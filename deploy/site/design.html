@@ -95,7 +95,7 @@ h4.t{font:600 15px var(--f-head);color:var(--navy);margin:0}
 .c-info{background:var(--info-bg);color:var(--info)}.c-info::before{content:"i"}
 .c-unk{background:transparent;color:var(--unk);border:1px dashed var(--unk)}.c-unk::before{content:"?"}
 .tag{font:700 10px var(--f-body);letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:2px;border:1px solid currentColor;white-space:nowrap}
-.k-fact{color:var(--navy)}.k-assumption{color:var(--blue)}.k-inference{color:var(--warn)}.k-unknown{color:var(--unk);border-style:dashed}.k-option{color:var(--pass)}
+.k-fact{color:var(--navy)}.k-assumption{color:var(--blue)}.k-inference{color:var(--warn)}.k-unknown{color:var(--unk);border-style:dashed}
 .flag{position:absolute;top:-12px;left:22px;background:var(--red);color:#fff;font:700 12px var(--f-head);padding:6px 12px 8px;border-radius:6px 6px 0 0;clip-path:polygon(0 0,100% 0,100% 82%,54% 82%,50% 100%,46% 82%,0 82%)}
 
 /* cards & panels */
@@ -189,10 +189,6 @@ ul.ticks li::before{content:"";width:18px;height:14px;margin-top:3px;background:
 .seg:first-of-type{border-top:0;padding-top:4px}
 .seg p{margin:0;color:var(--text)}
 .seg .refs{display:block;margin-top:4px;font:500 11px var(--f-mono);color:var(--muted)}
-.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
-.opt{display:flex;flex-direction:column;gap:12px;padding:22px}
-.opt .big{font:600 34px var(--f-head);color:var(--navy);font-variant-numeric:tabular-nums}
-.opt hr{border:0;border-top:1px solid var(--line);margin:2px 0;width:100%}
 .help{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
 .help .card{text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;padding:28px 24px}
 .help p{margin:0}
@@ -327,8 +323,7 @@ svg text{fill:var(--muted);font:11px var(--f-body)}
           <div class="frow" style="align-items:start"><label style="padding-top:10px">Financement</label>
             <div class="radio">
               <div class="on"><i></i>Vendre une partie de ZST.TO<span class="mono">13 % → 3 %</span></div>
-              <div><i></i>Au prorata de tous les placements<span class="hint">par défaut</span></div>
-              <div><i></i>Au prorata d'une catégorie d'actifs<span class="hint">choisir</span></div>
+              <div><i></i>Autre titre vendu, à préciser<span class="hint">choisir</span></div>
               <div><i></i>Nouvelle contribution en espèces<span class="hint">montant</span></div>
             </div></div>
           <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:18px"><button class="btn btn-o">Annuler</button><button class="btn btn-p">Confirmer et analyser</button></div>
@@ -340,7 +335,7 @@ svg text{fill:var(--muted);font:11px var(--f-body)}
 
 <!-- 2. Report -->
 <section class="board">
-  <div class="board-label"><b>2 · Rapport de cohérence</b><span>Flux B : verdict, ce qui change, vos limites par facteur, explication étiquetée, options dans vos limites</span></div>
+  <div class="board-label"><b>2 · Rapport de cohérence</b><span>Flux B : verdict, ce qui change, vos limites par facteur, explication étiquetée, écart à la limite H9</span></div>
   <div class="scroll"><div class="screen w-desk">
     <div class="util"><span class="on">Particuliers</span><span>Simulation</span><span class="r">FR | <u>EN</u></span></div>
     <div class="hdr"><div class="mark"><i></i><div><b>Cohérence</b><small>Analyseur de profil</small></div></div>
@@ -405,14 +400,10 @@ svg text{fill:var(--muted);font:11px var(--f-body)}
         <div class="seg"><span><span class="tag k-unknown">Inconnu</span></span><p>On ne peut pas vérifier l'exposition sectorielle ni celle de votre employeur à l'intérieur des FNB larges.<span class="refs">H6 · H10</span></p></div>
       </div>
 
-      <div>
-        <div class="sec-h"><h3 class="t" style="font-size:24px;font-weight:500">Ce qui tient dans vos limites</h3><span class="tag k-option">Option</span></div>
-        <div class="opts">
-          <div class="card opt"><span class="lbl">Prorata, tous les placements</span><div class="big">2,0 %</div><hr><ul class="ticks"><li>Volatilité 7,5 %</li><li>Pire repli -8,7 %</li><li>P5 à l'horizon 360 101 $</li></ul><span class="hint">Limite atteinte : <span class="mono">H9</span> plancher</span></div>
-          <div class="card opt"><span class="lbl">Prorata, FNB d'actions</span><div class="big">2,0 %</div><hr><ul class="ticks"><li>Volatilité 7,4 %</li><li>Pire repli -8,6 %</li><li>P5 à l'horizon 360 630 $</li></ul><span class="hint">Limite atteinte : <span class="mono">H9</span> plancher</span></div>
-          <div class="card opt"><span class="lbl">Depuis ZST.TO</span><div class="big">1,5 %</div><hr><ul class="ticks"><li>Volatilité 7,5 %</li><li>Pire repli -8,6 %</li><li>P5 à l'horizon 360 503 $</li></ul><span class="hint">Limite atteinte : <span class="mono">H9</span> plancher</span></div>
-        </div>
-        <p class="hint" style="margin:10px 0 0">Calculé par le code à partir de vos propres limites. Ce sont des faits sur votre profil, pas une recommandation.</p>
+      <div class="card pad">
+        <div class="sec-h"><h3 class="t" style="font-size:24px;font-weight:500">Écart à votre limite H9</h3><span class="tag k-fact">Fait</span></div>
+        <p style="margin:0;color:var(--navy)">Avec le financement indiqué (ZST.TO), la transaction franchit votre limite H9 au-delà de 1,5 %.</p>
+        <p class="hint" style="margin:10px 0 0">Calculé par le code à partir de vos propres limites et du financement que vous avez indiqué. Cette information décrit votre demande; elle ne recommande rien.</p>
       </div>
 
       <div class="help">
@@ -471,7 +462,7 @@ svg text{fill:var(--muted);font:11px var(--f-body)}
       <div class="notes">I prefer companies I understand. <mark>No hype stocks unless I can explain the business.</mark></div>
       <div class="card rule"><div><div style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><span class="tag k-inference">Inférence · 0,8</span><span class="chip c-pass">Approuvée</span></div><b style="color:var(--navy)">Préférer des entreprises que vous comprenez</b><div class="rk">prefer_attribute · understandable_business</div><div class="hint">« I prefer companies I understand. »</div></div><button class="btn btn-o">Retirer</button></div>
       <div class="card rule" style="border:2px solid var(--blue)"><div><div style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><span class="tag k-inference">Inférence · 0,8</span><span class="chip c-unk">À approuver</span></div><b style="color:var(--navy)">Éviter les titres à la mode</b><div class="rk">avoid_attribute · hype</div><div class="hint">« <mark>No hype stocks unless I can explain the business.</mark> »</div></div><div style="display:flex;flex-direction:column;gap:8px"><button class="btn btn-p">Approuver</button><button class="btn btn-o">Rejeter</button></div></div>
-      <p class="hint" style="margin:0">Une règle approuvée reste une préférence : elle produit un rappel, jamais un blocage. Pour en faire une limite stricte, ajoutez-la à vos exclusions.</p>
+      <p class="hint" style="margin:0">Une règle approuvée reste une préférence : elle produit un rappel, jamais un blocage. Une limite stricte vient seulement de vos exclusions déclarées.</p>
     </div>
   </div></div>
 </section>
@@ -513,7 +504,7 @@ svg text{fill:var(--muted);font:11px var(--f-body)}
         <div class="check"><span class="id">H9</span><div class="what"><b>P5 316 971 $</b><span>plancher 360 000 $</span></div><span class="chip c-viol">Hors</span></div>
         <div class="check"><span class="id">+3</span><div class="what"><b>H7, H8, H10</b><span><a href="#">Voir les 5 facteurs</a></span></div><span class="chip c-viol">Hors</span></div>
       </div>
-      <div class="card" style="padding:16px"><span class="tag k-option">Option</span><p style="margin:8px 0 0;color:var(--navy)"><b>Jusqu'à 2,0 %</b> tient dans vos limites (prorata, tous les placements). Limite atteinte : H9.</p></div>
+      <div class="card" style="padding:16px"><span class="tag k-fact">Fait</span><p style="margin:8px 0 0;color:var(--navy)">Avec le financement indiqué (ZST.TO), la transaction franchit votre limite H9 au-delà de 1,5 %.</p></div>
     </div>
     <div class="ptabs"><span>Sommaire</span><span>Cohérence</span><span class="on">Vérifier</span><span>Profil</span></div>
   </div>

@@ -1,10 +1,15 @@
 #!/usr/bin/env python3
 """Precompute the dashboard's "Search and ask" universe and "What-if" scenarios with the real engine.
 
-For each asset of the starter universe: put it at 5 % or 10 % of Robert's current portfolio, funded pro rata from
-all holdings or from the largest bond holding. Each scenario runs the same code as a review: `intent.apply` ->
-`engine.analyse` -> hard + soft checks -> five factor sections (flow-B context: current vs proposed) -> the
-deterministic `explain.template_section` text. No LLM call, no recommendation: the user picks the asset.
+A scenario is a set of inputs the user picks in the Simulation tab: the asset, the size (target weight, % of the
+portfolio) and the funding (pro rata from all holdings, or a specific holding). This script precomputes the grid of
+those inputs for each asset of the starter universe against Robert's current portfolio. Each scenario runs the same
+code as a review: `intent.apply` -> `engine.analyse` -> hard + soft checks -> five factor sections (flow-B context:
+current vs proposed) -> the deterministic `explain.template_section` text. No LLM call.
+
+Describe, never prescribe (docs/spec-decisions.md D10): this script makes no recommendation, and nothing is
+compared or ordered against anything else. Scenarios are keyed by the user-selectable inputs (size, then funding),
+never ordered or selected by outcome; the universe is listed by name.
 
 Output (under <out>/): universe.json, whatif.json ({ticker: {asset, scenarios}})
 """
