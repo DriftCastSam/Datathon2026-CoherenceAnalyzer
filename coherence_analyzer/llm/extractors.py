@@ -125,8 +125,8 @@ def explainer(facts: dict, retry_failures: list[str] | None = None) -> dict:
 
 
 def profile_consistency_call(payload: dict) -> dict:
-    """N6 (§20.9): `{output, call_log}` for `internal.n6_payload(...)`. P0.11."""
-    raise NotImplementedError
+    """N6 (§20.9): `{output, call_log}` for `internal.n6_payload(...)`."""
+    return bedrock.call_tool(N6_NODE, load_schema(N6_NODE), load_prompt(N6_NODE), payload, prompt_version(N6_NODE))
 
 
 def profile_consistency(payload: dict) -> dict:

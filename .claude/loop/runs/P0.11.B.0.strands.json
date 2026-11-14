@@ -1,0 +1,39 @@
+{
+  "duration_s": 163.4,
+  "guard_cancellations": [
+    {
+      "reason": "'^from\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'^from\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'from)\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'import)' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'python' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'profile_consistency\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    }
+  ],
+  "is_error": false,
+  "model_id": "us.anthropic.claude-sonnet-5-5",
+  "num_turns": 32,
+  "result": "All of `tests/test_internal.py` now passes with no skips. The full suite is green with `COHERENCE_ANALYZER_LLM=mock`: 852 passed, 1 skipped, and the skip is not in the internal tests.\n\nFiles changed:\n- `coherence_analyzer/coherence/internal.py`: implements C1\u2013C5 (`rule_findings`), `n6_payload` and `check_profile`. It also holds the fixed fr-CA/en-CA question templates, one per C-rule plus one generic N6 template.\n- `coherence_analyzer/gate.py`: adds the `profile_consistency` branch and the `PROFILE_SECTIONS` constant.\n- `coherence_analyzer/llm/extractors.py`: `profile_consistency_call` now calls the node.\n- `coherence_analyzer/llm/schemas/profile_consistency.json`: new N6 output schema.\n- `coherence_analyzer/llm/prompts/profile_consistency.v1.md`: new N6 prompt.\n- `scripts/handwrite_llm_cache.py`: records the Robert N6 entry (model id `fixture:hand-written`). The other cache entries came out unchanged.\n- `fixtures/llm_cache/profile_consistency.9712e1a0\u2026.json`: the recorded entry. It holds the `preferences.interests` vs `values.notes` tension.\n- `README.md`: Status line for P0.11 and a new \"Internal coherence (P0.11)\" block under Assumptions.\n\nI did not touch `pipeline.py`, `cli.py`, `store.py`, `report.py`, `explain.py` or `factors/`. The `profile_coherence` report block is still unwired.\n\nSPEC-AMBIGUITY resolved (all noted in the README):\n- **C1 month arithmetic:** a goal fires when its date is strictly later than the `as_of` month plus `round(horizon_years * 12)` months.\n- **Rule finding `values`:** the declared value at each field, in field order. `reason` is `None`.\n- **N6 payload:** `{profile: {7 declared sections}, rule_hits: [{id, fields}]}`. `meta`, `limits`, `limits_trace` and `_conventions` are left out.\n- **Which paths count as declared:** only the 7 profile sections. Any path through or onto a `{value, by}` object is rejected, and so are `limits.*` paths.\n- **Quote matching:** `str(value)`, or one element of a list. `values.notes` takes an exact substring.\n- **Gate check order:** shape or more than 5 findings gives `rejected:schema`. Paths and quotes then give `rejected:evidence`. Reason length, digits and advisory phrases give `rejected:schema`. The advisory match is case-insensitive.\n- **N6 ids:** `N6.<k>` uses the 1-based position in the accepted output, even when a finding is dropped as a rule duplicate.\n- **Errors in `check_profile`:** only `LLMCacheMiss` is caught, as \u00a720.9 says. An `LLMOutputInvalid` would propagate.\n- **Schema strictness:** the schema is stricter than the gate needs (`minItems` 2, `maxItems` 5, reason length and no-digit pattern). A live model therefore gets one schema retry before the gate sees its output.\n",
+  "stop_reason": "end_turn",
+  "usage": {
+    "inputTokens": 1381612,
+    "outputTokens": 20794,
+    "totalTokens": 1402406
+  }
+}

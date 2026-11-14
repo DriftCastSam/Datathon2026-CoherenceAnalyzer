@@ -1,0 +1,151 @@
+{
+  "cache_key": "9712e1a00b612fee2e8d26a5c8fac2a611a137d92bd8ecc305cae780e90beef0",
+  "call_log": {
+    "hand_written": true,
+    "latency_ms": 0,
+    "tokens_in": 0,
+    "tokens_out": 0
+  },
+  "input_hash": "sha256:717e117e8821b93f2b947a1d59e6a588194107ec2cd724b0927bad88568bd35b",
+  "model_id": "fixture:hand-written",
+  "node": "profile_consistency",
+  "output": {
+    "abstain": false,
+    "findings": [
+      {
+        "fields": [
+          "preferences.interests",
+          "values.notes"
+        ],
+        "kind": "tension",
+        "quotes": [
+          "new_opportunities",
+          "No hype stocks unless I can explain the business."
+        ],
+        "reason": "Interest in new opportunities may pull against the wish to avoid hype stocks."
+      }
+    ]
+  },
+  "prompt_version": "profile_consistency.v1",
+  "user_payload": {
+    "profile": {
+      "identity": {
+        "age": 59,
+        "dependants": 0,
+        "employer_sector": "Health Care",
+        "employment_type": "salaried",
+        "marital_status": "married",
+        "occupation": "Healthcare professional",
+        "retirement_target_age": 63
+      },
+      "knowledge": {
+        "declared_level": "advanced",
+        "products_used": [
+          "stocks",
+          "etf",
+          "bonds",
+          "mutual_funds"
+        ],
+        "quiz_score": 0.8,
+        "years_investing": 22
+      },
+      "objectives": {
+        "goals": [
+          {
+            "amount": 450000,
+            "date": "2030-06",
+            "name": "Retire at 63",
+            "priority": 1
+          },
+          {
+            "amount": 40000,
+            "date": "2032-01",
+            "name": "Help children with a down payment",
+            "priority": 2
+          }
+        ],
+        "horizon_years": 4,
+        "primary": "capital_preservation_with_growth",
+        "secondary": [
+          "income"
+        ]
+      },
+      "preferences": {
+        "asset_types_allowed": [
+          "stocks",
+          "etf",
+          "bonds",
+          "gold"
+        ],
+        "asset_types_refused": [
+          "crypto",
+          "options",
+          "leveraged_etf",
+          "margin"
+        ],
+        "home_bias_ok": true,
+        "interests": [
+          "new_opportunities",
+          "market_news"
+        ],
+        "max_fee_mer_pct": 0.5,
+        "prefers_dividends": true,
+        "prefers_large_caps": true
+      },
+      "risk": {
+        "declared": "low_moderate",
+        "max_acceptable_drawdown_pct": -12,
+        "reaction_to_20pct_drop": "sell_some"
+      },
+      "situation": {
+        "annual_income_band": "150k-200k",
+        "debt": {
+          "consumer": 0,
+          "mortgage": 0
+        },
+        "emergency_fund": 30000,
+        "monthly_contribution": 1500,
+        "monthly_expenses": 6500,
+        "other_assets": {
+          "pension": 0,
+          "real_estate_equity": 550000
+        },
+        "planned_withdrawals": [
+          {
+            "amount": 60000,
+            "date": "2030-06",
+            "purpose": "retirement income, year 1"
+          }
+        ]
+      },
+      "values": {
+        "environment": {
+          "exclusions": [],
+          "importance": 2
+        },
+        "governance": {
+          "exclusions": [
+            "accounting_fraud_last_5y"
+          ],
+          "importance": 3
+        },
+        "notes": "I prefer companies I understand. No hype stocks unless I can explain the business.",
+        "social": {
+          "exclusions": [
+            "tobacco"
+          ],
+          "importance": 3
+        }
+      }
+    },
+    "rule_hits": [
+      {
+        "fields": [
+          "objectives.horizon_years",
+          "objectives.goals[1].date"
+        ],
+        "id": "C1"
+      }
+    ]
+  }
+}

@@ -9,6 +9,7 @@ Rejections and abstentions return a copy of the previous field untouched (SPEC ย
 from __future__ import annotations
 
 import copy
+import re
 from datetime import datetime
 from typing import Literal
 
@@ -106,8 +107,93 @@ def _values(old_field: dict | None, out: dict, context: dict) -> tuple[dict | No
     return {"value": value, "confidence": conf, **_stamp(node, context)}, "accepted"
 
 
+# ---------------------------------------------------------------- N6 profile_consistency (docs/spec-factors.md ยง20.9)
+
+PROFILE_SECTIONS = ("identity", "situation", "objectives", "risk", "knowledge", "values", "preferences")
+N6_KINDS = ("tension", "contradiction")
+N6_MAX_FINDINGS = 5
+N6_MAX_REASON_CHARS = 200
+NOTES_PATH = "values.notes"
+_MISSING = object()
+_PATH_PART = re.compile(r"(\w+)(?:\[(\d+)\])?")
+
+
+def _resolve_declared(profile: dict, path: str) -> object:
+    """Value of `a.b[1].c` in the declared part of the profile; _MISSING for a made-up path, a computed
+    `{value, by}` object (or anything below one), `limits`, `limits_trace`, `meta`, ..."""
+    parts = path.split(".")
+    if parts[0] not in PROFILE_SECTIONS:
+        return _MISSING
+    node: object = profile
+    for part in parts:
+        m = _PATH_PART.fullmatch(part)
+        if m is None or not isinstance(node, dict) or "by" in node or m.group(1) not in node:
+            return _MISSING
+        node = node[m.group(1)]
+        if m.group(2) is not None:
+            i = int(m.group(2))
+            if not isinstance(node, list) or i >= len(node):
+                return _MISSING
+            node = node[i]
+    if isinstance(node, dict) and "by" in node:
+        return _MISSING
+    return node
+
+
+def _quote_ok(path: str, quote: str, value: object) -> bool:
+    if not quote:
+        return False
+    if path == NOTES_PATH:
+        return isinstance(value, str) and quote in value        # exact substring, no folding
+    if isinstance(value, list):
+        return any(not isinstance(e, (dict, list)) and e is not None and str(e) == quote for e in value)
+    if isinstance(value, (dict, type(None))):
+        return False
+    return str(value) == quote
+
+
+def _n6_shape_ok(findings: object) -> bool:
+    if not isinstance(findings, list):
+        return False
+    for f in findings:
+        if not (isinstance(f, dict) and f.get("kind") in N6_KINDS and isinstance(f.get("reason"), str)
+                and isinstance(f.get("fields"), list) and all(isinstance(x, str) for x in f["fields"])
+                and isinstance(f.get("quotes"), list) and all(isinstance(x, str) for x in f["quotes"])):
+            return False
+    return True
+
+
+def _profile_consistency(old_field: dict | None, out: dict, context: dict) -> tuple[dict | None, GateStatus]:
+    from .explain import ADVISORY_BLOCKLIST     # lazy: explain imports the llm layer
+
+    findings = out.get("findings")
+    if not _n6_shape_ok(findings) or len(findings) > N6_MAX_FINDINGS:
+        return _kept(old_field, "rejected:schema")
+    profile = context["profile"]
+
+    # 2. evidence: declared paths, >= 2 distinct, one quote per path equal to its value (notes: exact substring)
+    for f in findings:
+        fields, quotes = f["fields"], f["quotes"]
+        if len(fields) < 2 or len(set(fields)) != len(fields) or len(quotes) != len(fields):
+            return _kept(old_field, "rejected:evidence")
+        for path, quote in zip(fields, quotes):
+            value = _resolve_declared(profile, path)
+            if value is _MISSING or not _quote_ok(path, quote, value):
+                return _kept(old_field, "rejected:evidence")
+
+    # 3. reason: <= 200 chars, no digit, no advisory phrase (matched case-insensitively, as explain V4)
+    for f in findings:
+        reason = f["reason"]
+        if (not reason or len(reason) > N6_MAX_REASON_CHARS or any(c.isdigit() for c in reason)
+                or any(p in reason.casefold() for p in ADVISORY_BLOCKLIST)):
+            return _kept(old_field, "rejected:schema")
+
+    return {"value": copy.deepcopy(findings), **_stamp("profile_consistency", context)}, "accepted"
+
+
 def gate(node: str, old_field: dict | None, llm_output: dict, context: dict) -> tuple[dict | None, GateStatus]:
-    """context: {"event_ids": set[str], "notes": str, "model_id", "prompt_version", "input_hash"}."""
+    """context: {"event_ids": set[str], "notes": str, "model_id", "prompt_version", "input_hash"};
+    N6 also needs "profile" (the declared profile the finding paths resolve in)."""
     # 1. abstain (before anything else: an abstaining output is never "rejected")
     if llm_output.get("abstain") is True:
         return _kept(old_field, "kept:abstain")
@@ -115,4 +201,6 @@ def gate(node: str, old_field: dict | None, llm_output: dict, context: dict) -> 
         return _behaviour(old_field, llm_output, context)
     if node == "values_parser":
         return _values(old_field, llm_output, context)
+    if node == "profile_consistency":
+        return _profile_consistency(old_field, llm_output, context)
     return _kept(old_field, "rejected:schema")   # nodes gated in later build steps (N2 question_rubric)

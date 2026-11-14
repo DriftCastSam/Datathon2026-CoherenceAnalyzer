@@ -17,7 +17,8 @@ sys.path.insert(0, str(ROOT))
 
 from jsonschema import Draft202012Validator  # noqa: E402
 
-from coherence_analyzer import config, data  # noqa: E402
+from coherence_analyzer import config, data, gate  # noqa: E402
+from coherence_analyzer.coherence import internal  # noqa: E402
 from coherence_analyzer.llm import bedrock, extractors  # noqa: E402
 
 ROBERT = ROOT / "fixtures" / "robert"
@@ -60,6 +61,26 @@ N3_AMIRA_OUTPUT = {"rules": [
      "quote": "I don't want everything in tech."},
 ]}
 
+# N6 (docs/spec-factors.md 20.9): Robert's interests vs his notes. Quotes are the values at their paths / a notes substring.
+N6_ROBERT_OUTPUT = {"abstain": False, "findings": [
+    {"kind": "tension", "fields": ["preferences.interests", "values.notes"],
+     "quotes": ["new_opportunities", "No hype stocks unless I can explain the business."],
+     "reason": "Interest in new opportunities may pull against the wish to avoid hype stocks."},
+]}
+
+
+def _write_n6_robert(profile: dict) -> None:
+    as_of = json.loads((ROBERT / "portfolio.json").read_text())["as_of"]
+    payload = internal.n6_payload(profile, internal.rule_findings(profile, as_of))
+    Draft202012Validator(extractors.load_schema("profile_consistency")).validate(N6_ROBERT_OUTPUT)
+    context = {"event_ids": set(), "notes": profile["values"]["notes"], "profile": profile,
+               "model_id": bedrock.MOCK_MODEL_ID, "prompt_version": extractors.prompt_version("profile_consistency"),
+               "input_hash": bedrock.input_hash(payload)}
+    assert gate.gate("profile_consistency", None, N6_ROBERT_OUTPUT, context)[1] == "accepted"
+    p = bedrock.write_entry(config.LLM_CACHE_DIR, "profile_consistency", extractors.prompt_version("profile_consistency"),
+                            bedrock.MOCK_MODEL_ID, payload, N6_ROBERT_OUTPUT, CALL_LOG)
+    print(p.relative_to(ROOT))
+
 
 def main() -> None:
     profile = json.loads((ROBERT / "profile.json").read_text(encoding="utf-8"))
@@ -70,6 +91,8 @@ def main() -> None:
         p = bedrock.write_entry(config.LLM_CACHE_DIR, "values_parser", extractors.prompt_version("values_parser"),
                                 bedrock.MOCK_MODEL_ID, extractors.n3_payload(notes), out, CALL_LOG)
         print(p.relative_to(ROOT))
+
+    _write_n6_robert(profile)
 
     events = [json.loads(line) for line in (ROBERT / "events.jsonl").read_text().splitlines() if line.strip()]
     weights = json.loads((ROBERT / "portfolio.json").read_text())["weights_pct"]
