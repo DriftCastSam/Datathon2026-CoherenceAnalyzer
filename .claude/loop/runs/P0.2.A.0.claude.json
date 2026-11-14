@@ -1,0 +1,227 @@
+{
+  "api_error_status": null,
+  "credential_expires_at": "2026-11-29T15:06:17.285Z",
+  "duration_api_ms": 251623,
+  "duration_ms": 251754,
+  "fast_mode_state": "off",
+  "first_content_frame_ms": 766,
+  "input_attachments_detail": {
+    "ambient_start_ms": 2,
+    "ambient_wait_ms": 4,
+    "cpu_ms": 14,
+    "major_faults": 0,
+    "producers": 40,
+    "prompt_producers_ms": 0,
+    "render_ms": 1,
+    "setup_ms": 0,
+    "slowest_producer": "model",
+    "slowest_producer_ms": 4,
+    "token_counts": 0
+  },
+  "is_error": false,
+  "message_normalization_detail": {
+    "after_ms": 0,
+    "before_ms": 0,
+    "images_ms": 0,
+    "messages": 12,
+    "normalize_ms": 1,
+    "other_ms": 0,
+    "post_process_ms": 0,
+    "wire_messages": 2
+  },
+  "modelUsage": {
+    "claude-haiku-5-5": {
+      "cacheCreationEphemeral1hInputTokens": 0,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationInputTokens": 0,
+      "cacheReadInputTokens": 0,
+      "canonicalModel": "claude-haiku-5-5",
+      "contextWindow": 1000000,
+      "costBasis": "list",
+      "costUSD": 0.0001988,
+      "inputTokens": 1848,
+      "maxOutputTokens": 128000,
+      "outputTokens": 28,
+      "provider": "firstParty",
+      "thinkingTokens": 0,
+      "webSearchRequests": 0
+    },
+    "claude-opus-5-5": {
+      "cacheCreationEphemeral1hInputTokens": 100853,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationInputTokens": 100853,
+      "cacheReadInputTokens": 962942,
+      "canonicalModel": "claude-opus-5-5",
+      "contextWindow": 1000000,
+      "costBasis": "list",
+      "costUSD": 1.5933043999999998,
+      "inputTokens": 28,
+      "maxOutputTokens": 128000,
+      "outputTokens": 29689,
+      "provider": "firstParty",
+      "thinkingTokens": 10786,
+      "webSearchRequests": 0
+    }
+  },
+  "num_turns": 15,
+  "permission_denials": [
+    {
+      "tool_input": {
+        "command": "ls tests fixtures/* ..; for f in coherence_analyzer/levels.py coherence_analyzer/rules/*.py coherence_analyzer/config.py tests/test_rules.py tests/test_limits_no_llm_inputs.py tests/test_levels.py tests/conftest.py; do echo \"=== $f\"; cat $f 2>/dev/null; done",
+        "description": "Show stubs, tests, and fixtures layout"
+      },
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_016oA2XtDAP4Jieq6t84w8pG"
+    },
+    {
+      "tool_input": {
+        "command": "ls tests fixtures/amira fixtures/llm_cache .. && head -n 400 coherence_analyzer/levels.py coherence_analyzer/rules/*.py coherence_analyzer/config.py tests/test_rules.py tests/test_limits_no_llm_inputs.py tests/test_levels.py tests/conftest.py",
+        "description": "Show stubs, tests, and fixtures layout"
+      },
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_012Dx7rK9fyB172LVZPWH3rF"
+    },
+    {
+      "tool_input": {
+        "command": "COHERENCE_ANALYZER_LLM=mock .venv/bin/python -m pytest -q tests/test_levels.py tests/test_rules.py tests/test_limits_no_llm_inputs.py 2>&1 | grep -E \"passed|failed|Error|error\" | sort | uniq -c | sort -rn | head -30",
+        "description": "Run the new tests and summarize outcomes"
+      },
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01Tu6wtJSj81xmJNk9fUoBgu"
+    },
+    {
+      "tool_input": {
+        "command": "COHERENCE_ANALYZER_LLM=mock .venv/bin/python -m pytest -q -rf tests/test_levels.py tests/test_rules.py tests/test_limits_no_llm_inputs.py",
+        "description": "Run the three new test files"
+      },
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_018LURZysChymR9CkRJKK1Em"
+    }
+  ],
+  "process_turn_index": 0,
+  "queued_turn_count": 0,
+  "request_build_detail": {
+    "cache_break_record_ms": 0,
+    "headers_ms": 1,
+    "other_ms": 0,
+    "plans_ms": 1,
+    "record_attempt_ms": 2,
+    "records_ms": 0,
+    "retry_setup_ms": 0,
+    "sent_build_cache_breakpoints_ms": 0,
+    "sent_build_ms": 1,
+    "sent_build_safety_context_ms": 0,
+    "sent_build_surrogate_scan_ms": 0,
+    "system_ms": 0
+  },
+  "result": "I wrote all three files, but couldn't run them: the sandbox needs approval for pytest and that approval wasn't given here. I've only read them over, not executed them. Most tests in `test_rules.py` and `test_limits_no_llm_inputs.py` should fail now because the code they call isn't written yet (`derive_all`, `income_stability`, `effective_horizon_years`, `capacity`, `knowledge_score`, `build_limits`). `test_levels.py` already passes against the existing `levels.py`, unless it unexpectedly maps unknown levels instead of raising. I removed the module-level skips and added no new ones, and I changed nothing outside `tests/`.\n\n**tests/test_levels.py**\n- test_order_and_index: `LEVELS` is exactly low < low_moderate < moderate < moderate_high < high, and `idx` and `at` give the indices 0\u20134 (SPEC \u00a73.3)\n- test_at_clamps_to_valid_range: an index out of range clamps to `low` or `high` (SPEC \u00a73.3)\n- test_lower_is_min_by_index_and_symmetric: `lower` returns the smaller level by index, whatever the argument order, for all 25 pairs (SPEC \u00a77.1 risk.effective)\n- test_step_floors_and_caps: `step` stops at `low` and `high` and moves by delta otherwise (SPEC \u00a77.1 capacity floor)\n- test_order_and_clamp: low_moderate\u2192high is clamped to moderate, and moderate\u2192low to low_moderate (SPEC \u00a711.4, \u00a715 test_gate)\n- test_clamp_move_within_one_step_is_unchanged: a move of 0 or \u00b11 level passes through unchanged (SPEC \u00a711.4)\n- test_clamp_move_without_previous_value_takes_new: with no previous value, the new value is kept as is (SPEC \u00a711.4)\n- test_clamp_move_never_exceeds_one_level: for every pair, the move is at most 1 level and goes toward the target (SPEC \u00a711.4)\n- test_unknown_level_raises: an unknown level name raises `ValueError` (SPEC \u00a73.3, marked SPEC-AMBIGUITY)\n\n**tests/test_rules.py**\n- test_robert_derived_fields: Robert gives pre_retirement, income `high`, ef_months 4.6, effective horizon 3.6, capacity and effective `low_moderate`, knowledge.score 74 (SPEC \u00a715, \u00a77.1)\n- test_derived_fields_are_rule_objects: each derived field is `{value, by, confidence}` with `by` starting `rule:`, and knowledge.score has confidence < 1 (SPEC \u00a71.1, \u00a77.1)\n- test_derive_all_is_pure: `derive_all` doesn't change the profile it's given (SPEC \u00a77.1, CLAUDE.md \"pure functions\")\n- test_derive_all_is_deterministic: the same input gives the same output (SPEC \u00a71.8)\n- test_robert_limits_equal_fixture_block: Robert's limits equal the fixture's `limits` block, without `_note`/`by`, with the exclusion lists compared as sets (SPEC \u00a715, \u00a77.2)\n- test_life_stage: the age boundaries 35, 55 and the retirement age, checked in rule order (SPEC \u00a77.1)\n- test_income_stability: salaried\u2192high, self_employed\u2192medium, contract/commission/unemployed\u2192low (SPEC \u00a77.1)\n- test_emergency_fund_months_one_decimal: the ratio is rounded to 1 decimal (SPEC \u00a77.1)\n- test_effective_horizon_robert: 2026-11 \u2192 2030-06 is 43 months, which gives 3.6 (SPEC \u00a77.1)\n- test_effective_horizon_no_withdrawals_is_horizon: with no withdrawals, the result is `horizon_years` (SPEC \u00a77.1)\n- test_effective_horizon_withdrawal_after_horizon_is_horizon: the min() keeps `horizon_years` when the withdrawal is later (SPEC \u00a77.1)\n- test_effective_horizon_uses_earliest_withdrawal: \"first\" means earliest by date, not first in the list (SPEC \u00a77.1, marked SPEC-AMBIGUITY)\n- test_capacity_base_from_horizon: the horizon bands are half-open [lo, hi) at 3, 5, 10 and 15 (SPEC \u00a77.1, marked SPEC-AMBIGUITY)\n- test_capacity_robert: Robert's inputs give `low_moderate` (SPEC \u00a715)\n- test_capacity_notch_low_emergency_fund: ef < 3 knocks one level off, and exactly 3 doesn't (SPEC \u00a77.1)\n- test_capacity_notch_low_income_stability: `low` income knocks one level off, and `medium` doesn't (SPEC \u00a77.1)\n- test_capacity_notch_near_withdrawals: withdrawals over 10% of value within 24 months knock one level off; exactly 10%, or a withdrawal 43 months away, doesn't (SPEC \u00a77.1)\n- test_capacity_near_withdrawals_are_summed: the 10% test applies to the sum of the withdrawals within 24 months (SPEC \u00a77.1, marked SPEC-AMBIGUITY)\n- test_capacity_notches_stack: three hits move high down to moderate (SPEC \u00a77.1)\n- test_capacity_floor_is_low: capacity never goes below `low` (SPEC \u00a77.1)\n- test_effective_risk_is_min: effective risk is min(declared, capacity) (SPEC \u00a77.1)\n- test_knowledge_score_robert_formula: 32 + 23.4 + 18.6 = 74 (SPEC \u00a77.1)\n- test_knowledge_score_declared_map: novice 20, intermediate 50, advanced 78, expert 95, each weighted 0.3 (SPEC \u00a77.1)\n- test_knowledge_score_llm_term_clamped_to_5_points: question quality 1.0 gives 79, 0.0 gives 69, and 0.65 gives 74.9 with no clamp needed (SPEC \u00a77.1, \u00a711.4, marked SPEC-AMBIGUITY)\n- test_knowledge_score_history_appended: an update that changes the score adds one history entry holding the new value (SPEC \u00a77.1, marked SPEC-AMBIGUITY)\n- test_limits_table_rows: each of the 5 levels gives its table row, floor = value \u00d7 ratio, employer sector cap 0.15 and MER limit 0.5 (SPEC \u00a77.2)\n- test_limits_table_matches_spec: `LIMITS_TABLE` and `MAX_EMPLOYER_SECTOR_WEIGHT` match the spec table (SPEC \u00a77.2)\n- test_max_drawdown_is_less_negative_of_table_and_user: a user value of \u22125 gives \u22125, and \u221230 gives \u221212 (SPEC \u00a77.2)\n- test_floor_scales_with_portfolio_value: 400k gives 360k and 100k gives 90k (SPEC \u00a77.2)\n- test_crypto_excluded_when_cap_is_zero_even_if_not_refused: crypto is added when max_crypto is 0 (SPEC \u00a77.2)\n- test_crypto_not_excluded_when_cap_positive_and_not_refused: crypto isn't excluded at `moderate` if the user didn't refuse it (SPEC \u00a77.2)\n- test_declared_above_capacity_does_not_loosen_limits: declaring `high` leaves Robert's limits unchanged (SPEC \u00a77.1, \u00a77.2)\n- test_low_emergency_fund_tightens_limits_end_to_end: ef 2.3 gives capacity and effective `low`, then the `low` limits: fixed income 0.50, single stock 0.05, floor 380k, drawdown \u22128 (SPEC \u00a77.1, \u00a77.2)\n- test_approved_parsed_rules_are_promoted: approved `exclude_activity` and `max_theme_weight` rules reach limits, as `{theme: fraction}` (SPEC \u00a76.2 N3, \u00a77.2, marked SPEC-AMBIGUITY)\n- test_unapproved_parsed_rules_are_not_promoted: unapproved rules leave no trace in limits (SPEC \u00a76.2 N3, \u00a715)\n- test_other_rule_kinds_never_promoted: an approved `prefer_attribute` rule doesn't change limits (SPEC \u00a76.2 N3)\n- test_limits_trace_min_fixed_income_matches_spec_example: the trace equals the spec's example list exactly, order included (SPEC \u00a77.2, marked SPEC-AMBIGUITY)\n- test_limits_trace_covers_every_limit: every limit has a trace entry, as a list of unique strings (SPEC \u00a73.3.5)\n- test_table_driven_limits_trace_through_effective_risk: every table-driven limit traces back through the full `risk.effective` chain (SPEC \u00a77.2)\n- test_limits_trace_user_inputs: the trace includes the user-declared inputs (drawdown, refused asset types, MER, `values.*.exclusions`) (SPEC \u00a77.2)\n- test_limits_trace_is_fully_expanded: each registered rule's inputs are fully expanded inside the trace (SPEC \u00a73.3.5)\n- test_limits_trace_is_generated_from_registry: adding an input to a rule in the registry changes the trace, so it can't be hand-written (SPEC \u00a77.2)\n\n**tests/test_limits_no_llm_inputs.py**\n- test_no_limit_input_resolves_to_llm_field: no trace path resolves to a field with `by` starting `llm:` (SPEC \u00a71.2, \u00a715)\n- test_known_llm_fields_never_in_trace: behavioural, question_quality, parsed_notes and knowledge.score never appear in a trace (SPEC \u00a71.2, \u00a77.1)\n- test_registry_walk_from_limits_reaches_no_llm_field: following the registry from every trace path reaches no `llm:` field (SPEC \u00a715)\n- test_no_registered_rule_outputs_an_llm_field: no rule in the registry writes an `llm:` field (SPEC \u00a71.1)\n- test_knowledge_score_depends_on_llm_but_is_not_a_limit_input: knowledge.score depends on question_quality but never feeds limits (SPEC \u00a77.1)\n- test_injected_llm_dependency_shows_up_in_trace: an `llm:` input added to a rule shows up in the trace and is caught (SPEC \u00a71.2, \u00a715)\n- test_llm_fields_do_not_change_limits: changing every `llm:` field leaves limits and the trace unchanged (SPEC \u00a71.2)\n- test_llm_fields_do_not_change_limits_without_rederive: the same holds when `build_limits` is called directly (SPEC \u00a71.2)\n- test_unapproved_parsed_rules_do_not_appear_in_limits: unapproved exclusion and theme rules are absent from limits (SPEC \u00a715)\n\nThe tests pin some assumptions on the implementation:\n- They call the rule functions with the signatures from the stubs in `rules/derive.py`. `capacity` is called with keyword arguments.\n- They take \"previous run\" for the knowledge score to be the stored `knowledge.score`. With quiz and declared level fixed, the expected numbers are the same if it's read as the previous question-quality term.\n- They expect user exclusions to be traced as `values.<pillar>.exclusions`.",
+  "result_index": 0,
+  "safety_stops": 0,
+  "session_id": "02fb6666-8f3f-43ee-8b39-f6327c5175a9",
+  "stop_reason": "end_turn",
+  "subagent_stats": {
+    "by_type": {},
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "system": 0,
+      "user": 0
+    },
+    "max_depth": 0,
+    "refused": {
+      "budget": 0,
+      "concurrency_limit": 0,
+      "depth_limit": 0
+    },
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "spawned": 0,
+    "spawned_by_subagents": 0,
+    "started_in_background": 0
+  },
+  "subtype": "success",
+  "terminal_reason": "completed",
+  "time_to_request_cpu_ms": 109,
+  "time_to_request_loop_lag_ms": 20,
+  "time_to_request_major_faults": 0,
+  "time_to_request_ms": 70,
+  "time_to_request_phases_ms": {
+    "autocompact": 1,
+    "client_creation": 1,
+    "conversation_append": 0,
+    "engine_pickup": 1,
+    "init_frame_send": 3,
+    "init_message": 3,
+    "input_attachments": 9,
+    "input_hooks": 2,
+    "loop_entry": 2,
+    "message_normalization": 1,
+    "message_prep": 1,
+    "model_config_wait": 0,
+    "model_gates": 0,
+    "other": 2,
+    "process_user_input": 1,
+    "query_setup": 1,
+    "request_announcements": 4,
+    "request_build": 5,
+    "resume_other": 0,
+    "system_prompt": 24,
+    "tool_pool_refresh": 2,
+    "tool_schema_build": 4,
+    "transcript_persist": 3
+  },
+  "tool_schema_build_detail": {
+    "after_ms": 0,
+    "betas_ms": 0,
+    "new_schemas": 14,
+    "other_ms": 0,
+    "placement_ms": 1,
+    "render_ms": 3,
+    "tools": 14,
+    "waits_ms": 0
+  },
+  "total_cost_usd": 1.5935031999999998,
+  "ttft_ms": 1246,
+  "ttft_stream_ms": 766,
+  "turn_start_resume_kind": "none",
+  "type": "result",
+  "usage": {
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 100853,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "cache_creation_input_tokens": 100853,
+    "cache_read_input_tokens": 962942,
+    "fallback_credit": null,
+    "inference_geo": "global",
+    "input_tokens": 28,
+    "iterations": [
+      {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 195,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 195,
+        "cache_read_input_tokens": 100658,
+        "input_tokens": 2,
+        "output_tokens": 4031,
+        "type": "message"
+      }
+    ],
+    "output_tokens": 29689,
+    "output_tokens_details": {
+      "thinking_tokens": 10786
+    },
+    "server_tool_use": {
+      "web_fetch_requests": 0,
+      "web_search_requests": 0
+    },
+    "service_tier": "standard",
+    "speed": "standard"
+  },
+  "uuid": "eef38c4a-3abc-41ba-a4f2-5887fefe7675"
+}
