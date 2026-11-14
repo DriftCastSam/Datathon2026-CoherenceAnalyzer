@@ -1,0 +1,130 @@
+{
+  "_conventions": {
+    "plain_value": "Declared by the user. Only the user changes it.",
+    "object_with_by": "Computed or estimated by the system: {value, by, confidence}. by = 'rule:<name>' (code, deterministic) or 'llm:<name>' (inferred, may only trigger warnings).",
+    "currency": "CAD",
+    "fictional": "All profiles are fictional, as the case requires."
+  },
+
+  "meta": {
+    "profile_id": "persona-robert",
+    "updated_at": "2026-11-14",
+    "version": 1,
+    "locale": "fr-CA",
+    "province": "QC"
+  },
+
+  "identity": {
+    "age": 59,
+    "marital_status": "married",
+    "dependants": 0,
+    "occupation": "Healthcare professional",
+    "employer_sector": "Health Care",
+    "employment_type": "salaried",
+    "retirement_target_age": 63,
+    "life_stage": {"value": "pre_retirement", "by": "rule:life_stage", "confidence": 1.0}
+  },
+
+  "situation": {
+    "annual_income_band": "150k-200k",
+    "income_stability": {"value": "high", "by": "rule:income_stability", "confidence": 1.0},
+    "monthly_expenses": 6500,
+    "emergency_fund": 30000,
+    "emergency_fund_months": {"value": 4.6, "by": "rule:emergency_fund / monthly_expenses", "confidence": 1.0},
+    "debt": {"mortgage": 0, "consumer": 0},
+    "other_assets": {"real_estate_equity": 550000, "pension": 0},
+    "planned_withdrawals": [
+      {"date": "2030-06", "amount": 60000, "purpose": "retirement income, year 1"}
+    ],
+    "monthly_contribution": 1500
+  },
+
+  "objectives": {
+    "primary": "capital_preservation_with_growth",
+    "secondary": ["income"],
+    "goals": [
+      {"name": "Retire at 63", "date": "2030-06", "amount": 450000, "priority": 1},
+      {"name": "Help children with a down payment", "date": "2032-01", "amount": 40000, "priority": 2}
+    ],
+    "horizon_years": 4,
+    "effective_horizon_years": {"value": 3.6, "by": "rule:min(horizon, first_withdrawal)", "confidence": 1.0}
+  },
+
+  "risk": {
+    "declared": "low_moderate",
+    "max_acceptable_drawdown_pct": -12,
+    "reaction_to_20pct_drop": "sell_some",
+    "capacity": {"value": "low_moderate", "by": "rule:capacity(horizon, income_stability, emergency_fund_months, withdrawals)", "confidence": 1.0},
+    "behavioural": {
+      "value": "moderate_high",
+      "by": "llm:behaviour_classifier",
+      "confidence": 0.55,
+      "evidence": [
+        "2026-11-14: asked to put 10% in NVDA after news coverage",
+        "2026-11-10: asked which AI stock is 'the next big one'"
+      ]
+    },
+    "effective": {"value": "low_moderate", "by": "rule:min(declared, capacity)", "confidence": 1.0}
+  },
+
+  "knowledge": {
+    "declared_level": "advanced",
+    "years_investing": 22,
+    "products_used": ["stocks", "etf", "bonds", "mutual_funds"],
+    "quiz_score": 0.8,
+    "question_quality": {
+      "value": 0.62,
+      "by": "llm:question_rubric",
+      "confidence": 0.6,
+      "evidence": [
+        {"date": "2026-11-12", "question": "What does XBB's duration mean for my bonds if rates drop?", "score": 0.9},
+        {"date": "2026-11-10", "question": "Which AI stock is the next big one?", "score": 0.3}
+      ]
+    },
+    "score": {
+      "value": 74,
+      "by": "rule:0.4*quiz + 0.3*declared + 0.3*question_quality (llm part moves max 5 pts per update)",
+      "confidence": 0.85,
+      "history": [{"date": "2026-11-01", "value": 76}, {"date": "2026-11-14", "value": 74}]
+    }
+  },
+
+  "values": {
+    "environment": {"importance": 2, "exclusions": []},
+    "social": {"importance": 3, "exclusions": ["tobacco"]},
+    "governance": {"importance": 3, "exclusions": ["accounting_fraud_last_5y"]},
+    "notes": "I prefer companies I understand. No hype stocks unless I can explain the business.",
+    "parsed_notes": {
+      "value": [{"rule": "prefer_understandable_business", "applies_to": "single_stocks", "approved_by_user": true}],
+      "by": "llm:values_parser",
+      "confidence": 0.8
+    }
+  },
+
+  "preferences": {
+    "asset_types_allowed": ["stocks", "etf", "bonds", "gold"],
+    "asset_types_refused": ["crypto", "options", "leveraged_etf", "margin"],
+    "prefers_dividends": true,
+    "prefers_large_caps": true,
+    "home_bias_ok": true,
+    "max_fee_mer_pct": 0.5,
+    "interests": ["new_opportunities", "market_news"]
+  },
+
+  "limits": {
+    "_note": "Derived from the profile only. This is what the portfolio struct gets compared against.",
+    "by": "rule:limits_table[risk.effective] + goals + preferences",
+    "vol_band_annual": [0.05, 0.09],
+    "floor_at_horizon": 360000,
+    "max_drawdown_pct": -12,
+    "min_fixed_income_weight": 0.30,
+    "max_single_stock_weight": 0.08,
+    "max_sector_risk_share": 0.30,
+    "max_crypto_weight": 0.0,
+    "max_foreign_currency_weight": 0.40,
+    "max_employer_sector_weight": 0.15,
+    "excluded_asset_types": ["crypto", "options", "leveraged_etf", "margin"],
+    "excluded_activities": ["tobacco", "accounting_fraud_last_5y"],
+    "max_fee_mer_pct": 0.5
+  }
+}

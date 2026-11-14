@@ -1,0 +1,4 @@
+{"event_id": "ev_robert_0001", "profile_id": "persona-robert", "ts": "2026-11-01T09:00:00-04:00", "type": "quiz_result", "text": null, "payload": {"score": 0.8, "quiz_id": "kq_v1"}, "source": "ui_quiz"}
+{"event_id": "ev_robert_0004", "profile_id": "persona-robert", "ts": "2026-11-10T19:30:00-05:00", "type": "question", "text": "Which AI stock is the next big one?", "payload": null, "source": "ui_chat"}
+{"event_id": "ev_robert_0005", "profile_id": "persona-robert", "ts": "2026-11-12T08:15:00-05:00", "type": "question", "text": "What does XBB's duration mean for my bonds if rates drop?", "payload": null, "source": "ui_chat"}
+{"event_id": "ev_robert_0007", "profile_id": "persona-robert", "ts": "2026-11-14T10:02:00-05:00", "type": "order_intent", "text": "I want to put 10% in NVDA, everyone's talking about it", "payload": null, "source": "ui_chat"}
