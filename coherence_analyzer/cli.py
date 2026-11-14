@@ -1,7 +1,7 @@
 """`python -m coherence_analyzer.cli {refresh,check,review,audit,demo}` (SPEC §12, docs/spec-decisions.md D7).
 
 `review` is the headline command; `check` is Flow B (trade check): without `--auto-confirm` it stops at B2 and shows the
-N4 draft intent; with it, it runs B3-B9 and prints the verdict, the diff and the options. `demo` reviews every persona
+N4 draft intent; with it, it runs B3-B9 and prints the verdict, the diff and the headroom of the trade. `demo` reviews every persona
 whose fixtures are complete (profile.json, events.jsonl, portfolio.json) and prints a notice for the others.
 """
 from __future__ import annotations
@@ -52,10 +52,8 @@ def _print_check(rep: dict) -> None:
     print(f"  sections: {statuses}")
     if flips:
         print(f"  changed by the trade: {flips}")
-    for o in rep["alternatives"]:
-        f = o["funding"]
-        print(f"  fits your limits: up to {o['max_weight_pct']} % funded by {f.get('ticker') or f['kind']}"
-              f" (stopped by {o['binding_check']})")
+    if rep["headroom"]:
+        print(f"  {rep['headroom']['line']}")
     unknown = sorted({u["id"] for u in rep["unknowns"]})
     if unknown:
         print(f"  cannot verify: {', '.join(unknown)}")

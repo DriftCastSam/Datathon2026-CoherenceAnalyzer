@@ -312,8 +312,8 @@ FLOW_B_ASSUMPTIONS = (
     "Limits are computed once, on the current portfolio value (the floor does not move for a cash contribution).",
     "Soft checks S1 and S3 come from the gated N1 behaviour classifier (confidence capped at 0.8) and never produce a "
     "violation; S3 is attached to the trade, so it exists on the proposed side only.",
-    "Options (alternatives) show what fits within the user's own stated limits, computed by code; they are facts about "
-    "the profile, not advice, and nothing is executed.",
+    "Headroom: with the user's own funding only, how far the trade goes before it crosses one of the user's limits, "
+    "computed by code (SPEC §8, D10). It describes the trade the user asked for; nothing is suggested or executed.",
 )
 AWAITING = "awaiting_confirmation"
 INTENT_KEYS = ("action", "ticker", "target_weight_pct", "funding")      # fields the user may edit at B2
@@ -575,14 +575,14 @@ def b6_checks_and_diff(state: dict) -> dict:
 
 
 def b7_resize(state: dict) -> dict:
-    """B7: the resizer (SPEC §8, D2) when the proposed portfolio has a hard violation. `alternatives` = its options;
-    `[]` when nothing violates or when no funding mode keeps even a small weight within the limits."""
+    """B7: the resizer (SPEC §8, D2, D10) when the proposed portfolio has a hard violation. `headroom` = its result
+    for the user's own funding (or its `none_fit` record); None when nothing violates."""
     violated = any(c["status"] == "violation" for c in state["checks_proposed"])
     if not violated:
-        return {**state, "alternatives": [], "resizer": None}
+        return {**state, "headroom": None}
     pf = {**state["portfolio"], "horizon_months": state["horizon_months"]}
     res = resizer.resize(pf, state["intent"], state["profile"], engine.load_market(str(config.DATA_DIR)), _meta())
-    return {**state, "alternatives": store.plain(res.get("options", [])), "resizer": store.plain(res)}
+    return {**state, "headroom": store.plain(res)}
 
 
 def b8_explain(state: dict) -> dict:
@@ -615,16 +615,19 @@ def b9_save(state: dict) -> dict:
     """B9: the report and the audit record (model id, as_of, every call with its gate decision) go to the store."""
     profile, pf, refresh_ = state["profile"], state["portfolio"], state["refresh"]
     notes = list(state["metrics_current"]["assumptions"]) + list(FLOW_B_ASSUMPTIONS)
-    res = state.get("resizer")
+    res = state.get("headroom")
+    if res:      # the headroom line is template text (SPEC §8), stated in the report so the CLI and the UI show it as is
+        res = {**res, "line": resizer.headroom_text(res, state["intent"]["funding"],
+                                                    state["intent"]["target_weight_pct"], state["locale"])}
     if res and res.get("none_fit"):
-        notes.append("Resizer: no funding mode keeps this trade within your limits at any weight above the current "
-                     f"one; binding checks: {', '.join(res['binding_checks'])}.")
+        notes.append("Headroom: with the funding the user gave, the trade crosses a limit from the first step above "
+                     f"the current weight; binding checks: {', '.join(res['binding_checks'])}.")
     rep = report_mod.build_trade_check(
         run_id=state["run_id"], profile_id=profile["meta"]["profile_id"], profile_version=refresh_["version_out"],
         portfolio_id=pf["portfolio_id"], intent=state["intent"], checks_current=state["checks_current"],
         checks_proposed=state["checks_proposed"], metrics_current=state["metrics_current"],
         metrics_proposed=state["metrics_proposed"], sections=state["sections"], explanation=state["explanation"],
-        alternatives=state["alternatives"], assumptions=notes, data_window=state["data_window"],
+        headroom=res, assumptions=notes, data_window=state["data_window"],
         disclaimer=config.DISCLAIMER[state["locale"]], profile_coherence=state["profile_coherence"])
     store.save_portfolio(pf)
     store.save_report(rep)

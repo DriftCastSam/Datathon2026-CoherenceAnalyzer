@@ -9,7 +9,7 @@ Scenario: Robert in_0001 = NVDA 10% funded from ZST.TO on the starter data (`eng
 48 months, 400 000 CAD, seed 7). Measured context (tests/test_resizer.py, tests/test_pipeline_offline.py):
   current  : vol 7.27 %, mdd -7.7 %, p5_T 366 719, no violation (H6, H10 unknown only).
   proposed : vol 9.83 %, mdd -13.4 %, p5_T 316 971; H3, H4, H7, H8, H9, H10 violation.
-  resizer  : max 1.5 % from ZST.TO (binding H9), 2.0 % pro rata all; every option binds H9 (D2).
+  headroom : the user's own funding only: 1.5 % from ZST.TO, binding H9 (D2, D10).
 
 Everything runs with COHERENCE_ANALYZER_LLM=mock in a temp working directory: no network, no clock value is asserted,
 fixed seeds. The pipeline's step functions are not named by the spec, so the tests drive `pipeline.check` and the CLI
@@ -22,6 +22,7 @@ import json
 import os
 import re
 import shutil
+import unicodedata
 from datetime import date
 from pathlib import Path
 
@@ -57,7 +58,11 @@ FR_DISCLAIMER = ("Simulation éducative avec des profils fictifs. Ceci n'est pas
                  "Aucune transaction n'est exécutée.")                                    # SPEC §9.4
 ISO_TS = re.compile(r"\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d+)?(?:Z|[+-]\d{2}:\d{2})?")
 ULID = re.compile(r"^[0-9A-HJKMNP-TV-Z]{26}$")
-OPTION_KEYS = {"funding", "max_weight_pct", "binding_check", "metrics"}                  # SPEC §8 step 2
+HEADROOM_KEYS = {"funding", "max_weight_pct", "binding_check", "metrics"}               # SPEC §8 step 4
+# SPEC §8, D10.2: the headroom line, FR (Robert is fr-CA). `1,5 %` may use a NBSP, see _flat.
+FR_HEADROOM = re.compile(r"Avec le financement indiqué \(ZST\.TO\), la transaction franchit votre limite H9 "
+                         r"au-delà de 1,5 ?%\.")
+NO_ADVICE_WORDS = re.compile(r"\b(options?|alternatives?|pourriez|you could)\b", re.IGNORECASE)   # SPEC §8
 SPECIFIC_ZST = {"kind": "specific", "ticker": "ZST.TO"}
 
 _REAL_SAVE_REPORT = store.save_report
@@ -140,6 +145,25 @@ def _tickers(drivers) -> list[str]:
     return [d["ticker"] if isinstance(d, dict) else d for d in drivers]
 
 
+def _flat(text: str) -> str:
+    """NBSP / narrow NBSP -> space, so `1,5 %` matches whichever space the formatter uses."""
+    return text.replace("\u00a0", " ").replace("\u202f", " ")
+
+
+def _fold(text: str) -> str:
+    """Case- and accent-insensitive form used by the V4 matcher (SPEC §9.3 item 3)."""
+    return "".join(ch for ch in unicodedata.normalize("NFKD", text) if not unicodedata.combining(ch)).casefold()
+
+
+def _keys(node) -> set[str]:
+    """Every dict key anywhere in a JSON value."""
+    if isinstance(node, dict):
+        return set(node) | {k for v in node.values() for k in _keys(v)}
+    if isinstance(node, list):
+        return {k for v in node for k in _keys(v)}
+    return set()
+
+
 def _n1_patch(change):
     return lambda node, out: change(out) if node == "behaviour_classifier" else out
 
@@ -217,7 +241,7 @@ def test_check_with_an_unknown_intent_id_raises_a_clear_error_not_the_stub(tmp_p
 
 def test_check_report_is_schema_valid_flow_b_with_both_sides(rep, run_b, report_schema):
     """§13 + §4: the saved report validates against schemas/report.json, flow B, and unlike Flow C it carries the
-    proposed side, the diff and the alternatives. Rich types are plain JSON (the later Step Functions wrap them)."""
+    proposed side, the diff and the headroom. Rich types are plain JSON (the later Step Functions wrap them)."""
     errors = sorted(Draft202012Validator(report_schema).iter_errors(rep), key=lambda e: list(e.absolute_path))
     assert errors == [], [e.message for e in errors]
     assert ULID.match(rep["run_id"])
@@ -225,7 +249,8 @@ def test_check_report_is_schema_valid_flow_b_with_both_sides(rep, run_b, report_
     assert rep["profile_id"] == "persona-robert" and rep["portfolio_id"] == "robert-main"
     assert isinstance(rep["profile_version"], int) and rep["profile_version"] >= 1
     assert rep["checks_proposed"] and rep["metrics_proposed"] and rep["diff"]
-    assert isinstance(rep["alternatives"], list) and rep["alternatives"]
+    assert isinstance(rep["headroom"], dict) and rep["headroom"]                        # D10.2: null | object
+    assert "alternatives" not in rep                                                    # key renamed (D10.2)
     assert rep["data_window"] == ["2022-01-31", "2026-10-31"]                           # D4
     assert any("survivorship" in a.lower() for a in rep["assumptions"])                  # §3.1 limitation shown
     assert json.loads(json.dumps(rep)) == rep                                            # JSON round trip, no extras
@@ -444,29 +469,48 @@ def test_diff_function_flipped_checks_and_deltas_are_pure(expected):
 
 # ---------------------------------------------------------------- B7 resizer
 
-def test_alternatives_are_the_resizer_options_for_robert_nvda_from_zst(rep):
-    """§8 + D2: the proposed portfolio has violations, so the resizer runs; the report's `alternatives` are its
-    options (<= 3, de-duplicated, the user's own funding first-class): ZST.TO 1.5 % (golden, below SPEC §8's 5 %),
-    binding H9; every option's max is below the requested 10 % and below 5 %, binding H9."""
-    opts = rep["alternatives"]
-    assert 1 <= len(opts) <= 3
-    assert all(OPTION_KEYS <= set(o) for o in opts)
-    assert len({json.dumps(o["funding"], sort_keys=True) for o in opts}) == len(opts)
-    zst = next(o for o in opts if o["funding"] == SPECIFIC_ZST)
-    assert zst["max_weight_pct"] < 5.0                                                   # D2: below 5 %, H9 binds
-    assert zst["max_weight_pct"] == pytest.approx(1.5, abs=1e-9)
-    assert zst["binding_check"] == "H9"
-    assert zst["metrics"]["p5_T"] >= 360_000                                             # fits the floor at n=5000
-    for o in opts:
-        assert o["max_weight_pct"] < 5.0 and o["binding_check"] == "H9"
-    pro_rata = [o for o in opts if o["funding"] == {"kind": "pro_rata_all"}]
-    if pro_rata:
-        assert pro_rata[0]["max_weight_pct"] == pytest.approx(2.0, abs=1e-9)
+def test_headroom_is_the_resizer_result_for_the_users_own_funding_only(rep):
+    """§8 + D2 + D10.2: the proposed portfolio has violations, so the resizer runs; the report's `headroom` is ONE
+    object (not a list) for the user's funding unchanged: ZST.TO 1.5 % (golden, below SPEC §8's 5 %), binding H9."""
+    hr = rep["headroom"]
+    assert isinstance(hr, dict)
+    # SPEC-AMBIGUITY: the spec fixes the four result keys; extra keys (e.g. the rendered line) are not forbidden.
+    assert HEADROOM_KEYS <= set(hr)
+    assert "options" not in hr and "alternatives" not in hr
+    assert hr["funding"] == SPECIFIC_ZST == rep["intent"]["funding"]                     # never a funding the user did not state
+    assert hr["max_weight_pct"] < 5.0                                                    # D2: below 5 %, H9 binds
+    assert hr["max_weight_pct"] == pytest.approx(1.5, abs=1e-9)
+    assert hr["binding_check"] == "H9"
+    assert hr["metrics"]["p5_T"] >= 360_000                                              # fits the floor at n=5000
+
+
+def test_headroom_line_is_template_text_in_the_report_and_the_cli_output(rep, run_b):
+    """§8 + D10.2: the headroom line is the fixed factual sentence, FR for Robert (fr-CA); it is stated in the saved
+    report and printed by the CLI; it carries no 'options', 'alternatives' or 'pourriez' wording."""
+    # SPEC-AMBIGUITY: SPEC §9.2 / §20.5 do not name the report key holding the line; stricter reading: the saved
+    # report (anywhere) AND the CLI output both state it, so the UI and the terminal show the same text.
+    flat_report = _flat(json.dumps(rep, ensure_ascii=False))
+    assert FR_HEADROOM.search(flat_report), "headroom line missing from the report"
+    found = FR_HEADROOM.search(_flat(run_b["stdout"]))
+    assert found, "headroom line missing from the CLI output"
+    assert not NO_ADVICE_WORDS.search(found.group(0))
+    assert not any(_fold(p) in _fold(found.group(0)) for p in explain.ADVISORY_BLOCKLIST)   # passes V4 (wide list)
+
+
+def test_report_and_cli_carry_no_options_or_alternatives_wording(rep, run_b, audit):
+    """D10.2 + SPEC §8: no `alternatives` / `options` key anywhere in the report or the audit, and none of the words
+    in the assumptions, the explanation or the CLI output."""
+    assert not {"alternatives", "options"} & _keys(rep)
+    assert not {"alternatives", "options"} & _keys(audit)
+    prose = rep["assumptions"] + [rep["explanation"]["headline"]] + [s["text"] for s in rep["explanation"]["segments"]]
+    for text in prose + [run_b["stdout"]]:
+        assert not NO_ADVICE_WORDS.search(text), text
+    assert "fits your limits" not in run_b["stdout"]                                     # the old CLI wording
 
 
 def test_a_trade_that_fits_has_no_violation_no_resizer_and_keeps_the_soft_warnings(tmp_path):
     """§4 B7: "if proposed has violations -> resizer": NVDA 1 % (every check passes at n=5000, tests/test_resizer.py)
-    gives no hard violation, `alternatives == []`, and verdict coherent_with_warnings (S1 and S3 warn, §7.5)."""
+    gives no hard violation, `headroom is None` (nothing to measure), and verdict coherent_with_warnings (S1 and S3 warn, §7.5)."""
     work = tmp_path / "robert"
     shutil.copytree(FIX, work)
     intents = _read(work / "intents.json")
@@ -476,7 +520,8 @@ def test_a_trade_that_fits_has_no_violation_no_resizer_and_keeps_the_soft_warnin
     rep, audit = _only(run)
     assert rep["intent"]["target_weight_pct"] == 1
     assert not [c for c in rep["checks_proposed"] if c["status"] == "violation"]
-    assert rep["alternatives"] == []
+    assert rep["headroom"] is None
+    assert "alternatives" not in rep
     assert rep["verdict"] == audit["verdict"] == "coherent_with_warnings"
     assert _by_id(rep["checks_proposed"], "S3")[0]["status"] == "warning"
 
@@ -511,7 +556,7 @@ def test_explanation_is_verified_template_framed_and_the_disclaimer_is_fixed(rep
     for seg in ex["segments"]:
         facts = by[seg["factor"]]["facts"]
         assert explain.numcheck(seg["text"], facts) == []
-        assert not any(p in seg["text"].casefold() for p in explain.ADVISORY_BLOCKLIST)
+        assert not any(_fold(p) in _fold(seg["text"]) for p in explain.ADVISORY_BLOCKLIST)   # V4: accent-insensitive
 
 
 # ---------------------------------------------------------------- B1/B3: the LLM calls, in order, with the right inputs

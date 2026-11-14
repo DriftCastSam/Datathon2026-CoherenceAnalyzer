@@ -20,6 +20,7 @@ import json
 import os
 import re
 import shutil
+import unicodedata
 from pathlib import Path
 
 import pytest
@@ -229,7 +230,7 @@ def test_review_nvda_report_is_schema_valid_and_has_the_section_13_shape(review_
     errors = sorted(Draft202012Validator(report_schema).iter_errors(rep), key=lambda e: list(e.absolute_path))
     assert errors == [], [e.message for e in errors]
     for key in ("run_id", "flow", "profile_id", "profile_version", "portfolio_id", "intent", "verdict", "checks_current",
-                "checks_proposed", "diff", "metrics_current", "metrics_proposed", "alternatives", "unknowns",
+                "checks_proposed", "diff", "metrics_current", "metrics_proposed", "headroom", "unknowns",
                 "assumptions", "data_window", "explanation", "disclaimer", "sections"):
         assert key in rep, key
     assert ULID.match(rep["run_id"])                                                     # SPEC §4: run_id is a ULID
@@ -240,7 +241,8 @@ def test_review_nvda_report_is_schema_valid_and_has_the_section_13_shape(review_
     # Flow C is "B5-B9 without an intent"; the resizer and the trade diff are P2 (D7 point 3)
     assert rep["intent"] is None and rep["checks_proposed"] is None
     assert rep["metrics_proposed"] is None and rep["diff"] is None
-    assert rep["alternatives"] == []
+    assert rep["headroom"] is None                                                       # D10.2: Flow C has no trade
+    assert "alternatives" not in rep                                                     # key renamed (D10.2)
     assert rep["data_window"] == ["2022-01-31", "2026-10-31"]                            # D4: 58 months
     assert all(isinstance(a, str) and a for a in rep["assumptions"]) and rep["assumptions"]
     assert any("survivorship" in a.lower() for a in rep["assumptions"])                  # §3.1 / §5 limitation shown
@@ -356,8 +358,10 @@ def test_review_nvda_explanation_is_template_headline_section_segments_and_fixed
     for seg in ex["segments"]:                                                           # inv. 6: numbers in the facts
         facts = next(s["facts"] for s in rep["sections"] if s["factor"] == seg["factor"])
         assert explain.numcheck(seg["text"], facts) == []
-        low = seg["text"].casefold()
-        assert not any(p in low for p in explain.ADVISORY_BLOCKLIST)                     # inv. 7: no advice
+        low = "".join(ch for ch in unicodedata.normalize("NFKD", seg["text"]) if not unicodedata.combining(ch)).casefold()
+        folded = ["".join(ch for ch in unicodedata.normalize("NFKD", p) if not unicodedata.combining(ch)).casefold()
+                  for p in explain.ADVISORY_BLOCKLIST]
+        assert not any(p in low for p in folded)                                         # inv. 7: no advice (V4, D10.4)
 
 
 # ---------------------------------------------------------------- LLM calls and audit (§10, D6, D7)

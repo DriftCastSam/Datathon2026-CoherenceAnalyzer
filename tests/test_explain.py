@@ -21,6 +21,7 @@ Contract these tests pin down (the stubs name `explain.verify_section(output, fa
 import copy
 import json
 import re
+import unicodedata
 
 import pytest
 from jsonschema import Draft202012Validator
@@ -334,13 +335,76 @@ def test_verify_v4_advisory_wording_is_rejected(phrase, payload_fr):
     assert _rules(explain.verify_section(out, facts)) == {"V4"}
 
 
+# SPEC §9.3 item 3 / D10.4: suggestions as well as orders; case- and accent-insensitive; any person or mood.
+SUGGESTIONS = [
+    "Vous pourriez alléger cette position.", "Tu pourrais en vendre une partie.", "Vous devriez attendre.",
+    "Il serait judicieux d'ajouter des obligations.", "Il serait préférable d'attendre.",
+    "Nous conseillons la prudence.", "Je conseille la prudence.", "Je suggère une pause.",
+    "On pourrait envisager une autre source de financement.", "Un rééquilibrage s'impose.",
+    "Rééquilibrez le portefeuille.", "La prochaine étape est de vendre.",
+    "You could sell some NVDA.", "You may want to hold less.", "You might want to wait.",
+    "Consider holding more bonds.", "It would be wise to wait.", "It would be better to buy less.",
+    "We suggest a smaller trade.", "I suggest a smaller trade.", "We advise caution.", "Rebalance the portfolio.",
+    "A natural next step is to sell.",
+]
+
+
+@pytest.mark.parametrize("phrase", SUGGESTIONS)
+def test_verify_v4_rejects_suggestions_not_only_orders(phrase, payload_fr):
+    """D10.4: V4 covers suggestions ("consider", "you could", "vous pourriez", "envisage", "rebalance", "next step",
+    ...), not only buy/sell imperatives."""
+    facts = _facts(payload_fr, "risque")
+    out = _good_output(facts)
+    out["segments"][0]["text"] = phrase + " " + out["segments"][0]["text"]
+    assert _rules(explain.verify_section(out, facts)) == {"V4"}, phrase
+
+
+@pytest.mark.parametrize("variant", [
+    lambda s: s.upper(),                                                  # case
+    lambda s: s.title(),
+    lambda s: unicodedata.normalize("NFD", s),                            # decomposed accents
+    lambda s: "".join(c for c in unicodedata.normalize("NFD", s) if not unicodedata.combining(c)),   # accents dropped
+], ids=["upper", "title", "nfd", "no_accents"])
+@pytest.mark.parametrize("phrase", ["Il serait préférable d'attendre.", "Rééquilibrez le portefeuille.",
+                                    "La prochaine étape est claire.", "Je suggère une pause.",
+                                    "Vous pourriez attendre.", "Consider waiting."])
+def test_verify_v4_is_case_and_accent_insensitive(phrase, variant, payload_fr):
+    """D10.4 / §9.3 item 3: matching is case- and accent-insensitive (NFKD, strip combining marks, casefold)."""
+    facts = _facts(payload_fr, "risque")
+    out = _good_output(facts)
+    out["segments"][0]["text"] = variant(phrase) + " " + out["segments"][0]["text"]
+    assert "V4" in _rules(explain.verify_section(out, facts)), variant(phrase)
+
+
+@pytest.mark.parametrize("text", [
+    "Cette transaction ferait passer le revenu fixe sous le minimum de votre profil.",
+    "This trade would lower fixed income below the minimum of your profile.",
+    "La transaction que vous avez indiquée ferait monter la volatilité au-dessus de la bande.",
+])
+def test_verify_v4_allows_stating_a_measured_effect_of_the_users_own_trade(text, payload_fr):
+    """D10.4 / SPEC §9.2: "stating a measured effect of the user's own trade stays allowed"."""
+    facts = _facts(payload_fr, "risque")
+    out = _good_output(facts)
+    out["segments"][0]["text"] = text + " " + out["segments"][0]["text"]
+    assert "V4" not in _rules(explain.verify_section(out, facts))
+
+
 def test_verify_v4_each_blocklist_entry_is_rejected(payload_fr):
-    """V4: every phrase of `explain.ADVISORY_BLOCKLIST` is rejected."""
+    """V4: every phrase of `explain.ADVISORY_BLOCKLIST` is rejected, also in upper case and without accents."""
     facts = _facts(payload_fr, "horizon")
     for phrase in explain.ADVISORY_BLOCKLIST:
-        out = _good_output(facts)
-        out["segments"][0]["text"] = f"{phrase} ceci. " + out["segments"][0]["text"]
-        assert "V4" in _rules(explain.verify_section(out, facts)), phrase
+        for form in (phrase, phrase.upper(), _strip_accents(phrase)):
+            out = _good_output(facts)
+            out["segments"][0]["text"] = f"{form} ceci. " + out["segments"][0]["text"]
+            assert "V4" in _rules(explain.verify_section(out, facts)), form
+
+
+def _strip_accents(text: str) -> str:
+    return "".join(c for c in unicodedata.normalize("NFD", text) if not unicodedata.combining(c))
+
+
+def _fold(text: str) -> str:
+    return unicodedata.normalize("NFKD", text).encode("ascii", "ignore").decode().casefold()
 
 
 @pytest.mark.parametrize("variant", ["too_many", "too_long", "inference", "bad_kind"])
@@ -428,9 +492,11 @@ def test_explainer_schema_matches_the_spec():
 
 
 def test_explainer_prompt_is_versioned_and_has_one_block_per_factor():
-    """§20.5 + CLAUDE.md: `prompts/explainer.v<N>.md` (common rules + one guidance block per factor)."""
+    """§20.5 + CLAUDE.md: `prompts/explainer.v<N>.md` (common rules + one guidance block per factor). D10: prompt
+    changes bump the version, so the narration prompt is v2 (v1 stays on disk as the record of what v1 said)."""
     version = extractors.prompt_version(NODE)
     assert re.fullmatch(r"explainer\.v\d+", version)
+    assert version == "explainer.v2"
     text = (config.PROMPTS_DIR / f"{version}.md").read_text(encoding="utf-8").lower()
     for fid in DISPLAY:
         assert fid in text, fid
@@ -592,8 +658,7 @@ def test_explanation_covers_every_failing_check_and_passes_numcheck(plan_name, l
     assert set(FAILING_IDS) <= refs
     text = " ".join([result["headline"]] + [g["text"] for g in result["segments"]])
     assert explain.numcheck(text, payload_fr) == []
-    low = text.lower()
-    assert not any(p in low for p in explain.ADVISORY_BLOCKLIST)
+    assert not any(_fold(p) in _fold(text) for p in explain.ADVISORY_BLOCKLIST)
 
 
 def test_headline_is_template_text_independent_of_the_writer(llm, payload_fr, monkeypatch, tmp_path):

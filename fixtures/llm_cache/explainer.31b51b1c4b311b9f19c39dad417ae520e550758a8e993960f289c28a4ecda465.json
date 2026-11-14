@@ -1,12 +1,12 @@
 {
-  "cache_key": "95aae05292c15e6a5316f495edf1f1d7ab92a591e4c1e2522ee38a46639d0302",
+  "cache_key": "31b51b1c4b311b9f19c39dad417ae520e550758a8e993960f289c28a4ecda465",
   "call_log": {
     "hand_written": true,
     "latency_ms": 0,
     "tokens_in": 0,
     "tokens_out": 0
   },
-  "input_hash": "sha256:2dab336741aa0381c2aa8da37558ae910c8f9e853ceb8d97743820689f6f0d2c",
+  "input_hash": "sha256:868ff76281e52d295a3730b81363b904a28d75025381a2d9e38f8ff1545e0875",
   "model_id": "fixture:hand-written",
   "node": "explainer",
   "output": {
@@ -18,7 +18,7 @@
           "H7",
           "metrics.current.vol"
         ],
-        "text": "H4: le revenu fixe pèse 25,0 %, sous le minimum de 30,0 %. H7: la volatilité historique est de 9,8 %, au-dessus de la bande de 9,0 %."
+        "text": "H4: le revenu fixe pèse 25,0 %, sous le minimum de 30,0 %. H7: la volatilité historique est de 9,8 %, au-dessus de la bande de 9,0 %. Le repli pourrait atteindre 77,7 %."
       },
       {
         "kind": "fact",
@@ -46,7 +46,7 @@
       }
     ]
   },
-  "prompt_version": "explainer.v1",
+  "prompt_version": "explainer.v2",
   "user_payload": {
     "checks": [
       {
@@ -169,9 +169,6 @@
       "proposed": {}
     },
     "question": "Quelle perte peut être absorbée?",
-    "retry_failures": [
-      "V2: segment 1 has number(s) not in the facts: 77,7 %"
-    ],
     "status": "violation",
     "unknowns": [],
     "verdict": "incoherent"

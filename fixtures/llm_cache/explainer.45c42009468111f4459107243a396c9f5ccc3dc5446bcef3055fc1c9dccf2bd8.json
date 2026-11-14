@@ -1,12 +1,12 @@
 {
-  "cache_key": "0694d1ee24a6d57795fe5e2d50f13e3e533d9d7a37c59bb0142ae4f2ebdeda25",
+  "cache_key": "45c42009468111f4459107243a396c9f5ccc3dc5446bcef3055fc1c9dccf2bd8",
   "call_log": {
     "hand_written": true,
     "latency_ms": 0,
     "tokens_in": 0,
     "tokens_out": 0
   },
-  "input_hash": "sha256:52dd4446013ab0b5d97cda144b3a5edc4592213b98503bfedfcbf3224e19dbdb",
+  "input_hash": "sha256:84e36e0ee1d4550e67336d9e6a3a2752c47b8ff6bd16d6eeaac1cd371af1905a",
   "model_id": "fixture:hand-written",
   "node": "explainer",
   "output": {
@@ -16,7 +16,7 @@
         "refs": [
           "H3"
         ],
-        "text": "H3 (NVDA): valeur 10,0 %, limite 8,0 %."
+        "text": "Je recommande de réduire cette position. H3 (NVDA): valeur 10,0 %, limite 8,0 %."
       },
       {
         "kind": "fact",
@@ -30,14 +30,13 @@
         "refs": [
           "H6",
           "H11",
-          "H12",
           "H10"
         ],
-        "text": "H6, H11, H12, H10: ne peut pas être vérifié (part de FNB non ventilée par secteur)."
+        "text": "H6, H11, H10: ne peut pas être vérifié (part de FNB non ventilée par secteur)."
       }
     ]
   },
-  "prompt_version": "explainer.v1",
+  "prompt_version": "explainer.v2",
   "user_payload": {
     "checks": [
       {
@@ -254,71 +253,6 @@
       },
       {
         "derived_from": [
-          "limits.max_fee_mer_pct",
-          "preferences.max_fee_mer_pct"
-        ],
-        "id": "H12",
-        "limit": "0,5 %",
-        "message_key": "fee_unknown",
-        "source": "rule:max_fee",
-        "status": "unknown",
-        "subject": "GLD",
-        "value": "—"
-      },
-      {
-        "derived_from": [
-          "limits.max_fee_mer_pct",
-          "preferences.max_fee_mer_pct"
-        ],
-        "id": "H12",
-        "limit": "0,5 %",
-        "message_key": "fee_unknown",
-        "source": "rule:max_fee",
-        "status": "unknown",
-        "subject": "SPY",
-        "value": "—"
-      },
-      {
-        "derived_from": [
-          "limits.max_fee_mer_pct",
-          "preferences.max_fee_mer_pct"
-        ],
-        "id": "H12",
-        "limit": "0,5 %",
-        "message_key": "fee_unknown",
-        "source": "rule:max_fee",
-        "status": "unknown",
-        "subject": "XBB.TO",
-        "value": "—"
-      },
-      {
-        "derived_from": [
-          "limits.max_fee_mer_pct",
-          "preferences.max_fee_mer_pct"
-        ],
-        "id": "H12",
-        "limit": "0,5 %",
-        "message_key": "fee_unknown",
-        "source": "rule:max_fee",
-        "status": "unknown",
-        "subject": "XIU.TO",
-        "value": "—"
-      },
-      {
-        "derived_from": [
-          "limits.max_fee_mer_pct",
-          "preferences.max_fee_mer_pct"
-        ],
-        "id": "H12",
-        "limit": "0,5 %",
-        "message_key": "fee_unknown",
-        "source": "rule:max_fee",
-        "status": "unknown",
-        "subject": "ZST.TO",
-        "value": "—"
-      },
-      {
-        "derived_from": [
           "limits.max_sector_risk_share",
           "risk.effective",
           "risk.declared",
@@ -412,17 +346,16 @@
     },
     "evidence_events": [],
     "factor": "contraintes",
-    "intent": {
-      "funding": "ZST.TO",
-      "target_weight": "10 %",
-      "ticker": "NVDA"
-    },
+    "intent": null,
     "locale": "fr-CA",
     "metrics": {
       "current": {},
       "proposed": {}
     },
     "question": "Quelles limites s'appliquent?",
+    "retry_failures": [
+      "V2: segment 1 has number(s) not in the facts: 77,7 %"
+    ],
     "status": "violation",
     "unknowns": [
       {
@@ -613,71 +546,6 @@
         "status": "unknown",
         "subject": "ZST.TO",
         "value": "3,0 %"
-      },
-      {
-        "derived_from": [
-          "limits.max_fee_mer_pct",
-          "preferences.max_fee_mer_pct"
-        ],
-        "id": "H12",
-        "limit": "0,5 %",
-        "message_key": "fee_unknown",
-        "source": "rule:max_fee",
-        "status": "unknown",
-        "subject": "GLD",
-        "value": "—"
-      },
-      {
-        "derived_from": [
-          "limits.max_fee_mer_pct",
-          "preferences.max_fee_mer_pct"
-        ],
-        "id": "H12",
-        "limit": "0,5 %",
-        "message_key": "fee_unknown",
-        "source": "rule:max_fee",
-        "status": "unknown",
-        "subject": "SPY",
-        "value": "—"
-      },
-      {
-        "derived_from": [
-          "limits.max_fee_mer_pct",
-          "preferences.max_fee_mer_pct"
-        ],
-        "id": "H12",
-        "limit": "0,5 %",
-        "message_key": "fee_unknown",
-        "source": "rule:max_fee",
-        "status": "unknown",
-        "subject": "XBB.TO",
-        "value": "—"
-      },
-      {
-        "derived_from": [
-          "limits.max_fee_mer_pct",
-          "preferences.max_fee_mer_pct"
-        ],
-        "id": "H12",
-        "limit": "0,5 %",
-        "message_key": "fee_unknown",
-        "source": "rule:max_fee",
-        "status": "unknown",
-        "subject": "XIU.TO",
-        "value": "—"
-      },
-      {
-        "derived_from": [
-          "limits.max_fee_mer_pct",
-          "preferences.max_fee_mer_pct"
-        ],
-        "id": "H12",
-        "limit": "0,5 %",
-        "message_key": "fee_unknown",
-        "source": "rule:max_fee",
-        "status": "unknown",
-        "subject": "ZST.TO",
-        "value": "—"
       },
       {
         "derived_from": [

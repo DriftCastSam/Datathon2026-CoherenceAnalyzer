@@ -1,0 +1,39 @@
+{
+  "duration_s": 266.7,
+  "guard_cancellations": [
+    {
+      "reason": "'boptionb' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'option' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "command substitution is not allowed; run the inner command on its own",
+      "tool": "shell"
+    },
+    {
+      "reason": "'python' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'explainer\\.v\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'python' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    }
+  ],
+  "is_error": false,
+  "model_id": "us.anthropic.claude-sonnet-5-5",
+  "num_turns": 52,
+  "result": "The D10 core work is finished and the full suite is green (1602 passed, no skips). I did not run `cli demo` by hand; `test_pipeline_offline.py` covers it in mock mode.\n\nA prior WIP commit had already done part of this (the resizer's single funding, the `alternatives` \u2192 `headroom` rename in report/pipeline/cli, the wider blocklist, the H7 wording). I finished the rest.\n\n**Files changed**\n- `coherence_analyzer/resizer.py`: `resize()` now returns exactly `{funding, max_weight_pct, binding_check, metrics}` or `{none_fit, binding_checks}`. The golden value is unchanged (1.5 %, binding H9). `headroom_text(headroom, funding, target_pct, locale)` produces the fixed FR/EN sentence, with no ticker and no \"options\"/\"alternatives\"/\"you could\" wording.\n- `coherence_analyzer/pipeline.py`: `b9_save` stores the template sentence in `headroom.line`, in the report locale, and passes that headroom to the report.\n- `coherence_analyzer/cli.py`: prints `headroom.line` instead of rebuilding the sentence in English.\n- `coherence_analyzer/schemas/report.json`: `headroom` is `null | {funding, max_weight_pct, binding_check, metrics, line?} | {none_fit, binding_checks, line?}`. A list of options no longer validates.\n- `coherence_analyzer/explain.py`: V4 folding now follows the spec order (NFKD, strip combining marks, casefold).\n- `coherence_analyzer/llm/prompts/explainer.v2.md` (new): rule 6 is \"describe, never prescribe\", for any person or mood, with no ranking; stating a measured effect of the user's own trade is allowed.\n- `coherence_analyzer/llm/extractors.py`: the explainer prompt version is now `explainer.v2`.\n- `scripts/handwrite_explainer_cache.py`: now deletes hand-written explainer entries from older prompt versions before writing.\n- `fixtures/llm_cache/`: I re-ran `handwrite_explainer_cache.py` and `handwrite_flow_b_cache.py`. That removed 9 stale v1 hand-written entries and wrote 9 v2 ones. Real recorded v1 entries stay on disk and are now cache misses that fall back to the template.\n- `README.md`: Status entry, updated Resizer/V4/Flow B notes, and a new D10 bullet under Assumptions.\n\n**SPEC-AMBIGUITY resolved**\n- **Where the headroom line lives:** SPEC doesn't name a report key for it. I put it in `headroom.line` and let the CLI print it, so the saved report and the terminal show the same text and the locale follows the profile (FR for Robert).\n- **Extra `line` key:** `test_resizer` pins the four-key `resize()` result exactly, so `line` is added by the pipeline after the resizer returns. `test_flow_b` and the schema allow that extra key.\n- **Funding in the `none_fit` case:** the result no longer carries `funding`, so `headroom_text` takes the intent's funding as a parameter.\n",
+  "stop_reason": "end_turn",
+  "usage": {
+    "inputTokens": 2814119,
+    "outputTokens": 22077,
+    "totalTokens": 2836196
+  }
+}

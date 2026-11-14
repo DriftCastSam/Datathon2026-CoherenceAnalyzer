@@ -8,17 +8,38 @@ text, and only after the verifier passed). Every LLM call goes through `bedrock.
 from __future__ import annotations
 
 import copy
+import unicodedata
 from concurrent.futures import ThreadPoolExecutor
 
 from .config import DISCLAIMER
 from .llm import bedrock, extractors
 from .numfacts import numcheck as _numcheck
 
-# Lower case (matched against the casefolded text). §9.3 examples first, then close variants (FR + EN).
-ADVISORY_BLOCKLIST = ("tu devrais acheter", "tu devrais vendre", "je recommande", "nous recommandons",
-                      "you should buy", "you should sell", "we recommend", "i recommend",
-                      "vous devriez acheter", "vous devriez vendre", "je conseille", "nous conseillons",
-                      "i suggest you", "we advise")
+# Lower case. SPEC §9.3 item 3 / D10: suggestions as well as orders, FR + EN. Several entries are stems
+# ("envisage", "rééquilibr", "rebalanc", "consider") so every inflection matches. Use `advisory_hits` to match:
+# it is case- and accent-insensitive.
+ADVISORY_BLOCKLIST = (
+    # FR
+    "tu devrais acheter", "tu devrais vendre", "tu devrais", "vous devriez acheter", "vous devriez vendre",
+    "vous devriez", "tu pourrais", "vous pourriez", "envisage", "il serait judicieux", "il serait préférable",
+    "je recommande", "nous recommandons", "je conseille", "nous conseillons", "je suggère", "nous suggérons",
+    "rééquilibr", "prochaine étape",
+    # EN
+    "you should buy", "you should sell", "you should", "you could", "you may want to", "you might want to",
+    "consider", "it would be wise", "it would be better", "we recommend", "i recommend", "we suggest",
+    "i suggest you", "i suggest", "we advise", "rebalanc", "next step",
+)
+
+
+def _fold(text: str) -> str:
+    """NFKD, strip combining marks, casefold (SPEC §9.3 item 3): `rééquilibrer` and `REEQUILIBRER` match the same entry."""
+    return "".join(c for c in unicodedata.normalize("NFKD", text) if not unicodedata.combining(c)).casefold()
+
+
+def advisory_hits(text: str) -> list[str]:
+    """Blocklist entries found in `text` (case- and accent-insensitive). Empty list = no advisory wording."""
+    low = _fold(text)
+    return [p for p in ADVISORY_BLOCKLIST if _fold(p) in low]
 
 MAX_SEGMENTS = 4          # V5
 MAX_SEGMENT_CHARS = 300   # V5
@@ -48,7 +69,7 @@ _FR = {
     "H5": "Les actifs en devises étrangères pèsent {value}, au-delà du maximum de {limit}.",
     "H6": "Le secteur de votre employeur ({subject}) pèse {value}, au-delà du maximum de {limit}.",
     "H7": "La volatilité historique est de {value}, au-dessus de la bande de {limit}.",
-    "H7/info": "La volatilité historique est de {value}, sous la bande de {limit}: plus prudent que votre profil.",
+    "H7/info": "La volatilité historique est de {value}, sous la borne inférieure de {limit} de la bande de votre profil.",
     "H8": "Le repli historique maximal est de {value}, plus profond que la limite de {limit}.",
     "H9": "Le scénario bas (centile 5) à l'horizon est de {value}, sous le plancher de {limit}.",
     "H10": "Le secteur {subject} compte pour {value} du risque, au-delà du maximum de {limit}.",
@@ -77,7 +98,7 @@ _EN = {
     "H5": "Foreign-currency assets weigh {value}, above the maximum of {limit}.",
     "H6": "Your employer's sector ({subject}) weighs {value}, above the maximum of {limit}.",
     "H7": "Historical volatility is {value}, above the band limit of {limit}.",
-    "H7/info": "Historical volatility is {value}, below the band limit of {limit}: more conservative than your profile.",
+    "H7/info": "Historical volatility is {value}, below the lower bound of {limit} of the band for your profile.",
     "H8": "The maximum historical drawdown is {value}, deeper than the limit of {limit}.",
     "H9": "The low scenario (5th percentile) at the horizon is {value}, below the floor of {limit}.",
     "H10": "The {subject} sector accounts for {value} of the risk, above the maximum of {limit}.",
@@ -259,8 +280,7 @@ def verify_section(output: dict, facts: dict) -> list[str]:
         bad = _numcheck(text, facts)
         if bad:
             v2.append(f"V2: segment {i} has number(s) not in the facts: {', '.join(bad)}")
-        low = text.casefold()
-        v4 += [f"V4: segment {i} has advisory wording {p!r}" for p in ADVISORY_BLOCKLIST if p in low]
+        v4 += [f"V4: segment {i} has advisory wording {p!r}" for p in advisory_hits(text)]
 
     v3 = [f"V3: check {cid} ({status}) is not referenced by any segment"
           for cid, status in dict.fromkeys((c["id"], c["status"]) for c in facts.get("checks", [])

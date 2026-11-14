@@ -54,7 +54,7 @@ def build_review(*, run_id: str, profile_id: str, profile_version: int, portfoli
                  data_window: list[str], disclaimer: str, profile_coherence: dict,
                  goals: dict | None = None) -> dict:
     """The Flow C report (SPEC §13 + §20.4): a baseline for the current portfolio, so no intent, no proposed side, no
-    diff and no alternatives (the resizer and the trade diff are P2, D7 point 3). `checks` are the tagged checks;
+    diff and no headroom (the resizer and the trade diff are P2, D7 point 3). `checks` are the tagged checks;
     `sections` already carry their `narrative`. Pure: the verdict comes from the checks and must equal the one derived
     from the section statuses."""
     verdict_ = verdict(checks)
@@ -65,7 +65,7 @@ def build_review(*, run_id: str, profile_id: str, profile_version: int, portfoli
         "run_id": run_id, "flow": "C", "profile_id": profile_id, "profile_version": profile_version,
         "portfolio_id": portfolio_id, "intent": None, "verdict": verdict_,
         "checks_current": checks, "checks_proposed": None, "diff": None,
-        "metrics_current": metrics, "metrics_proposed": None, "alternatives": [],
+        "metrics_current": metrics, "metrics_proposed": None, "headroom": None,
         "unknowns": unknowns(checks), "assumptions": assumptions, "data_window": data_window,
         "explanation": explanation, "disclaimer": disclaimer, "sections": sections,
         "profile_coherence": profile_coherence,      # separate block (§20.9): never enters the verdict
@@ -117,10 +117,10 @@ def diff(current: list[Check], proposed: list[Check], m_cur: dict, m_new: dict) 
 
 def build_trade_check(*, run_id: str, profile_id: str, profile_version: int, portfolio_id: str, intent: dict,
                       checks_current: list[dict], checks_proposed: list[dict], metrics_current: dict,
-                      metrics_proposed: dict, sections: list[dict], explanation: dict, alternatives: list[dict],
+                      metrics_proposed: dict, sections: list[dict], explanation: dict, headroom: dict | None,
                       assumptions: list[str], data_window: list[str], disclaimer: str,
                       profile_coherence: dict) -> dict:
-    """The Flow B report (SPEC §13 + §20.4): the confirmed intent, both sides, the diff, the resizer options. The
+    """The Flow B report (SPEC §13 + §20.4): the confirmed intent, both sides, the diff, the resizer headroom (user funding only, D10). The
     verdict is computed on the PROPOSED checks (the question is whether the trade is coherent) and must equal the one
     derived from the section statuses. `unknowns` = the proposed checks with status unknown. Pure."""
     verdict_ = verdict(checks_proposed)
@@ -132,7 +132,7 @@ def build_trade_check(*, run_id: str, profile_id: str, profile_version: int, por
         "run_id": run_id, "flow": "B", "profile_id": profile_id, "profile_version": profile_version,
         "portfolio_id": portfolio_id, "intent": intent, "verdict": verdict_,
         "checks_current": cur, "checks_proposed": new, "diff": d,
-        "metrics_current": metrics_current, "metrics_proposed": metrics_proposed, "alternatives": alternatives,
+        "metrics_current": metrics_current, "metrics_proposed": metrics_proposed, "headroom": headroom,
         "unknowns": unknowns(new), "assumptions": assumptions, "data_window": data_window,
         "explanation": explanation, "disclaimer": disclaimer, "sections": sections,
         "profile_coherence": profile_coherence,
