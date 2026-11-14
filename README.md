@@ -46,6 +46,7 @@ Everything else is stubbed with signatures and `NotImplementedError`. The matchi
 - **P0.8:** narration loop (docs/spec-factors.md §20.5): N5 `explainer` (`schemas/explainer.json`, `prompts/explainer.v1.md`, `extractors.explainer_call`), `explain.verify_section` (V1-V5), `explain.narrate_section` (`llm` -> `llm_retry` -> `template`, at most 2 calls per section, none for `pass` sections) and `explain.explain` (headline, disclaimer and pass sections are template text). Hand-written Robert + NVDA entries in `fixtures/llm_cache/` (`python scripts/handwrite_explainer_cache.py`): horizon `llm`, risque `llm_retry`, contraintes `template`. `tests/test_explain.py` uses its own temporary cache.
 
 - **P0.9:** `pipeline.py` Flow A `refresh` (rules + N3 through the gate, only when `values.notes` changed; no N1/N2) and Flow C `review` (engine -> hard checks + S2/S4 -> verdict -> five sections -> narration loop -> report + audit), `store.py` (local store, ULID run ids, report/audit/profile/portfolio files), `schemas/report.json` (§13 + sections), `coherence/soft.py` S2 and S4, `report.build_review`, `cli review [--portfolio FILE]`, `cli audit`, `cli demo`, `fixtures/robert/portfolio_review.json` (Robert after buying NVDA) + `tests/test_pipeline_offline.py`. `cli review fixtures/robert --portfolio portfolio_review.json` -> `incoherent` (horizon, risque, contraintes `violation`); `cli review fixtures/robert` -> `coherent`, H6/H10 unknown. Flow B (`pipeline.check`) is not wired (P2). One more hand-written N5 entry covers Robert's current-portfolio `contraintes` section (`unknown`, mode `llm`).
+- **P1.3:** S3 store backend (`COHERENCE_ANALYZER_STORE=s3`, same §10 keys, `store.py`), Bedrock Guardrail on the explainer call only (`llm/bedrock.py`, `GuardrailIntervened` ends the section in the template), CloudFormation template `deploy/aws/coherence-analyzer.cfn.json` (not deployed), README "AWS deploy", `.env.example`. `tests/test_store_s3.py`, `tests/test_guardrail.py` (botocore Stubber, offline).
 Remaining TODOs:
 - Amira and Mateo have portfolios only; their profiles and events are P1.
 - Robert's `llm:` fields are hand-written (`model_id: fixture:hand-written`) until the Bedrock cache is recorded (P1.11).
@@ -134,6 +135,37 @@ All persona financial figures beyond the case brief are fictional team assumptio
   - `explain.explain` narrates the non-pass sections on a `ThreadPoolExecutor(max_workers=5)` and collects them in display order; `pass` sections are narrated inline (template, no LLM call). An exception in one lane gives the template for that section only (`llm_error` records it). Narration is the only thing run concurrently, so the report text is identical to a sequential run. The order of the LLM calls across sections (spy / audit order of the writer calls) is now scheduling-dependent; the audit lists the writer calls in display order.
   - `pipeline.review` runs `internal.check_profile(profile, portfolio.as_of)` (the refreshed profile) on a one-worker pool next to the section lanes (the "sixth lane") and adds `report["profile_coherence"] = {status, findings}` (no `llm` key). It never feeds the verdict, a section status, `limits` or the explanation mode. The N6 call goes to the audit `llm_calls` with its gate status (`accepted`, `rejected:*`); a cache miss (`skipped:cache_miss`, no call log) goes to `llm_errors`.
   - `report.json` requires the block; `status` is `pass | info | warning` (stricter than the check status enum: never `violation`, inv. 3). CLI prints one `profile: <status> (<ids>)` line per review (`profile: pass` without findings).
+- **S3 store and guardrail (P1.3):**
+  - `store.append_event` on s3 is a `get` + `put` of the whole `events.jsonl` object: **non-atomic**, a concurrent append can be lost (fine for one demo user; use a table or versioned append for more). The local backend still appends a line.
+  - SPEC-AMBIGUITY (`read_events` / `append_event` keep their `Path` signature): on s3 a relative path starting with `profiles/` is read as the §10 layout key under the prefix (`profiles/<id>/events.jsonl`); any other path (the `fixtures/<persona>` directory the pipeline reads, an absolute path) stays a local file, so fixture events load under either backend.
+  - A missing key (`NoSuchKey`) is `FileNotFoundError` for `load_report` / `load_audit` (and an empty list for `read_events`); any other S3 error (`AccessDenied`...) propagates. The save functions return the s3 key as a `Path`. `store.root()` is display-only (`s3:/bucket/prefix`) on s3.
+  - An unknown `COHERENCE_ANALYZER_STORE` or s3 without `COHERENCE_ANALYZER_S3_BUCKET` raises `ValueError` naming the variable. The s3 `ContentType` is `application/json` for every write, `events.jsonl` included.
+  - Guardrail: `guardrailConfig` (id, version, `trace: enabled`) is sent for the `explainer` node only, and only when both `BEDROCK_GUARDRAIL_ID` and `BEDROCK_GUARDRAIL_VERSION` are set. `stopReason: guardrail_intervened` raises `GuardrailIntervened` (a subclass of `LLMOutputInvalid`, carrying `call_log`): not retried, not cached; the narration loop ends in the template for that section (`llm_error` = `GuardrailIntervened: ...`, one attempt recorded). The call log of a guarded call adds `guardrail_id`, `guardrail_version`, `guardrail_intervened`. The cache key is unchanged, so recorded entries stay valid; a cached answer is served without a guardrail call (it was recorded under the same setting).
+  - The CloudFormation template (`deploy/aws/coherence-analyzer.cfn.json`) is not deployed by the build; the deny topic examples are the team's own wording, to be tuned against real traffic.
+
+## AWS deploy
+
+The template is `deploy/aws/coherence-analyzer.cfn.json` (S3 bucket with versioning, public access block, SSE and a TLS-only policy; Bedrock Guardrail with a denied topic for personalised investment recommendations; one least-privilege managed policy). It is never deployed by the tests or the build. To deploy by hand:
+
+```
+aws cloudformation deploy \
+  --template-file deploy/aws/coherence-analyzer.cfn.json \
+  --stack-name coherence-analyzer \
+  --capabilities CAPABILITY_IAM \
+  --parameter-overrides ModelArn=<bedrock model or inference profile ARN> S3Prefix=ca/
+aws cloudformation describe-stacks --stack-name coherence-analyzer --query "Stacks[0].Outputs"
+```
+
+Attach the `AccessPolicyArn` output to the role or user that runs the app, then set in `.env`:
+
+```
+COHERENCE_ANALYZER_STORE=s3
+COHERENCE_ANALYZER_S3_BUCKET=<BucketName output>
+COHERENCE_ANALYZER_S3_PREFIX=ca                  # the S3Prefix parameter without the trailing slash
+BEDROCK_MODEL_ID=<model id matching ModelArn>
+BEDROCK_GUARDRAIL_ID=<GuardrailId output>
+BEDROCK_GUARDRAIL_VERSION=<GuardrailVersion output>
+```
 
 ## Disclaimer
 Educational simulation with fictional profiles. This is not personalised financial advice. No transaction is executed.

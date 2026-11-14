@@ -297,6 +297,9 @@ def narrate_section(facts: dict) -> dict:
             result = extractors.explainer_call(facts, retry_failures)
         except bedrock.LLMCacheMiss as exc:                   # nothing recorded for this input: no point in retrying
             return _template_narrative(facts, attempts, f"LLMCacheMiss: {exc}")
+        except bedrock.GuardrailIntervened as exc:           # blocked, not malformed: no retry (SPEC §6.1, §9.3)
+            attempts.append({"failures": [f"guardrail: {exc}"], "call_log": exc.call_log})
+            return _template_narrative(facts, attempts, f"GuardrailIntervened: {exc}")
         except bedrock.LLMOutputInvalid as exc:
             failures = [f"V5: the output did not match the explainer schema: {exc}"]
             attempts.append({"failures": failures, "call_log": None})

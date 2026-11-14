@@ -22,6 +22,8 @@ SCHEMAS_DIR = Path(__file__).parent / "schemas"
 # LLM / AWS
 COHERENCE_ANALYZER_LLM = os.getenv("COHERENCE_ANALYZER_LLM", "mock")        # mock | record | live
 COHERENCE_ANALYZER_STORE = os.getenv("COHERENCE_ANALYZER_STORE", "local")   # local | s3
+COHERENCE_ANALYZER_S3_BUCKET = os.getenv("COHERENCE_ANALYZER_S3_BUCKET", "")   # required when STORE=s3
+COHERENCE_ANALYZER_S3_PREFIX = os.getenv("COHERENCE_ANALYZER_S3_PREFIX", "")   # optional key prefix
 AWS_REGION = os.getenv("AWS_REGION", "us-east-1")
 BEDROCK_MODEL_ID = os.getenv("BEDROCK_MODEL_ID", "")
 BEDROCK_GUARDRAIL_ID = os.getenv("BEDROCK_GUARDRAIL_ID", "")
