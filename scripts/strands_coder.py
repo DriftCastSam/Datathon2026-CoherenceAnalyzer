@@ -41,7 +41,9 @@ Project rules (CLAUDE.md, verbatim):
 ---
 Tools: read, write, edit (old_str must be unique), shell (allowlisted: pytest, python -m/-c, read-only git, ls/cat/grep/find/sed -n).
 A guard cancels forbidden calls and tells you why; do not try to work around it. You cannot commit: the loop commits for you.
-Work in small verified steps: read the relevant SPEC sections and code first, then edit, then run the tests."""
+Work in small verified steps: read the relevant SPEC sections and code first, then edit, then run the tests.
+Keep each write or edit call under about 250 lines: create a large file with a first write, then append
+the rest with edit calls. One huge tool call can hit the output token limit and be lost."""
 
 
 def _segments(cmd: str) -> list[str]:
@@ -89,7 +91,7 @@ def path_block_reason(path: str) -> str | None:
     return guard.blocked(rel, guard.frozen())
 
 
-def run(prompt: str, *, max_turns: int, timeout: int, model_id: str | None = None, max_tokens: int = 16000) -> dict:
+def run(prompt: str, *, max_turns: int, timeout: int, model_id: str | None = None, max_tokens: int = 32000) -> dict:
     """Run one coding session. Returns a dict shaped like `claude -p --output-format json` (subset)."""
     from strands import Agent
     from strands.hooks import BeforeToolCallEvent, HookProvider, HookRegistry

@@ -87,13 +87,14 @@
     },
     {
       "id": "P0.9",
-      "title": "pipeline flows B and C + cli demo (Robert end-to-end offline, five sections)",
+      "title": "pipeline Flow A (rules + N3) and Flow C review + cli review/demo (Robert review end-to-end offline)",
       "spec": [
-        "§4",
+        "docs/spec-decisions.md D7 (wins over §4, §12, §17)",
+        "docs/spec-factors.md §20.4-20.5",
+        "§4 Flow A, Flow C",
         "§10",
-        "§12",
+        "§12 CLI",
         "§13",
-        "docs/spec-factors.md §20.4",
         "§15 test_pipeline_offline",
         "docs/spec-decisions.md D3 D5"
       ],
@@ -104,9 +105,35 @@
         "coherence_analyzer/pipeline.py",
         "coherence_analyzer/store.py",
         "coherence_analyzer/cli.py",
-        "coherence_analyzer/schemas/report.json"
+        "coherence_analyzer/schemas/report.json",
+        "fixtures/robert/portfolio_review.json",
+        "fixtures/llm_cache/"
       ],
-      "notes": "P0 acceptance = Robert: `cli check fixtures/robert --intent in_0001 --auto-confirm` in mock mode writes a schema-valid report (verdict incoherent, 5 sections in display order objectif..preferences, every check has a factor key) and an audit record (with per-section narration modes and model_id); running it twice gives byte-identical reports except run_id/timestamps. `demo` runs whatever personas have complete fixtures and skips the rest with a printed notice (Amira/Mateo are P1). Verdicts: three values only, unknowns never change the verdict (D3)."
+      "notes": "Per D7: Flow A = rules only plus N3 values_parser through the gate (no N1/N2 in the pipeline; their code stays). Flow C = engine.analyse(current) -> hard checks + S2/S4 -> verdict -> five sections -> narration loop -> report + audit. Add fixtures/robert/portfolio_review.json holding the engine.ROBERT_NVDA weights (do not modify fixtures/robert/portfolio.json, frozen tests read it). Acceptance: `cli review fixtures/robert --portfolio portfolio_review.json` in mock mode writes a schema-valid report: verdict incoherent; 5 sections in display order objectif, horizon, risque, contraintes, preferences; statuses horizon/risque/contraintes violation, objectif/preferences pass; every check has a factor key; narration modes recorded per section; audit record has model_id and per-section modes. `cli review fixtures/robert` (current portfolio) gives verdict coherent with H6/H10 in unknowns. Running twice gives byte-identical reports except run_id/timestamps. `demo` runs personas with complete fixtures and prints a notice for the rest. Flow B is P2: do not wire it."
+    },
+    {
+      "id": "P0.10",
+      "title": "intake form per factor (deterministic) + N3 values_parser schema/prompt + parsed-rule approval",
+      "spec": [
+        "docs/spec-decisions.md D7 points 1 and 4",
+        "docs/spec-factors.md §20.6",
+        "§6.2 N3",
+        "§7.2 excluded_activities / max_theme_weight",
+        "§11",
+        "§1 inv. 2"
+      ],
+      "tests": [
+        "tests/test_intake.py"
+      ],
+      "code": [
+        "coherence_analyzer/intake.py",
+        "coherence_analyzer/factors/",
+        "coherence_analyzer/llm/schemas/values_parser.json",
+        "coherence_analyzer/llm/prompts/values_parser.v1.md",
+        "coherence_analyzer/llm/extractors.py",
+        "fixtures/llm_cache/"
+      ],
+      "notes": "intake.missing(profile, factor) and intake.next_question(profile, factor) are pure; questions are fixed fr-CA/en-CA templates per REQUIRED path (no LLM). Robert fixture: missing() is empty for every factor; removing a REQUIRED path makes next_question return that path's question; a skip stores {value: null, by: 'user:skipped'}. N3 in mock mode on Robert's values.notes returns rules whose quote is an exact substring (gate rejects otherwise); parsed rules start approved_by_user false; build_limits ignores unapproved rules and includes an approved max_theme_weight / exclude_activity (invariant 2: test_limits_no_llm_inputs stays green). A parsed max_theme_weight with no number makes next_question ask for the number. Never write data/meta/activity_tags.csv."
     }
   ]
 }
