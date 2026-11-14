@@ -573,7 +573,8 @@ def test_demo_reviews_the_personas_with_complete_fixtures_and_notices_the_rest(t
     assert {c["node"] for c in run["calls"]} <= ALLOWED_NODES
 
 
-def test_flow_b_is_not_wired_in_p0():
-    """D7 point 3: Flow B (N4 intent_parser, B2 confirm, trade diff) is P2; `pipeline.check` is still the stub."""
-    with pytest.raises(NotImplementedError):
-        pipeline.check(FIX, "in_0001", auto_confirm=True)
+def test_flow_b_is_wired_in_p2():
+    """D7 point 3: Flow B (N4 intent_parser, B2 confirm, trade diff) moved to P2 and is now wired (P2.FB);
+    `pipeline.check` is no longer the P0 stub. Its behaviour is pinned in tests/test_flow_b.py."""
+    rep = pipeline.check(FIX, "in_0001", auto_confirm=True)
+    assert rep["flow"] == "B"
