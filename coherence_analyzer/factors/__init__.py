@@ -31,6 +31,7 @@ class SectionContext:
     intent: dict | None = None
     events: list[dict] = field(default_factory=list)
     locale: str = "fr-CA"
+    goal_checks: list[dict] = field(default_factory=list)   # G1 (info, shown in objectif facts, never in the status)
 
 
 def _section(mod, ctx: SectionContext) -> dict:

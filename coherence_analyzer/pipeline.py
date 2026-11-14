@@ -276,6 +276,24 @@ def _n6_audit(result: dict) -> tuple[list[dict], list[dict]]:
     return [], []
 
 
+def _goals_block(market, pf: dict, profile: dict, horizon_m: int, metrics: dict) -> tuple[dict, list[dict]]:
+    """G1 (P2.14): a second simulation with the user-declared `situation.monthly_contribution` and
+    `objectives.goals` (never `limits`, invariant 2). `metrics` (no contribution) stays the basis of H7-H10 and H14.
+    Returns the report's `goals` block and the tagged G1 checks (shown in objectif facts, outside the verdict)."""
+    contribution = float(_val((profile.get("situation") or {}).get("monthly_contribution")) or 0.0)
+    goals = list((profile.get("objectives") or {}).get("goals") or [])
+    block = {"monthly_contribution": contribution, "horizon_months": horizon_m, "goal_probs": [], "checks": [],
+             "assumptions": list(metrics["assumptions"])}
+    if not goals:
+        return block, []
+    gm = store.plain(engine.analyse(market, pf["weights_pct"], horizon_m, pf["value_cad"],
+                                    monthly_contribution=contribution, goals=goals, as_of=pf["as_of"]))
+    checks = report_mod.tag_checks(hard.g1(gm, profile))
+    block.update(goal_probs=gm["goal_probs"], checks=store.plain(checks),
+                 assumptions=list(checks[0]["assumptions"]))
+    return block, checks
+
+
 def review(fixture_dir: Path, portfolio: str | Path | None = None) -> dict:
     """Flow C: baseline coherence report for the current portfolio (B5-B9 without an intent). Writes the report and
     the audit record to the store and returns the report. `portfolio` = file name inside the fixture directory
@@ -294,13 +312,14 @@ def review(fixture_dir: Path, portfolio: str | Path | None = None) -> dict:
     horizon_m = int(round(float(_val(profile["objectives"]["horizon_years"])) * 12))
     market = engine.load_market(str(config.DATA_DIR))
     metrics = store.plain(engine.analyse(market, pf["weights_pct"], horizon_m, pf["value_cad"]))
-
+    goals_block, goal_checks = _goals_block(market, pf, profile, horizon_m, metrics)
     meta = {n: data.load_meta(n) for n in META_NAMES}
     checks = (hard.run_all(pf["weights"], metrics, profile, assets, meta)
               + soft.run_all(profile, None, pf["weights"], assets))
     tagged = report_mod.tag_checks(checks)
     ctx = factors.SectionContext(profile=profile, limits=profile["limits"], limits_trace=profile["limits_trace"],
-                                 checks_current=tagged, metrics_current=metrics, events=events, locale=locale)
+                                 checks_current=tagged, metrics_current=metrics, events=events, locale=locale,
+                                 goal_checks=goal_checks)
     sections = report_mod.build_sections(ctx)
     verdict = report_mod.verdict(tagged)
 
@@ -320,7 +339,7 @@ def review(fixture_dir: Path, portfolio: str | Path | None = None) -> dict:
         portfolio_id=pf["portfolio_id"], checks=tagged, metrics=metrics, sections=sections,
         explanation={k: explanation[k] for k in ("mode", "headline", "segments", "disclaimer")},
         assumptions=list(metrics["assumptions"]) + list(FLOW_C_ASSUMPTIONS), data_window=list(market.window),
-        disclaimer=config.DISCLAIMER[locale], profile_coherence=profile_coherence)
+        disclaimer=config.DISCLAIMER[locale], profile_coherence=profile_coherence, goals=goals_block)
     rep["stress"] = stress.stress_block(pf["weights"], pf["value_cad"], assets, data.load_macro(), as_of=pf["as_of"],
                                         asset_meta=meta["asset_meta"], locale=locale)    # P2.16: info only
     store.save_portfolio(pf)
