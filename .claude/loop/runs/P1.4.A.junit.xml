@@ -1,0 +1,1044 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="53" failures="3" skipped="0" tests="63" time="1.085" timestamp="2026-11-14T22:41:38.943572+00:00" hostname="bomboclat-laptop"><testcase classname="tests.test_api" name="test_health_ok" time="0.005" /><testcase classname="tests.test_api" name="test_cors_allows_get_and_post_from_any_origin" time="0.003"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f17d450&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f17d450&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_no_route_path_names_a_trade_action" time="0.001"><failure message="assert False&#10; +  where False = any(&lt;generator object test_no_route_path_names_a_trade_action.&lt;locals&gt;.&lt;genexpr&gt; at 0x753c1eff4c80&gt;)">client = &lt;starlette.testclient.TestClient object at 0x753c1f17f390&gt;
+
+    def test_no_route_path_names_a_trade_action(client):
+        # §1 inv. 7 / CLAUDE.md: no buy/sell recommendations, no execution. No route path contains buy, sell, order, execute.
+        paths = _paths(api.app)
+&gt;       assert any(p.startswith("/profiles") for p in paths)
+E       assert False
+E        +  where False = any(&lt;generator object test_no_route_path_names_a_trade_action.&lt;locals&gt;.&lt;genexpr&gt; at 0x753c1eff4c80&gt;)
+
+tests/test_api.py:157: AssertionError</failure></testcase><testcase classname="tests.test_api" name="test_expected_routes_exist" time="0.003"><failure message="AssertionError: ('post', '/profiles/{profile_id}/events')&#10;assert ('post', '/profiles/{x}/events') in {('get', '/health')}">client = &lt;starlette.testclient.TestClient object at 0x753c1f158e90&gt;
+
+    def test_expected_routes_exist(client):
+        # §12 + task endpoint list: every endpoint is registered with the right method.
+        spec_paths = client.get("/openapi.json").json()["paths"]
+        expected = {
+            ("get", "/health"), ("get", "/profiles"), ("get", "/profiles/{profile_id}"),
+            ("get", "/profiles/{profile_id}/intake"), ("post", "/profiles/{profile_id}/events"),
+            ("post", "/profiles/{profile_id}/intake/answer"), ("post", "/profiles/{profile_id}/intake/skip"),
+            ("post", "/profiles/{profile_id}/review"), ("get", "/reports/{run_id}"), ("get", "/audit/{run_id}"),
+        }
+        # path parameter names are free: normalise {anything} to {x}
+        have = {(m, re.sub(r"\{[^}]+\}", "{x}", p)) for p, ms in spec_paths.items() for m in ms}
+        for m, p in expected:
+&gt;           assert (m, re.sub(r"\{[^}]+\}", "{x}", p)) in have, (m, p)
+E           AssertionError: ('post', '/profiles/{profile_id}/events')
+E           assert ('post', '/profiles/{x}/events') in {('get', '/health')}
+
+tests/test_api.py:179: AssertionError</failure></testcase><testcase classname="tests.test_api" name="test_profiles_list_has_robert_with_id_and_name" time="0.002"><failure message="assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x753c1f15a8b0&gt;
+
+    def test_profiles_list_has_robert_with_id_and_name(client):
+        # Task: GET /profiles -&gt; [{profile_id, name}] for every fixture dir with profile.json + events.jsonl + portfolio.json.
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:188: AssertionError</failure></testcase><testcase classname="tests.test_api" name="test_get_profile_copies_fixture_into_store_and_serves_it" time="0.003"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f149fd0&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f149fd0&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_get_unknown_profile_is_404" time="0.010" /><testcase classname="tests.test_api" name="test_intake_get_matches_intake_module_per_factor[fr-CA]" time="0.002"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f1a3240&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f1a3240&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_intake_get_matches_intake_module_per_factor[en-CA]" time="0.002"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f1a2690&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f1a2690&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_intake_locale_changes_the_question_text_only" time="0.002"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f1a2be0&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f1a2be0&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_intake_rejects_unknown_locale" time="0.003"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f1a1f20&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f1a1f20&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_intake_answer_stores_value_and_clears_missing" time="0.002"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f1a1e10&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f1a1e10&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_intake_skip_marks_path_skipped" time="0.003"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f1a3680&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f1a3680&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_intake_answer_and_skip_validate_the_body" time="0.003"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f1a2470&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f1a2470&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_intake_cannot_write_limits_or_llm_fields[limits.max_crypto_weight]" time="0.002"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f1a38a0&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f1a38a0&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_intake_cannot_write_limits_or_llm_fields[limits]" time="0.003"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0c8160&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0c8160&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_intake_cannot_write_limits_or_llm_fields[limits_trace.max_crypto_weight]" time="0.002"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0c8490&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0c8490&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_intake_cannot_write_limits_or_llm_fields[risk.behavioural]" time="0.002"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0c87c0&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0c87c0&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_intake_cannot_write_limits_or_llm_fields[knowledge.question_quality]" time="0.003"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0c8af0&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0c8af0&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_intake_cannot_write_limits_or_llm_fields[values.parsed_notes.by]" time="0.003"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0c8e20&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0c8e20&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_post_event_assigns_next_id_and_appends" time="0.003"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0c9150&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0c9150&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_post_event_accepts_the_non_order_types[question-None]" time="0.003"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0c9480&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0c9480&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_post_event_accepts_the_non_order_types[note-None]" time="0.002"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0c97b0&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0c97b0&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_post_event_accepts_the_non_order_types[quiz_result-payload2]" time="0.002"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0c9ae0&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0c9ae0&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_post_event_accepts_the_non_order_types[profile_edit-payload3]" time="0.002"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0c9e10&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0c9e10&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_order_intent_is_501_and_nothing_is_appended" time="0.003"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0ca140&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0ca140&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_invalid_events_are_422_and_not_appended[body0]" time="0.003"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0ca470&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0ca470&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_invalid_events_are_422_and_not_appended[body1]" time="0.003"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0ca7a0&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0ca7a0&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_invalid_events_are_422_and_not_appended[body2]" time="0.002"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0caad0&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0caad0&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_invalid_events_are_422_and_not_appended[body3]" time="0.003"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0cae00&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0cae00&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_invalid_events_are_422_and_not_appended[body4]" time="0.002"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0cb130&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0cb130&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_invalid_events_are_422_and_not_appended[body5]" time="0.003"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0cb460&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0cb460&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_client_cannot_choose_the_event_id" time="0.002"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0cb790&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0cb790&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_decision_reject_then_approve_round_trips" time="0.002"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0cbac0&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0cbac0&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_decision_does_not_touch_the_llm_stamp_or_other_fields" time="0.003"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0cbdf0&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0cbdf0&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_decision_bad_index_is_404[2]" time="0.003"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f1a38a0&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f1a38a0&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_decision_bad_index_is_404[999]" time="0.002"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f1a2470&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f1a2470&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_decision_non_integer_index_is_422" time="0.003"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f1a3680&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f1a3680&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_decision_body_is_strict_422_and_state_unchanged[body0]" time="0.002"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f1a1e10&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f1a1e10&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_decision_body_is_strict_422_and_state_unchanged[body1]" time="0.002"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0cbac0&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0cbac0&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_decision_body_is_strict_422_and_state_unchanged[body2]" time="0.002"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0cb790&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0cb790&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_decision_body_is_strict_422_and_state_unchanged[body3]" time="0.003"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0cb460&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0cb460&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_decision_body_is_strict_422_and_state_unchanged[body4]" time="0.002"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0cb8a0&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0cb8a0&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_decision_body_is_strict_422_and_state_unchanged[body5]" time="0.003"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0cb240&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0cb240&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_decision_body_is_strict_422_and_state_unchanged[body6]" time="0.002"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0caf10&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0caf10&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_decision_body_is_strict_422_and_state_unchanged[body7]" time="0.003"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0cabe0&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0cabe0&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_decision_body_is_strict_422_and_state_unchanged[body8]" time="0.003"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f1a1ae0&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f1a1ae0&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_decision_body_is_strict_422_and_state_unchanged[body9]" time="0.003"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f1a29c0&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f1a29c0&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_decision_max_pct_out_of_range_is_422[-5]" time="0.003"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f1a3bd0&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f1a3bd0&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_decision_max_pct_out_of_range_is_422[150]" time="0.003"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f1a3df0&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f1a3df0&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_decision_max_pct_out_of_range_is_422[100.01]" time="0.003"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f1a2360&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f1a2360&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_theme_rule_number_comes_from_the_user_and_reaches_limits_only_after_approval" time="0.002"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f1a0380&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f1a0380&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_review_equals_pipeline_review_apart_from_run_id_and_timestamps" time="0.003"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0ca360&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0ca360&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_review_is_stored_and_served_by_run_id" time="0.002"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0c9d00&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0c9d00&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_audit_record_for_the_review_run" time="0.003"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0c99d0&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0c99d0&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_review_considers_events_appended_through_the_api" time="0.002"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0c96a0&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0c96a0&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_review_limits_are_recomputed_not_taken_from_the_request" time="0.002"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0c9370&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0c9370&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_unknown_run_id_is_404[01ARZ3NDEKTSV4RRFFQ69G5FAV-reports]" time="0.003" /><testcase classname="tests.test_api" name="test_unknown_run_id_is_404[01ARZ3NDEKTSV4RRFFQ69G5FAV-audit]" time="0.002" /><testcase classname="tests.test_api" name="test_unknown_run_id_is_404[nope-reports]" time="0.002" /><testcase classname="tests.test_api" name="test_unknown_run_id_is_404[nope-audit]" time="0.002" /><testcase classname="tests.test_api" name="test_run_id_cannot_reach_other_store_files" time="0.002"><error message="failed on setup with &quot;AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&quot;">client = &lt;starlette.testclient.TestClient object at 0x753c1f0c9260&gt;
+
+    @pytest.fixture()
+    def pid(client) -&gt; str:
+&gt;       return _robert_id(client)
+               ^^^^^^^^^^^^^^^^^^
+
+tests/test_api.py:68: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x753c1f0c9260&gt;
+
+    def _robert_id(client: TestClient) -&gt; str:
+        r = client.get("/profiles")
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+tests/test_api.py:73: AssertionError</error></testcase><testcase classname="tests.test_api" name="test_zz_fixtures_are_unchanged_after_the_whole_module" time="0.001" /></testsuite></testsuites>
