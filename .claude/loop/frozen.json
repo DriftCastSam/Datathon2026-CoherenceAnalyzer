@@ -14,6 +14,7 @@
     "tests/test_lanes.py": "c48fb8f12a470b38beff13d55467716343dd06deefdbf3e29597271839dc1442",
     "tests/test_levels.py": "641adec31b05635f2f1b6363963aa2c07069b3813d2eca1807422a10b3363697",
     "tests/test_limits_no_llm_inputs.py": "dbc9de038f9aef78f560bb432494475e0b6c6313e670498af07fd4c10aa90453",
+    "tests/test_lookthrough.py": "035eebeb4b72b3718e1487f442c4276ca8e1b5de1c4cd7e87019d47c99380fc1",
     "tests/test_meta_checks.py": "99a098cdeae02a7cf2056712c48d89c2fe6965a40c7396f928cd1013268cf5bb",
     "tests/test_numcheck.py": "1d381f6b574e693dff12fe7a77c58f8e388356179713d1a80cb3d8417266c0d6",
     "tests/test_personas.py": "a907e9cd4961b59ab12faf2cfab7824062ab102f32132a61b1aa4ed72521ca35",

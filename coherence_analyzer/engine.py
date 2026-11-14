@@ -77,6 +77,34 @@ def sector(mk: Market, t: str) -> str:
     return s
 
 
+def sector_lookthrough(mk: Market, w: pd.Series, rc: pd.Series,
+                       shares: dict[str, dict[str, float]] | None = None) -> list[dict]:
+    """Sector groups (SPEC §5): each equity ETF in `shares` has its weight and risk contribution split across its
+    sectors by weight; every other ticker keeps its own sector() bucket. With no shares this is the plain
+    per-ticker split (Broad market kept). Sorted by risk, descending."""
+    shares = shares or {}
+    g: dict[str, list[float]] = {}
+    for t in w.index:
+        split = shares.get(t) if mk.assets.loc[t, "asset_class"] == "etf_equity" else None
+        for k, sh in (split.items() if split else [(sector(mk, t), None)]):
+            acc = g.setdefault(k, [0, 0])
+            acc[0] += w[t] if sh is None else w[t] * sh
+            acc[1] += rc[t] if sh is None else rc[t] * sh
+    return sorted([{"name": k, "weight": round(v[0], 4), "risk": round(v[1], 4)} for k, v in g.items()],
+                  key=lambda x: -x["risk"])
+
+
+def _lookthrough_shares(mk: Market, tickers: list[str],
+                        meta_dir: str | Path | None) -> tuple[dict[str, dict[str, float]], bool]:
+    """(shares of the held equity ETFs that are covered, lookthrough flag). The flag is True only when the file has
+    rows and every held equity ETF is covered; no file or no rows -> ({}, False)."""
+    df = data.load_meta("etf_sector_weights", config.META_DIR if meta_dir is None else Path(meta_dir))
+    avail = data.etf_sector_shares(df)
+    held = [t for t in tickers if mk.assets.loc[t, "asset_class"] == "etf_equity"]
+    shares = {t: avail[t] for t in held if t in avail}
+    return shares, bool(avail) and len(shares) == len(held)
+
+
 def assumptions(mk: Market, drift: str, block: int) -> list[str]:
     return [
         f"Drift ({drift}): {ASSUMED if drift == 'assumed' else 'historical sample mean'}"
@@ -117,7 +145,8 @@ def goal_probabilities(paths_cad: np.ndarray, goals: list[dict], as_of: str) -> 
 def analyse(market: Market, weights_pct: dict[str, float], horizon_m: int, start_cad: float = 100_000, *,
             n: int = config.ENGINE_N, block: int = config.ENGINE_BLOCK, seed: int = config.ENGINE_SEED,
             drift: str = "assumed", monthly_contribution: float = 0.0, goals: list[dict] | None = None,
-            as_of: str | None = None, return_paths: bool = False) -> dict:
+            as_of: str | None = None, return_paths: bool = False,
+            meta_dir: str | Path | None = None) -> dict:
     """monthly_contribution (CAD, >= 0) is added to the NAV at the end of each simulated month. `goals` need the
     reference date `as_of` (D1: portfolio.as_of); the engine never reads the wall clock."""
     c = float(monthly_contribution or 0.0)
@@ -175,8 +204,9 @@ def analyse(market: Market, weights_pct: dict[str, float], horizon_m: int, start
         nav_cad = paths * start_cad
         q = np.percentile(paths, [5, 25, 50, 75, 95], axis=0) * start_cad
         loss = float((paths[:, -1] < 1).mean())
-    groups = {}
-    for name, fn in [("sector", sector), ("country", country), ("class", klass)]:
+    shares, lookthrough = _lookthrough_shares(mk, list(w.index), meta_dir)
+    groups = {"sector": sector_lookthrough(mk, w, rc, shares)}
+    for name, fn in [("country", country), ("class", klass)]:
         g: dict[str, list[float]] = {}
         for t in w.index:
             k = fn(mk, t)
@@ -196,9 +226,11 @@ def analyse(market: Market, weights_pct: dict[str, float], horizon_m: int, start
            "corr_eq_bond": round(float(mk.r_cad[["SPY", "XBB.TO"]].corr().iloc[0, 1]), 3),
            # additions (SPEC §5)
            "p5_T": round(float(q[0, -1]), 0), "p50_T": round(float(q[2, -1]), 0), "p95_T": round(float(q[4, -1]), 0),
-           "lookthrough": False,  # TODO P2 step 13: etf_sector_weights.csv -> sector_lookthrough
+           "lookthrough": lookthrough,
            "goal_probs": goal_probabilities(nav_cad, list(goals), as_of) if goals else [],
-           "assumptions": assumptions(mk, drift, block)}
+           "assumptions": assumptions(mk, drift, block) + (
+               ["ETF sector look-through: each covered equity ETF's weight and risk are split across its sectors by "
+                "the issuer sector weights of data/meta/etf_sector_weights.csv (as_of per row)"] if shares else [])}
     if c:
         amt = f"{c:,.2f}".rstrip("0").rstrip(".")
         out["assumptions"].append(
