@@ -5,401 +5,473 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>CoherenceAnalyzer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
-/* Design v2 (deploy/site/design.html) applied to the real reports: white header, navy headings, blue actions,
-   pale-blue panels, white cards on light grey, red only for the mark and "outside your limits". */
+/* Layout: top bar + header with five page tabs (hash-routed); each tab is one screen of cards on a light grey ground.
+   Values follow the "Coherence dashboard" reference: navy ink, red brand square, green/red/amber pillar states. */
 :root{
-  --red:#E41C23; --viol:#D0011B; --viol-bg:#FDECEE;
-  --navy:#00314D; --text:#565656; --text-2:#425865; --muted:#7993A2;
-  --blue:#1572C5; --blue-h:#105797; --on-blue:#FFFFFF;
-  --page:#F1F1F1; --surface:#FFFFFF; --tint:#EEF6FB; --tint-2:#D9EEF4; --grey:#EFEFEF;
-  --line:#D2D2D2; --line-2:#E7E7E7; --util:#303030; --on-util:#FFFFFF;
-  --warn:#8A5A00; --warn-bg:#FFF3D9; --pass:#007A33; --pass-bg:#E2F6EA; --info:#105797; --info-bg:#EEF6FB; --unk:#5E6B73; --unk-bg:#F1F1F1;
-  --cur:#425865; --cur-fill:rgba(66,88,101,.13); --cur-fill-2:rgba(66,88,101,.20); --prop:#E41C23;
-  --f-head:"Figtree",Arial,sans-serif; --f-body:"Figtree",Arial,sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
-  --r:4px; --pill:58px; --shadow:0 1px 3px rgba(0,49,77,.08);
+  --ink:#14233A; --navy:#0B2A4A; --muted:#46546B; --soft:#6B778A;
+  --bg:#F4F5F7; --surface:#FFFFFF; --line:#DDE1E7; --line-2:#ECEFF3; --tint:#F7F8FA;
+  --red:#E41C23; --red-ink:#C4161C; --red-bg:#FDECEC;
+  --ok:#1E7B3A; --ok-bg:#E8F5EC; --warn:#9A5B00; --warn-bg:#FFF4DE; --info:#1F5FA8; --info-bg:#EAF2FB;
+  --unk:#5E6B7A; --band:rgba(66,88,101,.13); --band-2:rgba(66,88,101,.22);
+  --f:"Figtree",system-ui,-apple-system,"Segoe UI",sans-serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --shadow:0 1px 2px rgba(20,35,58,.06);
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --red:#FF4A50; --viol:#FF6B78; --viol-bg:#3A1519;
-  --navy:#E8F1F8; --text:#C5CCD1; --text-2:#AEBBC4; --muted:#8FA4B1;
-  --blue:#4A9BE8; --blue-h:#76B4F0; --on-blue:#06192A;
-  --page:#0B1218; --surface:#131C24; --tint:#16283A; --tint-2:#1C3348; --grey:#1B242C;
-  --line:#2E3A44; --line-2:#24303A; --util:#05090D; --on-util:#FFFFFF;
-  --warn:#F2B54A; --warn-bg:#382A10; --pass:#5CCB8A; --pass-bg:#11301F; --info:#8CC2F2; --info-bg:#16283A; --unk:#A9B5BD; --unk-bg:#1B242C;
-  --cur:#AEBBC4; --cur-fill:rgba(174,187,196,.14); --cur-fill-2:rgba(174,187,196,.22); --prop:#FF5A5F; --shadow:0 1px 3px rgba(0,0,0,.4);
+  --ink:#E6ECF3; --navy:#DCE7F3; --muted:#A6B2C2; --soft:#8E9BAD;
+  --bg:#0D141C; --surface:#151F2A; --line:#283545; --line-2:#1F2A37; --tint:#1A2532;
+  --red:#FF4B52; --red-ink:#FF7A7F; --red-bg:#3A1619;
+  --ok:#5FD08A; --ok-bg:#12301E; --warn:#F2B54A; --warn-bg:#382A10; --info:#8CC2F2; --info-bg:#16283A;
+  --unk:#A9B5C2; --band:rgba(220,231,243,.10); --band-2:rgba(220,231,243,.18); --shadow:0 1px 2px rgba(0,0,0,.4);
   color-scheme:dark}}
 :root[data-theme="dark"]{
-  --red:#FF4A50; --viol:#FF6B78; --viol-bg:#3A1519;
-  --navy:#E8F1F8; --text:#C5CCD1; --text-2:#AEBBC4; --muted:#8FA4B1;
-  --blue:#4A9BE8; --blue-h:#76B4F0; --on-blue:#06192A;
-  --page:#0B1218; --surface:#131C24; --tint:#16283A; --tint-2:#1C3348; --grey:#1B242C;
-  --line:#2E3A44; --line-2:#24303A; --util:#05090D; --on-util:#FFFFFF;
-  --warn:#F2B54A; --warn-bg:#382A10; --pass:#5CCB8A; --pass-bg:#11301F; --info:#8CC2F2; --info-bg:#16283A; --unk:#A9B5BD; --unk-bg:#1B242C;
-  --cur:#AEBBC4; --cur-fill:rgba(174,187,196,.14); --cur-fill-2:rgba(174,187,196,.22); --prop:#FF5A5F; --shadow:0 1px 3px rgba(0,0,0,.4);
+  --ink:#E6ECF3; --navy:#DCE7F3; --muted:#A6B2C2; --soft:#8E9BAD;
+  --bg:#0D141C; --surface:#151F2A; --line:#283545; --line-2:#1F2A37; --tint:#1A2532;
+  --red:#FF4B52; --red-ink:#FF7A7F; --red-bg:#3A1619;
+  --ok:#5FD08A; --ok-bg:#12301E; --warn:#F2B54A; --warn-bg:#382A10; --info:#8CC2F2; --info-bg:#16283A;
+  --unk:#A9B5C2; --band:rgba(220,231,243,.10); --band-2:rgba(220,231,243,.18); --shadow:0 1px 2px rgba(0,0,0,.4);
   color-scheme:dark}
 *{box-sizing:border-box}
-body{margin:0;background:var(--page);color:var(--text);font:15px/1.5 var(--f-body)}
-a{color:var(--blue)} a:hover{color:var(--blue-h)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--f)}
+a{color:var(--navy)} a:hover{color:var(--red-ink)}
+button{font:inherit}
+:focus-visible{outline:3px solid var(--info);outline-offset:2px}
 .gut{padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
-.wrap{max-width:1120px;margin:0 auto}
-.util{background:var(--util);color:var(--on-util);font-size:12px}
-.util .wrap{display:flex;gap:2px;min-height:30px;align-items:stretch;flex-wrap:wrap}
-.util span{display:flex;align-items:center;padding:0 14px;opacity:.75} .util span.on{background:rgba(255,255,255,.14);opacity:1}
-.util .r{margin-left:auto}
-.hdr{background:var(--surface);border-bottom:1px solid var(--line-2);box-shadow:0 2px 6px rgba(0,0,0,.04);position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
+.wrap{max-width:1280px;margin:0 auto}
+.top{background:#0B2A4A;color:#fff;font-size:13px}
+.top .wrap{display:flex;flex-wrap:wrap;gap:6px 20px;justify-content:space-between;align-items:center;padding-block:8px}
+.top a{color:#fff}
+.hdr{background:var(--surface);border-bottom:1px solid var(--line);position:sticky;top:env(safe-area-inset-top,0px);z-index:5}
 body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:10;background:var(--surface)}
-.hdr .wrap{display:flex;align-items:center;gap:24px;min-height:72px;flex-wrap:wrap;padding-block:8px}
-.mark{display:flex;align-items:center;gap:10px;color:var(--navy);text-decoration:none}
-.mark i{width:30px;height:30px;background:var(--red);display:grid;place-items:center;border-radius:2px}
-.mark i::after{content:"";width:12px;height:12px;border:2.5px solid #fff;border-radius:50%}
-.mark div{display:flex;flex-direction:column;line-height:1}
-.mark b{font:700 18px var(--f-head);letter-spacing:.01em;text-transform:uppercase}
-.mark small{font:600 9.5px var(--f-head);letter-spacing:.06em;text-transform:uppercase;border-top:1px solid var(--navy);padding-top:3px;margin-top:3px}
-.hdr nav{display:flex;gap:20px;font-size:14px;flex-wrap:wrap}
-.hdr nav a{color:var(--text);text-decoration:none;padding:6px 0;border-bottom:3px solid transparent}
-.hdr nav a:hover,.hdr nav a:focus-visible{color:var(--navy);border-color:var(--red)}
-.tools{margin-left:auto;display:flex;gap:10px;align-items:center;flex:1 1 260px;justify-content:flex-end}
-select{font:500 14px var(--f-body);color:var(--navy);background:var(--surface);border:1px solid var(--line);border-radius:var(--pill);padding:9px 14px;max-width:100%;min-width:0;flex:0 1 320px}
-.iconbtn{background:var(--surface);color:var(--navy);border:1px solid var(--line);border-radius:50%;width:38px;height:38px;cursor:pointer;flex:none}
-:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
-main{padding-block:24px 48px}
-.stack{display:flex;flex-direction:column;gap:20px}
-.crumb{font-size:13px;color:var(--muted)}
-h1,h2,h3,h4{color:var(--navy);margin:0;text-wrap:balance;font-family:var(--f-head)}
-h2.sec{font:500 26px/1.2 var(--f-head);display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
-h2.sec small{font:400 14px var(--f-body);color:var(--muted)}
-h3{font:600 18px/1.25 var(--f-head)}
-.lbl{font:600 11px var(--f-body);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
-.mono{font-family:var(--f-mono);font-size:12px}
-.hint{font-size:13px;color:var(--muted)}
+.hdr .wrap{display:flex;flex-wrap:wrap;gap:8px 32px;align-items:center;justify-content:space-between;padding-block:6px}
+.brand{display:flex;align-items:center;gap:10px;font-weight:800;font-size:18px;color:var(--navy);letter-spacing:-.01em}
+.brand i{width:30px;height:30px;background:var(--red);border-radius:4px}
+.left{display:flex;flex-wrap:wrap;align-items:center;gap:4px 36px}
+nav.pages{display:flex;flex-wrap:wrap;gap:0 26px;font-weight:600;font-size:15px}
+nav.pages a{color:var(--muted);text-decoration:none;padding:14px 0 11px;border-bottom:3px solid transparent;display:inline-flex;gap:6px;align-items:center}
+nav.pages a[aria-current="page"]{color:var(--navy);border-color:var(--red)}
+nav.pages a .dot{width:7px;height:7px;border-radius:50%;background:var(--red)}
+.tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+select,.btn{border-radius:4px;min-height:40px;font-weight:600;font-size:14px}
+select{border:1px solid var(--navy);background:var(--surface);color:var(--navy);padding:8px 12px;max-width:100%}
+.btn{border:1px solid var(--navy);background:transparent;color:var(--navy);padding:8px 14px;cursor:pointer}
+main{padding-block:28px 56px}
+.page{display:flex;flex-direction:column;gap:20px}
+.eyebrow{font-size:12.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--red-ink)}
+h1,h2,h3{color:var(--navy);margin:0;text-wrap:balance}
+h1{font-size:32px;font-weight:800;letter-spacing:-.015em;line-height:1.15}
+h2{font-size:22px;font-weight:800}
+h3{font-size:17px;font-weight:700}
+p{margin:0}
+.sub{color:var(--muted);font-size:15px}
+.small{font-size:13px;color:var(--muted)}
+.mono{font-family:var(--mono);font-size:12px}
 .num{font-variant-numeric:tabular-nums}
-.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r);box-shadow:var(--shadow);padding:22px;min-width:0}
-.chip{display:inline-flex;align-items:center;gap:6px;font:600 12.5px var(--f-body);padding:3px 10px;border-radius:var(--pill);white-space:nowrap}
-.chip::before{font:700 11px var(--f-body)}
-.c-violation{background:var(--viol-bg);color:var(--viol)}.c-violation::before{content:"✕"}
-.c-warning{background:var(--warn-bg);color:var(--warn)}.c-warning::before{content:"!"}
-.c-pass{background:var(--pass-bg);color:var(--pass)}.c-pass::before{content:"✓"}
-.c-info{background:var(--info-bg);color:var(--info)}.c-info::before{content:"i"}
-.c-unknown{background:transparent;color:var(--unk);border:1px dashed var(--unk)}.c-unknown::before{content:"?"}
-.tag{font:700 10px var(--f-body);letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:2px;border:1px solid currentColor;white-space:nowrap;align-self:flex-start}
-.k-fact{color:var(--navy)}.k-assumption{color:var(--blue)}.k-inference{color:var(--warn)}.k-unknown{color:var(--unk);border-style:dashed}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:6px;padding:22px 24px;box-shadow:var(--shadow);min-width:0}
+.grid2{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:20px}
+.half{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:20px}
+@media (max-width:920px){.grid2,.half{grid-template-columns:1fr}}
 
-/* verdict */
-.verdict{position:relative;padding-top:30px;display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:28px}
-@media (max-width:860px){.verdict{grid-template-columns:1fr}}
-.flag{position:absolute;top:-1px;left:22px;color:#fff;font:700 12px var(--f-head);padding:6px 12px 9px;border-radius:0 0 4px 4px;text-transform:uppercase;letter-spacing:.04em}
-.flag.incoherent{background:var(--red)} .flag.coherent{background:var(--pass)} .flag.coherent_with_warnings{background:var(--warn)}
-.vh{font:500 28px/1.2 var(--f-head);color:var(--navy);text-wrap:balance}
-.counts{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-.persona{background:var(--tint);border-radius:var(--r);padding:16px 18px;display:grid;grid-template-columns:1fr 1fr;gap:12px 18px;font-size:14px}
-.persona div{min-width:0} .persona span{display:block;font-size:12px;color:var(--muted)} .persona b{color:var(--navy);font-weight:600}
-@media (max-width:420px){.persona{grid-template-columns:1fr}}
+/* profile strip */
+.strip{display:grid;grid-template-columns:repeat(5,minmax(0,1fr)) auto;gap:16px;align-items:center}
+@media (max-width:920px){.strip{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.kv span{display:block;font-size:11.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--soft)}
+.kv b{font-weight:600;font-size:15px;color:var(--ink)}
 
-/* tiles */
-.tiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-@media (max-width:900px){.tiles{grid-template-columns:repeat(2,minmax(0,1fr))}}
-@media (max-width:420px){.tiles{grid-template-columns:1fr}}
-.metric{padding:16px 18px;display:flex;flex-direction:column;gap:6px}
-.metric .v{font:600 26px/1.1 var(--f-head);color:var(--navy);font-variant-numeric:tabular-nums}
-.metric .lim{font-size:13px;color:var(--text-2)} .metric .lim.bad{color:var(--viol);font-weight:600}
+/* states */
+.st{display:inline-flex;align-items:center;gap:6px;font-weight:700;font-size:13px;padding:3px 10px;border-radius:99px;white-space:nowrap}
+.st::before{font-weight:800}
+.s-violation{background:var(--red-bg);color:var(--red-ink)} .s-violation::before{content:"✕"}
+.s-warning{background:var(--warn-bg);color:var(--warn)} .s-warning::before{content:"⚠"}
+.s-pass{background:var(--ok-bg);color:var(--ok)} .s-pass::before{content:"✓"}
+.s-info{background:var(--info-bg);color:var(--info)} .s-info::before{content:"i"}
+.s-unknown{background:transparent;color:var(--unk);border:1px dashed var(--unk)} .s-unknown::before{content:"?"}
+.c-violation{--c:var(--red)} .c-warning{--c:var(--warn)} .c-pass{--c:var(--ok)} .c-unknown{--c:var(--unk)} .c-info{--c:var(--info)}
+.tx-violation{color:var(--red-ink)} .tx-warning{color:var(--warn)} .tx-pass{color:var(--ok)} .tx-unknown{color:var(--unk)} .tx-info{color:var(--info)}
 
-/* charts */
-.two{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);gap:20px}
-@media (max-width:900px){.two{grid-template-columns:1fr}}
+/* summary */
+.exec{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:28px}
+@media (max-width:920px){.exec{grid-template-columns:1fr}}
+.exec .lead{font-size:17px;line-height:1.6}
+.qbox{border:1px solid var(--line);border-radius:6px;padding:14px 16px;display:flex;flex-direction:column;gap:4px}
+.qbox .q{font-size:11.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--soft)}
+.qbox .a{font-weight:800;font-size:17px;display:flex;gap:8px;align-items:center}
+.actions{display:flex;gap:16px;align-items:center;flex-wrap:wrap;margin-top:18px}
+.primary{background:var(--navy);color:var(--surface);border:0;border-radius:4px;padding:11px 18px;font-weight:700;cursor:pointer;min-height:44px}
+.link{background:none;border:0;padding:0;color:var(--navy);font-weight:700;text-decoration:underline;cursor:pointer}
+.pillars{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:14px}
+@media (max-width:1100px){.pillars{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media (max-width:640px){.pillars{grid-template-columns:1fr}}
+.pillar{text-align:left;background:var(--surface);border:1px solid var(--line);border-top:4px solid var(--c);border-radius:6px;padding:14px 16px;cursor:pointer;display:flex;flex-direction:column;gap:2px;box-shadow:var(--shadow);color:var(--ink)}
+.pillar:hover{border-color:var(--c)}
+.pillar .n{font-size:13px;color:var(--muted)} .pillar .v{font-weight:800;font-size:17px} .pillar .d{font-size:13px;color:var(--muted)}
+
+/* chart */
 .chart svg{width:100%;height:auto;display:block}
-.chart text{fill:var(--muted);font:11px var(--f-body)}
-.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;color:var(--text-2);margin-top:8px}
-.legend i{display:inline-block;width:14px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
-.drv{display:grid;grid-template-columns:70px minmax(0,1fr) 56px;gap:10px;align-items:center;padding-top:8px}
-.drv .bar{background:var(--grey);height:10px;border-radius:5px;overflow:hidden}.drv .bar div{height:100%;background:var(--cur)}
-.drv .bar div.hot{background:var(--prop)}
+.chart text{fill:var(--muted);font:12px var(--f)}
+.legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-top:8px}
+.legend i{display:inline-block;width:16px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+.scen{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:14px}
+@media (max-width:520px){.scen{grid-template-columns:1fr}}
+.scen div{background:var(--tint);border-radius:6px;padding:12px 14px}
+.scen span{display:block;font-size:13px;color:var(--muted)} .scen b{font-size:20px;font-weight:800}
+.keys{display:grid;grid-template-columns:1fr 1fr;gap:14px 18px;margin-top:14px}
+.keys span{display:block;font-size:13px;color:var(--muted)} .keys b{font-size:22px;font-weight:800;color:var(--navy)}
+.allocbar{display:flex;height:12px;border-radius:6px;overflow:hidden;gap:2px;margin:10px 0 14px}
+table{width:100%;border-collapse:collapse;font-size:14px;font-variant-numeric:tabular-nums}
+th{font-size:11.5px;letter-spacing:.07em;text-transform:uppercase;color:var(--soft);text-align:left;font-weight:700;padding:6px 8px;border-bottom:1px solid var(--line)}
+td{padding:8px;border-bottom:1px solid var(--line-2);vertical-align:top} td.r,th.r{text-align:right;white-space:nowrap}
+tr.flag td{background:var(--red-bg)}
+.sw{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:8px;vertical-align:0}
+.tbl{overflow-x:auto}
 
-/* profile check */
-.pc{display:grid;grid-template-columns:minmax(0,280px) minmax(0,1fr);gap:24px;align-items:start}
-@media (max-width:760px){.pc{grid-template-columns:1fr}}
-.pcl{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:12px}
-.pcl li{border:1px solid var(--line-2);border-left:4px solid var(--warn);border-radius:var(--r);padding:12px 14px;display:flex;flex-direction:column;gap:8px;background:var(--surface)}
-.pcl li.info{border-left-color:var(--info)}
-.pair{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:10px;align-items:center;font-size:14px}
-.pair>div{min-width:0;overflow-wrap:anywhere}.pair .vs{color:var(--muted);font-weight:700;font-size:12px}
-.pair b{color:var(--navy);font-weight:600}
-@media (max-width:520px){.pair{grid-template-columns:1fr}.pair .vs{display:none}}
-.q{background:var(--tint);border-radius:var(--r);padding:10px 12px;font-size:14px;color:var(--navy)}
+/* factor sub-tabs */
+.ftabs{display:flex;gap:8px;flex-wrap:wrap}
+.ftabs button{display:flex;gap:8px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:8px 14px;cursor:pointer;color:var(--navy);font-weight:600;font-size:14px}
+.ftabs button[aria-selected="true"]{background:var(--navy);border-color:var(--navy);color:var(--surface)}
+.ftabs .dot{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.rule{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:12px;padding:12px 0;border-top:1px solid var(--line-2);align-items:start}
+.rule .ic{font-weight:800;line-height:1.5}
+.rule b{font-weight:700} .rule .v{text-align:right;white-space:nowrap;font-weight:700;font-variant-numeric:tabular-nums}
+.rule .v small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.rule .id{font-family:var(--mono);font-size:11px;color:var(--soft);margin-left:6px}
+@media (max-width:560px){.rule{grid-template-columns:24px minmax(0,1fr)}.rule .v{grid-column:2;text-align:left}}
+.meter{margin:6px 0 2px} .meter .row{display:flex;justify-content:space-between;font-size:14px;font-weight:600;gap:12px}
+.meter .bar{height:8px;border-radius:4px;background:var(--line-2);overflow:hidden;margin:6px 0 10px}
+.meter .bar div{height:100%;border-radius:4px}
+dl.facts{margin:0;display:flex;flex-direction:column}
+dl.facts div{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.2fr);gap:12px;padding:9px 0;border-bottom:1px solid var(--line-2);font-size:14px}
+dl.facts dt{color:var(--muted)} dl.facts dt small{display:block;font-size:10.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--soft)}
+dl.facts dd{margin:0;font-weight:600;overflow-wrap:anywhere} dl.facts dd .by{display:block;font:500 11px var(--mono);color:var(--soft)}
+.segs{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:14px}
+.segs li{display:grid;grid-template-columns:92px minmax(0,1fr);gap:12px}
+.kind{font-size:10.5px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;border:1px solid currentColor;border-radius:3px;padding:2px 6px;align-self:start;text-align:center}
+.k-fact{color:var(--navy)} .k-assumption{color:var(--info)} .k-inference{color:var(--warn)} .k-unknown{color:var(--unk);border-style:dashed}
+.refs{display:block;font:500 11px var(--mono);color:var(--soft);margin-top:3px;overflow-wrap:anywhere}
+.mode{font:500 11.5px var(--mono);color:var(--muted);border:1px solid var(--line);border-radius:99px;padding:2px 9px;white-space:nowrap}
+.note{border-left:3px solid var(--red);padding:4px 0 4px 12px;color:var(--muted);font-size:14px}
 
-/* factors */
-.tabs{display:flex;gap:6px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
-.tabs button{font:600 14px var(--f-body);color:var(--blue);background:var(--surface);border:1px solid var(--line);border-bottom:0;border-radius:var(--r) var(--r) 0 0;padding:9px 14px;cursor:pointer;display:flex;gap:8px;align-items:center;margin-bottom:-1px}
-.tabs button em{font:700 11px var(--f-mono);font-style:normal;color:var(--red)}
-.tabs button[aria-selected="true"]{color:var(--navy);border-top:3px solid var(--red);background:var(--surface)}
-.tabs button .dot{width:8px;height:8px;border-radius:50%}
-.dot.violation{background:var(--viol)}.dot.warning{background:var(--warn)}.dot.unknown{background:var(--unk)}.dot.pass{background:var(--pass)}.dot.info{background:var(--info)}
-.panel{border:1px solid var(--line);border-top:0;background:var(--surface);border-radius:0 0 var(--r) var(--r);padding:8px 22px 22px}
-.fgh{display:flex;gap:10px;align-items:baseline;margin:18px 0 6px;flex-wrap:wrap}
-.fgh .n{font:700 12px var(--f-mono);color:var(--red)} .fgh b{color:var(--navy);font:600 16px var(--f-head)} .fgh span{font-size:13px;color:var(--muted)}
-.check{display:grid;grid-template-columns:44px minmax(0,1fr) auto 140px;gap:14px;align-items:center;padding:12px 0;border-top:1px solid var(--line-2)}
-.check .id{font:500 12px var(--f-mono);color:var(--muted)}
-.check .what b{display:block;color:var(--navy);font-weight:600} .check .what span{font-size:13px}
-.check .val{font:600 15px var(--f-body);color:var(--navy);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
-.check .val small{display:block;font-weight:400;color:var(--muted);font-size:12px}
-.check .st{justify-self:end}
-.check.pass{opacity:.72}
-@media (max-width:640px){.check{grid-template-columns:40px minmax(0,1fr)}.check .val,.check .st{grid-column:2;justify-self:start;text-align:left}}
-.fdetail{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:28px;margin-top:20px;padding-top:18px;border-top:1px solid var(--line)}
-@media (max-width:860px){.fdetail{grid-template-columns:1fr}}
-dl.facts{margin:10px 0 0;display:flex;flex-direction:column}
-dl.facts div{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;padding:8px 0;border-bottom:1px solid var(--line-2);font-size:14px}
-dl.facts dt{color:var(--text-2)} dl.facts dt small{display:block;font:600 10px var(--f-body);letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
-dl.facts dd{margin:0;color:var(--navy);font-weight:600;overflow-wrap:anywhere}
-dl.facts dd .by{display:block;font:500 11px var(--f-mono);color:var(--muted);font-weight:400}
-.segs{list-style:none;margin:10px 0 0;padding:0;display:flex;flex-direction:column;gap:12px}
-.segs li{display:grid;grid-template-columns:96px minmax(0,1fr);gap:12px;align-items:start}
-.segs .refs{display:block;margin-top:3px;font:500 11px var(--f-mono);color:var(--muted);overflow-wrap:anywhere}
-.mode{font:500 11px var(--f-mono);color:var(--muted);border:1px solid var(--line);border-radius:var(--pill);padding:2px 8px}
-.principle{margin-top:16px;font-size:14px;color:var(--text-2);border-left:3px solid var(--red);padding:4px 0 4px 12px}
-
-/* footer */
-.three{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
-@media (max-width:860px){.three{grid-template-columns:1fr}}
-.three ul{margin:8px 0 0;padding-left:18px;font-size:13.5px} .three li{margin:4px 0}
-footer{background:var(--surface);border-top:1px solid var(--line);padding-block:24px 40px;font-size:13px;color:var(--text-2)}
-footer .wrap{display:flex;flex-direction:column;gap:6px}
-@media (prefers-reduced-motion:no-preference){.card,.panel{transition:box-shadow .15s}}
+/* profile coherence */
+.pcs{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px}
+.pcc{border:1px solid var(--line);border-radius:6px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.pcc.warning{background:var(--warn-bg);border-color:var(--warn)} .pcc.info{background:var(--info-bg);border-color:var(--info)}
+.pcc .t{font-size:12px;font-weight:800;letter-spacing:.04em}
+.pcc .vs{font-size:14px} .pcc .vs b{color:var(--navy)}
+.pcc .ask{font-size:14px;border-top:1px solid var(--line);padding-top:8px;margin-top:4px}
+.src{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+@media (max-width:860px){.src{grid-template-columns:1fr}}
+.src ul{margin:8px 0 0;padding-left:18px;font-size:14px;color:var(--muted)} .src li{margin:5px 0}
+footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;color:var(--muted)}
 </style>
 </head>
 <body>
-<div class="util gut"><div class="wrap"><span class="on">Particuliers</span><span>Simulation</span><span class="r">Profils fictifs · FR</span></div></div>
+<div class="top gut"><div class="wrap">
+  <span>ⓘ Simulation seulement. Profils et portefeuilles fictifs, pas un conseil financier personnalisé.</span>
+  <span><a href="#sources">Sources et hypothèses</a> · <a href="design.html">Écrans v2</a></span>
+</div></div>
 <header class="hdr gut"><div class="wrap">
-  <a class="mark" href="#top" aria-label="CoherenceAnalyzer"><i></i><div><b>Cohérence</b><small>Analyseur de profil</small></div></a>
-  <nav aria-label="Sections"><a href="#profil">Profil</a><a href="#facteurs">Facteurs</a><a href="#resultats">Résultats</a><a href="#explication">Explication</a><a href="design.html">Écrans v2</a></nav>
-  <div class="tools"><select id="pick" aria-label="Rapport"></select><button class="iconbtn" id="theme" type="button" aria-label="Mode sombre">◐</button></div>
+  <div class="left">
+    <div class="brand"><i aria-hidden="true"></i>CoherenceAnalyzer</div>
+    <nav class="pages" aria-label="Pages" id="pages"></nav>
+  </div>
+  <div class="tools">
+    <select id="pick" aria-label="Rapport"></select>
+    <button class="btn" id="theme" type="button" aria-label="Basculer le mode sombre">◐</button>
+  </div>
 </div></header>
-<main class="gut" id="top"><div class="wrap stack" id="app"><p class="hint">Chargement du rapport…</p></div></main>
+<main class="gut"><div class="wrap" id="app"><p class="sub">Chargement du rapport…</p></div></main>
 <footer class="gut"><div class="wrap" id="foot"></div></footer>
 
 <script>
 (() => {
   const $ = s => document.querySelector(s);
   const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-  const nbsp = s => s.replace(/ | /g, " ");
+  const nb = s => s.replace(/ | /g, " ");
   const pct = (x, d = 1) => (x * 100).toFixed(d).replace(".", ",").replace("-", "−") + " %";
-  const cad = x => nbsp(new Intl.NumberFormat("fr-CA", {maximumFractionDigits: 0}).format(x)) + " $";
+  const cad = x => nb(new Intl.NumberFormat("fr-CA", {maximumFractionDigits: 0}).format(x)) + " $";
+  const kcad = x => Math.round(x / 1000) + " k$";
   const RANK = {violation: 4, warning: 3, unknown: 2, info: 1, pass: 0};
-  const ST = {violation: "Hors limite", warning: "Avertissement", unknown: "Non vérifiable", info: "Info", pass: "Respecté"};
-  const chip = (s, label) => `<span class="chip c-${s}">${esc(label || ST[s] || s)}</span>`;
+  const ICON = {violation: "✕", warning: "⚠", unknown: "?", info: "i", pass: "✓"};
+  const PILLAR = {violation: "Hors limites", warning: "Avertissement", unknown: "À vérifier", info: "Info", pass: "Aligné"};
+  const CHECK_ST = {violation: "Hors limite", warning: "Avertissement", unknown: "Non vérifiable", info: "Info", pass: "Respecté"};
+  const st = (s, label) => `<span class="st s-${s}">${esc(label || CHECK_ST[s])}</span>`;
   const LVL = {low: "faible", low_moderate: "faible à modéré", moderate: "modéré", moderate_high: "modéré à élevé", high: "élevé"};
-  const STAGE = {pre_retirement: "préretraite", retirement: "retraite", accumulation: "accumulation", early_career: "début de carrière"};
-  const VERDICT = {incoherent: "Incohérent", coherent: "Cohérent", coherent_with_warnings: "Cohérent avec avertissements"};
+  const STAGE = {pre_retirement: "préretraite", retirement: "retraite", accumulation: "accumulation"};
+  const OBJ = {capital_preservation_with_growth: "Préserver le capital, un peu de croissance", capital_preservation: "Préserver le capital", growth: "Croissance", income: "Revenu", aggressive_growth: "Croissance soutenue"};
+  const VERDICT = {incoherent: "Non cohérent", coherent: "Cohérent", coherent_with_warnings: "Cohérent, avec avertissements"};
   const CHECK = {
-    H1: ["Types d'actifs refusés", "Aucun type d'actif que vous refusez"], H2: ["Cryptoactifs", "Plafond selon votre risque"],
-    H3: ["Titre individuel maximum", "Poids d'un seul titre"], H4: ["Revenu fixe minimum", "Part minimale en obligations"],
-    H5: ["Devises étrangères", "Part maximale hors CAD"], H6: ["Secteur de votre employeur", "Concentration avec votre emploi"],
-    H7: ["Bande de volatilité", "Fixée par votre risque effectif"], H8: ["Repli maximal accepté", "Le repli que vous avez déclaré pouvoir accepter"],
-    H9: ["Valeur pessimiste à l'horizon", "Protège 90 % de la valeur actuelle au premier retrait"], H10: ["Part du risque d'un secteur", "Contribution au risque total"],
+    H1: ["Aucun type d'actif refusé", "Types que vous refusez"], H2: ["Cryptoactifs sous le plafond", "Selon votre risque"],
+    H3: ["Aucun titre au-dessus du plafond", "Poids d'un seul titre"], H4: ["Revenu fixe minimum", "Part en obligations"],
+    H5: ["Devises étrangères sous le plafond", "Part hors CAD"], H6: ["Exposition au secteur de votre employeur", "Concentration avec votre emploi"],
+    H7: ["Volatilité dans votre bande", "Fixée par votre risque effectif"], H8: ["Repli historique sous votre maximum", "Le repli que vous acceptez"],
+    H9: ["Valeur pessimiste au-dessus du plancher", "90 % de la valeur au premier retrait"], H10: ["Part du risque d'un secteur", "Contribution au risque total"],
     H11: ["Activités exclues", "Vos exclusions approuvées"], H12: ["Frais (RFG)", "Plafond déclaré"], H13: ["Thème plafonné", "Vos règles approuvées"],
-    H14: ["Réaction à une baisse de 20 %", "Cohérence avec le repli historique"], S2: ["Connaissances et complexité", "Produits complexes détenus"],
-    S4: ["Rappel de vos notes", "Règle non approuvée"], G1: ["Probabilité d'atteindre l'objectif", ""], O1: ["Objectif et portefeuille", ""],
+    H14: ["Réaction déclarée à une baisse de 20 %", "Comparée au repli historique"], S2: ["Connaissances et complexité", "Produits complexes détenus"],
+    S4: ["Rappel de vos notes", "Règle non approuvée"],
   };
   const FIELD = {
-    "objectives.horizon_years": "Horizon déclaré", "objectives.effective_horizon_years": "Horizon effectif",
-    "objectives.primary": "Objectif principal", "objectives.secondary": "Objectifs secondaires", "objectives.goals": "Objectifs",
-    "situation.planned_withdrawals": "Retraits prévus", "identity.retirement_target_age": "Âge de retraite visé",
-    "risk.declared": "Risque déclaré", "risk.capacity": "Capacité de risque", "risk.effective": "Risque effectif",
-    "risk.behavioural": "Comportement observé", "risk.max_acceptable_drawdown_pct": "Repli maximal accepté",
+    "objectives.horizon_years": "Horizon déclaré", "objectives.effective_horizon_years": "Horizon effectif", "objectives.primary": "Objectif principal",
+    "objectives.secondary": "Objectifs secondaires", "objectives.goals": "Objectifs", "situation.planned_withdrawals": "Retraits prévus",
+    "identity.retirement_target_age": "Âge de retraite visé", "risk.declared": "Risque déclaré", "risk.capacity": "Capacité de risque",
+    "risk.effective": "Risque effectif", "risk.behavioural": "Comportement observé", "risk.max_acceptable_drawdown_pct": "Repli maximal accepté",
     "risk.reaction_to_20pct_drop": "Réaction à une baisse de 20 %", "situation.emergency_fund_months": "Fonds d'urgence (mois)",
     "situation.income_stability": "Stabilité du revenu", "identity.employer_sector": "Secteur de l'employeur",
-    "preferences.asset_types_refused": "Types d'actifs refusés", "preferences.max_fee_mer_pct": "RFG maximal",
-    "values.notes": "Vos notes", "preferences.interests": "Intérêts", "values.parsed_notes": "Règles tirées de vos notes",
+    "preferences.asset_types_refused": "Types d'actifs refusés", "preferences.max_fee_mer_pct": "RFG maximal", "values.notes": "Vos notes",
+    "preferences.interests": "Intérêts", "values.parsed_notes": "Règles tirées de vos notes",
   };
   const fieldName = p => FIELD[p] || FIELD[p.replace(/\[\d+\]/g, "").replace(/\.date$/, "")] || p;
   const UNIT = {weight: pct, risk_share: pct, annual_vol: pct, drawdown: pct, cad, score: x => String(Math.round(x))};
-  const fv = (c, v) => v == null ? "—" : (UNIT[c.unit] || (x => String(x)))(v);
-  const show = v => {
-    if (v == null) return "—";
-    if (Array.isArray(v)) return v.map(show).join(" · ");
-    if (typeof v === "object") return Object.entries(v).map(([k, x]) => `${k}: ${show(x)}`).join(", ");
-    return LVL[v] || STAGE[v] || String(v);
-  };
-  const state = {rep: null, factor: "all"};
+  const fv = (c, v) => v == null ? "—" : (UNIT[c.unit] || String)(v);
+  const show = v => v == null ? "—" : Array.isArray(v) ? v.map(show).join(" · ")
+    : typeof v === "object" ? Object.entries(v).map(([k, x]) => `${k}: ${show(x)}`).join(", ") : (LVL[v] || STAGE[v] || OBJ[v] || String(v));
+  const KIND = {fact: "fait", assumption: "hypothèse", inference: "inférence", unknown: "inconnu"};
+  const PAGES = [["synthese", "Synthèse"], ["facteurs", "Facteurs"], ["profil", "Profil"], ["portefeuille", "Portefeuille"], ["sources", "Sources"]];
+  const state = {rep: null, page: "synthese", factor: null};
 
-  function hero(rep) {
-    const s = rep.site, pc = s.profile_card, secs = rep.sections;
-    const div = secs.filter(x => x.status === "violation" || x.status === "warning");
-    const n = st => rep.checks_current.filter(c => c.status === st).length;
+  const checksOf = (rep, f) => rep.checks_current.filter(c => c.factor === f).sort((a, b) => RANK[b.status] - RANK[a.status]);
+  const worst = (rep, f) => checksOf(rep, f)[0];
+  function pillarLine(rep, s) {
+    const cs = checksOf(rep, s.factor), bad = cs.filter(c => c.status === "violation" || c.status === "warning");
+    if (!cs.length) return s.not_covered && s.not_covered.length ? "Pas encore mesuré" : "Aucune vérification chiffrée";
+    if (bad.length) { const c = bad[0]; return `${c.id}${c.subject ? " " + c.subject : ""} : ${fv(c, c.value)} pour une limite de ${fv(c, c.limit)}${bad.length > 1 ? ` · ${bad.length - 1} autre${bad.length > 2 ? "s" : ""}` : ""}`; }
+    const unk = cs.filter(c => c.status === "unknown").length;
+    return unk ? `${cs.length - unk} sur ${cs.length} vérifiées, ${unk} non vérifiable${unk > 1 ? "s" : ""}` : `${cs.length} vérification${cs.length > 1 ? "s" : ""} respectée${cs.length > 1 ? "s" : ""}`;
+  }
+
+  /* ---------- Synthèse ---------- */
+  function strip(rep) {
+    const p = rep.site.profile_card;
+    return `<section class="card strip" aria-label="Profil">
+      <div class="kv"><span>Âge, profession</span><b>${p.age} ans, ${esc(p.occupation)}</b></div>
+      <div class="kv"><span>Objectif</span><b>${esc(show(rep.sections[0].facts.declared["objectives.primary"]))}</b></div>
+      <div class="kv"><span>Horizon</span><b>${p.horizon_years} ans (effectif ${String(p.effective_horizon_years).replace(".", ",")})</b></div>
+      <div class="kv"><span>Profil de risque</span><b>${esc(show(p.risk_effective))}</b></div>
+      <div class="kv"><span>Portefeuille</span><b>${cad(rep.site.value_cad)}</b></div>
+      <button class="link" type="button" data-go="profil">Voir le profil</button></section>`;
+  }
+  function summary(rep) {
+    const secs = rep.sections, div = secs.filter(s => s.status === "violation" || s.status === "warning");
+    const pc = rep.profile_coherence || {status: "pass", findings: []};
+    const nf = pc.findings.length;
+    const q1 = nf ? (pc.status === "warning" ? "Une contradiction à clarifier" : "Cohérent, une tension") : "Cohérent";
+    const q1s = nf ? `${nf} point${nf > 1 ? "s" : ""} relevé${nf > 1 ? "s" : ""} (règles C1–C5 et IA vérifiée)` : "Aucune contradiction relevée";
+    const al = secs.filter(s => s.status === "pass").length, unk = secs.filter(s => s.status === "unknown").length;
+    const q2s = [`${al} aligné${al > 1 ? "s" : ""}`, div.length ? `${div.length} hors limites` : "", unk ? `${unk} à vérifier` : ""].filter(Boolean).join(", ");
+    const first = rep.explanation.segments.find(g => (secs.find(s => s.factor === g.factor) || {}).status === "violation");
     const lead = div.length
-      ? `Ce portefeuille s'écarte de votre profil sur ${div.length} des 5 facteurs : ${div.map(x => x.title).join(", ")}.`
-      : `Ce portefeuille respecte vos propres limites sur les 5 facteurs.`;
-    return `<section class="card verdict" aria-label="Verdict">
-      <span class="flag ${rep.verdict}">${VERDICT[rep.verdict]}</span>
-      <div><div class="crumb">Revue de portefeuille · ${esc(s.label)}</div>
-        <p class="vh" style="margin:10px 0 0">${esc(lead)}</p>
-        <p class="hint" style="margin:8px 0 0">${esc(rep.explanation.headline)}</p>
-        <div class="counts">${n("violation") ? chip("violation", `${n("violation")} hors limite`) : ""}${n("warning") ? chip("warning", `${n("warning")} avertissement${n("warning") > 1 ? "s" : ""}`) : ""}${n("unknown") ? chip("unknown", `${n("unknown")} non vérifiable${n("unknown") > 1 ? "s" : ""}`) : ""}${!n("violation") && !n("warning") ? chip("pass", "Dans vos limites") : ""}</div></div>
-      <div class="persona" id="profil">
-        <div><span>Investisseur</span><b>${esc(pc.name)}, ${pc.age} ans</b></div>
-        <div><span>Étape de vie</span><b>${esc(show(pc.life_stage))}</b></div>
-        <div><span>Risque déclaré / capacité</span><b>${esc(show(pc.risk_declared))} / ${esc(show(pc.risk_capacity))}</b></div>
-        <div><span>Risque effectif (le plus bas)</span><b>${esc(show(pc.risk_effective))}</b></div>
-        <div><span>Horizon effectif</span><b>${String(pc.effective_horizon_years).replace(".", ",")} ans</b> <span>retrait ${esc(pc.first_withdrawal.date || "")}</span></div>
-        <div><span>Portefeuille</span><b>${cad(s.value_cad)}</b> <span>au ${esc(s.as_of)}</span></div>
+      ? `Le portefeuille s'écarte du profil de ${esc(rep.site.profile_card.name)} sur ${div.length} des 5 facteurs : ${div.map(s => s.title.toLowerCase()).join(", ")}.`
+      : `Le portefeuille respecte les limites tirées du profil de ${esc(rep.site.profile_card.name)} sur les 5 facteurs.`;
+    const pq = nf ? ` Le profil lui-même comporte ${nf} point${nf > 1 ? "s" : ""} à clarifier avant d'aller plus loin.` : "";
+    return `<section class="card exec">
+      <div><h2>Résumé</h2>
+        <p class="lead" style="margin-top:10px">${lead}${pq}</p>
+        ${first ? `<p class="sub" style="margin-top:10px">${esc(first.text)}</p>` : ""}
+        <div class="actions"><button class="primary" type="button" data-go="facteurs">Voir l'analyse par facteur</button><button class="link" type="button" data-go="sources">Comment ce rapport est produit</button></div></div>
+      <div style="display:flex;flex-direction:column;gap:12px">
+        <div class="qbox"><span class="q">Question 1 : le profil est-il cohérent?</span><span class="a tx-${nf ? pc.status : "pass"}">${ICON[nf ? pc.status : "pass"]} ${q1}</span><span class="small">${q1s}</span></div>
+        <div class="qbox"><span class="q">Question 2 : le portefeuille convient-il au profil?</span><span class="a tx-${rep.verdict === "incoherent" ? "violation" : rep.verdict === "coherent" ? "pass" : "warning"}">${ICON[rep.verdict === "incoherent" ? "violation" : rep.verdict === "coherent" ? "pass" : "warning"]} ${VERDICT[rep.verdict]}</span><span class="small">${q2s}</span></div>
       </div></section>`;
   }
-
-  function profileCheck(rep) {
-    const pc = rep.profile_coherence;
-    if (!pc) return "";
-    const f = pc.findings;
-    const label = {warning: "Contradiction", info: "Tension"};
-    return `<section class="card" aria-labelledby="pc-h"><div class="pc">
-      <div><div class="lbl">Vérification du profil</div><h3 id="pc-h" style="margin:8px 0 6px">Votre profil se contredit-il?</h3>
-        <p class="hint" style="margin:0">Vérifié sur le profil seul, avant tout portefeuille. Les règles C1 à C5 passent d'abord; l'IA (N6) cherche ensuite ce que les règles ne savent pas exprimer, et le code vérifie chaque champ et chaque citation. Cela ne change pas le verdict du portefeuille.</p>
-        <div style="margin-top:12px">${f.length ? chip(pc.status, `${f.length} point${f.length > 1 ? "s" : ""} à clarifier`) : chip("pass", "Aucune contradiction")}</div></div>
-      ${f.length ? `<ul class="pcl">${f.map(x => {
-        const vals = x.values || x.quotes || [];
-        return `<li class="${x.status}"><div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">${chip(x.status, label[x.status])}<span class="tag ${x.source.startsWith("llm") ? "k-inference" : "k-fact"}">${x.source.startsWith("llm") ? "IA · inférence" : "règle " + esc(x.id)}</span></div>
-          <div class="pair"><div><span class="hint">${esc(fieldName(x.fields[0]))}</span><br><b>« ${esc(show(vals[0]))} »</b></div><span class="vs">VS</span><div><span class="hint">${esc(fieldName(x.fields[1]))}</span><br><b>« ${esc(show(vals[1]))} »</b></div></div>
-          ${x.reason ? `<div class="hint">${esc(x.reason)}</div>` : ""}
-          <div class="q"><b>Question :</b> ${esc((x.question && (x.question["fr-CA"] || x.question)) || "")}</div></li>`;
-      }).join("")}</ul>` : `<p class="hint">Aucune contradiction entre les réponses du profil.</p>`}
-    </div></section>`;
-  }
-
-  function tiles(rep) {
-    const m = rep.metrics_current, L = rep.site.limits;
-    const band = L.vol_band_annual, dd = L.max_drawdown_pct / 100, floor = L.floor_at_horizon;
-    const t = [
-      ["Volatilité annuelle", pct(m.vol), `Votre bande : ${pct(band[0], 0)} à ${pct(band[1], 0)}`, m.vol > band[1] || m.vol < band[0]],
-      ["Pire repli historique", pct(m.mdd), `Votre maximum : ${pct(dd, 0)} · ${esc(m.mdd_date)}`, m.mdd < dd],
-      ["Valeur pessimiste (P5)", cad(m.p5_T), `Votre plancher : ${cad(floor)}`, m.p5_T < floor],
-      ["Probabilité de perte", pct(m.loss_prob), "À l'horizon, simulation", false],
-    ];
-    return `<div class="tiles">${t.map(([k, v, l, bad]) => `<div class="card metric"><span class="lbl">${k}</span><span class="v">${v}</span><span class="lim ${bad ? "bad" : ""}">${bad ? "✕ " : ""}${l}</span></div>`).join("")}</div>`;
-  }
+  const pillars = rep => `<div class="pillars">${rep.sections.map(s => `<button class="pillar c-${s.status}" type="button" data-factor="${s.factor}"><span class="n">${esc(s.title)}</span><span class="v tx-${s.status}">${s.status === "pass" && !checksOf(rep, s.factor).length ? "Aucun écart" : PILLAR[s.status]}</span><span class="d">${esc(pillarLine(rep, s))}</span></button>`).join("")}</div>`;
 
   function cone(rep) {
-    const c = rep.metrics_current.cone, floor = rep.site.limits.floor_at_horizon, n = c.p50.length;
-    const W = 680, H = 280, L = 62, R = 16, T = 12, B = 30;
-    const all = [...c.p5, ...c.p95, floor];
+    const c = rep.metrics_current.cone, floor = rep.site.limits.floor_at_horizon, v0 = rep.site.value_cad, n = c.p50.length;
+    const W = 720, H = 300, L = 54, R = 120, T = 16, B = 30;
+    const all = [...c.p5, ...c.p95, floor, v0];
     const lo = Math.floor(Math.min(...all) / 50000) * 50000, hi = Math.ceil(Math.max(...all) / 50000) * 50000;
-    const x = i => L + (i / (n - 1)) * (W - L - R), y = v => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
-    const pts = a => a.map((v, i) => `${x(i).toFixed(1)},${y(v).toFixed(1)}`);
-    const band = (a, b) => `M${pts(a).join(" L")} L${pts(b).reverse().join(" L")} Z`;
-    const [y0, m0] = rep.site.as_of.split("-").map(Number);
+    const x = i => L + (i / n) * (W - L - R), y = v => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
+    const line = a => [`${x(0)},${y(v0)}`, ...a.map((v, i) => `${x(i + 1).toFixed(1)},${y(v).toFixed(1)}`)];
+    const band = (a, b) => `M${line(a).join(" L")} L${line(b).reverse().join(" L")} Z`;
     let g = "";
-    for (let v = lo; v <= hi; v += 50000) g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line-2)"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${v / 1000} k$</text>`;
-    for (let i = 0; i < n; i += 12) { const mm = (m0 - 1 + i + 1), yy = y0 + Math.floor(mm / 12); g += `<text x="${x(i)}" y="${H - 8}" text-anchor="middle">${String(mm % 12 + 1).padStart(2, "0")}/${yy}</text>`; }
-    g += `<path d="${band(c.p95, c.p5)}" fill="var(--cur-fill)"/><path d="${band(c.p75, c.p25)}" fill="var(--cur-fill-2)"/>`;
-    g += `<line x1="${L}" x2="${W - R}" y1="${y(floor)}" y2="${y(floor)}" stroke="var(--viol)" stroke-width="1.5" stroke-dasharray="5 4"/>`;
-    g += `<text x="${L + 6}" y="${y(floor) - 6}" style="fill:var(--viol);font-weight:600">Plancher ${cad(floor)}</text>`;
-    g += `<polyline points="${pts(c.p50).join(" ")}" fill="none" stroke="var(--cur)" stroke-width="2"/>`;
-    g += `<polyline points="${pts(c.p5).join(" ")}" fill="none" stroke="var(--prop)" stroke-width="1.5"/>`;
-    g += `<circle cx="${x(n - 1)}" cy="${y(c.p5[n - 1])}" r="4" fill="var(--prop)"/><text x="${x(n - 1) - 8}" y="${y(c.p5[n - 1]) + 16}" text-anchor="end" style="fill:var(--prop);font-weight:600">P5 ${cad(c.p5[n - 1])}</text>`;
-    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Fourchette de valeur du portefeuille sur l'horizon">${g}</svg>`;
+    for (let v = lo; v <= hi; v += 50000) g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line-2)"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${kcad(v)}</text>`;
+    const yrs = Math.round(n / 12);
+    for (let k = 0; k <= yrs; k++) g += `<text x="${x(Math.min(k * 12, n))}" y="${H - 8}" text-anchor="middle">${k ? "An " + k : "Auj."}</text>`;
+    g += `<path d="${band(c.p95, c.p5)}" fill="var(--band)"/><path d="${band(c.p75, c.p25)}" fill="var(--band-2)"/>`;
+    g += `<line x1="${L}" x2="${W - R}" y1="${y(floor)}" y2="${y(floor)}" stroke="var(--red)" stroke-width="1.5" stroke-dasharray="6 5"/>`;
+    g += `<text x="${L + 6}" y="${y(floor) - 7}" style="fill:var(--red-ink);font-weight:700">Plancher ${kcad(floor)}</text>`;
+    g += `<polyline points="${line(c.p50).join(" ")}" fill="none" stroke="var(--navy)" stroke-width="2.5"/>`;
+    g += `<polyline points="${line(c.p5).join(" ")}" fill="none" stroke="var(--red)" stroke-width="1.5"/>`;
+    const end = (v, lab, col) => `<circle cx="${x(n)}" cy="${y(v)}" r="4" fill="${col}"/><text x="${x(n) + 10}" y="${y(v) + 4}" style="fill:${col};font-weight:700">${lab} ${kcad(v)}</text>`;
+    g += end(c.p95[n - 1], "Optimiste", "var(--muted)") + end(c.p50[n - 1], "Médiane", "var(--navy)") + end(c.p5[n - 1], "Pessimiste", "var(--red-ink)");
+    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Valeur projetée du portefeuille : pessimiste ${cad(c.p5[n - 1])}, médiane ${cad(c.p50[n - 1])}, optimiste ${cad(c.p95[n - 1])}">${g}</svg>`;
   }
-
-  function drivers(rep) {
-    const d = (rep.metrics_current.drivers || []).slice().sort((a, b) => b.risk - a.risk).slice(0, 5);
-    const max = Math.max(...d.map(x => x.risk), 0.01);
-    const top = d[0];
-    return d.map(x => `<div class="drv"><span class="mono" style="color:var(--navy)">${esc(x.ticker)}</span><div class="bar"><div class="${x === top && x.risk > 2 * x.weight ? "hot" : ""}" style="width:${(x.risk / max * 100).toFixed(1)}%"></div></div><span class="num" style="text-align:right;font-weight:600;color:var(--navy)">${pct(x.risk)}</span></div><div class="hint" style="margin-left:80px">poids ${pct(x.weight)}</div>`).join("")
-      + (top ? `<p class="hint" style="margin:12px 0 0">${esc(top.ticker)} pèse ${pct(top.weight)} du portefeuille et porte ${pct(top.risk)} du risque total.</p>` : "");
+  function projection(rep) {
+    const m = rep.metrics_current, v0 = rep.site.value_cad;
+    const rel = v => `${v >= v0 ? "+" : "−"}${Math.abs((v / v0 - 1) * 100).toFixed(0)} % vs aujourd'hui`;
+    return `<section class="card chart"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline"><h3>Valeur projetée du portefeuille</h3><span class="small">${Math.round(m.cone.p50.length / 12)} ans, CAD, au ${esc(rep.site.as_of)}</span></div>
+      <div style="margin-top:10px">${cone(rep)}</div>
+      <div class="legend"><span><i style="background:var(--band)"></i>P5 à P95</span><span><i style="background:var(--band-2)"></i>P25 à P75</span><span><i style="background:var(--navy);height:3px"></i>Médiane</span><span><i style="background:var(--red);height:3px"></i>Scénario pessimiste (P5)</span><span><i style="border-top:2px dashed var(--red);height:0"></i>Plancher</span></div>
+      <div class="scen"><div><span>Pessimiste (P5)</span><b class="tx-violation">${cad(m.p5_T)}</b><span>${rel(m.p5_T)}</span></div><div><span>Médiane</span><b>${cad(m.p50_T)}</b><span>${rel(m.p50_T)}</span></div><div><span>Optimiste (P95)</span><b class="tx-pass">${cad(m.p95_T)}</b><span>${rel(m.p95_T)}</span></div></div>
+      <p class="small" style="margin-top:12px">Simulation par blocs de 12 mois sur les rendements mensuels ${esc(rep.data_window.join(" → "))}, 5 000 trajectoires, rendements attendus fixés par l'équipe. Ce n'est pas une prévision.</p></section>`;
   }
-
-  function checkRow(c) {
-    const [t, sub] = CHECK[c.id] || [c.id, ""];
-    const subj = c.subject ? ` · ${c.subject}` : "";
-    const lim = c.limit == null ? "" : `<small>${c.status === "violation" && ["H4", "H9"].includes(c.id) ? "min." : "limite"} ${fv(c, c.limit)}</small>`;
-    return `<div class="check ${c.status}"><span class="id">${esc(c.id)}</span><div class="what"><b>${esc(t)}${esc(subj)}</b><span>${esc(sub)}</span></div><div class="val">${fv(c, c.value)}${lim}</div><span class="st">${chip(c.status)}</span></div>`;
+  const PAL = ["#0B2A4A", "#4A6A8F", "#8AA3BF", "#C9A227", "#8A5A00", "#2F7D6B", "#7A8899", "#B9C3CF", "#5B4A8A", "#A0522D", "#3E7CB1"];
+  function holdings(rep) {
+    const d = (rep.metrics_current.drivers || []).slice().sort((a, b) => b.weight - a.weight), v0 = rep.site.value_cad;
+    const flagged = new Set(rep.checks_current.filter(c => c.status === "violation" && c.subject).map(c => c.subject));
+    const top = (rep.metrics_current.drivers || []).slice().sort((a, b) => b.risk - a.risk)[0];
+    return {d, flagged, top, bar: `<div class="allocbar" aria-hidden="true">${d.map((h, i) => `<span style="width:${h.weight * 100}%;background:${flagged.has(h.ticker) ? "var(--red)" : PAL[i % PAL.length]}"></span>`).join("")}</div>`,
+      rows: d.map((h, i) => `<tr class="${flagged.has(h.ticker) ? "flag" : ""}"><td><span class="sw" style="background:${flagged.has(h.ticker) ? "var(--red)" : PAL[i % PAL.length]}"></span>${esc(h.name)} <span class="mono">${esc(h.ticker)}</span>${flagged.has(h.ticker) ? ` <b class="tx-violation small">signalé</b>` : ""}</td><td class="r">${pct(h.weight, 0)}</td><td class="r">${cad(h.weight * v0)}</td><td class="r">${pct(h.risk)}</td></tr>`).join("")};
   }
+  function keyData(rep, full) {
+    const m = rep.metrics_current, h = holdings(rep);
+    return `<section class="card"><h3>Données clés du portefeuille</h3>
+      <div class="keys"><div><span>Valeur actuelle</span><b>${cad(rep.site.value_cad)}</b></div><div><span>Volatilité annuelle</span><b>${pct(m.vol)}</b></div>
+        <div><span>Pire repli (${esc(m.mdd_date)})</span><b>${pct(m.mdd)}</b></div><div><span>Positions</span><b>${h.d.length}</b></div></div>
+      <h3 style="margin-top:18px;font-size:15px">Répartition</h3>${h.bar}
+      <div class="tbl"><table><thead><tr><th>Position</th><th class="r">Poids</th><th class="r">Valeur</th><th class="r">Part du risque</th></tr></thead><tbody>${full ? h.rows : h.rows.split("</tr>").slice(0, 6).join("</tr>") + "</tr>"}</tbody></table></div>
+      ${full ? "" : `<button class="link" type="button" data-go="portefeuille" style="margin-top:10px">Voir les ${h.d.length} positions</button>`}
+      ${h.top ? `<p class="small" style="margin-top:10px">${esc(h.top.ticker)} pèse ${pct(h.top.weight, 0)} du portefeuille et porte ${pct(h.top.risk)} du risque total.</p>` : ""}</section>`;
+  }
+  const pageSynthese = rep => `<div class="page">
+    <div><p class="eyebrow">Analyse de cohérence</p><h1 style="margin-top:6px">Ce portefeuille convient-il à ${esc(rep.site.profile_card.name)}?</h1><p class="sub" style="margin-top:6px">${esc(rep.site.label)}</p></div>
+    ${strip(rep)}${summary(rep)}${pillars(rep)}
+    <div class="grid2">${projection(rep)}${keyData(rep, false)}</div></div>`;
 
-  function factors(rep) {
+  /* ---------- Facteurs ---------- */
+  function meters(rep, s) {
+    const m = rep.metrics_current, L = rep.site.limits, out = [];
+    const mtr = (a, av, b, bv, ratio, bad) => `<div class="meter"><div class="row"><span>${a}</span><span>${av}</span></div><div class="bar"><div style="width:${Math.min(100, ratio * 100)}%;background:var(--navy)"></div></div><div class="row"><span>${b}</span><span class="${bad ? "tx-violation" : ""}">${bv}</span></div><div class="bar"><div style="width:100%;background:${bad ? "var(--red)" : "var(--ok)"}"></div></div></div>`;
+    if (s.factor === "risque") out.push(mtr("Repli que le profil tolère", pct(L.max_drawdown_pct / 100, 0), "Pire repli historique du portefeuille", pct(m.mdd), Math.abs(L.max_drawdown_pct / 100 / m.mdd), m.mdd < L.max_drawdown_pct / 100));
+    if (s.factor === "horizon") out.push(mtr("Plancher tiré du profil", cad(L.floor_at_horizon), "Valeur pessimiste à l'horizon", cad(m.p5_T), Math.min(1, L.floor_at_horizon / Math.max(m.p5_T, L.floor_at_horizon)), m.p5_T < L.floor_at_horizon));
+    return out.join("");
+  }
+  function factorPage(rep) {
     const secs = rep.sections;
-    const tabs = [{factor: "all", title: "Toutes les vérifications", status: null}, ...secs];
-    const btn = (s, i) => `<button type="button" role="tab" id="tab-${s.factor}" aria-selected="${state.factor === s.factor}" aria-controls="fpanel" data-f="${s.factor}">${i ? `<em>0${i}</em>` : ""}${esc(s.title)}${s.status ? `<span class="dot ${s.status}" aria-label="${ST[s.status]}"></span>` : ""}</button>`;
-    const shown = state.factor === "all" ? secs.slice().sort((a, b) => RANK[b.status] - RANK[a.status]) : secs.filter(s => s.factor === state.factor);
-    const byF = f => rep.checks_current.filter(c => c.factor === f).sort((a, b) => RANK[b.status] - RANK[a.status]);
-    const groups = shown.map(s => {
-      const i = secs.indexOf(s) + 1, all = byF(s.factor);
-      const cs = state.factor === "all" ? all.filter(c => c.status !== "pass") : all;
-      const hidden = all.length - cs.length;
-      const more = hidden ? `<p class="hint" style="margin:8px 0 0">${hidden} vérification${hidden > 1 ? "s" : ""} respectée${hidden > 1 ? "s" : ""} · <a href="#facteurs" data-open="${s.factor}">voir le détail</a></p>` : "";
-      return `<div class="fgh"><span class="n">0${i}</span><b>${esc(s.title)}</b><span>${esc(s.question)}</span>${chip(s.status)}</div>${cs.map(checkRow).join("")}${more}${all.length ? "" : `<p class="hint">Aucune vérification chiffrée pour ce facteur${s.not_covered && s.not_covered.length ? " (pas encore couvert : " + s.not_covered.join(", ") + ")" : ""}.</p>`}`;
-    }).join("");
-    const one = state.factor === "all" ? null : secs.find(s => s.factor === state.factor);
-    return `<div class="tabs" role="tablist" aria-label="Facteurs">${tabs.map(btn).join("")}</div>
-      <div class="panel" id="fpanel" role="tabpanel">${groups}${one ? detail(one) : ""}
-      <p class="principle">Les contraintes établissent les limites. Les préférences orientent les choix à l'intérieur de ces limites.</p></div>`;
-  }
-
-  function detail(s) {
-    const f = s.facts, rows = [];
+    if (!state.factor || !secs.find(s => s.factor === state.factor)) state.factor = (secs.slice().sort((a, b) => RANK[b.status] - RANK[a.status])[0]).factor;
+    const s = secs.find(x => x.factor === state.factor), i = secs.indexOf(s) + 1, cs = checksOf(rep, s.factor), f = s.facts, n = s.narrative;
+    const rows = [];
     for (const [k, v] of Object.entries(f.declared || {})) rows.push([fieldName(k), "déclaré", show(v), ""]);
     for (const [k, v] of Object.entries(f.derived || {})) rows.push([fieldName(k), v.by && v.by.startsWith("llm") ? "inférence IA" : "calculé", show(v.value), v.by || ""]);
-    const n = s.narrative;
-    return `<div class="fdetail"><div><h3>Ce que dit le profil</h3><dl class="facts">${rows.map(([a, b, c, d]) => `<div><dt>${esc(a)}<small>${esc(b)}</small></dt><dd>${esc(c)}${d ? `<span class="by">${esc(d)}</span>` : ""}</dd></div>`).join("")}</dl></div>
-      <div><h3 style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">Comment le portefeuille se compare <span class="mode">texte : ${esc(n.mode)}</span></h3>
-        <ul class="segs">${n.segments.map(g => `<li><span class="tag k-${g.kind}">${esc({fact: "fait", assumption: "hypothèse", inference: "inférence", unknown: "inconnu"}[g.kind] || g.kind)}</span><div>${esc(g.text)}<span class="refs">${(g.refs || []).map(esc).join(", ")}</span></div></li>`).join("")}</ul>
-        <p class="hint" style="margin-top:12px">${n.mode === "template" ? "Texte gabarit, déterministe." : "Écrit par l'IA à partir des seuls faits ci-contre, puis vérifié par le code (références, chiffres, couverture, aucun conseil)."}</p></div></div>`;
-  }
-
-  function explanation(rep) {
-    const segs = rep.explanation.segments.filter(g => (rep.sections.find(s => s.factor === g.factor) || {}).status !== "pass");
-    const title = f => (rep.sections.find(s => s.factor === f) || {}).title || f;
-    return `<section class="card" id="explication"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline"><h3>Explication</h3><span class="mode">mode : ${esc(rep.explanation.mode)} · chiffres vérifiés</span></div>
-      ${segs.length ? `<ul class="segs">${segs.map(g => `<li><span class="tag k-${g.kind}">${esc({fact: "fait", assumption: "hypothèse", inference: "inférence", unknown: "inconnu"}[g.kind] || g.kind)}</span><div><span class="lbl">${esc(title(g.factor))}</span><br>${esc(g.text)}<span class="refs">${(g.refs || []).map(esc).join(", ")}</span></div></li>`).join("")}</ul>` : `<p class="hint">Aucun écart à expliquer : chaque facteur respecte vos limites.</p>`}</section>`;
-  }
-
-  function bottom(rep) {
-    const unk = rep.unknowns || [];
-    return `<div class="three">
-      <section class="card"><h3>Ce qu'on ne peut pas vérifier</h3>${unk.length ? `<ul>${unk.map(c => `<li><b>${esc(c.id)}</b> ${esc((CHECK[c.id] || [c.id])[0])}${c.subject ? " · " + esc(c.subject) : ""} : composition interne des FNB larges inconnue.</li>`).join("")}</ul>` : `<p class="hint">Tout a pu être vérifié.</p>`}</section>
-      <section class="card"><h3>Hypothèses de l'équipe</h3><ul>${rep.assumptions.slice(0, 4).map(a => `<li>${esc(a)}</li>`).join("")}</ul></section>
-      <section class="card"><h3>Journal d'audit</h3><ul><li>Rapport <span class="mono">${esc(rep.run_id)}</span></li><li>Profil ${esc(rep.profile_id)} v${esc(rep.profile_version)} · portefeuille ${esc(rep.portfolio_id)}</li><li>Données ${esc(rep.data_window.join(" → "))}</li><li>Facteurs narrés en parallèle; chaque sortie d'IA passe par le code avant d'être affichée.</li></ul></section>
-    </div>`;
-  }
-
-  function render(rep) {
-    state.rep = rep;
-    $("#app").innerHTML = `${hero(rep)}
-      ${profileCheck(rep)}
-      <h2 class="sec" id="facteurs">Vos limites, par facteur <small>Chaque vérification, avec les champs du profil d'où vient sa limite.</small></h2>
-      <div>${factors(rep)}</div>
-      <h2 class="sec" id="resultats">Résultats <small>Mesures du moteur face aux limites tirées du profil.</small></h2>
-      ${tiles(rep)}
-      <div class="two">
-        <section class="card chart"><h3>Fourchette de valeur jusqu'à l'horizon</h3><p class="hint" style="margin:4px 0 10px">Simulation par blocs de 12 mois, 5 000 trajectoires, rendements attendus fixés par l'équipe. Ce n'est pas une prévision.</p>${cone(rep)}
-          <div class="legend"><span><i style="background:var(--cur-fill)"></i>P5 à P95</span><span><i style="background:var(--cur-fill-2)"></i>P25 à P75</span><span><i style="background:var(--cur);height:3px"></i>Médiane</span><span><i style="background:var(--prop);height:3px"></i>Scénario pessimiste (P5)</span></div></section>
-        <section class="card"><h3>Principaux moteurs de risque</h3><p class="hint" style="margin:4px 0 6px">Part du risque total par position.</p>${drivers(rep)}</section>
+    const hard = {contraintes: "Les contraintes sont des règles strictes : une seule violation fait échouer le facteur.", preferences: "Les préférences sont souples : une préférence non respectée donne un avertissement, jamais un échec."}[s.factor] || "";
+    return `<div class="page">
+      <div><p class="eyebrow">Portefeuille face au profil</p><h1 style="margin-top:6px">Analyse par facteur</h1><p class="sub" style="margin-top:6px">Chaque facteur est évalué seul, sur sa partie du profil. Les chiffres sont calculés d'abord, puis expliqués.</p></div>
+      <div class="ftabs" role="tablist" aria-label="Facteurs">${secs.map((x, j) => `<button type="button" role="tab" class="c-${x.status}" aria-selected="${x.factor === s.factor}" data-factor="${x.factor}"><span class="dot"></span>0${j + 1} ${esc(x.title)}</button>`).join("")}</div>
+      <div class="half">
+        <section class="card" role="tabpanel"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap"><h2>0${i} ${esc(s.title)}</h2>${st(s.status, PILLAR[s.status])}</div>
+          <p class="sub" style="margin-top:4px">${esc(s.question)}</p>
+          ${hard ? `<p class="small" style="margin-top:10px">${hard}</p>` : ""}
+          <div style="margin-top:12px">${meters(rep, s)}</div>
+          ${cs.length ? cs.map(c => { const [t, sub] = CHECK[c.id] || [c.id, ""]; return `<div class="rule"><span class="ic tx-${c.status}" aria-label="${CHECK_ST[c.status]}">${ICON[c.status]}</span><div><b>${esc(t)}${c.subject ? " · " + esc(c.subject) : ""}</b><span class="id">${esc(c.id)}</span><div class="small">${esc(sub)}</div></div><div class="v">${fv(c, c.value)}${c.limit == null ? "" : `<small>limite ${fv(c, c.limit)}</small>`}</div></div>`; }).join("")
+            : `<p class="small" style="margin-top:12px">Aucune vérification chiffrée pour ce facteur${s.not_covered && s.not_covered.length ? " (pas encore couvert : " + s.not_covered.join(", ") + ")" : ""}.</p>`}
+        </section>
+        <section class="card"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap"><h3>Explication</h3><span class="mode">texte : ${esc(n.mode)}</span></div>
+          <ul class="segs" style="margin-top:14px">${n.segments.map(g => `<li><span class="kind k-${g.kind}">${KIND[g.kind] || g.kind}</span><div>${esc(g.text)}<span class="refs">${(g.refs || []).map(esc).join(", ")}</span></div></li>`).join("")}</ul>
+          <p class="small" style="margin-top:14px">${n.mode === "template" ? "Texte gabarit, déterministe." : "Écrit par l'IA à partir des seuls faits de ce facteur, puis vérifié par le code : références, chiffres, couverture, aucun conseil."}</p>
+          <h3 style="margin-top:20px">Ce que dit le profil</h3>
+          <dl class="facts" style="margin-top:8px">${rows.map(([a, b, c, d]) => `<div><dt>${esc(a)}<small>${esc(b)}</small></dt><dd>${esc(c)}${d ? `<span class="by">${esc(d)}</span>` : ""}</dd></div>`).join("")}</dl></section>
       </div>
-      ${explanation(rep)}
-      ${bottom(rep)}`;
-    $("#foot").innerHTML = `<b style="color:var(--navy)">${esc(rep.disclaimer)}</b><span>Aucune recommandation d'achat ou de vente. Rapport généré par <span class="mono">pipeline.review</span> (mode hors ligne, sorties d'IA enregistrées).</span>`;
-    bindTabs();
+      <p class="note">Les contraintes établissent les limites. Les préférences orientent les choix à l'intérieur de ces limites.</p></div>`;
   }
-  function bindTabs() {
-    const open = f => { state.factor = f; $("#facteurs").nextElementSibling.innerHTML = factors(state.rep); bindTabs(); document.getElementById("tab-" + f)?.focus(); };
-    document.querySelectorAll(".tabs button").forEach(b => b.addEventListener("click", () => open(b.dataset.f)));
-    document.querySelectorAll("[data-open]").forEach(a => a.addEventListener("click", e => { e.preventDefault(); open(a.dataset.open); }));
+
+  /* ---------- Profil ---------- */
+  function pageProfil(rep) {
+    const pc = rep.profile_coherence || {status: "pass", findings: []}, p = rep.site.profile_card, L = rep.site.limits;
+    const tag = {warning: "Contradiction", info: "Tension"};
+    return `<div class="page">
+      <div><p class="eyebrow">Question 1</p><h1 style="margin-top:6px">Le profil est-il cohérent en lui-même?</h1><p class="sub" style="margin-top:6px">Vérifié sur le profil seul, avant tout portefeuille. Les règles C1 à C5 passent d'abord; l'IA (N6) cherche ensuite ce que les règles ne savent pas exprimer, et le code vérifie chaque champ et chaque citation. Cela ne change pas le verdict du portefeuille.</p></div>
+      <section class="card"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap"><h2>Points à clarifier</h2>${pc.findings.length ? st(pc.status, `${pc.findings.length} point${pc.findings.length > 1 ? "s" : ""}`) : st("pass", "Aucune contradiction")}</div>
+        <div class="pcs" style="margin-top:16px">${pc.findings.map(x => { const v = x.values || x.quotes || []; return `<div class="pcc ${x.status}"><span class="t tx-${x.status}">${tag[x.status]} · ${x.source.startsWith("llm") ? "IA, vérifiée par le code" : "règle " + esc(x.id)}</span>
+          <div class="vs"><span class="small">${esc(fieldName(x.fields[0]))}</span><br><b>« ${esc(show(v[0]))} »</b></div><div class="vs"><span class="small">${esc(fieldName(x.fields[1]))}</span><br><b>« ${esc(show(v[1]))} »</b></div>
+          ${x.reason ? `<p class="small">${esc(x.reason)}</p>` : ""}<p class="ask"><b>Question :</b> ${esc((x.question && (x.question["fr-CA"] || x.question)) || "")}</p></div>`; }).join("") || `<p class="sub">Les réponses du profil vont dans le même sens.</p>`}</div></section>
+      <div class="half">
+        <section class="card"><h3>Profil de ${esc(p.name)}</h3><dl class="facts" style="margin-top:10px">
+          <div><dt>Âge, profession</dt><dd>${p.age} ans, ${esc(p.occupation)}</dd></div><div><dt>Étape de vie<small>calculé</small></dt><dd>${esc(show(p.life_stage))}</dd></div>
+          <div><dt>Risque déclaré</dt><dd>${esc(show(p.risk_declared))}</dd></div><div><dt>Capacité de risque<small>calculé</small></dt><dd>${esc(show(p.risk_capacity))}</dd></div>
+          <div><dt>Risque effectif<small>le plus bas des deux</small></dt><dd>${esc(show(p.risk_effective))}</dd></div>
+          <div><dt>Horizon déclaré / effectif</dt><dd>${p.horizon_years} ans / ${String(p.effective_horizon_years).replace(".", ",")} ans</dd></div>
+          <div><dt>Premier retrait</dt><dd>${esc(p.first_withdrawal.date || "—")} · ${p.first_withdrawal.amount ? cad(p.first_withdrawal.amount) : ""}</dd></div>
+          <div><dt>Fonds d'urgence</dt><dd>${String(p.emergency_fund_months).replace(".", ",")} mois</dd></div>
+          <div><dt>Objectifs</dt><dd>${(p.goals || []).map(g => `${esc(g.name)} (${esc(g.date)}, ${cad(g.amount)})`).join("<br>")}</dd></div>
+          <div><dt>Notes</dt><dd>« ${esc(p.notes)} »</dd></div></dl></section>
+        <section class="card"><h3>Limites tirées du profil</h3><p class="small" style="margin-top:4px">Calculées par des règles à partir de vos réponses seulement. Aucune sortie d'IA n'y entre.</p><dl class="facts" style="margin-top:10px">
+          <div><dt>Bande de volatilité</dt><dd>${pct(L.vol_band_annual[0], 0)} à ${pct(L.vol_band_annual[1], 0)}</dd></div>
+          <div><dt>Repli maximal</dt><dd>${pct(L.max_drawdown_pct / 100, 0)}</dd></div>
+          <div><dt>Plancher à l'horizon</dt><dd>${cad(L.floor_at_horizon)}</dd></div>
+          <div><dt>Revenu fixe minimum</dt><dd>${pct(L.min_fixed_income_weight, 0)}</dd></div>
+          <div><dt>Titre individuel maximum</dt><dd>${pct(L.max_single_stock_weight, 0)}</dd></div>
+          <div><dt>Part du risque d'un secteur</dt><dd>${pct(L.max_sector_risk_share, 0)}</dd></div>
+          <div><dt>Devises étrangères maximum</dt><dd>${pct(L.max_foreign_currency_weight, 0)}</dd></div>
+          <div><dt>Secteur de l'employeur maximum</dt><dd>${pct(L.max_employer_sector_weight, 0)}</dd></div>
+          <div><dt>Types refusés</dt><dd>${esc((L.excluded_asset_types || []).join(", "))}</dd></div>
+          <div><dt>Activités exclues</dt><dd>${esc((L.excluded_activities || []).join(", "))}</dd></div></dl></section>
+      </div></div>`;
   }
+
+  /* ---------- Portefeuille ---------- */
+  function pagePortefeuille(rep) {
+    const m = rep.metrics_current, L = rep.site.limits, g = m.groups || {};
+    const tile = (k, v, l, bad) => `<section class="card"><span class="small">${k}</span><div style="font-size:26px;font-weight:800;color:var(--navy)">${v}</div><span class="small ${bad ? "tx-violation" : ""}" style="${bad ? "font-weight:700" : ""}">${bad ? "✕ " : ""}${l}</span></section>`;
+    const grp = (title, rows) => rows && rows.length ? `<section class="card"><h3>${title}</h3><div class="tbl" style="margin-top:8px"><table><thead><tr><th></th><th class="r">Poids</th><th class="r">Part du risque</th></tr></thead><tbody>${rows.slice().sort((a, b) => b.risk - a.risk).map(r => `<tr class="${r.risk > L.max_sector_risk_share && title === "Secteurs" ? "flag" : ""}"><td>${esc(r.name)}</td><td class="r">${pct(r.weight, 0)}</td><td class="r">${pct(r.risk)}</td></tr>`).join("")}</tbody></table></div></section>` : "";
+    return `<div class="page">
+      <div><p class="eyebrow">Portefeuille</p><h1 style="margin-top:6px">Ce que contient le portefeuille</h1><p class="sub" style="margin-top:6px">${esc(rep.site.label)} · au ${esc(rep.site.as_of)}</p></div>
+      <div class="pillars" style="grid-template-columns:repeat(auto-fit,minmax(200px,1fr))">
+        ${tile("Volatilité annuelle", pct(m.vol), `Votre bande : ${pct(L.vol_band_annual[0], 0)} à ${pct(L.vol_band_annual[1], 0)}`, m.vol > L.vol_band_annual[1])}
+        ${tile("Pire repli historique", pct(m.mdd), `Votre maximum : ${pct(L.max_drawdown_pct / 100, 0)}`, m.mdd < L.max_drawdown_pct / 100)}
+        ${tile("Valeur pessimiste (P5)", cad(m.p5_T), `Votre plancher : ${cad(L.floor_at_horizon)}`, m.p5_T < L.floor_at_horizon)}
+        ${tile("Probabilité de perte", pct(m.loss_prob), "À l'horizon, simulation", false)}</div>
+      <div class="grid2">${keyData(rep, true)}<div class="page" style="gap:20px">${grp("Secteurs", g.sector)}${grp("Pays", g.country)}</div></div></div>`;
+  }
+
+  /* ---------- Sources ---------- */
+  function pageSources(rep) {
+    const unk = rep.unknowns || [];
+    return `<div class="page">
+      <div><p class="eyebrow">Sources et hypothèses</p><h1 style="margin-top:6px">Comment ce rapport est produit</h1></div>
+      <section class="card"><h3>Méthode</h3><ol style="margin:10px 0 0;padding-left:20px;line-height:1.7">
+        <li>Les règles calculent vos limites à partir de vos réponses seulement.</li>
+        <li>Le moteur simule le portefeuille (blocs de 12 mois, 5 000 trajectoires, graine fixe) et le code vérifie chaque limite.</li>
+        <li>Le profil est vérifié seul : règles C1 à C5, puis une passe d'IA dont chaque citation est vérifiée par le code.</li>
+        <li>Chaque facteur est expliqué en parallèle par l'IA à partir de ses seuls faits; le code vérifie références, chiffres et couverture, sinon un texte gabarit est utilisé.</li>
+        <li>Le verdict vient du code : le pire statut parmi les facteurs. L'IA ne fixe jamais un statut, une limite ou un chiffre.</li></ol></section>
+      <div class="src">
+        <section class="card"><h3>Ce qu'on ne peut pas vérifier</h3>${unk.length ? `<ul>${unk.map(c => `<li><b>${esc(c.id)}</b> ${esc((CHECK[c.id] || [c.id])[0])}${c.subject ? " · " + esc(c.subject) : ""} : composition interne des FNB larges inconnue.</li>`).join("")}</ul>` : `<p class="small">Tout a pu être vérifié.</p>`}</section>
+        <section class="card"><h3>Hypothèses de l'équipe</h3><ul>${rep.assumptions.map(a => `<li>${esc(a)}</li>`).join("")}</ul></section>
+        <section class="card"><h3>Audit</h3><ul><li>Rapport <span class="mono">${esc(rep.run_id)}</span></li><li>Profil ${esc(rep.profile_id)} v${esc(rep.profile_version)}</li><li>Portefeuille ${esc(rep.portfolio_id)} (${esc(rep.site.portfolio_file)})</li><li>Données ${esc(rep.data_window.join(" → "))}</li><li>Explication : mode <span class="mono">${esc(rep.explanation.mode)}</span></li></ul></section>
+      </div></div>`;
+  }
+
+  /* ---------- shell ---------- */
+  function render() {
+    const rep = state.rep;
+    if (!rep) return;
+    const bad = rep.sections.some(s => s.status === "violation"), pcBad = rep.profile_coherence && rep.profile_coherence.findings.length;
+    $("#pages").innerHTML = PAGES.map(([id, t]) => `<a href="#${id}" ${state.page === id ? 'aria-current="page"' : ""}>${t}${(id === "facteurs" && bad) || (id === "profil" && pcBad) ? '<span class="dot" aria-hidden="true"></span>' : ""}</a>`).join("");
+    const body = {synthese: pageSynthese, facteurs: factorPage, profil: pageProfil, portefeuille: pagePortefeuille, sources: pageSources}[state.page](rep);
+    $("#app").innerHTML = body;
+    $("#foot").innerHTML = `<div class="wrap" style="display:flex;flex-direction:column;gap:4px"><b style="color:var(--navy)">${esc(rep.disclaimer)}</b><span>Aucune recommandation d'achat ou de vente. Rapport produit par <span class="mono">pipeline.review</span>, hors ligne, sorties d'IA enregistrées.</span></div>`;
+    document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => go(b.dataset.go)));
+    document.querySelectorAll("[data-factor]").forEach(b => b.addEventListener("click", () => { state.factor = b.dataset.factor; go("facteurs", true); }));
+  }
+  function go(page, keepFocus) {
+    if (location.hash !== "#" + page) location.hash = page; else { state.page = page; render(); }
+    if (!keepFocus) window.scrollTo(0, 0);
+  }
+  function route() {
+    const h = location.hash.slice(1);
+    state.page = PAGES.some(([id]) => id === h) ? h : "synthese";
+    render();
+    if (state.page === "facteurs") document.querySelector(`.ftabs [aria-selected="true"]`)?.focus({preventScroll: true});
+  }
+  window.addEventListener("hashchange", () => { route(); window.scrollTo(0, 0); });
 
   async function load(file) {
     try {
       const r = await fetch("reports/" + file);
-      if (!r.ok) throw new Error(r.status);
-      state.factor = "all";
-      render(await r.json());
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      state.rep = await r.json(); state.factor = null; route();
     } catch (e) { $("#app").innerHTML = `<p class="card">Impossible de charger le rapport ${esc(file)} (${esc(e.message)}). Rechargez la page.</p>`; }
   }
+  try { const t = localStorage.getItem("ca-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
+  $("#theme").addEventListener("click", () => {
+    const cur = document.documentElement.dataset.theme || (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+    document.documentElement.dataset.theme = cur === "dark" ? "light" : "dark";
+    try { localStorage.setItem("ca-theme", document.documentElement.dataset.theme); } catch (e) {}
+  });
   (async () => {
-    try { const t = localStorage.getItem("ca-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
-    $("#theme").addEventListener("click", () => {
-      const dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
-      document.documentElement.dataset.theme = dark ? "light" : "dark";
-      try { localStorage.setItem("ca-theme", document.documentElement.dataset.theme); } catch (e) {}
-    });
     try {
       const idx = await (await fetch("reports/index.json")).json();
-      $("#pick").innerHTML = idx.map(r => `<option value="${esc(r.file)}">${esc(r.label)} · ${esc(VERDICT[r.verdict] || r.verdict)}</option>`).join("");
+      $("#pick").innerHTML = idx.map(r => `<option value="${esc(r.file)}">${esc(r.label)}</option>`).join("");
       $("#pick").addEventListener("change", e => load(e.target.value));
       load(idx[0].file);
     } catch (e) { $("#app").innerHTML = `<p class="card">Impossible de charger la liste des rapports. Rechargez la page.</p>`; }
