@@ -21,7 +21,7 @@ from typing import Any
 
 from jsonschema import Draft202012Validator
 
-from . import config, data, engine, explain, factors, gate, store
+from . import config, data, engine, explain, factors, gate, store, stress
 from .coherence import hard, internal, report as report_mod, soft
 from .llm import bedrock, extractors
 from .rules import derive, limits as limits_mod
@@ -321,6 +321,8 @@ def review(fixture_dir: Path, portfolio: str | Path | None = None) -> dict:
         explanation={k: explanation[k] for k in ("mode", "headline", "segments", "disclaimer")},
         assumptions=list(metrics["assumptions"]) + list(FLOW_C_ASSUMPTIONS), data_window=list(market.window),
         disclaimer=config.DISCLAIMER[locale], profile_coherence=profile_coherence)
+    rep["stress"] = stress.stress_block(pf["weights"], pf["value_cad"], assets, data.load_macro(), as_of=pf["as_of"],
+                                        asset_meta=meta["asset_meta"], locale=locale)    # P2.16: info only
     store.save_portfolio(pf)
     store.save_report(rep)
     audit = _audit(

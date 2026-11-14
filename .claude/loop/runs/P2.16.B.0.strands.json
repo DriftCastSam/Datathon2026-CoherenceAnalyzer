@@ -1,0 +1,19 @@
+{
+  "duration_s": 62.9,
+  "guard_cancellations": [
+    {
+      "reason": "'cut' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    }
+  ],
+  "is_error": false,
+  "model_id": "us.anthropic.claude-sonnet-5-5",
+  "num_turns": 9,
+  "result": "`tests/test_stress.py` was already green on the WIP commit, with 20 passed and none skipped. The full suite also passes: `COHERENCE_ANALYZER_LLM=mock python -m pytest -q` gives 1115 passed, and the golden test is unchanged. The only gap was the README, so that is the only file I changed.\n\n**Files changed**\n- `README.md`: added a P2.16 entry to \"Status\" and a rate-stress entry to \"Assumptions\". The assumption entry covers four things:\n  - the ASSUMED durations, marked `sourced: false`;\n  - the first-order formula, with no convexity term;\n  - the proxy yield series for each bond ETF;\n  - equities, crypto and gold not being modelled.\n\nThe code from the WIP commit needed no changes:\n- `coherence_analyzer/stress.py`\n- the macro loader in `coherence_analyzer/data.py`\n- the `stress` block in `coherence_analyzer/schemas/report.json`\n- the `pipeline.review` hook, which is two lines\n\nNo frozen report-schema test broke, so I did not write `BLOCKED.md`.\n\n**SPEC-AMBIGUITY resolved:** none. The README entries are the only decisions I recorded.\n",
+  "stop_reason": "end_turn",
+  "usage": {
+    "inputTokens": 159054,
+    "outputTokens": 2282,
+    "totalTokens": 161336
+  }
+}

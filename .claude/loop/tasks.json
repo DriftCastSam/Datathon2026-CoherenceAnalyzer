@@ -344,6 +344,141 @@
     "README.md"
    ],
    "notes": "P1.1 owns fixtures/amira, fixtures/mateo, scripts/handwrite_llm_cache.py and new llm_cache entries; P1.2 owns data.py, coherence/hard.py, data/meta/SOURCES.md; P1.3 owns store.py, llm/bedrock.py, config.py, deploy/aws/, .env.example; P1.4 owns api.py. These four tasks run IN PARALLEL in separate worktrees: edit only the files your task owns (plus README.md and new test files). Never write data/meta/activity_tags.csv or data/meta/asset_meta.csv. Do NOT edit pipeline.py, store.py, intake.py, gate.py, coherence/, rules/ or fixtures/: build on their current public functions. Use fastapi.testclient.TestClient (httpx is installed). The API never mutates fixtures/: on first access to a profile it copies its fixture dir (profile.json, events.jsonl, portfolio*.json, intents.json if present) into a working dir under store.root()/profiles/<profile_id>/ and works there. Tests point COHERENCE_ANALYZER_STORE_DIR at tmp_path and assert every fixtures/ file hash is unchanged after the whole test module. Endpoints: GET /health; GET /profiles -> [{profile_id, name}] for every fixture dir with profile.json + events.jsonl + portfolio.json (robert today; more appear when fixtures exist, so do not hardcode the count); GET /profiles/{id} -> current working profile (404 unknown id); GET /profiles/{id}/intake?locale=fr-CA|en-CA -> per factor {missing: intake.missing, next_question: intake.next_question}; POST /profiles/{id}/events -> validates §3.4 (type enum, text, ts), assigns the next event_id (ev_<name>_NNNN), appends to the working events.jsonl; type order_intent -> 501 with a message that Flow B is P2 (D7) and nothing is appended; POST /profiles/{id}/intake/answer {path, value} and /intake/skip {path} -> intake.answer / intake.skip on the working profile, saved, returns the profile; POST /profiles/{id}/parsed-rules/{index}/decision {approved: bool, max_pct?: number} -> sets approved_by_user (and max_pct for a theme rule without a number) on values.parsed_notes.value[index], 404 bad index; the request body can never set limits or any llm: field (422 on unknown keys); POST /profiles/{id}/review -> pipeline.review(working_dir) Flow C report; GET /reports/{run_id}, GET /audit/{run_id} -> stored docs, 404 if missing. Limits in returned profiles/reports are always recomputed by the pipeline, never taken from a request. CORS middleware allowing GET/POST from any origin (local demo). Tests: Robert review via the API equals pipeline.review on the fixture apart from run_id/timestamps (verdict, sections, checks); approving then rejecting a parsed rule round-trips; order_intent -> 501; 404/422 cases; no route path contains buy, sell, order or execute. README: how to run uvicorn coherence_analyzer.api:app."
+  },
+  {
+   "id": "P2.13",
+   "title": "ETF sector look-through (engine sector_lookthrough, H6/H10/H11 ETF part)",
+   "spec": [
+    "§3.1",
+    "§3.2 etf_sector_weights",
+    "§5 sector_lookthrough",
+    "§7.3 H6/H10/H11",
+    "§13",
+    "§19",
+    "docs/spec-decisions.md",
+    "docs/spec-factors.md"
+   ],
+   "tests": [
+    "tests/test_lookthrough.py"
+   ],
+   "code": [
+    "coherence_analyzer/data.py",
+    "coherence_analyzer/engine.py",
+    "coherence_analyzer/coherence/hard.py",
+    "coherence_analyzer/factors/",
+    "coherence_analyzer/schemas/report.json",
+    "data/meta/SOURCES.md",
+    "README.md"
+   ],
+   "notes": "Look-through from data/meta/etf_sector_weights.csv (etf, sector, weight, source_url, as_of) removes most unknowns on H6, H10 and the ETF part of H11. With NO such file (or header-only), engine output is byte-identical to today and lookthrough=false. Do NOT create the real CSV with numbers: it must come from issuer holdings pages entered by a human; document format and the four ETFs (XIU.TO, SPY, QQQ, ESGV) in data/meta/SOURCES.md and README. The loader rejects rows without source_url. Oracle tests build a small etf_sector_weights.csv in tmp_path. Ownership: data.py meta loader, engine.py groups/sector part ONLY (not the bootstrap), hard.py H6/H10/H11, factors that display them, report schema. These P2 tasks run IN PARALLEL in separate worktrees: edit only the files your task owns (plus README.md and new test files). No network, no pip install, no real AWS calls in code paths the tests run. Never write data/meta/activity_tags.csv. Golden test (tests/test_engine_golden.py) must stay green."
+  },
+  {
+   "id": "P2.14",
+   "title": "monthly contributions + goal_probs in the engine, G1 info check",
+   "spec": [
+    "§3.3",
+    "§5",
+    "§7.3 G1",
+    "§13",
+    "§19",
+    "docs/spec-decisions.md D1",
+    "docs/spec-factors.md"
+   ],
+   "tests": [
+    "tests/test_goals.py"
+   ],
+   "code": [
+    "coherence_analyzer/engine.py",
+    "coherence_analyzer/coherence/hard.py",
+    "coherence_analyzer/factors/",
+    "coherence_analyzer/schemas/report.json",
+    "coherence_analyzer/pipeline.py",
+    "README.md"
+   ],
+   "notes": "Implement monthly_contribution (added to NAV each step, CAD) and goal_probs (share of paths >= amount at the goal month, goals within horizon) in engine.analyse, replacing the NotImplementedError. Defaults keep current output bit-for-bit. G1 always info with assumption labels, never feeds limits; append G1 as a separate function in hard.py. Contribution and goals from user-declared profile fields only. Minimal edit in pipeline.review to pass them in. Numbers narrated must be in the facts payload. Ownership: engine bootstrap/simulation part (NOT groups/sector), G1, its factor display, report schema. These P2 tasks run IN PARALLEL in separate worktrees: edit only the files your task owns (plus README.md and new test files). No network, no pip install, no real AWS calls in code paths the tests run. Never write data/meta/activity_tags.csv. Golden test (tests/test_engine_golden.py) must stay green."
+  },
+  {
+   "id": "P2.16",
+   "title": "rate-scenario stress from macro_rates.csv (duration-based, labelled assumption)",
+   "spec": [
+    "§3.1 macro",
+    "§5 assumptions",
+    "§9.1",
+    "§13",
+    "§17 step 16",
+    "§19",
+    "docs/spec-decisions.md"
+   ],
+   "tests": [
+    "tests/test_stress.py"
+   ],
+   "code": [
+    "coherence_analyzer/stress.py",
+    "coherence_analyzer/data.py",
+    "coherence_analyzer/schemas/report.json",
+    "coherence_analyzer/pipeline.py",
+    "README.md"
+   ],
+   "notes": "A WIP commit with a partial implementation (stress.py, data.py macro loader, pipeline hook, report schema) is already on this branch: continue from it. Pure stress.py: bond ETF impact ~ -duration x dy for shocks -100/+100/+200 bp (plus a historical scenario from macro_rates.csv if sensible); equities/crypto/gold not modelled, said explicitly. Durations not in starter data: ASSUMED table in code, sourced:false, listed in README Assumptions. Report gets a `stress` block, info only, never violation/warning, never feeds limits; narrated numbers in the facts payload. Keep the pipeline.review hook small. If a frozen report-schema test breaks, write BLOCKED.md. These P2 tasks run IN PARALLEL in separate worktrees: edit only the files your task owns (plus README.md and new test files). No network, no pip install, no real AWS calls in code paths the tests run. Never write data/meta/activity_tags.csv. Golden test (tests/test_engine_golden.py) must stay green."
+  },
+  {
+   "id": "P2.N2",
+   "title": "N2 question_rubric node (schema, prompt, gate, mock cache, opt-in knowledge evidence)",
+   "spec": [
+    "§3.3 knowledge",
+    "§3.4",
+    "§6.1",
+    "§6.2 N2",
+    "§7.1",
+    "§7.4 S2",
+    "§11",
+    "§15",
+    "docs/spec-decisions.md D7"
+   ],
+   "tests": [
+    "tests/test_question_rubric.py"
+   ],
+   "code": [
+    "coherence_analyzer/llm/",
+    "coherence_analyzer/gate.py",
+    "coherence_analyzer/rules/derive.py",
+    "coherence_analyzer/config.py",
+    "fixtures/llm_cache/",
+    "scripts/handwrite_llm_cache.py",
+    "README.md"
+   ],
+   "notes": "A WIP commit (config flag, question_rubric prompt + schema drafts) is already on this branch: continue from it. N2 runs only behind a config flag, default off (D7), so Robert's knowledge.score 74 holds. Output goes through gate.py (real event_ids, exact quotes, confidence cap); enters knowledge.score with by: llm:… provenance; never feeds limits. Hand-written mock cache entries must pass schema + gate. Ownership: llm/ N2 additions, gate N2 rules, derive knowledge part, config flag, minimal Flow A hook. Don't touch pipeline.check, cli, engine, hard, N1/N4. These P2 tasks run IN PARALLEL in separate worktrees: edit only the files your task owns (plus README.md and new test files). No network, no pip install, no real AWS calls in code paths the tests run. Never write data/meta/activity_tags.csv. Golden test (tests/test_engine_golden.py) must stay green."
+  },
+  {
+   "id": "P2.FB",
+   "title": "Flow B trade check wired end-to-end offline (N4, N1, S1/S3, diff, resizer, cli check)",
+   "spec": [
+    "§4 Flow B",
+    "§6.2 N1/N4",
+    "§7.4 S1/S3",
+    "§7.5",
+    "§8",
+    "§9",
+    "§10",
+    "§12",
+    "§13",
+    "§15",
+    "docs/spec-decisions.md D2 D3 D5 D7 D8",
+    "docs/spec-factors.md"
+   ],
+   "tests": [
+    "tests/test_flow_b.py"
+   ],
+   "code": [
+    "coherence_analyzer/pipeline.py",
+    "coherence_analyzer/cli.py",
+    "coherence_analyzer/coherence/report.py",
+    "coherence_analyzer/coherence/soft.py",
+    "coherence_analyzer/explain.py",
+    "fixtures/llm_cache/",
+    "README.md"
+   ],
+   "notes": "Fill pipeline.check() (stub). Robert in_0001 = NVDA 10% from ZST.TO. B1 N4 -> gate -> B2 draft (CLI stops at B2 unless --auto-confirm) -> B3 Flow A refresh with N1 -> B4 intent.apply -> B5 analyse current+proposed same seed -> B6 hard+soft on both + diff (flipped checks + deltas vol, mdd, p5_T, width, loss_prob, top-3 drivers) -> B7 resizer if violations (D2 golden: binding H9 below 5% from ZST) -> B8 explain -> B9 save + audit (model id, as_of, gate decisions). Verdict incoherent. S1/S3 only from gated N1, never violation. Make each step a separate function taking/returning JSON-serialisable dicts (a later task wraps them as Step Functions + Lambda). Hand-written mock cache entries must pass schema + gate. Don't restructure pipeline.review() or engine.py. These P2 tasks run IN PARALLEL in separate worktrees: edit only the files your task owns (plus README.md and new test files). No network, no pip install, no real AWS calls in code paths the tests run. Never write data/meta/activity_tags.csv. Golden test (tests/test_engine_golden.py) must stay green."
   }
  ]
 }

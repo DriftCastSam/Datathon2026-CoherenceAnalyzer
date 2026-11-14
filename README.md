@@ -30,6 +30,7 @@ tests/                       pytest, all offline (COHERENCE_ANALYZER_LLM=mock)
 ## Status
 
 The build order follows SPEC §17. Done:
+- **P2.16:** `stress.py` (rate-scenario stress, `tests/test_stress.py`): bond ETF price change ~ -duration x Δy for parallel shocks of -100 / +100 / +200 bp plus a historical scenario (each held series' largest 12-month rise on month-end values in `macro_rates.csv`, up to the reference date). `data.load_macro_series` added; `pipeline.review` attaches a `stress` block (report schema: `status` is `info`, `feeds_limits` is `false`; never a check, never in the verdict or the limits). Numbers to narrate are pre-formatted in `stress.facts` (numcheck). Equities, crypto and gold are not modelled and the block says so. Durations are ASSUMED (see Assumptions); `data/meta/asset_meta.csv` columns `effective_duration`, `duration_source_url`, `duration_as_of` would make them sourced (none exist yet).
 - **P1.2:** `data.load_meta` validates the three meta files (§3.2: columns, sourced `activity_tags` rows, `mer_source_url` for any ETF fee, `themes` parsed to a list) and `coherence/hard.py` gains H11 (excluded activities), H12 (fees), H13 (theme weight) in `run_cheap`, owned by `contraintes`. `tests/test_meta_checks.py` passes. The real `data/meta/*.csv` do not exist yet, so on Robert H11 and H12 report `unknown` for every held equity / ETF; two older frozen tests in `tests/test_factors.py` pin the P0 list of contraintes checks and now fail: see `.claude/loop/BLOCKED.md`.
 - **P0.1:** `data.py`, the engine refactor, and the golden test.
 - **P0.2:** `levels.py`, `rules/registry.py`, `rules/derive.py`, `rules/limits.py` + tests.
@@ -74,6 +75,8 @@ Working copies live under `COHERENCE_ANALYZER_STORE_DIR` (default: the current d
 - **`data/meta/asset_meta.csv` themes are a team assumption** (`tech_heavy` = QQQ + single tech names; broad index ETFs carry no theme). Five ETF MERs are sourced from issuer pages (2026-11-14); XIU.TO, XBB.TO, ZST.TO, ESGV are blank until a human sources them, so H12 is `unknown` for them. Details: `data/meta/SOURCES.md`.
 
 All persona financial figures beyond the case brief are fictional team assumptions.
+
+- **Rate stress (P2.16), `sourced: false`:** the starter data has no duration column, so effective durations are an ASSUMED table in `stress.py` (years): XBB.TO 7.3, ZST.TO 0.3, AGG 6.0, TLT 16.5, approximate for the tracked indices; a human must replace them with issuer-published values (URL + date) in `asset_meta.csv`. Price change = -duration x Δy, first order, no convexity (no sourced convexity); parallel shifts only (-100 / +100 / +200 bp); USD bond ETFs are shocked in CAD value with USDCAD held constant. Each ETF's yield is proxied by a benchmark in `macro_rates.csv` (XBB.TO -> BD.CDN.10YR.DQ.YLD, ZST.TO -> BD.CDN.2YR.DQ.YLD, AGG and TLT -> DGS10), used for context and the historical scenario only. Equities, crypto and gold: no modelled impact (no rate beta estimated). Info only, not a forecast, never an input of limits or the verdict.
 
 - **Engine drift (annual, CAD):** Stocks / Equity ETFs 6%, Bonds 3%, Gold 3%, Crypto 6%. A team assumption, not a forecast.
 - **Bootstrap:** circular block, block = 12 months, n = 5000, seed = 7.
