@@ -1,0 +1,552 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="30" skipped="0" tests="41" time="0.494" timestamp="2026-11-14T22:40:15.123518+00:00" hostname="bomboclat-laptop"><testcase classname="tests.test_meta_checks" name="test_load_meta_missing_file_is_none[asset_meta]" time="0.001" /><testcase classname="tests.test_meta_checks" name="test_load_meta_missing_file_is_none[etf_sector_weights]" time="0.000" /><testcase classname="tests.test_meta_checks" name="test_load_meta_missing_file_is_none[activity_tags]" time="0.000" /><testcase classname="tests.test_meta_checks" name="test_load_meta_valid_files_keep_the_spec_columns" time="0.002" /><testcase classname="tests.test_meta_checks" name="test_load_meta_rejects_a_missing_column[asset_meta-themes]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-108/test_load_meta_rejects_a_missi0')
+name = 'asset_meta', missing = 'themes'
+
+    @pytest.mark.parametrize("name,missing", [
+        ("asset_meta", "themes"), ("asset_meta", "mer_source_url"), ("asset_meta", "has_lookthrough"),
+        ("etf_sector_weights", "source_url"), ("etf_sector_weights", "weight"),
+        ("activity_tags", "source_url"), ("activity_tags", "added_by"), ("activity_tags", "as_of"),
+    ])
+    def test_load_meta_rejects_a_missing_column(tmp_path, name, missing):
+        """§3.2: a file without one of its documented columns is rejected with ValueError."""
+        cols = [c for c in COLS[name] if c != missing]
+        _write(tmp_path, name, [], cols=cols)
+&gt;       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_meta_checks.py:158: Failed</failure></testcase><testcase classname="tests.test_meta_checks" name="test_load_meta_rejects_a_missing_column[asset_meta-mer_source_url]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-108/test_load_meta_rejects_a_missi1')
+name = 'asset_meta', missing = 'mer_source_url'
+
+    @pytest.mark.parametrize("name,missing", [
+        ("asset_meta", "themes"), ("asset_meta", "mer_source_url"), ("asset_meta", "has_lookthrough"),
+        ("etf_sector_weights", "source_url"), ("etf_sector_weights", "weight"),
+        ("activity_tags", "source_url"), ("activity_tags", "added_by"), ("activity_tags", "as_of"),
+    ])
+    def test_load_meta_rejects_a_missing_column(tmp_path, name, missing):
+        """§3.2: a file without one of its documented columns is rejected with ValueError."""
+        cols = [c for c in COLS[name] if c != missing]
+        _write(tmp_path, name, [], cols=cols)
+&gt;       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_meta_checks.py:158: Failed</failure></testcase><testcase classname="tests.test_meta_checks" name="test_load_meta_rejects_a_missing_column[asset_meta-has_lookthrough]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-108/test_load_meta_rejects_a_missi2')
+name = 'asset_meta', missing = 'has_lookthrough'
+
+    @pytest.mark.parametrize("name,missing", [
+        ("asset_meta", "themes"), ("asset_meta", "mer_source_url"), ("asset_meta", "has_lookthrough"),
+        ("etf_sector_weights", "source_url"), ("etf_sector_weights", "weight"),
+        ("activity_tags", "source_url"), ("activity_tags", "added_by"), ("activity_tags", "as_of"),
+    ])
+    def test_load_meta_rejects_a_missing_column(tmp_path, name, missing):
+        """§3.2: a file without one of its documented columns is rejected with ValueError."""
+        cols = [c for c in COLS[name] if c != missing]
+        _write(tmp_path, name, [], cols=cols)
+&gt;       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_meta_checks.py:158: Failed</failure></testcase><testcase classname="tests.test_meta_checks" name="test_load_meta_rejects_a_missing_column[etf_sector_weights-source_url]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-108/test_load_meta_rejects_a_missi3')
+name = 'etf_sector_weights', missing = 'source_url'
+
+    @pytest.mark.parametrize("name,missing", [
+        ("asset_meta", "themes"), ("asset_meta", "mer_source_url"), ("asset_meta", "has_lookthrough"),
+        ("etf_sector_weights", "source_url"), ("etf_sector_weights", "weight"),
+        ("activity_tags", "source_url"), ("activity_tags", "added_by"), ("activity_tags", "as_of"),
+    ])
+    def test_load_meta_rejects_a_missing_column(tmp_path, name, missing):
+        """§3.2: a file without one of its documented columns is rejected with ValueError."""
+        cols = [c for c in COLS[name] if c != missing]
+        _write(tmp_path, name, [], cols=cols)
+&gt;       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_meta_checks.py:158: Failed</failure></testcase><testcase classname="tests.test_meta_checks" name="test_load_meta_rejects_a_missing_column[etf_sector_weights-weight]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-108/test_load_meta_rejects_a_missi4')
+name = 'etf_sector_weights', missing = 'weight'
+
+    @pytest.mark.parametrize("name,missing", [
+        ("asset_meta", "themes"), ("asset_meta", "mer_source_url"), ("asset_meta", "has_lookthrough"),
+        ("etf_sector_weights", "source_url"), ("etf_sector_weights", "weight"),
+        ("activity_tags", "source_url"), ("activity_tags", "added_by"), ("activity_tags", "as_of"),
+    ])
+    def test_load_meta_rejects_a_missing_column(tmp_path, name, missing):
+        """§3.2: a file without one of its documented columns is rejected with ValueError."""
+        cols = [c for c in COLS[name] if c != missing]
+        _write(tmp_path, name, [], cols=cols)
+&gt;       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_meta_checks.py:158: Failed</failure></testcase><testcase classname="tests.test_meta_checks" name="test_load_meta_rejects_a_missing_column[activity_tags-source_url]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-108/test_load_meta_rejects_a_missi5')
+name = 'activity_tags', missing = 'source_url'
+
+    @pytest.mark.parametrize("name,missing", [
+        ("asset_meta", "themes"), ("asset_meta", "mer_source_url"), ("asset_meta", "has_lookthrough"),
+        ("etf_sector_weights", "source_url"), ("etf_sector_weights", "weight"),
+        ("activity_tags", "source_url"), ("activity_tags", "added_by"), ("activity_tags", "as_of"),
+    ])
+    def test_load_meta_rejects_a_missing_column(tmp_path, name, missing):
+        """§3.2: a file without one of its documented columns is rejected with ValueError."""
+        cols = [c for c in COLS[name] if c != missing]
+        _write(tmp_path, name, [], cols=cols)
+&gt;       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_meta_checks.py:158: Failed</failure></testcase><testcase classname="tests.test_meta_checks" name="test_load_meta_rejects_a_missing_column[activity_tags-added_by]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-108/test_load_meta_rejects_a_missi6')
+name = 'activity_tags', missing = 'added_by'
+
+    @pytest.mark.parametrize("name,missing", [
+        ("asset_meta", "themes"), ("asset_meta", "mer_source_url"), ("asset_meta", "has_lookthrough"),
+        ("etf_sector_weights", "source_url"), ("etf_sector_weights", "weight"),
+        ("activity_tags", "source_url"), ("activity_tags", "added_by"), ("activity_tags", "as_of"),
+    ])
+    def test_load_meta_rejects_a_missing_column(tmp_path, name, missing):
+        """§3.2: a file without one of its documented columns is rejected with ValueError."""
+        cols = [c for c in COLS[name] if c != missing]
+        _write(tmp_path, name, [], cols=cols)
+&gt;       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_meta_checks.py:158: Failed</failure></testcase><testcase classname="tests.test_meta_checks" name="test_load_meta_rejects_a_missing_column[activity_tags-as_of]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-108/test_load_meta_rejects_a_missi7')
+name = 'activity_tags', missing = 'as_of'
+
+    @pytest.mark.parametrize("name,missing", [
+        ("asset_meta", "themes"), ("asset_meta", "mer_source_url"), ("asset_meta", "has_lookthrough"),
+        ("etf_sector_weights", "source_url"), ("etf_sector_weights", "weight"),
+        ("activity_tags", "source_url"), ("activity_tags", "added_by"), ("activity_tags", "as_of"),
+    ])
+    def test_load_meta_rejects_a_missing_column(tmp_path, name, missing):
+        """§3.2: a file without one of its documented columns is rejected with ValueError."""
+        cols = [c for c in COLS[name] if c != missing]
+        _write(tmp_path, name, [], cols=cols)
+&gt;       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_meta_checks.py:158: Failed</failure></testcase><testcase classname="tests.test_meta_checks" name="test_load_meta_rejects_unsourced_activity_tag_row[source_url]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-108/test_load_meta_rejects_unsourc0')
+blank = 'source_url'
+
+    @pytest.mark.parametrize("blank", ["source_url", "as_of", "added_by"])
+    def test_load_meta_rejects_unsourced_activity_tag_row(tmp_path, blank):
+        """§3.2/§1: an activity_tags row needs a source_url, an as_of date and a human added_by."""
+        row = _tag("XOM", ENV)
+        row[blank] = ""
+        _write(tmp_path, "activity_tags", [_tag("ENB.TO", SOC), row])
+&gt;       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_meta_checks.py:168: Failed</failure></testcase><testcase classname="tests.test_meta_checks" name="test_load_meta_rejects_unsourced_activity_tag_row[as_of]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-108/test_load_meta_rejects_unsourc1')
+blank = 'as_of'
+
+    @pytest.mark.parametrize("blank", ["source_url", "as_of", "added_by"])
+    def test_load_meta_rejects_unsourced_activity_tag_row(tmp_path, blank):
+        """§3.2/§1: an activity_tags row needs a source_url, an as_of date and a human added_by."""
+        row = _tag("XOM", ENV)
+        row[blank] = ""
+        _write(tmp_path, "activity_tags", [_tag("ENB.TO", SOC), row])
+&gt;       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_meta_checks.py:168: Failed</failure></testcase><testcase classname="tests.test_meta_checks" name="test_load_meta_rejects_unsourced_activity_tag_row[added_by]" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-108/test_load_meta_rejects_unsourc2')
+blank = 'added_by'
+
+    @pytest.mark.parametrize("blank", ["source_url", "as_of", "added_by"])
+    def test_load_meta_rejects_unsourced_activity_tag_row(tmp_path, blank):
+        """§3.2/§1: an activity_tags row needs a source_url, an as_of date and a human added_by."""
+        row = _tag("XOM", ENV)
+        row[blank] = ""
+        _write(tmp_path, "activity_tags", [_tag("ENB.TO", SOC), row])
+&gt;       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_meta_checks.py:168: Failed</failure></testcase><testcase classname="tests.test_meta_checks" name="test_load_meta_rejects_etf_mer_without_source_url" time="0.001"><failure message="Failed: DID NOT RAISE ValueError">tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-108/test_load_meta_rejects_etf_mer0')
+
+    def test_load_meta_rejects_etf_mer_without_source_url(tmp_path):
+        """§3.2: 'Don't guess': an ETF row with mer_pct but no mer_source_url is rejected."""
+        _write(tmp_path, "asset_meta", [_am("XIU.TO", mer=0.18, url="", as_of="2026-11-01")])
+&gt;       with pytest.raises(ValueError):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE ValueError
+
+tests/test_meta_checks.py:175: Failed</failure></testcase><testcase classname="tests.test_meta_checks" name="test_load_meta_accepts_unfilled_etf_mer_and_unsourced_stock_zero" time="0.001" /><testcase classname="tests.test_meta_checks" name="test_load_meta_asset_meta_themes_are_a_semicolon_list" time="0.002"><failure message="AssertionError: assert ['a', 'i', ';...'e', 'm', ...] == ['ai', 'semis']&#10;  &#10;  At index 0 diff: 'a' != 'ai'&#10;  Left contains 6 more items, first extra item: ';'&#10;  Use -v to get more diff">tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-108/test_load_meta_asset_meta_them0')
+
+    def test_load_meta_asset_meta_themes_are_a_semicolon_list(tmp_path):
+        """§3.2: `themes` is a semicolon list (NVDA -&gt; ai;semis); one theme stays a one-item list; blank is empty."""
+        _write(tmp_path, "asset_meta", [_am("NVDA", mer=0, themes="ai;semis"), _am("QQQ", mer=0.2, url="https://example.test/q",
+                                                                                        as_of="2026-11-01", themes="tech_heavy"),
+                                        _am("RY.TO", mer=0, themes="")])
+        df = data.load_meta("asset_meta", tmp_path)
+        by = {r["ticker"]: r for r in (df.reset_index() if "ticker" not in df.columns else df).to_dict("records")}
+        # SPEC-AMBIGUITY: §3.2 says themes is a semicolon list and the task says the loader parses it; the stricter
+        # reading is that the loaded cell is already a list of strings (a blank cell gives an empty list).
+&gt;       assert list(by["NVDA"]["themes"]) == ["ai", "semis"]
+E       AssertionError: assert ['a', 'i', ';...'e', 'm', ...] == ['ai', 'semis']
+E         
+E         At index 0 diff: 'a' != 'ai'
+E         Left contains 6 more items, first extra item: ';'
+E         Use -v to get more diff
+
+tests/test_meta_checks.py:195: AssertionError</failure></testcase><testcase classname="tests.test_meta_checks" name="test_h11_no_tags_file_every_held_equity_and_etf_is_unknown_never_violation" time="0.003"><failure message="AssertionError: assert set() == {'unknown'}&#10;  &#10;  Extra items in the right set:&#10;  'unknown'&#10;  Use -v to get more diff">mateo_weights = {'XIU.TO': 0.15, 'ESGV': 0.2, 'SPY': 0.1, 'RY.TO': 0.05, ...}
+make_profile = &lt;function make_profile.&lt;locals&gt;.make at 0x7164e5229bc0&gt;
+assets =         asset_id  ...                                 sector
+ticker            ...                                    ...                       Crypto asset
+ETH-USD      A31  ...                           Crypto asset
+
+[31 rows x 6 columns]
+tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-108/test_h11_no_tags_file_every_he0')
+
+    def test_h11_no_tags_file_every_held_equity_and_etf_is_unknown_never_violation(
+            mateo_weights, make_profile, assets, tmp_path):
+        """§7.3/§15 Mateo: with no activity_tags file XOM and ENB.TO (and every held equity) are `unknown`, one per ticker.
+        Held ETFs with no asset_meta have no look-through -&gt; `unknown` too. Nothing is `pass` or `violation`."""
+        p, h11 = _h11(mateo_weights, make_profile, assets, tmp_path)
+&gt;       assert {c["status"] for c in h11} == {"unknown"}
+E       AssertionError: assert set() == {'unknown'}
+E         
+E         Extra items in the right set:
+E         'unknown'
+E         Use -v to get more diff
+
+tests/test_meta_checks.py:213: AssertionError</failure></testcase><testcase classname="tests.test_meta_checks" name="test_h11_sourced_tag_row_is_a_violation_on_that_ticker" time="0.002"><failure message="assert 0 == 1&#10; +  where 0 = len([])">mateo_weights = {'XIU.TO': 0.15, 'ESGV': 0.2, 'SPY': 0.1, 'RY.TO': 0.05, ...}
+make_profile = &lt;function make_profile.&lt;locals&gt;.make at 0x7164e54128d0&gt;
+assets =         asset_id  ...                                 sector
+ticker            ...                                    ...                       Crypto asset
+ETH-USD      A31  ...                           Crypto asset
+
+[31 rows x 6 columns]
+tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-108/test_h11_sourced_tag_row_is_a_0')
+
+    def test_h11_sourced_tag_row_is_a_violation_on_that_ticker(mateo_weights, make_profile, assets, tmp_path):
+        """§15 Mateo: a sourced XOM significant_environmental_controversy row -&gt; H11 violation on XOM, value the tag,
+        evidence = the row's source_url; the other equities stay `unknown`."""
+        _, h11 = _h11(mateo_weights, make_profile, assets, tmp_path, tags=[_tag("XOM", ENV)])
+        viol = [c for c in h11 if c["status"] == "violation"]
+&gt;       assert len(viol) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests/test_meta_checks.py:232: AssertionError</failure></testcase><testcase classname="tests.test_meta_checks" name="test_h11_one_violation_per_excluded_tag_and_one_unknown_per_ticker" time="0.002"><failure message="AssertionError: assert [] == ['significant..._controversy']&#10;  &#10;  Right contains 2 more items, first extra item: 'significant_environmental_controversy'&#10;  Use -v to get more diff">mateo_weights = {'XIU.TO': 0.15, 'ESGV': 0.2, 'SPY': 0.1, 'RY.TO': 0.05, ...}
+make_profile = &lt;function make_profile.&lt;locals&gt;.make at 0x7164e5412770&gt;
+assets =         asset_id  ...                                 sector
+ticker            ...                                    ...                       Crypto asset
+ETH-USD      A31  ...                           Crypto asset
+
+[31 rows x 6 columns]
+tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-108/test_h11_one_violation_per_exc0')
+
+    def test_h11_one_violation_per_excluded_tag_and_one_unknown_per_ticker(mateo_weights, make_profile, assets, tmp_path):
+        """§7.3: two sourced tags on one equity -&gt; a violation for each tag; unknowns stay one per ticker."""
+        tags = [_tag("XOM", ENV, "https://example.test/a"), _tag("XOM", SOC, "https://example.test/b")]
+        _, h11 = _h11(mateo_weights, make_profile, assets, tmp_path, tags=tags)
+        viol = [c for c in h11 if c["status"] == "violation"]
+&gt;       assert sorted(c["value"] for c in viol) == sorted([ENV, SOC])
+E       AssertionError: assert [] == ['significant..._controversy']
+E         
+E         Right contains 2 more items, first extra item: 'significant_environmental_controversy'
+E         Use -v to get more diff
+
+tests/test_meta_checks.py:251: AssertionError</failure></testcase><testcase classname="tests.test_meta_checks" name="test_h11_tag_outside_the_excluded_categories_never_fires" time="0.002"><failure message="assert (0 == 1)&#10; +  where 0 = len([])">mateo_weights = {'XIU.TO': 0.15, 'ESGV': 0.2, 'SPY': 0.1, 'RY.TO': 0.05, ...}
+make_profile = &lt;function make_profile.&lt;locals&gt;.make at 0x7164e5412140&gt;
+assets =         asset_id  ...                                 sector
+ticker            ...                                    ...                       Crypto asset
+ETH-USD      A31  ...                           Crypto asset
+
+[31 rows x 6 columns]
+tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-108/test_h11_tag_outside_the_exclu0')
+
+    def test_h11_tag_outside_the_excluded_categories_never_fires(mateo_weights, make_profile, assets, tmp_path):
+        """§7.3: tag rows for non-excluded tags never fire: XOM tagged only fossil_fuel_producer (not excluded here)
+        gets no violation and no pass; it is `unknown` (no tag row in an excluded category)."""
+        tags = [_tag("XOM", "fossil_fuel_producer"), _tag("ENB.TO", "tobacco")]
+        _, h11 = _h11(mateo_weights, make_profile, assets, tmp_path, tags=tags)
+        assert not [c for c in h11 if c["status"] in ("violation", "pass")]
+        assert "fossil_fuel_producer" not in {c["value"] for c in h11}
+        xom = [c for c in h11 if c["subject"] == "XOM"]
+&gt;       assert len(xom) == 1 and xom[0]["status"] == "unknown"
+E       assert (0 == 1)
+E        +  where 0 = len([])
+
+tests/test_meta_checks.py:267: AssertionError</failure></testcase><testcase classname="tests.test_meta_checks" name="test_h11_tag_on_a_ticker_that_is_not_held_never_fires" time="0.002" /><testcase classname="tests.test_meta_checks" name="test_h11_etf_without_lookthrough_is_unknown_even_with_asset_meta" time="0.002"><failure message="AssertionError: AGG&#10;assert (0 == 1)&#10; +  where 0 = len([])">mateo_weights = {'XIU.TO': 0.15, 'ESGV': 0.2, 'SPY': 0.1, 'RY.TO': 0.05, ...}
+make_profile = &lt;function make_profile.&lt;locals&gt;.make at 0x7164e5412090&gt;
+assets =         asset_id  ...                                 sector
+ticker            ...                                    ...                       Crypto asset
+ETH-USD      A31  ...                           Crypto asset
+
+[31 rows x 6 columns]
+tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-108/test_h11_etf_without_lookthrou0')
+
+    def test_h11_etf_without_lookthrough_is_unknown_even_with_asset_meta(mateo_weights, make_profile, assets, tmp_path):
+        """§7.3: asset_meta rows with has_lookthrough false -&gt; each held ETF is `unknown`, exactly once."""
+        am = [_am(t, look="false") for t in MATEO_ETFS]
+        _, h11 = _h11(mateo_weights, make_profile, assets, tmp_path, tags=[_tag("XOM", ENV)], asset_meta=am)
+        for t in MATEO_ETFS:
+            got = [c for c in h11 if c["subject"] == t]
+&gt;           assert len(got) == 1 and got[0]["status"] == "unknown", t
+E           AssertionError: AGG
+E           assert (0 == 1)
+E            +  where 0 = len([])
+
+tests/test_meta_checks.py:283: AssertionError</failure></testcase><testcase classname="tests.test_meta_checks" name="test_h11_no_excluded_activities_follows_the_h1_pass_convention" time="0.001"><failure message="assert 0 == 1&#10; +  where 0 = len([])">mateo_weights = {'XIU.TO': 0.15, 'ESGV': 0.2, 'SPY': 0.1, 'RY.TO': 0.05, ...}
+make_profile = &lt;function make_profile.&lt;locals&gt;.make at 0x7164e52c8eb0&gt;
+assets =         asset_id  ...                                 sector
+ticker            ...                                    ...                       Crypto asset
+ETH-USD      A31  ...                           Crypto asset
+
+[31 rows x 6 columns]
+tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-108/test_h11_no_excluded_activitie0')
+
+    def test_h11_no_excluded_activities_follows_the_h1_pass_convention(mateo_weights, make_profile, assets, tmp_path):
+        """§7.3 + H1 convention: nothing excluded -&gt; one pass check (subject None, value 0.0, limit None), no unknowns,
+        even with no meta files at all."""
+        p, h11 = _h11(mateo_weights, make_profile, assets, tmp_path, excluded=())
+&gt;       assert len(h11) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests/test_meta_checks.py:290: AssertionError</failure></testcase><testcase classname="tests.test_meta_checks" name="test_h12_per_etf_pass_violation_unknown" time="0.002"><failure message="AssertionError: assert [] == ['AGG', 'ESGV...TO', 'XIU.TO']&#10;  &#10;  Right contains 5 more items, first extra item: 'AGG'&#10;  Use -v to get more diff">mateo_weights = {'XIU.TO': 0.15, 'ESGV': 0.2, 'SPY': 0.1, 'RY.TO': 0.05, ...}
+make_profile = &lt;function make_profile.&lt;locals&gt;.make at 0x7164e52c9640&gt;
+assets =         asset_id  ...                                 sector
+ticker            ...                                    ...                       Crypto asset
+ETH-USD      A31  ...                           Crypto asset
+
+[31 rows x 6 columns]
+tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-108/test_h12_per_etf_pass_violatio0')
+
+    def test_h12_per_etf_pass_violation_unknown(mateo_weights, make_profile, assets, tmp_path):
+        """§7.3 H12: each held ETF: mer_pct &gt; max_fee_mer_pct (0.5) -&gt; violation; blank MER or missing row -&gt; unknown;
+        else pass. Value = the MER in percent, limit = the limit, unit pct, one result per ETF."""
+        p = make_profile()
+        h12 = _h12(mateo_weights, p, assets, tmp_path, FEE_ROWS)
+&gt;       assert sorted(c["subject"] for c in h12) == MATEO_ETFS           # ETFs only: no stock, one per ETF
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert [] == ['AGG', 'ESGV...TO', 'XIU.TO']
+E         
+E         Right contains 5 more items, first extra item: 'AGG'
+E         Use -v to get more diff
+
+tests/test_meta_checks.py:319: AssertionError</failure></testcase><testcase classname="tests.test_meta_checks" name="test_h12_no_asset_meta_file_every_held_etf_is_unknown" time="0.001"><failure message="AssertionError: assert {} == {'AGG': 'unkn...unknown', ...}&#10;  &#10;  Right contains 5 more items:&#10;  {'AGG': 'unknown',&#10;   'ESGV': 'unknown',&#10;   'SPY': 'unknown',&#10;   'XBB.TO': 'unknown',&#10;   'XIU.TO': 'unknown'}&#10;  Use -v to get more diff">mateo_weights = {'XIU.TO': 0.15, 'ESGV': 0.2, 'SPY': 0.1, 'RY.TO': 0.05, ...}
+make_profile = &lt;function make_profile.&lt;locals&gt;.make at 0x7164e52c9900&gt;
+assets =         asset_id  ...                                 sector
+ticker            ...                                    ...                       Crypto asset
+ETH-USD      A31  ...                           Crypto asset
+
+[31 rows x 6 columns]
+tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-108/test_h12_no_asset_meta_file_ev0')
+
+    def test_h12_no_asset_meta_file_every_held_etf_is_unknown(mateo_weights, make_profile, assets, tmp_path):
+        """§3.2/§7.3: asset_meta not built -&gt; MER unknown for every held ETF (never pass)."""
+        h12 = _h12(mateo_weights, make_profile(), assets, tmp_path, None)
+&gt;       assert {c["subject"]: c["status"] for c in h12} == {t: "unknown" for t in MATEO_ETFS}
+E       AssertionError: assert {} == {'AGG': 'unkn...unknown', ...}
+E         
+E         Right contains 5 more items:
+E         {'AGG': 'unknown',
+E          'ESGV': 'unknown',
+E          'SPY': 'unknown',
+E          'XBB.TO': 'unknown',
+E          'XIU.TO': 'unknown'}
+E         Use -v to get more diff
+
+tests/test_meta_checks.py:336: AssertionError</failure></testcase><testcase classname="tests.test_meta_checks" name="test_h12_equality_with_the_limit_is_a_pass" time="0.002"><failure message="AssertionError: assert {} == {'XIU.TO': 'p...: 'violation'}&#10;  &#10;  Right contains 3 more items:&#10;  {'ESGV': 'violation', 'SPY': 'pass', 'XIU.TO': 'pass'}&#10;  Use -v to get more diff">assets =         asset_id  ...                                 sector
+ticker            ...                                    ...                       Crypto asset
+ETH-USD      A31  ...                           Crypto asset
+
+[31 rows x 6 columns]
+make_profile = &lt;function make_profile.&lt;locals&gt;.make at 0x7164e52c80f0&gt;
+tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-108/test_h12_equality_with_the_lim0')
+
+    def test_h12_equality_with_the_limit_is_a_pass(assets, make_profile, tmp_path):
+        """§7.3: `&gt;` is a violation, so MER == limit passes; float noise below EPS (_gt) also passes; above EPS fails."""
+        rows = [_etf("XIU.TO", 0.5), _etf("SPY", 0.5 + 1e-10), _etf("ESGV", 0.5 + 1e-6)]
+        w = {"XIU.TO": 0.1, "SPY": 0.1, "ESGV": 0.1}
+        h12 = _h12(w, make_profile(), assets, tmp_path, rows)
+&gt;       assert {c["subject"]: c["status"] for c in h12} == {"XIU.TO": "pass", "SPY": "pass", "ESGV": "violation"}
+E       AssertionError: assert {} == {'XIU.TO': 'p...: 'violation'}
+E         
+E         Right contains 3 more items:
+E         {'ESGV': 'violation', 'SPY': 'pass', 'XIU.TO': 'pass'}
+E         Use -v to get more diff
+
+tests/test_meta_checks.py:345: AssertionError</failure></testcase><testcase classname="tests.test_meta_checks" name="test_h12_checks_commodity_and_bond_etfs_but_not_stocks_or_crypto" time="0.002"><failure message="AssertionError: assert {} == {'GLD': 'viol...'TLT': 'pass'}&#10;  &#10;  Right contains 2 more items:&#10;  {'GLD': 'violation', 'TLT': 'pass'}&#10;  Use -v to get more diff">assets =         asset_id  ...                                 sector
+ticker            ...                                    ...                       Crypto asset
+ETH-USD      A31  ...                           Crypto asset
+
+[31 rows x 6 columns]
+make_profile = &lt;function make_profile.&lt;locals&gt;.make at 0x7164e52ca8d0&gt;
+tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-108/test_h12_checks_commodity_and_0')
+
+    def test_h12_checks_commodity_and_bond_etfs_but_not_stocks_or_crypto(assets, make_profile, tmp_path):
+        """§7.3: every held ETF class (etf_equity, etf_bond, etf_commodity) is checked; equity and crypto are not."""
+        rows = [_etf("GLD", 0.40), _etf("TLT", 0.15), _am("MSFT", mer=0), _am("BTC-USD", mer=0)]
+        w = {"GLD": 0.1, "TLT": 0.1, "MSFT": 0.1, "BTC-USD": 0.05}
+        h12 = _h12(w, make_profile(fee=0.25), assets, tmp_path, rows)
+&gt;       assert {c["subject"]: c["status"] for c in h12} == {"GLD": "violation", "TLT": "pass"}
+E       AssertionError: assert {} == {'GLD': 'viol...'TLT': 'pass'}
+E         
+E         Right contains 2 more items:
+E         {'GLD': 'violation', 'TLT': 'pass'}
+E         Use -v to get more diff
+
+tests/test_meta_checks.py:353: AssertionError</failure></testcase><testcase classname="tests.test_meta_checks" name="test_h12_unheld_etf_is_not_checked" time="0.001"><failure message="AssertionError: assert [] == ['XIU.TO']&#10;  &#10;  Right contains one more item: 'XIU.TO'&#10;  Use -v to get more diff">assets =         asset_id  ...                                 sector
+ticker            ...                                    ...                       Crypto asset
+ETH-USD      A31  ...                           Crypto asset
+
+[31 rows x 6 columns]
+make_profile = &lt;function make_profile.&lt;locals&gt;.make at 0x7164e52cb740&gt;
+tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-108/test_h12_unheld_etf_is_not_che0')
+
+    def test_h12_unheld_etf_is_not_checked(assets, make_profile, tmp_path):
+        """§7.3: only held ETFs: a high-MER row for an ETF with weight 0 or absent produces nothing."""
+        rows = [_etf("XIU.TO", 0.18), _etf("QQQ", 0.9), _etf("SPY", 0.9)]
+        h12 = _h12({"XIU.TO": 0.2, "SPY": 0.0}, make_profile(), assets, tmp_path, rows)
+&gt;       assert [c["subject"] for c in h12] == ["XIU.TO"]
+E       AssertionError: assert [] == ['XIU.TO']
+E         
+E         Right contains one more item: 'XIU.TO'
+E         Use -v to get more diff
+
+tests/test_meta_checks.py:361: AssertionError</failure></testcase><testcase classname="tests.test_meta_checks" name="test_h12_without_max_fee_limit_emits_no_results" time="0.002" /><testcase classname="tests.test_meta_checks" name="test_h13_sums_weights_per_theme_and_compares_with_the_max" time="0.001"><failure message="AssertionError: expected exactly one H13 {'subject': 'tech_heavy'}, got []&#10;assert 0 == 1&#10; +  where 0 = len([])">make_profile = &lt;function make_profile.&lt;locals&gt;.make at 0x7164e52b40f0&gt;
+assets =         asset_id  ...                                 sector
+ticker            ...                                    ...                       Crypto asset
+ETH-USD      A31  ...                           Crypto asset
+
+[31 rows x 6 columns]
+tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-108/test_h13_sums_weights_per_them0')
+
+    def test_h13_sums_weights_per_theme_and_compares_with_the_max(make_profile, assets, tmp_path):
+        """§7.3 H13: Σ weight of holdings carrying the theme; an ETF counts fully. tech_heavy = QQQ .20 + MSFT .07 = .27
+        &gt; .25 violation; semis = NVDA .08 &lt;= .10 pass; one result per theme in limits.max_theme_weight."""
+        p = make_profile(themes={"tech_heavy": 0.25, "semis": 0.10})
+        h13 = _h13(THEME_W, p, assets, tmp_path, THEME_ROWS)
+        # SPEC-AMBIGUITY: §7.3 gives no subject for H13; the theme name is the subject (as sector is for H6/H10).
+&gt;       tech = _one(h13, "H13", subject="tech_heavy")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_meta_checks.py:388: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+checks = [], cid = 'H13', where = {'subject': 'tech_heavy'}
+
+    def _one(checks, cid, **where) -&gt; dict:
+        got = _by(checks, cid, **where)
+&gt;       assert len(got) == 1, f"expected exactly one {cid} {where}, got {got}"
+E       AssertionError: expected exactly one H13 {'subject': 'tech_heavy'}, got []
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests/test_meta_checks.py:114: AssertionError</failure></testcase><testcase classname="tests.test_meta_checks" name="test_h13_equality_is_a_pass_and_float_noise_does_not_flip_it" time="0.002"><failure message="AssertionError: expected exactly one H13 {'subject': 'ai'}, got []&#10;assert 0 == 1&#10; +  where 0 = len([])">make_profile = &lt;function make_profile.&lt;locals&gt;.make at 0x7164e52b4a90&gt;
+assets =         asset_id  ...                                 sector
+ticker            ...                                    ...                       Crypto asset
+ETH-USD      A31  ...                           Crypto asset
+
+[31 rows x 6 columns]
+tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-108/test_h13_equality_is_a_pass_an0')
+
+    def test_h13_equality_is_a_pass_and_float_noise_does_not_flip_it(make_profile, assets, tmp_path):
+        """§7.3 + `_gt` tolerance: ai = NVDA .08 + MSFT .07 = .15 against max .15 passes (0.08 + 0.07 is not exactly 0.15)."""
+        h13 = _h13(THEME_W, make_profile(themes={"ai": 0.15}), assets, tmp_path, THEME_ROWS)
+&gt;       c = _one(h13, "H13", subject="ai")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_meta_checks.py:403: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+checks = [], cid = 'H13', where = {'subject': 'ai'}
+
+    def _one(checks, cid, **where) -&gt; dict:
+        got = _by(checks, cid, **where)
+&gt;       assert len(got) == 1, f"expected exactly one {cid} {where}, got {got}"
+E       AssertionError: expected exactly one H13 {'subject': 'ai'}, got []
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests/test_meta_checks.py:114: AssertionError</failure></testcase><testcase classname="tests.test_meta_checks" name="test_h13_theme_nobody_holds_passes_with_zero" time="0.002"><failure message="AssertionError: expected exactly one H13 {'subject': 'ev'}, got []&#10;assert 0 == 1&#10; +  where 0 = len([])">make_profile = &lt;function make_profile.&lt;locals&gt;.make at 0x7164e52b4f60&gt;
+assets =         asset_id  ...                                 sector
+ticker            ...                                    ...                       Crypto asset
+ETH-USD      A31  ...                           Crypto asset
+
+[31 rows x 6 columns]
+tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-108/test_h13_theme_nobody_holds_pa0')
+
+    def test_h13_theme_nobody_holds_passes_with_zero(make_profile, assets, tmp_path):
+        """§7.3: a limited theme no holding carries sums to 0 -&gt; pass."""
+&gt;       c = _one(_h13(THEME_W, make_profile(themes={"ev": 0.05}), assets, tmp_path, THEME_ROWS), "H13", subject="ev")
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_meta_checks.py:412: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+checks = [], cid = 'H13', where = {'subject': 'ev'}
+
+    def _one(checks, cid, **where) -&gt; dict:
+        got = _by(checks, cid, **where)
+&gt;       assert len(got) == 1, f"expected exactly one {cid} {where}, got {got}"
+E       AssertionError: expected exactly one H13 {'subject': 'ev'}, got []
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests/test_meta_checks.py:114: AssertionError</failure></testcase><testcase classname="tests.test_meta_checks" name="test_h13_no_asset_meta_is_unknown_per_theme" time="0.001"><failure message="AssertionError: assert {} == {'tech_heavy'...i': 'unknown'}&#10;  &#10;  Right contains 2 more items:&#10;  {'ai': 'unknown', 'tech_heavy': 'unknown'}&#10;  Use -v to get more diff">make_profile = &lt;function make_profile.&lt;locals&gt;.make at 0x7164e52b57a0&gt;
+assets =         asset_id  ...                                 sector
+ticker            ...                                    ...                       Crypto asset
+ETH-USD      A31  ...                           Crypto asset
+
+[31 rows x 6 columns]
+tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-108/test_h13_no_asset_meta_is_unkn0')
+
+    def test_h13_no_asset_meta_is_unknown_per_theme(make_profile, assets, tmp_path):
+        """§7.3/§3.2: no asset_meta file -&gt; themes cannot be read -&gt; `unknown` for each limited theme, never pass."""
+        p = make_profile(themes={"tech_heavy": 0.25, "ai": 0.15})
+        h13 = _h13(THEME_W, p, assets, tmp_path, None)
+&gt;       assert {c["subject"]: c["status"] for c in h13} == {"tech_heavy": "unknown", "ai": "unknown"}
+E       AssertionError: assert {} == {'tech_heavy'...i': 'unknown'}
+E         
+E         Right contains 2 more items:
+E         {'ai': 'unknown', 'tech_heavy': 'unknown'}
+E         Use -v to get more diff
+
+tests/test_meta_checks.py:420: AssertionError</failure></testcase><testcase classname="tests.test_meta_checks" name="test_h13_without_max_theme_weight_emits_no_results" time="0.002" /><testcase classname="tests.test_meta_checks" name="test_run_cheap_emits_h11_h12_h13_in_cheap_order" time="0.002"><failure message="AssertionError: assert {'H11', 'H12', 'H13'} &lt;= {'H1', 'H2', ...', 'H5', 'H6'}&#10;  &#10;  Extra items in the left set:&#10;  'H11'&#10;  'H12'&#10;  'H13'">mateo_weights = {'XIU.TO': 0.15, 'ESGV': 0.2, 'SPY': 0.1, 'RY.TO': 0.05, ...}
+make_profile = &lt;function make_profile.&lt;locals&gt;.make at 0x7164e52b6e50&gt;
+assets =         asset_id  ...                                 sector
+ticker            ...                                    ...                       Crypto asset
+ETH-USD      A31  ...                           Crypto asset
+
+[31 rows x 6 columns]
+tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-108/test_run_cheap_emits_h11_h12_h0')
+
+    def test_run_cheap_emits_h11_h12_h13_in_cheap_order(mateo_weights, make_profile, assets, tmp_path):
+        """§8: H1-H6 then H11, H12, H13 in `hard.CHEAP` order; every one of them is in run_cheap's output."""
+        meta = _meta(tmp_path, asset_meta=THEME_ROWS + [r for r in FEE_ROWS if r["ticker"] in MATEO_ETFS])
+        p = make_profile(themes={"tech_heavy": 0.25})
+        ids = [c["id"] for c in hard.run_cheap(mateo_weights, p, assets, meta)]
+&gt;       assert {"H11", "H12", "H13"} &lt;= set(ids)
+E       AssertionError: assert {'H11', 'H12', 'H13'} &lt;= {'H1', 'H2', ...', 'H5', 'H6'}
+E         
+E         Extra items in the left set:
+E         'H11'
+E         'H12'
+E         'H13'
+
+tests/test_meta_checks.py:436: AssertionError</failure></testcase><testcase classname="tests.test_meta_checks" name="test_h11_h12_h13_belong_to_contraintes[H11]" time="0.000" /><testcase classname="tests.test_meta_checks" name="test_h11_h12_h13_belong_to_contraintes[H12]" time="0.000" /><testcase classname="tests.test_meta_checks" name="test_h11_h12_h13_belong_to_contraintes[H13]" time="0.000" /><testcase classname="tests.test_meta_checks" name="test_meta_unknowns_never_change_the_verdict_but_a_violation_does" time="0.001"><failure message="assert ([])">mateo_weights = {'XIU.TO': 0.15, 'ESGV': 0.2, 'SPY': 0.1, 'RY.TO': 0.05, ...}
+make_profile = &lt;function make_profile.&lt;locals&gt;.make at 0x7164e52b75e0&gt;
+assets =         asset_id  ...                                 sector
+ticker            ...                                    ...                       Crypto asset
+ETH-USD      A31  ...                           Crypto asset
+
+[31 rows x 6 columns]
+tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-108/test_meta_unknowns_never_chang0')
+
+    def test_meta_unknowns_never_change_the_verdict_but_a_violation_does(mateo_weights, make_profile, assets, tmp_path):
+        """D3/§7.5: Mateo with only H11-H13 unknowns is `coherent` and lists them; one sourced tag makes it `incoherent`."""
+        p = make_profile(themes={"tech_heavy": 0.25})
+        only = [c for c in hard.run_cheap(mateo_weights, p, assets, _meta(tmp_path))
+                if c["id"] in ("H11", "H12", "H13")]
+&gt;       assert only and {c["status"] for c in only} == {"unknown"}
+E       assert ([])
+
+tests/test_meta_checks.py:453: AssertionError</failure></testcase></testsuite></testsuites>
