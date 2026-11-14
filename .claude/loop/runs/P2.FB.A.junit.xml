@@ -1,0 +1,539 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="15" failures="7" skipped="0" tests="23" time="1.006" timestamp="2026-11-14T23:01:58.468791+00:00" hostname="bomboclat-laptop"><testcase classname="tests.test_flow_b" name="test_check_without_auto_confirm_stops_at_b2_after_n4_only" time="0.003"><failure message="NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)">tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-192/test_check_without_auto_confir0')
+
+    def test_check_without_auto_confirm_stops_at_b2_after_n4_only(tmp_path):
+        """SPEC §4 B2 + §12: without --auto-confirm the run stops at the draft: N4 ran (B1), the draft is shown, but no
+        N1 / N5 call, no engine report and nothing is saved (the user has not confirmed; invariant: never auto-executed)."""
+&gt;       run = _run(["check", str(FIX), "--intent", INTENT_ID], tmp_path)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_flow_b.py:201: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_flow_b.py:107: in _run
+    cli.main(argv)
+coherence_analyzer/cli.py:75: in main
+    pipeline.check(a.fixture, a.intent, auto_confirm=a.auto_confirm)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+fixture_dir = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/agent-a93cc0f99c5ce0dce/fixtures/robert')
+intent_id = 'in_0001', auto_confirm = False
+
+    def check(fixture_dir: Path, intent_id: str, *, auto_confirm: bool = False) -&gt; dict:
+        """Flow B: B1 intent_parser ... B9 report + audit. P2 (D7 point 3): not wired."""
+&gt;       raise NotImplementedError("Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)")
+E       NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)
+
+coherence_analyzer/pipeline.py:247: NotImplementedError</failure></testcase><testcase classname="tests.test_flow_b" name="test_check_with_an_unknown_intent_id_raises_a_clear_error_not_the_stub" time="0.002"><failure message="NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)">tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-192/test_check_with_an_unknown_int0')
+
+    def test_check_with_an_unknown_intent_id_raises_a_clear_error_not_the_stub(tmp_path):
+        """SPEC §12: `--intent` names an intent of the fixture; an id that does not exist is an error, and the P0
+        NotImplementedError stub is gone."""
+        # SPEC-AMBIGUITY: the exception type is not specified; any lookup/value error is accepted, the stub is not.
+        with pytest.raises((ValueError, LookupError, FileNotFoundError)):
+&gt;           _run(["check", str(FIX), "--intent", "in_9999", "--auto-confirm"], tmp_path)
+
+tests/test_flow_b.py:213: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_flow_b.py:107: in _run
+    cli.main(argv)
+coherence_analyzer/cli.py:75: in main
+    pipeline.check(a.fixture, a.intent, auto_confirm=a.auto_confirm)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+fixture_dir = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/agent-a93cc0f99c5ce0dce/fixtures/robert')
+intent_id = 'in_9999', auto_confirm = True
+
+    def check(fixture_dir: Path, intent_id: str, *, auto_confirm: bool = False) -&gt; dict:
+        """Flow B: B1 intent_parser ... B9 report + audit. P2 (D7 point 3): not wired."""
+&gt;       raise NotImplementedError("Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)")
+E       NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)
+
+coherence_analyzer/pipeline.py:247: NotImplementedError</failure></testcase><testcase classname="tests.test_flow_b" name="test_check_report_is_schema_valid_flow_b_with_both_sides" time="0.001"><error message="failed on setup with &quot;NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=None, _trace=&lt;pluggy._tracing.TagTracerSub object at 0x794afde0cd60&gt;, _basetemp=PosixPath('/tmp/pytest-of-safraa/pytest-192'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def run_b(tmp_path_factory) -&gt; dict:
+        """`cli check fixtures/robert --intent in_0001 --auto-confirm` (acceptance)."""
+&gt;       return _run(_check_argv(), tmp_path_factory.mktemp("b1"))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_flow_b.py:178: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_flow_b.py:107: in _run
+    cli.main(argv)
+coherence_analyzer/cli.py:75: in main
+    pipeline.check(a.fixture, a.intent, auto_confirm=a.auto_confirm)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+fixture_dir = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/agent-a93cc0f99c5ce0dce/fixtures/robert')
+intent_id = 'in_0001', auto_confirm = True
+
+    def check(fixture_dir: Path, intent_id: str, *, auto_confirm: bool = False) -&gt; dict:
+        """Flow B: B1 intent_parser ... B9 report + audit. P2 (D7 point 3): not wired."""
+&gt;       raise NotImplementedError("Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)")
+E       NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)
+
+coherence_analyzer/pipeline.py:247: NotImplementedError</error></testcase><testcase classname="tests.test_flow_b" name="test_report_intent_is_the_confirmed_in_0001_nvda_10_from_zst" time="0.000"><error message="failed on setup with &quot;NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=None, _trace=&lt;pluggy._tracing.TagTracerSub object at 0x794afde0cd60&gt;, _basetemp=PosixPath('/tmp/pytest-of-safraa/pytest-192'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def run_b(tmp_path_factory) -&gt; dict:
+        """`cli check fixtures/robert --intent in_0001 --auto-confirm` (acceptance)."""
+&gt;       return _run(_check_argv(), tmp_path_factory.mktemp("b1"))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_flow_b.py:178: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_flow_b.py:107: in _run
+    cli.main(argv)
+coherence_analyzer/cli.py:75: in main
+    pipeline.check(a.fixture, a.intent, auto_confirm=a.auto_confirm)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+fixture_dir = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/agent-a93cc0f99c5ce0dce/fixtures/robert')
+intent_id = 'in_0001', auto_confirm = True
+
+    def check(fixture_dir: Path, intent_id: str, *, auto_confirm: bool = False) -&gt; dict:
+        """Flow B: B1 intent_parser ... B9 report + audit. P2 (D7 point 3): not wired."""
+&gt;       raise NotImplementedError("Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)")
+E       NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)
+
+coherence_analyzer/pipeline.py:247: NotImplementedError</error></testcase><testcase classname="tests.test_flow_b" name="test_verdict_is_incoherent_and_sections_follow_the_proposed_checks" time="0.000"><error message="failed on setup with &quot;NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=None, _trace=&lt;pluggy._tracing.TagTracerSub object at 0x794afde0cd60&gt;, _basetemp=PosixPath('/tmp/pytest-of-safraa/pytest-192'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def run_b(tmp_path_factory) -&gt; dict:
+        """`cli check fixtures/robert --intent in_0001 --auto-confirm` (acceptance)."""
+&gt;       return _run(_check_argv(), tmp_path_factory.mktemp("b1"))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_flow_b.py:178: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_flow_b.py:107: in _run
+    cli.main(argv)
+coherence_analyzer/cli.py:75: in main
+    pipeline.check(a.fixture, a.intent, auto_confirm=a.auto_confirm)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+fixture_dir = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/agent-a93cc0f99c5ce0dce/fixtures/robert')
+intent_id = 'in_0001', auto_confirm = True
+
+    def check(fixture_dir: Path, intent_id: str, *, auto_confirm: bool = False) -&gt; dict:
+        """Flow B: B1 intent_parser ... B9 report + audit. P2 (D7 point 3): not wired."""
+&gt;       raise NotImplementedError("Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)")
+E       NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)
+
+coherence_analyzer/pipeline.py:247: NotImplementedError</error></testcase><testcase classname="tests.test_flow_b" name="test_checks_are_the_hard_checks_of_each_portfolio_and_carry_a_factor" time="0.031"><error message="failed on setup with &quot;NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=None, _trace=&lt;pluggy._tracing.TagTracerSub object at 0x794afde0cd60&gt;, _basetemp=PosixPath('/tmp/pytest-of-safraa/pytest-192'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def run_b(tmp_path_factory) -&gt; dict:
+        """`cli check fixtures/robert --intent in_0001 --auto-confirm` (acceptance)."""
+&gt;       return _run(_check_argv(), tmp_path_factory.mktemp("b1"))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_flow_b.py:178: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_flow_b.py:107: in _run
+    cli.main(argv)
+coherence_analyzer/cli.py:75: in main
+    pipeline.check(a.fixture, a.intent, auto_confirm=a.auto_confirm)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+fixture_dir = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/agent-a93cc0f99c5ce0dce/fixtures/robert')
+intent_id = 'in_0001', auto_confirm = True
+
+    def check(fixture_dir: Path, intent_id: str, *, auto_confirm: bool = False) -&gt; dict:
+        """Flow B: B1 intent_parser ... B9 report + audit. P2 (D7 point 3): not wired."""
+&gt;       raise NotImplementedError("Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)")
+E       NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)
+
+coherence_analyzer/pipeline.py:247: NotImplementedError</error></testcase><testcase classname="tests.test_flow_b" name="test_metrics_current_and_proposed_are_the_engine_values_with_the_same_seed" time="0.000"><error message="failed on setup with &quot;NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=None, _trace=&lt;pluggy._tracing.TagTracerSub object at 0x794afde0cd60&gt;, _basetemp=PosixPath('/tmp/pytest-of-safraa/pytest-192'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def run_b(tmp_path_factory) -&gt; dict:
+        """`cli check fixtures/robert --intent in_0001 --auto-confirm` (acceptance)."""
+&gt;       return _run(_check_argv(), tmp_path_factory.mktemp("b1"))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_flow_b.py:178: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_flow_b.py:107: in _run
+    cli.main(argv)
+coherence_analyzer/cli.py:75: in main
+    pipeline.check(a.fixture, a.intent, auto_confirm=a.auto_confirm)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+fixture_dir = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/agent-a93cc0f99c5ce0dce/fixtures/robert')
+intent_id = 'in_0001', auto_confirm = True
+
+    def check(fixture_dir: Path, intent_id: str, *, auto_confirm: bool = False) -&gt; dict:
+        """Flow B: B1 intent_parser ... B9 report + audit. P2 (D7 point 3): not wired."""
+&gt;       raise NotImplementedError("Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)")
+E       NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)
+
+coherence_analyzer/pipeline.py:247: NotImplementedError</error></testcase><testcase classname="tests.test_flow_b" name="test_unknowns_are_those_of_the_proposed_checks_and_listed_apart_from_the_verdict" time="0.000"><error message="failed on setup with &quot;NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=None, _trace=&lt;pluggy._tracing.TagTracerSub object at 0x794afde0cd60&gt;, _basetemp=PosixPath('/tmp/pytest-of-safraa/pytest-192'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def run_b(tmp_path_factory) -&gt; dict:
+        """`cli check fixtures/robert --intent in_0001 --auto-confirm` (acceptance)."""
+&gt;       return _run(_check_argv(), tmp_path_factory.mktemp("b1"))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_flow_b.py:178: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_flow_b.py:107: in _run
+    cli.main(argv)
+coherence_analyzer/cli.py:75: in main
+    pipeline.check(a.fixture, a.intent, auto_confirm=a.auto_confirm)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+fixture_dir = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/agent-a93cc0f99c5ce0dce/fixtures/robert')
+intent_id = 'in_0001', auto_confirm = True
+
+    def check(fixture_dir: Path, intent_id: str, *, auto_confirm: bool = False) -&gt; dict:
+        """Flow B: B1 intent_parser ... B9 report + audit. P2 (D7 point 3): not wired."""
+&gt;       raise NotImplementedError("Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)")
+E       NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)
+
+coherence_analyzer/pipeline.py:247: NotImplementedError</error></testcase><testcase classname="tests.test_flow_b" name="test_s1_and_s3_come_from_the_gated_n1_and_are_never_violations" time="0.000"><error message="failed on setup with &quot;NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=None, _trace=&lt;pluggy._tracing.TagTracerSub object at 0x794afde0cd60&gt;, _basetemp=PosixPath('/tmp/pytest-of-safraa/pytest-192'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def run_b(tmp_path_factory) -&gt; dict:
+        """`cli check fixtures/robert --intent in_0001 --auto-confirm` (acceptance)."""
+&gt;       return _run(_check_argv(), tmp_path_factory.mktemp("b1"))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_flow_b.py:178: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_flow_b.py:107: in _run
+    cli.main(argv)
+coherence_analyzer/cli.py:75: in main
+    pipeline.check(a.fixture, a.intent, auto_confirm=a.auto_confirm)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+fixture_dir = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/agent-a93cc0f99c5ce0dce/fixtures/robert')
+intent_id = 'in_0001', auto_confirm = True
+
+    def check(fixture_dir: Path, intent_id: str, *, auto_confirm: bool = False) -&gt; dict:
+        """Flow B: B1 intent_parser ... B9 report + audit. P2 (D7 point 3): not wired."""
+&gt;       raise NotImplementedError("Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)")
+E       NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)
+
+coherence_analyzer/pipeline.py:247: NotImplementedError</error></testcase><testcase classname="tests.test_flow_b" name="test_low_confidence_n1_gives_info_not_warning" time="0.001"><failure message="NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)">tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-192/test_low_confidence_n1_gives_i0')
+
+    def test_low_confidence_n1_gives_info_not_warning(tmp_path):
+        """§7.4: soft checks only warn when the source field passed the gate with confidence &gt;= 0.5; at 0.4 the answer is
+        stored as-is but S1 / S3 are `info` ("insufficient evidence"). The hard checks still decide the verdict."""
+        def weak(out):
+            out["confidence"] = 0.4
+            return out
+&gt;       run = _run(_check_argv(), tmp_path, patch_output=_n1_patch(weak))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_flow_b.py:367: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_flow_b.py:107: in _run
+    cli.main(argv)
+coherence_analyzer/cli.py:75: in main
+    pipeline.check(a.fixture, a.intent, auto_confirm=a.auto_confirm)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+fixture_dir = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/agent-a93cc0f99c5ce0dce/fixtures/robert')
+intent_id = 'in_0001', auto_confirm = True
+
+    def check(fixture_dir: Path, intent_id: str, *, auto_confirm: bool = False) -&gt; dict:
+        """Flow B: B1 intent_parser ... B9 report + audit. P2 (D7 point 3): not wired."""
+&gt;       raise NotImplementedError("Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)")
+E       NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)
+
+coherence_analyzer/pipeline.py:247: NotImplementedError</failure></testcase><testcase classname="tests.test_flow_b" name="test_invented_n1_evidence_is_rejected_by_the_gate_and_never_reaches_the_report" time="0.001"><failure message="NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)">tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-192/test_invented_n1_evidence_is_r0')
+
+    def test_invented_n1_evidence_is_rejected_by_the_gate_and_never_reaches_the_report(tmp_path):
+        """Invariants 4 + 5 + §11: an N1 answer citing an event_id that does not exist is `rejected:evidence`; the previous
+        behavioural value stays (S1 still warns on it), nothing invented appears in the report, the run completes."""
+        def invent(out):
+            out["evidence"] = [{"event_id": "ev_invented_9999", "signal": "hype_chasing", "note": "made up"}]
+            return out
+&gt;       run = _run(_check_argv(), tmp_path, patch_output=_n1_patch(invent))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_flow_b.py:383: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_flow_b.py:107: in _run
+    cli.main(argv)
+coherence_analyzer/cli.py:75: in main
+    pipeline.check(a.fixture, a.intent, auto_confirm=a.auto_confirm)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+fixture_dir = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/agent-a93cc0f99c5ce0dce/fixtures/robert')
+intent_id = 'in_0001', auto_confirm = True
+
+    def check(fixture_dir: Path, intent_id: str, *, auto_confirm: bool = False) -&gt; dict:
+        """Flow B: B1 intent_parser ... B9 report + audit. P2 (D7 point 3): not wired."""
+&gt;       raise NotImplementedError("Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)")
+E       NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)
+
+coherence_analyzer/pipeline.py:247: NotImplementedError</failure></testcase><testcase classname="tests.test_flow_b" name="test_report_diff_lists_flipped_checks_and_metric_deltas" time="0.000"><error message="failed on setup with &quot;NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=None, _trace=&lt;pluggy._tracing.TagTracerSub object at 0x794afde0cd60&gt;, _basetemp=PosixPath('/tmp/pytest-of-safraa/pytest-192'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def run_b(tmp_path_factory) -&gt; dict:
+        """`cli check fixtures/robert --intent in_0001 --auto-confirm` (acceptance)."""
+&gt;       return _run(_check_argv(), tmp_path_factory.mktemp("b1"))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_flow_b.py:178: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_flow_b.py:107: in _run
+    cli.main(argv)
+coherence_analyzer/cli.py:75: in main
+    pipeline.check(a.fixture, a.intent, auto_confirm=a.auto_confirm)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+fixture_dir = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/agent-a93cc0f99c5ce0dce/fixtures/robert')
+intent_id = 'in_0001', auto_confirm = True
+
+    def check(fixture_dir: Path, intent_id: str, *, auto_confirm: bool = False) -&gt; dict:
+        """Flow B: B1 intent_parser ... B9 report + audit. P2 (D7 point 3): not wired."""
+&gt;       raise NotImplementedError("Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)")
+E       NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)
+
+coherence_analyzer/pipeline.py:247: NotImplementedError</error></testcase><testcase classname="tests.test_flow_b" name="test_diff_function_flipped_checks_and_deltas_are_pure" time="0.143"><failure message="NotImplementedError">expected = {'current': {'metrics': {'vol': 0.0727, 'vol_local': 0.0793, 'mdd': -0.077, 'mdd_date': '2022-09', ...}, 'checks': [{'...s': 'pass', 'subject': 'JNJ', ...}, {'id': 'H3', 'kind': 'hard', 'status': 'violation', 'subject': 'NVDA', ...}, ...]}}
+
+    def test_diff_function_flipped_checks_and_deltas_are_pure(expected):
+        """§7.5: `report.diff(current, proposed, m_cur, m_new)` gives the flipped checks and the metric deltas (vol, mdd,
+        p5_T, width, loss_prob, top-3 drivers), JSON-serialisable, without mutating its inputs; identical sides flip nothing."""
+        cur, new = expected["current"], expected["proposed"]
+        a, b = copy.deepcopy(cur["checks"]), copy.deepcopy(new["checks"])
+        ma, mb = copy.deepcopy(cur["metrics"]), copy.deepcopy(new["metrics"])
+&gt;       d = report_mod.diff(a, b, ma, mb)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_flow_b.py:428: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+current = [{'id': 'H1', 'kind': 'hard', 'status': 'pass', 'subject': None, ...}, {'id': 'H2', 'kind': 'hard', 'status': 'pass', ...', 'status': 'pass', 'subject': 'JNJ', ...}, {'id': 'H3', 'kind': 'hard', 'status': 'pass', 'subject': 'PG', ...}, ...]
+proposed = [{'id': 'H1', 'kind': 'hard', 'status': 'pass', 'subject': None, ...}, {'id': 'H2', 'kind': 'hard', 'status': 'pass', ...tus': 'pass', 'subject': 'JNJ', ...}, {'id': 'H3', 'kind': 'hard', 'status': 'violation', 'subject': 'NVDA', ...}, ...]
+m_cur = {'vol': 0.0727, 'vol_local': 0.0793, 'mdd': -0.077, 'mdd_date': '2022-09', ...}
+m_new = {'vol': 0.0983, 'vol_local': 0.1075, 'mdd': -0.134, 'mdd_date': '2022-09', ...}
+
+    def diff(current: list[Check], proposed: list[Check], m_cur: dict, m_new: dict) -&gt; dict:
+        """Checks whose status flipped + metric deltas (vol, mdd, p5_T, width, loss_prob, top-3 drivers)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/report.py:76: NotImplementedError</failure></testcase><testcase classname="tests.test_flow_b" name="test_alternatives_are_the_resizer_options_for_robert_nvda_from_zst" time="0.000"><error message="failed on setup with &quot;NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=None, _trace=&lt;pluggy._tracing.TagTracerSub object at 0x794afde0cd60&gt;, _basetemp=PosixPath('/tmp/pytest-of-safraa/pytest-192'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def run_b(tmp_path_factory) -&gt; dict:
+        """`cli check fixtures/robert --intent in_0001 --auto-confirm` (acceptance)."""
+&gt;       return _run(_check_argv(), tmp_path_factory.mktemp("b1"))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_flow_b.py:178: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_flow_b.py:107: in _run
+    cli.main(argv)
+coherence_analyzer/cli.py:75: in main
+    pipeline.check(a.fixture, a.intent, auto_confirm=a.auto_confirm)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+fixture_dir = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/agent-a93cc0f99c5ce0dce/fixtures/robert')
+intent_id = 'in_0001', auto_confirm = True
+
+    def check(fixture_dir: Path, intent_id: str, *, auto_confirm: bool = False) -&gt; dict:
+        """Flow B: B1 intent_parser ... B9 report + audit. P2 (D7 point 3): not wired."""
+&gt;       raise NotImplementedError("Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)")
+E       NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)
+
+coherence_analyzer/pipeline.py:247: NotImplementedError</error></testcase><testcase classname="tests.test_flow_b" name="test_a_trade_that_fits_has_no_violation_no_resizer_and_keeps_the_soft_warnings" time="0.003"><failure message="NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)">tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-192/test_a_trade_that_fits_has_no_0')
+
+    def test_a_trade_that_fits_has_no_violation_no_resizer_and_keeps_the_soft_warnings(tmp_path):
+        """§4 B7: "if proposed has violations -&gt; resizer": NVDA 1 % (every check passes at n=5000, tests/test_resizer.py)
+        gives no hard violation, `alternatives == []`, and verdict coherent_with_warnings (S1 and S3 warn, §7.5)."""
+        work = tmp_path / "robert"
+        shutil.copytree(FIX, work)
+        intents = _read(work / "intents.json")
+        intents[0]["target_weight_pct"] = 1
+        (work / "intents.json").write_text(json.dumps(intents), encoding="utf-8")
+&gt;       run = _run(_check_argv(work), tmp_path)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_flow_b.py:475: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_flow_b.py:107: in _run
+    cli.main(argv)
+coherence_analyzer/cli.py:75: in main
+    pipeline.check(a.fixture, a.intent, auto_confirm=a.auto_confirm)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+fixture_dir = PosixPath('/tmp/pytest-of-safraa/pytest-192/test_a_trade_that_fits_has_no_0/robert')
+intent_id = 'in_0001', auto_confirm = True
+
+    def check(fixture_dir: Path, intent_id: str, *, auto_confirm: bool = False) -&gt; dict:
+        """Flow B: B1 intent_parser ... B9 report + audit. P2 (D7 point 3): not wired."""
+&gt;       raise NotImplementedError("Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)")
+E       NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)
+
+coherence_analyzer/pipeline.py:247: NotImplementedError</failure></testcase><testcase classname="tests.test_flow_b" name="test_explanation_is_verified_template_framed_and_the_disclaimer_is_fixed" time="0.000"><error message="failed on setup with &quot;NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=None, _trace=&lt;pluggy._tracing.TagTracerSub object at 0x794afde0cd60&gt;, _basetemp=PosixPath('/tmp/pytest-of-safraa/pytest-192'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def run_b(tmp_path_factory) -&gt; dict:
+        """`cli check fixtures/robert --intent in_0001 --auto-confirm` (acceptance)."""
+&gt;       return _run(_check_argv(), tmp_path_factory.mktemp("b1"))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_flow_b.py:178: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_flow_b.py:107: in _run
+    cli.main(argv)
+coherence_analyzer/cli.py:75: in main
+    pipeline.check(a.fixture, a.intent, auto_confirm=a.auto_confirm)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+fixture_dir = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/agent-a93cc0f99c5ce0dce/fixtures/robert')
+intent_id = 'in_0001', auto_confirm = True
+
+    def check(fixture_dir: Path, intent_id: str, *, auto_confirm: bool = False) -&gt; dict:
+        """Flow B: B1 intent_parser ... B9 report + audit. P2 (D7 point 3): not wired."""
+&gt;       raise NotImplementedError("Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)")
+E       NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)
+
+coherence_analyzer/pipeline.py:247: NotImplementedError</error></testcase><testcase classname="tests.test_flow_b" name="test_llm_calls_are_n4_then_n1_then_the_explainer_with_exact_payloads" time="0.000"><error message="failed on setup with &quot;NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=None, _trace=&lt;pluggy._tracing.TagTracerSub object at 0x794afde0cd60&gt;, _basetemp=PosixPath('/tmp/pytest-of-safraa/pytest-192'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def run_b(tmp_path_factory) -&gt; dict:
+        """`cli check fixtures/robert --intent in_0001 --auto-confirm` (acceptance)."""
+&gt;       return _run(_check_argv(), tmp_path_factory.mktemp("b1"))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_flow_b.py:178: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_flow_b.py:107: in _run
+    cli.main(argv)
+coherence_analyzer/cli.py:75: in main
+    pipeline.check(a.fixture, a.intent, auto_confirm=a.auto_confirm)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+fixture_dir = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/agent-a93cc0f99c5ce0dce/fixtures/robert')
+intent_id = 'in_0001', auto_confirm = True
+
+    def check(fixture_dir: Path, intent_id: str, *, auto_confirm: bool = False) -&gt; dict:
+        """Flow B: B1 intent_parser ... B9 report + audit. P2 (D7 point 3): not wired."""
+&gt;       raise NotImplementedError("Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)")
+E       NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)
+
+coherence_analyzer/pipeline.py:247: NotImplementedError</error></testcase><testcase classname="tests.test_flow_b" name="test_audit_record_has_model_id_as_of_engine_and_every_gate_decision" time="0.000"><error message="failed on setup with &quot;NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=None, _trace=&lt;pluggy._tracing.TagTracerSub object at 0x794afde0cd60&gt;, _basetemp=PosixPath('/tmp/pytest-of-safraa/pytest-192'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def run_b(tmp_path_factory) -&gt; dict:
+        """`cli check fixtures/robert --intent in_0001 --auto-confirm` (acceptance)."""
+&gt;       return _run(_check_argv(), tmp_path_factory.mktemp("b1"))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_flow_b.py:178: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_flow_b.py:107: in _run
+    cli.main(argv)
+coherence_analyzer/cli.py:75: in main
+    pipeline.check(a.fixture, a.intent, auto_confirm=a.auto_confirm)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+fixture_dir = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/agent-a93cc0f99c5ce0dce/fixtures/robert')
+intent_id = 'in_0001', auto_confirm = True
+
+    def check(fixture_dir: Path, intent_id: str, *, auto_confirm: bool = False) -&gt; dict:
+        """Flow B: B1 intent_parser ... B9 report + audit. P2 (D7 point 3): not wired."""
+&gt;       raise NotImplementedError("Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)")
+E       NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)
+
+coherence_analyzer/pipeline.py:247: NotImplementedError</error></testcase><testcase classname="tests.test_flow_b" name="test_cli_check_prints_the_verdict_and_the_audit_is_readable" time="0.000"><error message="failed on setup with &quot;NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=None, _trace=&lt;pluggy._tracing.TagTracerSub object at 0x794afde0cd60&gt;, _basetemp=PosixPath('/tmp/pytest-of-safraa/pytest-192'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def run_b(tmp_path_factory) -&gt; dict:
+        """`cli check fixtures/robert --intent in_0001 --auto-confirm` (acceptance)."""
+&gt;       return _run(_check_argv(), tmp_path_factory.mktemp("b1"))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_flow_b.py:178: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_flow_b.py:107: in _run
+    cli.main(argv)
+coherence_analyzer/cli.py:75: in main
+    pipeline.check(a.fixture, a.intent, auto_confirm=a.auto_confirm)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+fixture_dir = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/agent-a93cc0f99c5ce0dce/fixtures/robert')
+intent_id = 'in_0001', auto_confirm = True
+
+    def check(fixture_dir: Path, intent_id: str, *, auto_confirm: bool = False) -&gt; dict:
+        """Flow B: B1 intent_parser ... B9 report + audit. P2 (D7 point 3): not wired."""
+&gt;       raise NotImplementedError("Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)")
+E       NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)
+
+coherence_analyzer/pipeline.py:247: NotImplementedError</error></testcase><testcase classname="tests.test_flow_b" name="test_check_run_leaves_fixtures_and_activity_tags_unchanged" time="0.000"><error message="failed on setup with &quot;NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=None, _trace=&lt;pluggy._tracing.TagTracerSub object at 0x794afde0cd60&gt;, _basetemp=PosixPath('/tmp/pytest-of-safraa/pytest-192'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def run_b(tmp_path_factory) -&gt; dict:
+        """`cli check fixtures/robert --intent in_0001 --auto-confirm` (acceptance)."""
+&gt;       return _run(_check_argv(), tmp_path_factory.mktemp("b1"))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_flow_b.py:178: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_flow_b.py:107: in _run
+    cli.main(argv)
+coherence_analyzer/cli.py:75: in main
+    pipeline.check(a.fixture, a.intent, auto_confirm=a.auto_confirm)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+fixture_dir = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/agent-a93cc0f99c5ce0dce/fixtures/robert')
+intent_id = 'in_0001', auto_confirm = True
+
+    def check(fixture_dir: Path, intent_id: str, *, auto_confirm: bool = False) -&gt; dict:
+        """Flow B: B1 intent_parser ... B9 report + audit. P2 (D7 point 3): not wired."""
+&gt;       raise NotImplementedError("Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)")
+E       NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)
+
+coherence_analyzer/pipeline.py:247: NotImplementedError</error></testcase><testcase classname="tests.test_flow_b" name="test_running_the_check_twice_gives_identical_reports_except_run_id_and_timestamps" time="0.000"><error message="failed on setup with &quot;NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=None, _trace=&lt;pluggy._tracing.TagTracerSub object at 0x794afde0cd60&gt;, _basetemp=PosixPath('/tmp/pytest-of-safraa/pytest-192'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def run_b(tmp_path_factory) -&gt; dict:
+        """`cli check fixtures/robert --intent in_0001 --auto-confirm` (acceptance)."""
+&gt;       return _run(_check_argv(), tmp_path_factory.mktemp("b1"))
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_flow_b.py:178: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_flow_b.py:107: in _run
+    cli.main(argv)
+coherence_analyzer/cli.py:75: in main
+    pipeline.check(a.fixture, a.intent, auto_confirm=a.auto_confirm)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+fixture_dir = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/agent-a93cc0f99c5ce0dce/fixtures/robert')
+intent_id = 'in_0001', auto_confirm = True
+
+    def check(fixture_dir: Path, intent_id: str, *, auto_confirm: bool = False) -&gt; dict:
+        """Flow B: B1 intent_parser ... B9 report + audit. P2 (D7 point 3): not wired."""
+&gt;       raise NotImplementedError("Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)")
+E       NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)
+
+coherence_analyzer/pipeline.py:247: NotImplementedError</error></testcase><testcase classname="tests.test_flow_b" name="test_pipeline_check_returns_the_report_and_is_no_longer_the_stub" time="0.016"><failure message="NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)">tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-192/test_pipeline_check_returns_th0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x794ad0486150&gt;
+report_schema = {'$schema': 'https://json-schema.org/draft/2020-12/schema', '$id': 'https://coherence-analyzer.local/schemas/report.js...ts have intent, checks_proposed, metrics_proposed and diff = null and alternatives = []. Flow B fills them (P2).', ...}
+
+    def test_pipeline_check_returns_the_report_and_is_no_longer_the_stub(tmp_path, monkeypatch, report_schema):
+        """§4 + P2.FB: `pipeline.check(fixture_dir, intent_id, auto_confirm=True)` runs B1-B9 and returns the report,
+        like `pipeline.review` does; the report is the one saved in the store."""
+        monkeypatch.chdir(tmp_path)
+&gt;       res = pipeline.check(FIX, INTENT_ID, auto_confirm=True)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/agent-a93cc0f99c5ce0dce/tests/test_flow_b.py:624: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+fixture_dir = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/agent-a93cc0f99c5ce0dce/fixtures/robert')
+intent_id = 'in_0001', auto_confirm = True
+
+    def check(fixture_dir: Path, intent_id: str, *, auto_confirm: bool = False) -&gt; dict:
+        """Flow B: B1 intent_parser ... B9 report + audit. P2 (D7 point 3): not wired."""
+&gt;       raise NotImplementedError("Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)")
+E       NotImplementedError: Flow B (N4 intent_parser, confirm form, trade diff) is P2; use `review` (docs/spec-decisions.md D7)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/agent-a93cc0f99c5ce0dce/coherence_analyzer/pipeline.py:247: NotImplementedError</failure></testcase><testcase classname="tests.test_flow_b" name="test_hand_written_cache_entries_for_n1_and_n4_pass_schema_and_gate" time="0.003" /></testsuite></testsuites>

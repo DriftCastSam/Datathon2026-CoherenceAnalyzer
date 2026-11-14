@@ -1,0 +1,35 @@
+{
+  "duration_s": 298.4,
+  "guard_cancellations": [
+    {
+      "reason": "'^class' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'S3\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'python' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'p[limits]=lim' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'S3\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    }
+  ],
+  "is_error": false,
+  "model_id": "us.anthropic.claude-sonnet-5-5",
+  "num_turns": 29,
+  "result": "sides, S3 a warning on the proposed side only, both cite real event ids, no soft check is a violation, and the N1 gate status is `accepted` (\u00a77.4, invariant 3).\n- `test_low_confidence_n1_gives_info_not_warning`: with N1 confidence 0.4, S1 and S3 are `info`, and the hard checks still make the verdict `incoherent` (\u00a77.4, `WARN_MIN_CONF`).\n- `test_invented_n1_evidence_is_rejected_by_the_gate_and_never_reaches_the_report`: N1 citing an invented event id gets `rejected:evidence`, the id appears nowhere, the previous S1 warning stays and the run completes (\u00a711, invariants 4 and 5).\n- `test_report_diff_lists_flipped_checks_and_metric_deltas`: H3, H4, H7, H8 and H9 flip pass to violation, H10 ends as a violation, and H1, H2, H5 and S1 are not listed. Metric deltas equal proposed minus current for vol, mdd, p5_T, width and loss_prob, and the top-3 drivers are NVDA, XIU.TO, SPY (\u00a77.5, B6).\n- `test_diff_function_flipped_checks_and_deltas_are_pure`: `report.diff` is pure, JSON-serialisable and mutates nothing; identical sides give no flips and zero deltas (\u00a77.5).\n- `test_alternatives_are_the_resizer_options_for_robert_nvda_from_zst`: at most 3 distinct options; the ZST.TO option is 1.5 % binding H9, every option is below 5 % binding H9, and pro rata all is 2.0 % (\u00a78, D2).\n- `test_a_trade_that_fits_has_no_violation_no_resizer_and_keeps_the_soft_warnings`: with NVDA at 1 %, there is no violation, `alternatives == []`, and the verdict is `coherent_with_warnings` (\u00a74 B7, \u00a77.5).\n- `test_explanation_is_verified_template_framed_and_the_disclaimer_is_fixed`: every section narrative passes V1\u2013V5, violations and warnings are cited, the headline is the template one, the mode is the worst non-pass mode, numbers exist in the facts, there is no advisory text, and the disclaimer is fixed (\u00a79, \u00a720.5, invariants 6 and 7).\n- `test_llm_calls_are_n4_then_n1_then_the_explainer_with_exact_payloads`: N4 runs first, then N1, then N5; payloads match `n4_payload` and `n1_events` (events only, no profile fields, up to the order_intent). N5 never runs on a pass section, and all calls hit the mock cache (\u00a74, \u00a76.2, D1).\n- `test_audit_record_has_model_id_as_of_engine_and_every_gate_decision`: the audit has flow B, `as_of`, the four events considered, the model id on the record and on every call, a gate status per call (N4 and N1 `accepted`), input hashes, engine parameters, verdict and explanation mode, and per-section narration modes (\u00a710, D1, D6, B9).\n- `test_cli_check_prints_the_verdict_and_the_audit_is_readable`: `cli check` prints the verdict, and `cli audit <run_id>` shows the record (\u00a712).\n- `test_check_run_leaves_fixtures_and_activity_tags_unchanged`: the run does not rewrite `fixtures/robert` or `data/meta/activity_tags.csv` (CLAUDE.md invariants, \u00a710).\n- `test_running_the_check_twice_gives_identical_reports_except_run_id_and_timestamps`: two runs are identical apart from `run_id` and timestamps (invariant 8).\n- `test_pipeline_check_returns_the_report_and_is_no_longer_the_stub`: `pipeline.check(..., auto_confirm=True)` returns the saved, schema-valid flow B report (\u00a74).\n- `test_hand_written_cache_entries_for_n1_and_n4_pass_schema_and_gate`: the existing N1 and N4 cache entries for the Robert scenario pass their schemas, N1 passes the gate, and N4 tickers are in the universe (\u00a76.2, \u00a711).\n\nWhere the spec is ambiguous I took the stricter reading and marked it `# SPEC-AMBIGUITY:` in the file:\n- **Confirmed intent:** the report's intent comes from the fixture intent in_0001 with specific ZST.TO funding, not from the recorded N4 draft, which says `pro_rata_all`.\n- **S3 side:** S3 appears only on the proposed side.\n- **S1 evidence:** the event ids can sit anywhere in the S1 or S3 check.\n- **Metric deltas:** each delta is proposed minus current, as a bare number or an object with a `delta` field.\n- **H10 flips:** only its final status is pinned, not its per-subject entries.\n- **Unknown intent id:** the exception type is open, but `NotImplementedError` does not count.\n",
+  "stop_reason": "end_turn",
+  "usage": {
+    "inputTokens": 2421710,
+    "outputTokens": 41501,
+    "totalTokens": 2463211
+  }
+}
