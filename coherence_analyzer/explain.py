@@ -21,6 +21,16 @@ def template_explain(payload: dict) -> dict:
     raise NotImplementedError
 
 
+def template_section(facts: dict) -> dict:
+    """Deterministic section text from its facts (docs/spec-factors.md §20.5). Always passes V1-V5."""
+    raise NotImplementedError
+
+
+def verify_section(output: dict, facts: dict) -> list[str]:
+    """Verifier V1-V5 (§20.5). Empty list = pass."""
+    raise NotImplementedError
+
+
 def explain(payload: dict) -> dict:
     """llm -> llm_retry -> template. Returns {mode, headline, segments, disclaimer}."""
     raise NotImplementedError

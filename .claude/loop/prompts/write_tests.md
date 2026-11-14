@@ -10,6 +10,8 @@ Rules:
 - Remove the module-level `pytestmark = pytest.mark.skip(...)` from the files you own. Do not add skips{skip_rule}.
 - Tests must be deterministic and offline: no network, no clock reads without a fixed value, COHERENCE_ANALYZER_LLM=mock, fixed seeds.
 - Do NOT write or change any code outside tests/. The implementation does not exist yet, so the new tests are expected to FAIL now. That is correct.
+- Import only the stub names that already exist (read the stub modules first). Tests must be collectable: they fail on NotImplementedError or wrong values, never on ImportError. If a name you need has no stub, import the module and call `getattr(module, "name")` inside the test, or write `.claude/loop/BLOCKED.md` naming the missing stub.
+- Keep each write or edit call under about 250 lines; build long test files in several edits.
 - Where the spec is ambiguous, pick the stricter reading and write a one-line `# SPEC-AMBIGUITY:` comment above the assertion explaining the choice. Never invent expected numbers the spec does not give; assert properties instead.
 - Do not run git commands that change state (no commit, stash, reset, checkout).
 
