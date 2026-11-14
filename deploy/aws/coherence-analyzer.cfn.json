@@ -125,21 +125,24 @@
             {
               "Name": "Personalised-investment-recommendations",
               "Type": "DENY",
-              "Definition": "Telling a person what to buy, sell or hold, or how to invest their own money, as a personalised investment recommendation.",
+              "Definition": "Recommendations addressed to the reader telling them to buy, sell, hold or reallocate a specific investment, or how they personally should invest their money.",
               "Examples": [
-                "Devrais-je acheter de l'action NVDA avec mes économies ?",
-                "Quel FNB dois-je vendre dans mon portefeuille ?",
-                "Je te conseille d'acheter plus d'actions, qu'en penses-tu ?",
-                "Should I buy NVDA with my savings?",
-                "Which ETF should I sell in my portfolio? I recommend you pick one."
-              ]
+                "Vous devriez vendre vos actions NVDA et acheter des obligations.",
+                "Je vous recommande d'acheter XBB pour réduire votre risque.",
+                "You should sell your NVDA shares and buy more bonds.",
+                "We recommend moving 10% of your portfolio into gold.",
+                "Buy QQQ now, it is the best choice for your profile."
+              ],
+              "InputEnabled": false,
+              "OutputEnabled": true,
+              "OutputAction": "BLOCK"
             }
           ]
         }
       },
       "Metadata": {
         "com.aws.cloudformation.Context": {
-          "why": "SPEC section 14: denied topic on the N5 explainer call only; other nodes return structured data.",
+          "why": "SPEC section 14: denied topic on the N5 explainer call only. v2 (2026-11-14): v1 blocked factual limit-vs-holding sentences and our own rules text on input; the topic now targets directives and runs on output only.",
           "must": [
             "Never attach to N1, N3, N4 or N6 calls",
             "Blocked messaging stays fixed text, never LLM output"
@@ -156,7 +159,7 @@
             "GuardrailId"
           ]
         },
-        "Description": "Immutable version of the explainer guardrail"
+        "Description": "Explainer guardrail v2: denied topic narrowed to directives, evaluated on model output only"
       },
       "Metadata": {
         "com.aws.cloudformation.Context": {

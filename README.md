@@ -219,6 +219,13 @@ aws cloudformation deploy \
 aws cloudformation describe-stacks --stack-name coherence-analyzer --query "Stacks[0].Outputs"
 ```
 
+Deployed 2026-11-14 as stack `coherence-analyzer` (us-east-1), guardrail version 2. Version 1 blocked factual
+"limit X, holds Y" sentences and the explainer's own rules text on input. Version 2 narrows the denied topic to
+recommendations addressed to the reader and evaluates the model output only (`InputEnabled: false`). Probe results
+with ApplyGuardrail: every buy/sell/reallocate directive tried (fr + en) is blocked, and every French factual
+divergence sentence passes. One English factual sentence ("Crypto is 15.0 % ... above the 10.0 % cap") is still a
+false positive, which costs that section its LLM narration (template fallback).
+
 Attach the `AccessPolicyArn` output to the role or user that runs the app, then set in `.env`:
 
 ```
