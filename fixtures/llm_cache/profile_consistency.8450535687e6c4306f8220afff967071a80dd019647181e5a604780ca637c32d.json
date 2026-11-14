@@ -1,0 +1,109 @@
+{
+  "cache_key": "8450535687e6c4306f8220afff967071a80dd019647181e5a604780ca637c32d",
+  "call_log": {
+    "hand_written": true,
+    "latency_ms": 0,
+    "tokens_in": 0,
+    "tokens_out": 0
+  },
+  "input_hash": "sha256:2d909238f816ec329a124fae2c54bb5119227e00971adc19192d66f1b8468e54",
+  "model_id": "fixture:hand-written",
+  "node": "profile_consistency",
+  "output": {
+    "abstain": false,
+    "findings": [
+      {
+        "fields": [
+          "preferences.interests",
+          "values.notes"
+        ],
+        "kind": "tension",
+        "quotes": [
+          "new_tech",
+          "I don't want everything in tech."
+        ],
+        "reason": "Interest in new tech may pull against the wish not to hold everything in tech."
+      }
+    ]
+  },
+  "prompt_version": "profile_consistency.v1",
+  "user_payload": {
+    "profile": {
+      "identity": {
+        "age": 26,
+        "dependants": 0,
+        "employer_sector": "Information Technology",
+        "employment_type": "salaried",
+        "marital_status": "single",
+        "occupation": "Software engineer",
+        "retirement_target_age": 65
+      },
+      "knowledge": {
+        "declared_level": "intermediate",
+        "products_used": [
+          "stocks",
+          "etf",
+          "crypto"
+        ],
+        "quiz_score": 0.75,
+        "years_investing": 3
+      },
+      "objectives": {
+        "goals": [
+          {
+            "amount": 500000,
+            "date": "2046-06",
+            "name": "Financial independence fund",
+            "priority": 1
+          }
+        ],
+        "horizon_years": 20,
+        "primary": "growth",
+        "secondary": []
+      },
+      "preferences": {
+        "asset_types_allowed": [
+          "stocks",
+          "etf",
+          "bonds",
+          "gold",
+          "crypto"
+        ],
+        "asset_types_refused": [
+          "options",
+          "leveraged_etf",
+          "margin"
+        ],
+        "home_bias_ok": true,
+        "interests": [
+          "ai",
+          "new_tech",
+          "crypto"
+        ],
+        "max_fee_mer_pct": 0.5,
+        "prefers_dividends": false,
+        "prefers_large_caps": false
+      },
+      "risk": {
+        "declared": "high",
+        "max_acceptable_drawdown_pct": -35,
+        "reaction_to_20pct_drop": "buy_more"
+      },
+      "situation": {
+        "annual_income_band": "90k-120k",
+        "debt": {
+          "consumer": 0,
+          "student_loan": 6000
+        },
+        "emergency_fund": 16000,
+        "monthly_contribution": 900,
+        "monthly_expenses": 3200,
+        "planned_withdrawals": []
+      },
+      "values": {
+        "notes": "I love AI and new tech but I don't want everything in tech."
+      }
+    },
+    "rule_hits": []
+  }
+}

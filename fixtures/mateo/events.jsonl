@@ -1,0 +1,3 @@
+{"event_id": "ev_mateo_0001", "profile_id": "persona-mateo", "ts": "2026-10-22T20:30:00-04:00", "type": "quiz_result", "text": null, "payload": {"score": 0.7, "quiz_id": "kq_v1"}, "source": "ui_quiz"}
+{"event_id": "ev_mateo_0002", "profile_id": "persona-mateo", "ts": "2026-11-03T21:00:00-05:00", "type": "question", "text": "Does an ESG-screened fund like ESGV really leave out companies with major environmental controversies?", "payload": null, "source": "ui_chat"}
+{"event_id": "ev_mateo_0003", "profile_id": "persona-mateo", "ts": "2026-11-09T20:15:00-05:00", "type": "question", "text": "How can I find out whether a company I own has had a social controversy, like a labour or safety scandal?", "payload": null, "source": "ui_chat"}

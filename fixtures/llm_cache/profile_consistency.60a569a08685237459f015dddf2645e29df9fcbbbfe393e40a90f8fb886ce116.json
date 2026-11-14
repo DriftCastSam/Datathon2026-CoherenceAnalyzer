@@ -1,0 +1,119 @@
+{
+  "cache_key": "60a569a08685237459f015dddf2645e29df9fcbbbfe393e40a90f8fb886ce116",
+  "call_log": {
+    "hand_written": true,
+    "latency_ms": 0,
+    "tokens_in": 0,
+    "tokens_out": 0
+  },
+  "input_hash": "sha256:28b6453cdae628f8d8518609836c7531ddbd32375d56f1393fb9ce91d41bb06a",
+  "model_id": "fixture:hand-written",
+  "node": "profile_consistency",
+  "output": {
+    "abstain": false,
+    "findings": []
+  },
+  "prompt_version": "profile_consistency.v1",
+  "user_payload": {
+    "profile": {
+      "identity": {
+        "age": 41,
+        "dependants": 2,
+        "employer_sector": "Industrials",
+        "employment_type": "salaried",
+        "marital_status": "common_law",
+        "occupation": "Operations manager",
+        "retirement_target_age": 65
+      },
+      "knowledge": {
+        "declared_level": "intermediate",
+        "products_used": [
+          "stocks",
+          "etf",
+          "bonds"
+        ],
+        "quiz_score": 0.7,
+        "years_investing": 9
+      },
+      "objectives": {
+        "goals": [
+          {
+            "amount": 40000,
+            "date": "2034-09",
+            "name": "Children's post-secondary education",
+            "priority": 1
+          }
+        ],
+        "horizon_years": 10,
+        "primary": "balanced_growth",
+        "secondary": [
+          "education_funding"
+        ]
+      },
+      "preferences": {
+        "asset_types_allowed": [
+          "stocks",
+          "etf",
+          "bonds",
+          "gold"
+        ],
+        "asset_types_refused": [
+          "crypto",
+          "options",
+          "leveraged_etf",
+          "margin"
+        ],
+        "home_bias_ok": true,
+        "interests": [
+          "esg_funds",
+          "dividend_income"
+        ],
+        "max_fee_mer_pct": 0.5,
+        "prefers_dividends": true,
+        "prefers_large_caps": true
+      },
+      "risk": {
+        "declared": "moderate",
+        "max_acceptable_drawdown_pct": -20,
+        "reaction_to_20pct_drop": "hold"
+      },
+      "situation": {
+        "annual_income_band": "120k-150k",
+        "debt": {
+          "consumer": 0,
+          "mortgage": 260000
+        },
+        "emergency_fund": 31200,
+        "monthly_contribution": 1200,
+        "monthly_expenses": 5200,
+        "other_assets": {
+          "pension": 0,
+          "real_estate_equity": 220000
+        },
+        "planned_withdrawals": [
+          {
+            "amount": 40000,
+            "date": "2034-09",
+            "purpose": "children's post-secondary education, year 1"
+          }
+        ]
+      },
+      "values": {
+        "environment": {
+          "exclusions": [
+            "significant_environmental_controversy"
+          ],
+          "importance": 5
+        },
+        "notes": "Avoid companies with major environmental or social controversies. Open to new tech if it fits, nothing speculative.",
+        "social": {
+          "exclusions": [
+            "significant_social_controversy"
+          ],
+          "importance": 4
+        }
+      }
+    },
+    "rule_hits": []
+  }
+}
