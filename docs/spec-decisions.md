@@ -39,3 +39,50 @@ Do not implement until the team approves; P0.6 code and its frozen test still se
 The team's Claude model on Bedrock rejects `temperature` ("deprecated for this model"), so record
 mode fails as built. Proposal: `call_tool` does not send it. Reproducibility rests on the input-hash cache (record/live) and the recorded mock
 cache, which is what the tests run on. Record the model id in every audit record.
+
+## D7. Product focus: profile in, portfolio divergences out (Flow C is the headline)
+Adopted 2026-11-14. Wins over SPEC §4 (Flow B as "the main demo"), §6.2 N1/N2/N4 priority, §12 UI list,
+§16 persona matrix and §17 build order. D5 (five factors, narration loop) and the analysis layer (§7, §8 rules,
+limits, hard checks) are unchanged.
+
+**Goal.** Build the user's profile, then show where the *current* portfolio diverges from it, factor by factor,
+and explain each divergence through the profile fields it comes from. Typical divergences: low risk tolerance
+but concentrated tech/AI stocks (H3, H7, H8, H10, H13); a house down payment in 3 years but a long-horizon
+equity portfolio (`planned_withdrawals` -> effective horizon -> capacity -> H4, H9); an excluded activity
+held in the portfolio (H11).
+
+**P0 pipeline (offline, mock mode):**
+```
+intake form (per factor, deterministic) + free-text notes
+-> N3 values_parser -> gate (§11) -> user approves/rejects each parsed rule
+-> Flow A refresh (rules only; no N1/N2)
+-> Flow C review: engine.analyse(current) -> hard checks + S2/S4 -> verdict
+-> five factor sections (§20.4) -> narration loop per non-pass section (§20.5) -> report + audit
+```
+
+1. **Intake = form + notes.** One fixed form per factor; questions and the `REQUIRED` checklist are code
+   (§20.6), no LLM writes questions. Free text (`values.notes`) goes through N3 and the gate; parsed rules start
+   `approved_by_user: false`, and only approved `exclude_activity` / `max_theme_weight` rules reach `limits`
+   (invariant 2 unchanged). A parsed theme rule with no number (Amira's "pas tout en tech") makes the form ask for
+   the number. Intake moves from P1 to P0.
+2. **Narration is the end of the pipeline.** Each non-pass section explains the divergence *in relation to the
+   profile*: which declared or derived field sets the limit, walking `derived_from` one level per segment where
+   it helps (e.g. "down payment in June 2029 -> horizon 2.6 years -> capacity low -> minimum 30 % in bonds;
+   the portfolio holds 12 %"). Writer N5 + verifier V1-V5 + one retry + template, exactly as §20.5.
+3. **Deferred to P2 (code kept, not wired into the P0 pipeline):** Flow B (N4 `intent_parser`, B2 confirm form,
+   trade diff), the resizer (§8), N1 `behaviour_classifier`, N2 `question_rubric`, and soft checks S1 and S3
+   (they need N1). Their built code and frozen tests stay green; nothing is deleted. S2 stays, with
+   `knowledge.score` computed from declared/quiz fields only while N2 is off.
+4. **Data: the current starter universe only (31 assets).** No tickers are added. Divergence examples must use
+   assets that exist (e.g. fossil fuels: XOM, CNQ.TO, ENB.TO; tech concentration: NVDA, QQQ, SHOP.TO). H11 needs
+   sourced, human-written rows in `data/meta/activity_tags.csv` (still humans only); until they exist, H11 reports
+   `unknown`, which is the intended "says what it doesn't know" behaviour.
+5. **Robert's demo portfolio.** Measured on the starter data: Robert's current portfolio (`engine.ROBERT`) is
+   `coherent` (H6, H10 `unknown` only); the divergences all come from the NVDA trade (`engine.ROBERT_NVDA`: H3, H4,
+   H7, H8, H9, H10 violations). For a review demo, add `fixtures/robert/portfolio_review.json` holding the
+   `ROBERT_NVDA` weights ("already bought NVDA"). `fixtures/robert/portfolio.json` stays as is, because frozen
+   tests read it.
+
+**Build order (replaces P0.9, adds P0.10):** P0.7 and P0.8 unchanged. P0.9 = pipeline Flow A (rules + N3) and
+Flow C + `cli review` / `cli demo` (Robert review end-to-end offline, five sections, narration). P0.10 = intake
+form + N3 schema/prompt + rule approval. Flow B wiring moves to P2.
