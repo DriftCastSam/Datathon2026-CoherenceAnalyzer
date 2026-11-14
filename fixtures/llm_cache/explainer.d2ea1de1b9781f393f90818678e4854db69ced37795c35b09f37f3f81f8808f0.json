@@ -1,0 +1,131 @@
+{
+  "cache_key": "d2ea1de1b9781f393f90818678e4854db69ced37795c35b09f37f3f81f8808f0",
+  "call_log": {
+    "cache_hit": false,
+    "guardrail_id": "j85vlkrhs5xz",
+    "guardrail_intervened": false,
+    "guardrail_version": "1",
+    "input_hash": "sha256:3e281e8eeb16de6054d855bfce53139beb3715d0212740bd0ed91eeae27b8226",
+    "latency_ms": 3491.4,
+    "model_id": "us.anthropic.claude-sonnet-5-5",
+    "node": "explainer",
+    "prompt_version": "explainer.v1",
+    "tokens_in": 2733,
+    "tokens_out": 451
+  },
+  "input_hash": "sha256:3e281e8eeb16de6054d855bfce53139beb3715d0212740bd0ed91eeae27b8226",
+  "model_id": "us.anthropic.claude-sonnet-5-5",
+  "node": "explainer",
+  "output": {
+    "segments": [
+      {
+        "kind": "fact",
+        "refs": [
+          "declared.values.environment.importance",
+          "declared.values.social.importance",
+          "declared.preferences.interests",
+          "declared.preferences.prefers_large_caps",
+          "declared.preferences.home_bias_ok"
+        ],
+        "text": "Tes préférences déclarées: importance de l'environnement à 5, du social à 4, intérêt pour les fonds ESG et les revenus de dividendes, préférence pour les grandes capitalisations et le biais domestique accepté. Elles n'entraînent aucune violation."
+      },
+      {
+        "kind": "fact",
+        "refs": [
+          "S4",
+          "derived.values.parsed_notes"
+        ],
+        "text": "Deux règles tirées de tes notes («Open to new tech if it fits» et «nothing speculative.») n'ont pas été approuvées par toi. Elles sont signalées à titre d'information seulement (S4) et ne peuvent pas être vérifiées automatiquement."
+      },
+      {
+        "kind": "inference",
+        "refs": [
+          "derived.values.parsed_notes",
+          "declared.values.notes"
+        ],
+        "text": "Ces deux règles sont une interprétation de tes notes par un modèle (llm:values_parser), pas une règle que tu as validée. Aucun événement de ton historique ne les appuie."
+      }
+    ]
+  },
+  "prompt_version": "explainer.v1",
+  "user_payload": {
+    "checks": [
+      {
+        "derived_from": [
+          "values.parsed_notes",
+          "values.notes"
+        ],
+        "id": "S4",
+        "limit": "—",
+        "message_key": "parsed_rule_not_approved",
+        "source": "rule:unapproved_parsed_rule",
+        "status": "info",
+        "subject": "Open to new tech if it fits",
+        "value": "—"
+      },
+      {
+        "derived_from": [
+          "values.parsed_notes",
+          "values.notes"
+        ],
+        "id": "S4",
+        "limit": "—",
+        "message_key": "parsed_rule_not_approved",
+        "source": "rule:unapproved_parsed_rule",
+        "status": "info",
+        "subject": "nothing speculative.",
+        "value": "—"
+      }
+    ],
+    "declared": {
+      "preferences.home_bias_ok": true,
+      "preferences.interests": [
+        "esg_funds",
+        "dividend_income"
+      ],
+      "preferences.prefers_dividends": true,
+      "preferences.prefers_large_caps": true,
+      "values.environment.importance": "5",
+      "values.notes": "Avoid companies with major environmental or social controversies. Open to new tech if it fits, nothing speculative.",
+      "values.social.importance": "4"
+    },
+    "derived": {
+      "values.parsed_notes": {
+        "because": [],
+        "by": "llm:values_parser",
+        "value": [
+          {
+            "applies_to": "all",
+            "approved_by_user": false,
+            "params": {
+              "note": "open to new tech if it fits"
+            },
+            "quote": "Open to new tech if it fits",
+            "rule_kind": "other"
+          },
+          {
+            "applies_to": "all",
+            "approved_by_user": false,
+            "params": {
+              "attribute": "speculative"
+            },
+            "quote": "nothing speculative.",
+            "rule_kind": "avoid_attribute"
+          }
+        ]
+      }
+    },
+    "evidence_events": [],
+    "factor": "preferences",
+    "intent": null,
+    "locale": "fr-CA",
+    "metrics": {
+      "current": {},
+      "proposed": {}
+    },
+    "question": "Qu'est-ce qui oriente les choix?",
+    "status": "info",
+    "unknowns": [],
+    "verdict": "coherent"
+  }
+}

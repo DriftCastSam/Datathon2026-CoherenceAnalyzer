@@ -1,0 +1,112 @@
+{
+  "cache_key": "ec45b1dddf93cd941e5725d0f457dcd6e0c6b66703f8c0088b501fe866aaef67",
+  "call_log": {
+    "cache_hit": false,
+    "guardrail_id": "j85vlkrhs5xz",
+    "guardrail_intervened": false,
+    "guardrail_version": "1",
+    "input_hash": "sha256:17a25c1cf9a635205a47be488029f93fe726b69a62546bf4fc234ae8cc078b03",
+    "latency_ms": 5795.7,
+    "model_id": "us.anthropic.claude-sonnet-5-5",
+    "node": "explainer",
+    "prompt_version": "explainer.v1",
+    "tokens_in": 2543,
+    "tokens_out": 801
+  },
+  "input_hash": "sha256:17a25c1cf9a635205a47be488029f93fe726b69a62546bf4fc234ae8cc078b03",
+  "model_id": "us.anthropic.claude-sonnet-5-5",
+  "node": "explainer",
+  "output": {
+    "segments": [
+      {
+        "kind": "fact",
+        "refs": [
+          "declared.preferences.interests",
+          "declared.preferences.home_bias_ok",
+          "declared.preferences.prefers_dividends",
+          "declared.preferences.prefers_large_caps"
+        ],
+        "text": "Tu as déclaré des intérêts pour l'IA, les nouvelles technologies et la cryptomonnaie. Tu acceptes un biais local, et tu n'as pas de préférence pour les dividendes ni pour les grandes capitalisations."
+      },
+      {
+        "kind": "fact",
+        "refs": [
+          "declared.values.notes"
+        ],
+        "text": "Ta note dit : « I love AI and new tech but I don't want everything in tech. » Ce sont des préférences : elles orientent les choix à l'intérieur de tes limites et ne créent jamais de violation."
+      },
+      {
+        "kind": "inference",
+        "refs": [
+          "derived.values.parsed_notes"
+        ],
+        "text": "Inférence du modèle (llm:values_parser) : ta phrase « I love AI and new tech » devient une règle de préférence pour l'attribut ai_and_new_tech. Tu ne l'as pas approuvée."
+      },
+      {
+        "kind": "unknown",
+        "refs": [
+          "S4"
+        ],
+        "text": "La règle n'est pas approuvée et ne peut pas être vérifiée automatiquement. Le contrôle S4 est donc seulement informatif, sans valeur ni limite."
+      }
+    ]
+  },
+  "prompt_version": "explainer.v1",
+  "user_payload": {
+    "checks": [
+      {
+        "derived_from": [
+          "values.parsed_notes",
+          "values.notes"
+        ],
+        "id": "S4",
+        "limit": "—",
+        "message_key": "parsed_rule_not_approved",
+        "source": "rule:unapproved_parsed_rule",
+        "status": "info",
+        "subject": "I love AI and new tech",
+        "value": "—"
+      }
+    ],
+    "declared": {
+      "preferences.home_bias_ok": true,
+      "preferences.interests": [
+        "ai",
+        "new_tech",
+        "crypto"
+      ],
+      "preferences.prefers_dividends": false,
+      "preferences.prefers_large_caps": false,
+      "values.notes": "I love AI and new tech but I don't want everything in tech."
+    },
+    "derived": {
+      "values.parsed_notes": {
+        "because": [],
+        "by": "llm:values_parser",
+        "value": [
+          {
+            "applies_to": "all",
+            "approved_by_user": false,
+            "params": {
+              "attribute": "ai_and_new_tech"
+            },
+            "quote": "I love AI and new tech",
+            "rule_kind": "prefer_attribute"
+          }
+        ]
+      }
+    },
+    "evidence_events": [],
+    "factor": "preferences",
+    "intent": null,
+    "locale": "fr-CA",
+    "metrics": {
+      "current": {},
+      "proposed": {}
+    },
+    "question": "Qu'est-ce qui oriente les choix?",
+    "status": "info",
+    "unknowns": [],
+    "verdict": "incoherent"
+  }
+}
