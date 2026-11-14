@@ -151,7 +151,7 @@ def test_explainer_needs_both_id_and_version(bd, gid, version):
 
 
 def test_guardrail_changes_nothing_else_in_the_request(bd, tmp_path):
-    # D6: still no temperature; the toolChoice stays forced; only guardrailConfig is added.
+    # D6: still no temperature; the toolChoice stays as configured (D9: auto); only guardrailConfig is added.
     bd.queue(tool_response("explainer", {"answer": 1}))
     bd.call("explainer")
     bd.configure("", "")
@@ -162,7 +162,7 @@ def test_guardrail_changes_nothing_else_in_the_request(bd, tmp_path):
     guarded, plain = bd.requests
     assert {k: v for k, v in guarded.items() if k != "guardrailConfig"} == plain
     assert "temperature" not in guarded["inferenceConfig"]
-    assert guarded["toolConfig"]["toolChoice"] == {"tool": {"name": "explainer"}}
+    assert guarded["toolConfig"]["toolChoice"] == {"auto": {}}          # D9
 
 
 def test_guardrail_log_records_id_version_and_not_intervened(bd):

@@ -130,7 +130,9 @@ def _converse(client: Any, model_id: str, node: str, schema: dict, system: str, 
         system=[{"text": system}],
         messages=messages,
         toolConfig={"tools": [{"toolSpec": {"name": node, "inputSchema": {"json": schema}}}],
-                    "toolChoice": {"tool": {"name": node}}},
+                    # D9: the team's model rejects a forced tool ("tool" / "any"); with one tool and `auto`, a reply
+                    # without the toolUse block is invalid output (one retry with the error, then LLMOutputInvalid).
+                    "toolChoice": {"auto": {}}},
         # No temperature (docs/spec-decisions.md D6): the model rejects it. Reproducibility comes from
         # the input-hash cache (record/live) and the recorded mock cache.
         inferenceConfig={"maxTokens": MAX_TOKENS.get(node, DEFAULT_MAX_TOKENS)},
@@ -140,7 +142,7 @@ def _converse(client: Any, model_id: str, node: str, schema: dict, system: str, 
 
 def call_tool(node: str, schema: dict, system: str, user_payload: dict, prompt_version: str) -> dict:
     """mock: read fixtures/llm_cache only (raise LLMCacheMiss). record: call + write fixtures/llm_cache.
-    live: call with .cache/llm. No temperature (D6), toolChoice forced to `node`, jsonschema-validate,
+    live: call with .cache/llm. No temperature (D6), toolChoice auto with the one `node` tool (D9), jsonschema-validate,
     retry once with validator message, then raise LLMOutputInvalid. Returns {output, call_log}."""
     mode = _mode()
     model_id = BEDROCK_MODEL_ID
@@ -197,16 +199,20 @@ def call_tool(node: str, schema: dict, system: str, user_payload: dict, prompt_v
         if attempt == 2:
             raise LLMOutputInvalid(f"{node}: output failed schema validation twice: {problem}")
         # Retry once: replay the model's tool call, then the validator message as a user turn (toolResult).
-        tool_use_id = "retry"
+        tool_use_id = None
         for block in response.get("output", {}).get("message", {}).get("content", []):
             if block.get("toolUse"):
-                tool_use_id = block["toolUse"].get("toolUseId", tool_use_id)
-        messages = messages + [
-            response["output"]["message"],
-            {"role": "user", "content": [{"toolResult": {"toolUseId": tool_use_id, "status": "error",
-                                                         "content": [{"text": f"Schema validation failed: {problem}. "
-                                                                              "Call the tool again with a valid input."}]}}]},
-        ]
+                tool_use_id = block["toolUse"].get("toolUseId", "retry")
+        if tool_use_id is None:
+            # D9 (toolChoice auto): a text-only reply has no tool call to answer with a toolResult; Bedrock rejects a
+            # toolResult whose id matches no toolUse, so the correction goes in as a plain user message.
+            feedback = {"role": "user", "content": [{"text": f"{problem}. Answer only by calling the tool "
+                                                             f"{node!r} with a valid input."}]}
+        else:
+            feedback = {"role": "user", "content": [{"toolResult": {
+                "toolUseId": tool_use_id, "status": "error",
+                "content": [{"text": f"Schema validation failed: {problem}. Call the tool again with a valid input."}]}}]}
+        messages = messages + [response["output"]["message"], feedback]
     assert output is not None
     log = {"node": node, "model_id": model_id, "prompt_version": prompt_version,
            "input_hash": input_hash(user_payload), "cache_hit": False,

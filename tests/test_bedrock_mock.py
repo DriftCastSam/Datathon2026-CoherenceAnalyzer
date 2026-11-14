@@ -209,7 +209,7 @@ def test_converse_request_forces_the_single_tool_without_temperature(monkeypatch
     assert len(tools) == 1
     assert tools[0]["toolSpec"]["name"] == "toy"
     assert tools[0]["toolSpec"]["inputSchema"] == {"json": TOY_SCHEMA}
-    assert req["toolConfig"]["toolChoice"] == {"tool": {"name": "toy"}}
+    assert req["toolConfig"]["toolChoice"] == {"auto": {}}   # D9: the model rejects a forced tool
     # docs/spec-decisions.md D6: the model rejects `temperature`; reproducibility comes from the cache
     assert "temperature" not in req["inferenceConfig"]
     assert isinstance(req["inferenceConfig"]["maxTokens"], int) and req["inferenceConfig"]["maxTokens"] > 0
@@ -408,7 +408,7 @@ def test_n1_request_carries_events_only_no_profile_fields(monkeypatch, dirs):
     # SPEC §6.2 N1: input is [{event_id, ts, type, text}]; other event fields and any profile field stay out.
     for banned in ("low_moderate", "declared", "capacity", "persona-robert", "ui_chat"):
         assert banned not in sent, banned
-    assert req["toolConfig"]["toolChoice"] == {"tool": {"name": "behaviour_classifier"}}
+    assert req["toolConfig"]["toolChoice"] == {"auto": {}}   # D9
     assert req["toolConfig"]["tools"][0]["toolSpec"]["inputSchema"]["json"] == _schema("behaviour_classifier")
 
 

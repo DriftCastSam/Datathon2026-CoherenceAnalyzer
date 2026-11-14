@@ -88,6 +88,14 @@ intake form (per factor, deterministic) + free-text notes
 Flow C + `cli review` / `cli demo` (Robert review end-to-end offline, five sections, narration). P0.10 = intake
 form + N3 schema/prompt + rule approval. Flow B wiring moves to P2.
 
+## D9. `toolChoice` auto, not forced (SPEC §6.1). Approved 2026-11-14
+The team's model (`us.anthropic.claude-sonnet-5-5`) rejects a forced tool: "tool_choice: type "tool" and
+"any" are not supported for this model" (first `COHERENCE_ANALYZER_LLM=record` run). `call_tool` sends
+`toolChoice: {"auto": {}}` with the node's single tool. Nothing else changes. A reply without the toolUse
+block named after the node is invalid output: it gets one retry with the error, then `LLMOutputInvalid`, and
+the extractor or narration falls back (gate keeps the old field, or the section uses the template). Cache keys
+do not include `toolChoice`, so recorded entries stay valid.
+
 ## D8. Internal coherence check + parallel factor lanes (spec-factors §20.9, §20.10)
 Requested by the team 2026-11-14 (whiteboard: isolate objectifs / risques / contraintes / préférences to
 reduce context and run them in parallel, combine at the end, and add an LLM check for contradictions inside
