@@ -222,6 +222,30 @@
         "README.md"
       ],
       "notes": "Runs in parallel with P0.9: do NOT edit pipeline.py, cli.py, store.py, coherence/report.py, explain.py or factors/ (wiring into the report is a later task). Tests must cover: Robert fixture (as_of 2026-11-12) -> rule_findings gives exactly one C1 (goal 'Help children with a down payment', 2032-01 vs horizon 4 years) and no C2-C5; each of C2-C5 fires on a minimal edited copy of Robert and C1-C5 skip silently when their fields are missing; C2 uses LIMITS_TABLE neighbours (Robert -12 at low_moderate is inside [-20, -8]); n6_payload has no {value, by} objects, no limits, no llm: fields, includes values.notes and the rule hits; gate profile_consistency accepts a good output, and rejects (whole output dropped, rejected:evidence) a made-up path, a {value,by} path, a quote that is not the value at its path, a notes quote that is not an exact substring, a single-field finding, and rejects (rejected:schema) a reason with a digit / advisory phrase / > 200 chars, or > 5 findings; abstain -> kept:abstain; statuses: contradiction->warning, tension->info, never violation; an N6 finding with the same path set as a C finding is dropped; check_profile in mock mode on Robert returns status warning with C1 first and the hand-written N6 tension (preferences.interests 'new_opportunities' vs values.notes 'No hype stocks unless I can explain the business.') as info; on LLMCacheMiss it returns the rule findings and llm.gate_status 'skipped:cache_miss'; every finding has fixed fr-CA/en-CA question templates (no LLM text in question); check_profile never mutates the profile and test_limits_no_llm_inputs stays green. Record the mock with scripts/handwrite_llm_cache.py (model id fixture:hand-written), as P0.10 did."
+    },
+    {
+      "id": "P0.12",
+      "title": "parallel factor lanes (thread pool in explain) + profile_coherence block in the Flow C report, audit and cli",
+      "spec": [
+        "docs/spec-decisions.md D8",
+        "docs/spec-factors.md §20.9 (Status and effect)",
+        "docs/spec-factors.md §20.10",
+        "§10",
+        "§13",
+        "docs/spec-decisions.md D3"
+      ],
+      "tests": [
+        "tests/test_lanes.py"
+      ],
+      "code": [
+        "coherence_analyzer/explain.py",
+        "coherence_analyzer/pipeline.py",
+        "coherence_analyzer/cli.py",
+        "coherence_analyzer/store.py",
+        "coherence_analyzer/schemas/report.json",
+        "README.md"
+      ],
+      "notes": "Do NOT change coherence/internal.py, gate.py, factors/ or any recorded llm_cache entry (all their tests stay green). Tests must cover: explain.explain runs the non-pass sections through a concurrent.futures.ThreadPoolExecutor (max_workers 5) and its output (mode, headline, segments, section order) is identical to a sequential run on the Robert review (monkeypatch narrate_section with a recorder / a sleep to prove overlap: total wall time well under the sum of per-section sleeps); an exception in one section's narration does not lose the others (that section falls back to the template, as for LLMCacheMiss); pass sections still make no LLM call. pipeline.review adds report['profile_coherence'] = internal.check_profile(profile, as_of) result's {status, findings} (as_of = portfolio.as_of, D1) for every Flow C report; on Robert it is status warning with C1 then N6.1; it never changes report['verdict'] or any section status (compare with check_profile monkeypatched to return 3 warnings); the audit record gets the N6 call log and gate status (llm_calls entry with node profile_consistency); report.json schema accepts the new block (required); cli review / demo print one line 'profile: warning (C1, N6.1)'. Reports stay deterministic apart from run_id (inv. 8)."
     }
   ]
 }
