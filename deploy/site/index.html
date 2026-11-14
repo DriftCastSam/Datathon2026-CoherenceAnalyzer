@@ -1,0 +1,469 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CoherenceAnalyzer</title>
+<meta name="description" content="Is this portfolio, or this trade, coherent with the investor's own profile?">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&display=swap">
+<style>
+:root {
+  color-scheme: light;
+  --bg: #f4f4f2; --surface: #fcfcfb; --surface-2: #f0efec; --line: #e0dfda;
+  --fg: #0b0b0b; --fg-2: #52514e; --muted: #7a7974;
+  --cur: #2a78d6; --prop: #eb6834; --cur-band: rgba(42,120,214,.16); --prop-band: rgba(235,104,52,.16);
+  --good: #0ca30c; --warn: #fab219; --serious: #ec835a; --crit: #d03b3b; --good-ink: #006300; --crit-ink: #b02a2a;
+  --accent: #1c5cab;
+  --f-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-head: "IBM Plex Sans Condensed", "IBM Plex Sans", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:where(:not([data-theme="light"])) {
+  color-scheme: dark;
+  --bg: #121211; --surface: #1a1a19; --surface-2: #232321; --line: #33332f;
+  --fg: #f0efec; --fg-2: #c3c2b7; --muted: #8f8e86;
+  --cur: #3987e5; --prop: #d95926; --cur-band: rgba(57,135,229,.22); --prop-band: rgba(217,89,38,.22);
+  --good-ink: #4cc24c; --crit-ink: #f07b7b; --accent: #86b6ef; } }
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --bg: #121211; --surface: #1a1a19; --surface-2: #232321; --line: #33332f;
+  --fg: #f0efec; --fg-2: #c3c2b7; --muted: #8f8e86;
+  --cur: #3987e5; --prop: #d95926; --cur-band: rgba(57,135,229,.22); --prop-band: rgba(217,89,38,.22);
+  --good-ink: #4cc24c; --crit-ink: #f07b7b; --accent: #86b6ef; }
+
+* { box-sizing: border-box }
+html { -webkit-text-size-adjust: 100% }
+body { margin: 0; background: var(--bg); color: var(--fg); font: 15px/1.55 var(--f-body);
+  padding: 0 max(16px, env(safe-area-inset-left)) 64px max(16px, env(safe-area-inset-right)) }
+.wrap { max-width: 1180px; margin: 0 auto }
+h1, h2, h3 { font-family: var(--f-head); font-weight: 600; margin: 0; line-height: 1.2; text-wrap: balance }
+h2 { font-size: 19px } h3 { font-size: 15px }
+p { margin: 0 }
+.mono, code { font-family: var(--f-mono); font-size: .9em }
+.muted { color: var(--fg-2) } .small { font-size: 13px }
+.eyebrow { font: 500 11.5px/1 var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted) }
+button, select, input { font: inherit; color: inherit }
+
+/* top bar */
+.top { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; padding: 18px 0 14px; border-bottom: 1px solid var(--line) }
+.brand { font: 600 20px/1 var(--f-head); letter-spacing: -.01em; margin-right: auto }
+.brand span { color: var(--muted); font-weight: 500 }
+.top select { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; max-width: 100% }
+.iconbtn { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px; cursor: pointer }
+.banner { margin: 14px 0 0; padding: 10px 14px; border: 1px dashed var(--line); border-radius: 10px; background: var(--surface-2); font-size: 13px; color: var(--fg-2) }
+.banner b { color: var(--fg) }
+
+/* layout */
+.grid { display: grid; gap: 16px; margin-top: 16px; grid-template-columns: repeat(12, minmax(0, 1fr)) }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; min-width: 0 }
+.card > h2 { margin-bottom: 4px } .card > .sub { color: var(--fg-2); font-size: 13px; margin-bottom: 14px }
+.c12 { grid-column: span 12 } .c8 { grid-column: span 8 } .c7 { grid-column: span 7 } .c5 { grid-column: span 5 } .c4 { grid-column: span 4 } .c6 { grid-column: span 6 }
+@media (max-width: 900px) { .c8, .c7, .c5, .c4, .c6 { grid-column: span 12 } }
+
+/* hero */
+.hero { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 20px; align-items: start }
+@media (max-width: 760px) { .hero { grid-template-columns: 1fr } }
+.verdict { display: inline-flex; align-items: center; gap: 8px; padding: 6px 12px; border-radius: 999px; font: 600 13px/1 var(--f-mono); letter-spacing: .04em; text-transform: uppercase; border: 1.5px solid }
+.verdict.incoherent { color: var(--crit-ink); border-color: var(--crit) }
+.verdict.coherent_with_warnings { color: var(--fg); border-color: var(--warn) }
+.verdict.coherent { color: var(--good-ink); border-color: var(--good) }
+.headline { font: 600 clamp(22px, 3.2vw, 30px)/1.2 var(--f-head); margin: 12px 0 8px; text-wrap: balance }
+.persona { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px 16px; font-size: 13.5px }
+.persona div span { display: block; color: var(--muted); font: 500 11px/1.3 var(--f-mono); text-transform: uppercase; letter-spacing: .06em }
+.lvl { font-family: var(--f-mono) }
+
+/* tiles */
+.tiles { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px }
+@media (max-width: 760px) { .tiles { grid-template-columns: repeat(2, minmax(0, 1fr)) } }
+.tile { background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 14px }
+.tile .k { color: var(--muted); font: 500 11px/1.3 var(--f-mono); text-transform: uppercase; letter-spacing: .06em }
+.tile .v { font: 600 24px/1.15 var(--f-head); margin-top: 6px; font-variant-numeric: tabular-nums }
+.tile .d { font-size: 12.5px; color: var(--fg-2); margin-top: 4px; font-variant-numeric: tabular-nums }
+.tile .lim { font-size: 12px; color: var(--muted); margin-top: 2px }
+
+/* what-if */
+.whatif { display: grid; gap: 14px }
+.field { display: grid; gap: 6px }
+.field label { font: 500 11px/1.3 var(--f-mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted) }
+.field select { background: var(--surface-2); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px }
+.slider-row { display: flex; align-items: center; gap: 12px }
+.slider-row input[type=range] { flex: 1; accent-color: var(--prop); min-width: 0 }
+.slider-row output { font: 600 22px/1 var(--f-head); min-width: 64px; text-align: right; font-variant-numeric: tabular-nums }
+.ticks { display: flex; flex-wrap: wrap; gap: 6px; min-height: 28px }
+.confirm { display: flex; flex-wrap: wrap; gap: 10px; align-items: center }
+.btn { border-radius: 8px; padding: 8px 14px; border: 1px solid var(--line); background: var(--surface-2); cursor: not-allowed; opacity: .75 }
+
+/* chips */
+.chip { display: inline-flex; align-items: center; gap: 5px; padding: 3px 8px; border-radius: 999px; font: 500 12px/1.2 var(--f-mono); border: 1px solid var(--line); background: var(--surface); white-space: nowrap }
+.chip i { font-style: normal; width: 9px; height: 9px; border-radius: 50%; display: inline-block; background: var(--muted) }
+.chip.violation i { background: var(--crit) } .chip.violation { border-color: var(--crit) }
+.chip.warning i { background: var(--warn) } .chip.warning { border-color: var(--warn) }
+.chip.pass i { background: var(--good) }
+.chip.info i { background: var(--accent) }
+.chip.unknown i { background: transparent; border: 1.5px dashed var(--muted) }
+.chip.absent { opacity: .6 }
+
+/* chart */
+.chart { position: relative; width: 100% }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible }
+.chart .axis text { fill: var(--muted); font: 11px var(--f-mono) }
+.chart .grid line { stroke: var(--line); stroke-width: 1 }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 12.5px; color: var(--fg-2); margin-top: 8px }
+.legend span { display: inline-flex; align-items: center; gap: 6px }
+.sw { width: 18px; height: 10px; border-radius: 3px; display: inline-block }
+.sw.line { height: 2px; border-radius: 1px }
+.tip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 12.5px; box-shadow: 0 4px 18px rgba(0,0,0,.12); white-space: nowrap; opacity: 0; transition: opacity .08s; z-index: 2; font-variant-numeric: tabular-nums }
+.tip b { font-family: var(--f-mono); font-weight: 500 }
+.tip .row { display: flex; align-items: center; gap: 6px }
+
+/* checks table */
+table { width: 100%; border-collapse: collapse; font-size: 13.5px }
+th { text-align: left; font: 500 11px/1.3 var(--f-mono); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); padding: 8px 8px; border-bottom: 1px solid var(--line) }
+td { padding: 9px 8px; border-bottom: 1px solid var(--line); vertical-align: top; font-variant-numeric: tabular-nums }
+tr.check { cursor: pointer } tr.check:hover td { background: var(--surface-2) }
+tr.check td:first-child { font-family: var(--f-mono); font-weight: 500 }
+tr.trace td { background: var(--surface-2); padding: 12px 14px }
+.chain { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; font: 12px/1.4 var(--f-mono) }
+.chain span { padding: 2px 7px; border-radius: 6px; background: var(--surface); border: 1px solid var(--line) }
+.chain .arrow { border: 0; background: none; padding: 0; color: var(--muted) }
+.tablewrap { overflow-x: auto; margin: 0 -4px }
+.kind-hard, .kind-soft { font: 500 11px var(--f-mono); color: var(--muted) }
+
+/* explanation */
+.segs { display: grid; gap: 10px; margin: 0; padding: 0; list-style: none }
+.segs li { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 12px; align-items: start }
+@media (max-width: 520px) { .segs li { grid-template-columns: 1fr; gap: 4px } }
+.tag { font: 500 11px/1 var(--f-mono); text-transform: uppercase; letter-spacing: .06em; padding: 5px 7px; border-radius: 6px; border: 1px solid var(--line); text-align: center; color: var(--fg-2) }
+.tag.fact { background: var(--surface-2); color: var(--fg) }
+.tag.assumption { border-style: dashed }
+.tag.inference { border-color: var(--warn) }
+.tag.unknown { border-style: dotted }
+.tag.option { border-color: var(--accent); color: var(--accent) }
+.refs { font: 11.5px var(--f-mono); color: var(--muted); margin-top: 3px }
+
+/* bars */
+.bars { display: grid; gap: 10px }
+.bar-row { display: grid; grid-template-columns: minmax(0, 170px) minmax(0, 1fr); gap: 10px; align-items: center; font-size: 13px }
+@media (max-width: 520px) { .bar-row { grid-template-columns: 1fr } }
+.bar-row .name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--fg-2) }
+.bar-track { position: relative; height: 26px }
+.bar { position: absolute; left: 0; height: 10px; border-radius: 0 4px 4px 0 }
+.bar.cur { top: 2px; background: var(--cur) } .bar.prop { top: 14px; background: var(--prop) }
+.limit-line { position: absolute; top: -3px; bottom: -3px; width: 0; border-left: 2px dashed var(--crit) }
+.bar-hit { position: absolute; inset: 0; cursor: default }
+
+.alts { display: grid; gap: 10px }
+.alt { border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; display: grid; gap: 4px }
+.alt .big { font: 600 22px/1.1 var(--f-head) }
+ul.plain { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 13.5px; color: var(--fg-2) }
+footer { margin-top: 28px; padding-top: 16px; border-top: 1px solid var(--line); font-size: 13px; color: var(--fg-2); display: grid; gap: 6px }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0) }
+details summary { cursor: pointer; color: var(--fg-2); font-size: 13px; margin-top: 10px }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">CoherenceAnalyzer <span>· profile ↔ portfolio</span></div>
+    <label class="sr" for="pick">Report</label>
+    <select id="pick" aria-label="Report"></select>
+    <button class="iconbtn" id="theme" type="button" aria-label="Toggle dark mode">◐</button>
+  </header>
+  <div class="banner" id="banner" hidden></div>
+  <main id="app"><p class="muted" style="margin-top:24px">Loading report…</p></main>
+  <footer id="foot"></footer>
+</div>
+
+<script>
+(() => {
+  const $ = (s, el = document) => el.querySelector(s);
+  const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;"}[c]));
+  const pct = (x, d = 1) => x == null ? "—" : (x * 100).toFixed(d) + " %";
+  const pp = (x, d = 1) => (x >= 0 ? "+" : "−") + Math.abs(x * 100).toFixed(d) + " pts";
+  const cad = x => x == null ? "—" : Math.round(x).toLocaleString("fr-CA").replace(/ | /g, " ") + " $";
+  const lvl = s => String(s || "").replace(/_/g, "-");
+  const STATUS = {violation: "violation", warning: "warning", info: "info", pass: "pass", unknown: "unknown", absent: "absent"};
+
+  // theme toggle (per-viewer convenience only)
+  const root = document.documentElement;
+  try { const t = localStorage.getItem("ca-theme"); if (t) root.dataset.theme = t; } catch (e) {}
+  $("#theme").onclick = () => {
+    const dark = root.dataset.theme ? root.dataset.theme === "dark" : matchMedia("(prefers-color-scheme: dark)").matches;
+    root.dataset.theme = dark ? "light" : "dark";
+    try { localStorage.setItem("ca-theme", root.dataset.theme); } catch (e) {}
+    if (state.rep) render(state.rep);
+  };
+
+  const state = {rep: null, funding: null, w: null};
+
+  function fmtVal(c, v) {
+    if (v == null) return "—";
+    if (Array.isArray(v)) return v.map(x => fmtVal(c, x)).join(" – ");
+    switch (c.unit) {
+      case "weight": case "risk_share": case "vol": case "drawdown": return pct(v);
+      case "cad": return cad(v);
+      case "level": return lvl(v);
+      default: return esc(v);
+    }
+  }
+  const chip = (s, label) => `<span class="chip ${STATUS[s] || ""}"><i aria-hidden="true"></i>${esc(label || s)}</span>`;
+
+  // ---------- cone chart (SVG, one y-axis, crosshair tooltip) ----------
+  function cone(el, series, floor, asOf) {
+    const W = 720, H = 300, m = {l: 64, r: 16, t: 12, b: 28};
+    const n = series[0].cone.p50.length;
+    const all = series.flatMap(s => [...s.cone.p5, ...s.cone.p95]).concat(floor ? [floor] : []);
+    let lo = Math.min(...all), hi = Math.max(...all);
+    const pad = (hi - lo) * .06; lo -= pad; hi += pad;
+    const x = i => m.l + (i / (n - 1)) * (W - m.l - m.r);
+    const y = v => m.t + (1 - (v - lo) / (hi - lo)) * (H - m.t - m.b);
+    const path = a => a.map((v, i) => (i ? "L" : "M") + x(i).toFixed(1) + " " + y(v).toFixed(1)).join("");
+    const band = c => path(c.p95) + c.p5.map((v, i) => "L" + x(n - 1 - i).toFixed(1) + " " + y(c.p5[n - 1 - i]).toFixed(1)).join("") + "Z";
+    const ticks = 5, yt = Array.from({length: ticks}, (_, i) => lo + (hi - lo) * (i + .5) / ticks);
+    const start = new Date(asOf + "T00:00:00");
+    const mlabel = i => { const d = new Date(start); d.setMonth(d.getMonth() + i); return d.toLocaleDateString("en-CA", {year: "numeric", month: "short"}); };
+    const xt = [0, 12, 24, 36, 48].filter(i => i < n);
+    let svg = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Simulated portfolio value range over the horizon">
+      <g class="grid">${yt.map(v => `<line x1="${m.l}" x2="${W - m.r}" y1="${y(v)}" y2="${y(v)}"/>`).join("")}</g>
+      <g class="axis">${yt.map(v => `<text x="${m.l - 8}" y="${y(v) + 4}" text-anchor="end">${(v / 1000).toFixed(0)} k</text>`).join("")}
+        ${xt.map(i => `<text x="${x(i)}" y="${H - 8}" text-anchor="middle">${mlabel(i)}</text>`).join("")}</g>`;
+    series.forEach(s => { svg += `<path d="${band(s.cone)}" fill="var(${s.band})" stroke="none"/>`; });
+    series.forEach(s => {
+      svg += `<path d="${path(s.cone.p5)}" fill="none" stroke="var(${s.color})" stroke-width="1" stroke-dasharray="3 3" opacity=".8"/>`;
+      svg += `<path d="${path(s.cone.p50)}" fill="none" stroke="var(${s.color})" stroke-width="2"/>`;
+    });
+    if (floor) svg += `<line x1="${m.l}" x2="${W - m.r}" y1="${y(floor)}" y2="${y(floor)}" stroke="var(--crit)" stroke-width="1.5" stroke-dasharray="6 4"/>
+      <text x="${W - m.r}" y="${y(floor) - 6}" text-anchor="end" style="fill:var(--crit-ink);font:500 11px var(--f-mono)">your floor ${cad(floor)}</text>`;
+    svg += `<line class="xh" x1="0" x2="0" y1="${m.t}" y2="${H - m.b}" stroke="var(--muted)" stroke-width="1" opacity="0"/>
+      <rect x="${m.l}" y="${m.t}" width="${W - m.l - m.r}" height="${H - m.t - m.b}" fill="transparent" class="hit"/></svg>
+      <div class="tip"></div>`;
+    el.innerHTML = svg;
+    const sv = $("svg", el), tip = $(".tip", el), xh = $(".xh", el);
+    const move = ev => {
+      const r = sv.getBoundingClientRect(), sx = (ev.clientX - r.left) * W / r.width;
+      const i = Math.max(0, Math.min(n - 1, Math.round((sx - m.l) / (W - m.l - m.r) * (n - 1))));
+      xh.setAttribute("x1", x(i)); xh.setAttribute("x2", x(i)); xh.setAttribute("opacity", 1);
+      tip.innerHTML = `<div style="margin-bottom:4px"><b>${mlabel(i)}</b></div>` + series.map(s =>
+        `<div class="row"><span class="sw line" style="background:var(${s.color})"></span>${esc(s.label)}: median ${cad(s.cone.p50[i])} · 5th pct ${cad(s.cone.p5[i])}</div>`).join("");
+      const px = x(i) * r.width / W;
+      tip.style.left = Math.min(Math.max(px - tip.offsetWidth / 2, 0), r.width - tip.offsetWidth) + "px";
+      tip.style.top = "-6px"; tip.style.opacity = 1;
+    };
+    sv.addEventListener("pointermove", move);
+    sv.addEventListener("pointerleave", () => { tip.style.opacity = 0; xh.setAttribute("opacity", 0); });
+  }
+
+  // ---------- sector risk bars ----------
+  function sectorBars(el, cur, prop, limit) {
+    const names = [...new Set([...(cur || []).map(s => s.name), ...(prop || []).map(s => s.name)])];
+    const get = (arr, n) => (arr || []).find(s => s.name === n);
+    names.sort((a, b) => ((get(prop, b) || get(cur, b) || {}).risk || 0) - ((get(prop, a) || get(cur, a) || {}).risk || 0));
+    const mx = Math.max(limit || 0, ...names.flatMap(n => [(get(cur, n) || {}).risk || 0, (get(prop, n) || {}).risk || 0])) * 1.08;
+    el.innerHTML = names.map(n => {
+      const c = get(cur, n), p = get(prop, n), broad = n.startsWith("Broad market");
+      return `<div class="bar-row"><div class="name" title="${esc(n)}">${esc(n)}${broad ? " <span class='muted small'>(no look-through)</span>" : ""}</div>
+        <div class="bar-track">
+          ${c ? `<div class="bar cur" style="width:${(c.risk / mx * 100).toFixed(2)}%"></div>` : ""}
+          ${p ? `<div class="bar prop" style="width:${(p.risk / mx * 100).toFixed(2)}%"></div>` : ""}
+          ${limit && !broad ? `<div class="limit-line" style="left:${(limit / mx * 100).toFixed(2)}%"></div>` : ""}
+          <div class="bar-hit" title="${esc(n)} — risk share: current ${c ? pct(c.risk) : "—"}${prop ? ", proposed " + (p ? pct(p.risk) : "—") : ""}; weight: current ${c ? pct(c.weight) : "—"}${prop ? ", proposed " + (p ? pct(p.weight) : "—") : ""}"></div>
+        </div></div>`;
+    }).join("");
+  }
+
+  // ---------- checks ----------
+  function checksTable(rep) {
+    const cur = rep.checks_current || [], prop = rep.checks_proposed;
+    const key = c => c.id + "|" + c.subject;
+    const curMap = Object.fromEntries(cur.map(c => [key(c), c]));
+    const rows = (prop || cur);
+    const order = {violation: 0, warning: 1, unknown: 2, info: 3, pass: 4};
+    const sorted = [...rows].sort((a, b) => (order[a.status] - order[b.status]) || a.id.localeCompare(b.id, "en", {numeric: true}));
+    return `<div class="tablewrap"><table><thead><tr><th>Check</th><th>Subject</th><th>Value</th><th>Your limit</th>${prop ? "<th>Now</th><th>After trade</th>" : "<th>Status</th>"}</tr></thead><tbody>` +
+      sorted.map((c, i) => {
+        const before = prop ? curMap[key(c)] : null;
+        const chain = (c.derived_from || []);
+        return `<tr class="check" data-i="${i}" tabindex="0" aria-expanded="false">
+          <td>${esc(c.id)} <span class="kind-${c.kind}">${c.kind === "soft" ? "soft" : ""}</span></td>
+          <td>${esc(c.subject)}</td><td>${fmtVal(c, c.value)}</td><td>${fmtVal(c, c.limit)}</td>
+          ${prop ? `<td>${before ? chip(before.status) : chip("absent", "n/a")}</td><td>${chip(c.status)}</td>` : `<td>${chip(c.status)}</td>`}
+        </tr>
+        <tr class="trace" data-for="${i}" hidden><td colspan="${prop ? 6 : 5}">
+          <div class="eyebrow" style="margin-bottom:8px">Why this limit exists · derived_from</div>
+          <div class="chain">${chain.length ? chain.map((p, j) => (j ? '<span class="arrow">←</span>' : "") + `<span>${esc(p)}</span>`).join("") : '<span>no limit: factual check</span>'}</div>
+          <p class="small muted" style="margin-top:8px">Source <code>${esc(c.source)}</code> · confidence ${c.confidence}${c.date ? " · date " + esc(c.date) : ""}${c.kind === "soft" ? " · LLM-derived: can warn, never block" : ""}</p>
+          ${c.evidence && c.evidence.length ? `<ul class="plain" style="margin-top:8px">${c.evidence.map(e => `<li>${esc(typeof e === "string" ? e : (e.event_id + ": " + (e.note || e.signal)))}</li>`).join("")}</ul>` : ""}
+        </td></tr>`;
+      }).join("") + "</tbody></table></div>";
+  }
+
+  // ---------- what-if (B2 intent form, precomputed grid) ----------
+  function whatifPanel(rep) {
+    const wi = rep.whatif, it = rep.intent;
+    const fundings = Object.keys(wi);
+    if (!state.funding || !wi[state.funding]) state.funding = fundings[0];
+    const rows = wi[state.funding].rows;
+    const maxW = rows[rows.length - 1].w;
+    if (state.w == null || state.w > maxW) state.w = Math.min(it.target_weight_pct, maxW);
+    return `<div class="whatif">
+      <div class="field"><label for="fund">Funding</label><select id="fund">${fundings.map(f => `<option ${f === state.funding ? "selected" : ""}>${esc(f)}</option>`).join("")}</select></div>
+      <div class="field"><label for="w">Target weight in ${esc(it.ticker)}</label>
+        <div class="slider-row"><input id="w" type="range" min="0" max="${maxW}" step="0.5" value="${state.w}"><output id="wout">${state.w.toFixed(1)} %</output></div></div>
+      <div class="field"><label>Your limits crossed at this weight</label><div class="ticks" id="viol"></div></div>
+      <div class="confirm"><button class="btn" type="button" disabled title="Simulation only: nothing is ever executed">Confirm intent (simulation)</button>
+        <span class="small muted">The draft came from the order text "${esc(it.event_id)}". The user confirms or edits it before any check runs.</span></div>
+    </div>`;
+  }
+
+  function currentProposed(rep) {
+    if (!rep.whatif) return {cur: rep.metrics_current, prop: null};
+    const row = rep.whatif[state.funding].rows.find(r => r.w === state.w) || rep.whatif[state.funding].rows.at(-1);
+    return {cur: rep.metrics_current, prop: row};
+  }
+
+  function updateLive(rep) {
+    const {cur, prop} = currentProposed(rep);
+    const L = rep.limits;
+    const t = (k, label, f, lim, worseUp) => {
+      const a = cur[k], b = prop ? prop[k] : null;
+      const d = b == null ? "" : (k === "p5_T" ? (b - a >= 0 ? "+" : "−") + cad(Math.abs(b - a)) : pp(b - a));
+      return `<div class="tile"><div class="k">${label}</div><div class="v">${f(b ?? a)}</div>
+        <div class="d">${prop ? `now ${f(a)} · ${d}` : "&nbsp;"}</div><div class="lim">${lim}</div></div>`;
+    };
+    $("#tiles").innerHTML =
+      t("vol", "Volatility (annual)", v => pct(v), `your band ${pct(L.vol_band_annual[0], 0)} – ${pct(L.vol_band_annual[1], 0)}`) +
+      t("mdd", "Worst drawdown since 2022", v => pct(v), `your limit ${L.max_drawdown_pct} %`) +
+      t("p5_T", "Pessimistic value at horizon", cad, `your floor ${cad(L.floor_at_horizon)}`) +
+      t("loss_prob", "Chance of a loss at horizon", v => pct(v, 0), "simulated, assumption-based");
+    const series = [{label: "Current portfolio", cone: cur.cone, color: "--cur", band: "--cur-band"}];
+    if (prop) series.push({label: `With ${rep.intent.ticker} at ${state.w.toFixed(1)} %`, cone: prop.cone, color: "--prop", band: "--prop-band"});
+    cone($("#cone"), series, L.floor_at_horizon, rep.profile_card.as_of);
+    $("#coneLegend").innerHTML = series.map(s => `<span><i class="sw" style="background:var(${s.band});border:1.5px solid var(${s.color})"></i>${esc(s.label)}: 5th–95th percentile, line = median</span>`).join("") +
+      `<span><i class="sw line" style="background:var(--crit)"></i>Your floor at horizon</span>`;
+    if (prop) {
+      const v = prop.violations;
+      $("#viol").innerHTML = v.length ? v.map(id => chip("violation", id)).join("") : chip("pass", "fits within all your limits");
+      $("#wout").textContent = state.w.toFixed(1) + " %";
+    }
+  }
+
+  // ---------- render ----------
+  function render(rep) {
+    state.rep = rep;
+    const pc = rep.profile_card, it = rep.intent, L = rep.limits;
+    const pv = rep.preview;
+    const banner = $("#banner");
+    if (pv) {
+      banner.hidden = false;
+      banner.innerHTML = `<b>Prototype.</b> Real: ${pv.real.map(esc).join(", ")}. Preview code until the build loop lands them: ${pv.preview.map(esc).join(", ")}. Built by <code>${esc(pv.built_by)}</code>; explanation mode <code>${esc(rep.explanation.mode)}</code> (no LLM text).`;
+    } else banner.hidden = true;
+
+    const vLabel = {incoherent: "Incoherent", coherent_with_warnings: "Coherent, with warnings", coherent: "Coherent"}[rep.verdict];
+    $("#app").innerHTML = `
+    <div class="grid">
+      <section class="card c12"><div class="hero">
+        <div>
+          <div class="eyebrow">${rep.flow === "B" ? "Flow B · trade check" : "Flow C · portfolio review"} · ${esc(rep.run_id)}</div>
+          <div style="margin-top:12px"><span class="verdict ${rep.verdict}">${rep.verdict === "incoherent" ? "✕" : rep.verdict === "coherent" ? "✓" : "!"} ${vLabel}</span></div>
+          <p class="headline">${esc(rep.explanation.headline)}</p>
+          ${it ? `<p class="muted">Request: <b>${esc(it.action)} ${esc(it.ticker)}</b> to ${it.target_weight_pct} % of the portfolio, funded from <b>${esc(it.funding.ticker || it.funding.kind)}</b>.</p>` : `<p class="muted">Baseline review of the current portfolio against the investor's own limits.</p>`}
+        </div>
+        <div class="persona">
+          <div><span>Investor</span>${esc(pc.name)}, ${pc.age} · ${esc(pc.occupation)}</div>
+          <div><span>Life stage</span>${lvl(pc.life_stage)}</div>
+          <div><span>Risk: declared / capacity</span><span class="lvl" style="display:inline;text-transform:none;font-size:13.5px;color:var(--fg);letter-spacing:0">${lvl(pc.declared)} / ${lvl(pc.capacity)}</span></div>
+          <div><span>Effective risk (min)</span><b class="lvl">${lvl(pc.effective)}</b></div>
+          <div><span>Effective horizon</span>${pc.effective_horizon_years} years (withdrawal ${esc(pc.first_withdrawal.date)})</div>
+          <div><span>Behaviour (LLM, conf. ${pc.behavioural_conf})</span>${lvl(pc.behavioural)} <span class="muted small">inference</span></div>
+          <div><span>Portfolio</span>${cad(pc.value_cad)} · as of ${esc(pc.as_of)}</div>
+          <div><span>Emergency fund</span>${pc.ef_months} months</div>
+        </div>
+      </div></section>
+
+      <section class="c12"><div class="tiles" id="tiles"></div></section>
+
+      <section class="card ${it ? "c8" : "c12"}">
+        <h2>Range of outcomes over the horizon</h2>
+        <p class="sub">Block-bootstrap simulation (n = 5000, seed 7) of monthly CAD returns 2022-01 → 2026-10, with team drift assumptions. Not a forecast.</p>
+        <div class="chart" id="cone"></div><div class="legend" id="coneLegend"></div>
+      </section>
+      ${it ? `<section class="card c4"><h2>Intent (what if?)</h2><p class="sub">Precomputed with the real engine at every 0.5 pt step. Move the slider to see where your own limits stop the trade.</p>${whatifPanel(rep)}</section>` : ""}
+
+      <section class="card c12">
+        <h2>Checks against your own limits</h2>
+        <p class="sub">Only hard, rule-based checks can produce a violation. LLM-derived checks (soft) can only warn. Click a row to see where its limit comes from.</p>
+        ${checksTable(rep)}
+      </section>
+
+      <section class="card c7">
+        <h2>Why: in plain language</h2>
+        <p class="sub">Every segment is labelled fact, assumption, inference, option or unknown. Every number is checked against the facts payload.</p>
+        <ul class="segs">${rep.explanation.segments.map(s => `<li><span class="tag ${s.kind}">${esc(s.kind)}</span><div>${esc(s.text)}<div class="refs">refs: ${(s.refs || []).map(esc).join(", ")}</div></div></li>`).join("")}</ul>
+      </section>
+      <section class="card c5">
+        <h2>${rep.alternatives && rep.alternatives.length ? "What fits within your limits" : "What we can't verify"}</h2>
+        ${rep.alternatives && rep.alternatives.length ? `<p class="sub">Computed by code from your own limits. These are facts about your profile, not recommendations.</p>
+          <div class="alts">${rep.alternatives.map(a => `<div class="alt"><div class="eyebrow">Funding ${esc(a.funding_label)}</div><div class="big">up to ${a.max_weight_pct.toFixed(1)} %</div><div class="small muted">Stopped by ${esc(a.binding_check || "nothing in range")} · pessimistic value ${cad(a.metrics.p5_T)}</div></div>`).join("")}</div>
+          <h3 style="margin-top:18px">What we can't verify</h3>` : `<p class="sub">Listed whatever the verdict.</p>`}
+        <ul class="plain" style="margin-top:8px">${(rep.unknowns || []).map(u => `<li><b>${esc(u.id)}</b> ${esc(u.subject)}: ${esc(u.message_key.replace(/_/g, " "))}</li>`).join("") || "<li>Nothing flagged.</li>"}</ul>
+      </section>
+
+      <section class="card c6">
+        <h2>Risk decomposition by sector</h2>
+        <p class="sub">Share of portfolio risk, not of weight. Dashed red line: your maximum sector risk share (${pct(L.max_sector_risk_share, 0)}).</p>
+        <div class="bars" id="sectors"></div>
+        <div class="legend"><span><i class="sw" style="background:var(--cur)"></i>Current</span>${rep.metrics_proposed ? `<span><i class="sw" style="background:var(--prop)"></i>After the requested trade</span>` : ""}</div>
+      </section>
+      <section class="card c6">
+        <h2>Main risk drivers</h2>
+        <p class="sub">${rep.metrics_proposed ? "After the requested trade." : "Current portfolio."} Share of total risk by holding.</p>
+        <div class="tablewrap"><table><thead><tr><th>Holding</th><th>Weight</th><th>Risk share</th><th>Own vol.</th></tr></thead><tbody>
+          ${(rep.metrics_proposed || rep.metrics_current).drivers.slice(0, 7).map(d => `<tr><td><b class="mono">${esc(d.ticker)}</b> <span class="muted small">${esc(d.name)}</span></td><td>${pct(d.weight)}</td><td>${pct(d.risk)}</td><td>${pct(d.vol)}</td></tr>`).join("")}
+        </tbody></table></div>
+      </section>
+
+      <section class="card c12">
+        <h2>Assumptions and limits of this analysis</h2>
+        <ul class="plain" style="margin-top:10px">${rep.assumptions.map(a => `<li>${esc(a)}</li>`).join("")}
+          <li>Limits table values are team calibrations, not regulation. KYC suitability in Québec (AMF/CIRO) is the real-world analogue.</li>
+          <li>Behaviour reading is noisy (confidence capped at 0.8); it can warn, never block.</li></ul>
+        <details><summary>Data window</summary><p class="small muted" style="margin-top:6px">${rep.data_window.join(" → ")}</p></details>
+      </section>
+    </div>`;
+
+    sectorBars($("#sectors"), rep.metrics_current.groups.sector, rep.metrics_proposed && rep.metrics_proposed.groups.sector, L.max_sector_risk_share);
+    document.querySelectorAll("tr.check").forEach(tr => {
+      const toggle = () => { const t = $(`tr.trace[data-for="${tr.dataset.i}"]`); t.hidden = !t.hidden; tr.setAttribute("aria-expanded", String(!t.hidden)); };
+      tr.addEventListener("click", toggle);
+      tr.addEventListener("keydown", e => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); toggle(); } });
+    });
+    if (it) {
+      $("#fund").onchange = e => { state.funding = e.target.value; state.w = null; render(rep); };
+      $("#w").oninput = e => { state.w = parseFloat(e.target.value); updateLive(rep); };
+    }
+    updateLive(rep);
+    const d = rep.disclaimer;
+    $("#foot").innerHTML = `<p>${esc(d.fr)}</p><p>${esc(d.en)}</p><p class="small">Data: AlphaForge starter pack (prices, USDCAD). Survivorship bias: universe selected in 2026.</p>`;
+  }
+
+  async function load(file) {
+    const r = await fetch("reports/" + file, {cache: "no-cache"});
+    state.funding = null; state.w = null;
+    render(await r.json());
+  }
+  (async () => {
+    try {
+      const idx = await (await fetch("reports/index.json", {cache: "no-cache"})).json();
+      $("#pick").innerHTML = idx.map(r => `<option value="${esc(r.file)}">${esc(r.label)}</option>`).join("");
+      $("#pick").onchange = e => load(e.target.value);
+      await load(idx[0].file);
+    } catch (e) {
+      $("#app").innerHTML = `<p style="margin-top:24px">Could not load reports: ${esc(e.message)}</p>`;
+    }
+  })();
+})();
+</script>
+</body>
+</html>
