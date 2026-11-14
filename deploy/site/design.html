@@ -1,0 +1,552 @@
+<title>CoherenceAnalyzer Screens</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@300;400;500;600;700&family=Ubuntu:wght@400;500&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: design canvas of framed screens. Canadian retail-bank web idiom: white header + grey nav links, navy headings, blue pill actions, pale-blue info panels, white cards on light grey, red reserved for the brand mark and for "outside your limits". */
+:root{
+  --red:#E41C23; --viol:#D0011B; --viol-bg:#FDECEE;
+  --navy:#00314D; --text:#565656; --text-2:#425865; --muted:#7993A2;
+  --blue:#1572C5; --blue-h:#105797; --on-blue:#FFFFFF;
+  --page:#F1F1F1; --surface:#FFFFFF; --tint:#EEF6FB; --tint-2:#D9EEF4; --grey:#EFEFEF;
+  --line:#D2D2D2; --line-2:#E7E7E7; --input:#C2C2C2; --util:#303030; --on-util:#FFFFFF;
+  --warn:#8A5A00; --warn-bg:#FFF3D9; --pass:#007A33; --pass-bg:#E2F6EA; --info:#105797; --info-bg:#EEF6FB; --unk:#5E6B73; --unk-bg:#F1F1F1;
+  --cur:#425865; --prop:#E41C23; --cur-fill:rgba(66,88,101,.13); --prop-fill:rgba(228,28,35,.11);
+  --f-head:"Figtree","Gilroy",Arial,sans-serif; --f-body:"Figtree","Gilroy",Arial,sans-serif;
+  --f-form:"Ubuntu","Figtree",Arial,sans-serif; --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  --r:4px; --pill:58px;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --red:#FF4A50; --viol:#FF6B78; --viol-bg:#3A1519;
+  --navy:#E8F1F8; --text:#C5CCD1; --text-2:#AEBBC4; --muted:#8FA4B1;
+  --blue:#4A9BE8; --blue-h:#76B4F0; --on-blue:#06192A;
+  --page:#0B1218; --surface:#131C24; --tint:#16283A; --tint-2:#1C3348; --grey:#1B242C;
+  --line:#2E3A44; --line-2:#24303A; --input:#3C4A55; --util:#05090D; --on-util:#FFFFFF;
+  --warn:#F2B54A; --warn-bg:#382A10; --pass:#5CCB8A; --pass-bg:#11301F; --info:#8CC2F2; --info-bg:#16283A; --unk:#A9B5BD; --unk-bg:#1B242C;
+  --cur:#AEBBC4; --prop:#FF5A5F; --cur-fill:rgba(174,187,196,.14); --prop-fill:rgba(255,90,95,.16);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --red:#FF4A50; --viol:#FF6B78; --viol-bg:#3A1519;
+  --navy:#E8F1F8; --text:#C5CCD1; --text-2:#AEBBC4; --muted:#8FA4B1;
+  --blue:#4A9BE8; --blue-h:#76B4F0; --on-blue:#06192A;
+  --page:#0B1218; --surface:#131C24; --tint:#16283A; --tint-2:#1C3348; --grey:#1B242C;
+  --line:#2E3A44; --line-2:#24303A; --input:#3C4A55; --util:#05090D; --on-util:#FFFFFF;
+  --warn:#F2B54A; --warn-bg:#382A10; --pass:#5CCB8A; --pass-bg:#11301F; --info:#8CC2F2; --info-bg:#16283A; --unk:#A9B5BD; --unk-bg:#1B242C;
+  --cur:#AEBBC4; --prop:#FF5A5F; --cur-fill:rgba(174,187,196,.14); --prop-fill:rgba(255,90,95,.16);
+  color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--page);color:var(--text);font:15px/1.5 var(--f-body);margin:0}
+.canvas{padding-block:32px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:52px;max-width:1300px;margin:0 auto}
+.canvas>header h1{font:600 30px/1.15 var(--f-head);color:var(--navy);margin:0 0 6px;text-wrap:balance}
+.canvas>header p{margin:0;max-width:72ch}
+.board{display:flex;flex-direction:column;gap:10px;min-width:0}
+.board-label{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap}
+.board-label b{font:700 13px var(--f-head);color:var(--navy);text-transform:uppercase;letter-spacing:.08em}
+.board-label span{color:var(--muted);font-size:13px}
+.scroll{overflow-x:auto;padding-bottom:6px}
+.screen{background:var(--surface);border:1px solid var(--line);box-shadow:0 8px 28px rgba(0,49,77,.10);overflow:hidden}
+.w-desk{width:1200px}.w-phone{width:390px;border-radius:28px}
+.row-boards{display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start}
+a{color:var(--blue)} a:hover{color:var(--blue-h)}
+
+/* chrome */
+.util{background:var(--util);color:var(--on-util);height:30px;display:flex;align-items:stretch;padding:0 40px;font-size:12px;gap:2px}
+.util span{display:flex;align-items:center;padding:0 14px;opacity:.75}
+.util span.on{background:rgba(255,255,255,.14);opacity:1}
+.util .r{margin-left:auto;gap:14px}
+.hdr{background:var(--surface);height:76px;display:flex;align-items:center;gap:32px;padding:0 40px;border-bottom:1px solid var(--line-2);box-shadow:0 2px 6px rgba(0,0,0,.04)}
+.mark{display:flex;align-items:center;gap:10px;color:var(--navy)}
+.mark i{width:30px;height:30px;background:var(--red);display:grid;place-items:center;border-radius:2px}
+.mark i::after{content:"";width:12px;height:12px;border:2.5px solid #fff;border-radius:50%}
+.mark div{display:flex;flex-direction:column;line-height:1}
+.mark b{font:700 18px var(--f-head);letter-spacing:.01em;text-transform:uppercase}
+.mark small{font:600 9.5px var(--f-head);letter-spacing:.06em;text-transform:uppercase;border-top:1px solid var(--navy);padding-top:3px;margin-top:3px}
+.hdr nav{margin-left:auto;display:flex;gap:22px;font-size:14px;height:100%}
+.hdr nav a{color:var(--text);text-decoration:none;display:flex;align-items:center;border-bottom:3px solid transparent}
+.hdr nav a.on{color:var(--navy);font-weight:600;border-color:var(--red)}
+.content{max-width:1120px;margin:0 auto;padding:28px 40px 36px}
+.crumb{font-size:13px;color:var(--muted);margin-bottom:8px}
+.crumb a{color:var(--blue)}
+h2.t{font:500 34px/1.15 var(--f-head);color:var(--navy);margin:0;text-wrap:balance}
+h3.t{font:600 19px/1.25 var(--f-head);color:var(--navy);margin:0}
+h4.t{font:600 15px var(--f-head);color:var(--navy);margin:0}
+.lbl{font:600 11px var(--f-body);text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}
+.num{font-variant-numeric:tabular-nums}
+.mono{font-family:var(--f-mono);font-size:12px}
+.hint{font-size:13px;color:var(--muted)}
+.btn{font:600 15px var(--f-head);border-radius:var(--pill);padding:11px 26px;border:1.5px solid transparent;cursor:pointer;display:inline-flex;gap:8px;align-items:center;justify-content:center;white-space:nowrap}
+.btn:focus-visible{outline:3px solid var(--blue);outline-offset:2px}
+.btn-p{background:var(--blue);color:var(--on-blue)} .btn-p:hover{background:var(--blue-h)}
+.btn-o{background:transparent;color:var(--navy);border-color:var(--navy)}
+.btn-ob{background:transparent;color:var(--blue);border-color:var(--blue)}
+.btn-w{background:var(--surface);color:var(--red)}
+.btn.wide{width:100%}
+
+/* chips */
+.chip{display:inline-flex;align-items:center;gap:6px;font:600 12.5px var(--f-body);padding:3px 10px;border-radius:var(--pill);white-space:nowrap}
+.chip::before{font:700 11px var(--f-body)}
+.c-viol{background:var(--viol-bg);color:var(--viol)}.c-viol::before{content:"✕"}
+.c-warn{background:var(--warn-bg);color:var(--warn)}.c-warn::before{content:"!"}
+.c-pass{background:var(--pass-bg);color:var(--pass)}.c-pass::before{content:"✓"}
+.c-info{background:var(--info-bg);color:var(--info)}.c-info::before{content:"i"}
+.c-unk{background:transparent;color:var(--unk);border:1px dashed var(--unk)}.c-unk::before{content:"?"}
+.tag{font:700 10px var(--f-body);letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:2px;border:1px solid currentColor;white-space:nowrap}
+.k-fact{color:var(--navy)}.k-assumption{color:var(--blue)}.k-inference{color:var(--warn)}.k-unknown{color:var(--unk);border-style:dashed}.k-option{color:var(--pass)}
+.flag{position:absolute;top:-12px;left:22px;background:var(--red);color:#fff;font:700 12px var(--f-head);padding:6px 12px 8px;border-radius:6px 6px 0 0;clip-path:polygon(0 0,100% 0,100% 82%,54% 82%,50% 100%,46% 82%,0 82%)}
+
+/* cards & panels */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--r)}
+.card.pad{padding:20px 22px}
+.panel-tint{background:var(--tint);border-radius:var(--r)}
+.icon{width:52px;height:52px;flex:none}
+.s{stroke:var(--navy);stroke-width:1.8;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.f{fill:var(--tint-2)}
+.rd{fill:var(--red)}
+ul.ticks{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+ul.ticks li{display:grid;grid-template-columns:22px 1fr;gap:10px;color:var(--text)}
+ul.ticks li::before{content:"";width:18px;height:14px;margin-top:3px;background:var(--navy);clip-path:polygon(0 55%,14% 40%,38% 64%,86% 0,100% 15%,38% 100%)}
+
+/* landing */
+.split{display:grid;grid-template-columns:1.25fr 1fr;min-height:640px}
+.split-l{background:var(--tint);position:relative;display:flex;flex-direction:column;justify-content:flex-end;padding:40px;gap:14px;overflow:hidden}
+.split-l .big{font:300 64px/1 var(--f-head);color:var(--navy);letter-spacing:-.02em}
+.split-l .big b{font-weight:600}
+.split-r{display:flex;flex-direction:column}
+.split-r .top{padding:40px 64px 28px;display:flex;flex-direction:column;gap:18px;flex:1}
+.split-r .bot{background:var(--tint);padding:28px 64px 34px;display:flex;flex-direction:column;gap:10px}
+.lang{align-self:flex-end;font-size:13px}
+.persona{display:grid;grid-template-columns:44px 1fr auto;gap:14px;align-items:center;border:1px solid var(--input);border-radius:var(--r);padding:12px 14px;cursor:pointer}
+.persona.on{border:2px solid var(--blue);padding:11px 13px;background:var(--tint)}
+.avatar{width:44px;height:44px;border-radius:50%;display:grid;place-items:center;font:700 16px var(--f-head);color:var(--navy);background:var(--tint-2)}
+.persona b{color:var(--navy);font-weight:600;display:block}
+.persona span{font-size:13px}
+
+/* forms */
+.frow{display:grid;grid-template-columns:240px 1fr;gap:20px;align-items:center;padding:12px 0}
+.frow>label{color:var(--navy);font-weight:500}
+.input{font:400 15px var(--f-form);color:var(--navy);background:var(--surface);border:1px solid var(--input);border-radius:var(--r);padding:10px 14px;width:100%;font-variant-numeric:tabular-nums}
+.input.prefill{background:var(--tint);border-color:var(--blue)}
+.radio{display:flex;flex-direction:column;gap:8px}
+.radio div{display:grid;grid-template-columns:22px 1fr auto;gap:10px;align-items:center;border:1px solid var(--input);border-radius:var(--r);padding:10px 14px;font-family:var(--f-form);font-size:14px;color:var(--navy)}
+.radio i{width:18px;height:18px;border-radius:50%;border:1.5px solid var(--muted);display:block}
+.radio .on{border:2px solid var(--blue);padding:9px 13px;background:var(--tint)}
+.radio .on i{border:5px solid var(--blue)}
+.seg-ctl{display:inline-flex;border:1.5px solid var(--navy);border-radius:var(--pill);overflow:hidden;width:max-content}
+.seg-ctl span{padding:8px 26px;font-weight:600;color:var(--navy)}
+.seg-ctl span.on{background:var(--navy);color:var(--surface)}
+.steps{display:flex;gap:8px;margin:20px 0 26px;flex-wrap:wrap}
+.steps div{display:flex;gap:10px;align-items:center;font-size:14px;color:var(--muted);padding-right:20px}
+.steps b{width:26px;height:26px;border-radius:50%;display:grid;place-items:center;border:1.5px solid var(--line);font:600 13px var(--f-head)}
+.steps .done b{background:var(--navy);border-color:var(--navy);color:var(--surface)}
+.steps .done{color:var(--navy)}
+.steps .now b{border-color:var(--blue);color:var(--blue)}
+.steps .now{color:var(--blue);font-weight:600}
+.quote{font:500 21px/1.4 var(--f-head);color:var(--navy);margin:10px 0}
+
+/* tabs (savings-page style) */
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs span{border:1px solid var(--line);border-bottom:0;border-radius:var(--r) var(--r) 0 0;padding:10px 16px;color:var(--blue);font-weight:600;font-size:14px;background:var(--surface);display:flex;gap:8px;align-items:center;cursor:pointer}
+.tabs span.on{background:var(--tint);color:var(--navy);border-color:var(--tint)}
+.tabs span em{font-style:normal;font:700 11px var(--f-mono);color:var(--red)}
+.tabpanel{background:var(--tint);padding:20px;border-radius:0 var(--r) var(--r) var(--r)}
+
+/* report */
+.verdict{position:relative;display:grid;grid-template-columns:1fr auto;gap:20px;align-items:center;margin-top:16px;padding:26px 24px 22px}
+.verdict .vh{font:500 26px/1.2 var(--f-head);color:var(--navy);text-wrap:balance}
+.counts{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.metrics{display:grid;grid-template-columns:repeat(4,1fr);gap:16px}
+.metric{display:flex;flex-direction:column;gap:6px;padding:16px 18px}
+.metric .v{display:flex;align-items:baseline;gap:8px;white-space:nowrap;font:600 23px var(--f-head);color:var(--navy);font-variant-numeric:tabular-nums}
+.metric .v s{font:400 13px var(--f-body);color:var(--muted);text-decoration:none}
+.metric .v s::after{content:" →"}
+.metric .lim{font-size:13px}
+.metric .lim.bad{color:var(--viol);font-weight:600}
+.grid2{display:grid;grid-template-columns:minmax(0,1.5fr) minmax(0,1fr);gap:20px;align-items:start}
+.sec-h{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:14px}
+.check{display:grid;grid-template-columns:48px 1fr auto 128px;gap:14px;align-items:center;padding:13px 16px;background:var(--surface);border:1px solid var(--line-2);border-radius:var(--r);cursor:pointer}
+.check+.check{margin-top:8px}
+.check:hover{border-color:var(--blue)}
+.check.sel{border:2px solid var(--blue);padding:12px 15px}
+.check .id{font:500 12px var(--f-mono);color:var(--muted)}
+.check .what{min-width:0}
+.check .what b{font-weight:600;color:var(--navy);display:block}
+.check .what span{font-size:13px}
+.check .val{font:600 15px var(--f-body);color:var(--navy);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+.check .val small{display:block;font-weight:400;color:var(--muted);font-size:12px}
+.check>.chip{justify-self:end}
+.fgroup{margin-top:16px}
+.fgroup:first-child{margin-top:0}
+.fgh{display:flex;gap:10px;align-items:baseline;margin-bottom:8px}
+.fgh .n{font:700 12px var(--f-mono);color:var(--red)}
+.fgh b{color:var(--navy);font:600 15px var(--f-head)}
+.fgh span{font-size:13px;color:var(--muted)}
+.principle{margin-top:16px;font-size:14px;color:var(--text-2);border-left:3px solid var(--red);padding:4px 0 4px 12px}
+.seg{display:grid;grid-template-columns:100px 1fr;gap:12px;padding:12px 0;border-top:1px solid var(--line-2);align-items:start}
+.seg:first-of-type{border-top:0;padding-top:4px}
+.seg p{margin:0;color:var(--text)}
+.seg .refs{display:block;margin-top:4px;font:500 11px var(--f-mono);color:var(--muted)}
+.opts{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.opt{display:flex;flex-direction:column;gap:12px;padding:22px}
+.opt .big{font:600 34px var(--f-head);color:var(--navy);font-variant-numeric:tabular-nums}
+.opt hr{border:0;border-top:1px solid var(--line);margin:2px 0;width:100%}
+.help{display:grid;grid-template-columns:repeat(3,1fr);gap:16px}
+.help .card{text-align:center;display:flex;flex-direction:column;align-items:center;gap:10px;padding:28px 24px}
+.help p{margin:0}
+.foot{background:var(--grey);padding:28px 40px 22px}
+.foot .cols{max-width:1120px;margin:0 auto;display:grid;grid-template-columns:repeat(4,1fr);gap:20px}
+.foot h5{margin:0 0 10px;font:600 12px var(--f-head);color:var(--navy)}
+.foot a{display:block;color:var(--text);text-decoration:none;font-size:14px;margin:6px 0}
+.foot .disc{max-width:1120px;margin:22px auto 0;border-top:1px solid var(--line);padding-top:14px;font-size:13px}
+
+/* chain */
+.chain{display:flex;flex-direction:column}
+.node{display:grid;grid-template-columns:30px 1fr;gap:14px;position:relative;padding-bottom:18px}
+.node::before{content:"";position:absolute;left:14px;top:26px;bottom:0;width:2px;background:var(--line)}
+.node:last-child::before{display:none}
+.dot{width:30px;height:30px;border-radius:50%;border:2px solid var(--navy);background:var(--surface);display:grid;place-items:center;font:700 10px var(--f-mono);color:var(--navy);position:relative;z-index:1}
+.node.bad .dot{border-color:var(--viol);color:var(--viol);background:var(--viol-bg)}
+.node.ok .dot{background:var(--navy);color:var(--surface)}
+.nb{display:flex;flex-direction:column;gap:2px;padding-top:4px}
+.nb>b{color:var(--navy);font-weight:600}
+.nb .p{font:500 11px var(--f-mono);color:var(--muted)}
+.kids{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px}
+.leaf{border:1px solid var(--line);border-radius:var(--r);padding:9px 11px;font-size:13px;background:var(--surface)}
+.leaf b{display:block;color:var(--navy);font-weight:600}
+.leaf .p{font:500 10px var(--f-mono);color:var(--muted)}
+.by{font:700 10px var(--f-body);text-transform:uppercase;letter-spacing:.07em}
+.by.user{color:var(--navy)}.by.rule{color:var(--blue)}
+
+/* values */
+.notes{background:var(--tint);border-radius:var(--r);padding:16px 18px;font:400 16px/1.6 var(--f-form);color:var(--navy)}
+mark{background:var(--warn-bg);color:var(--navy);padding:1px 3px;box-shadow:inset 0 -2px 0 var(--warn)}
+.rule{display:grid;grid-template-columns:1fr auto;gap:16px;align-items:center;padding:16px 18px}
+.rule .rk{font:500 12px var(--f-mono);color:var(--muted)}
+
+/* phone */
+.phdr{display:flex;justify-content:space-between;align-items:center;padding:14px 18px;border-bottom:1px solid var(--line-2)}
+.phdr .mark i{width:24px;height:24px}.phdr .mark i::after{width:9px;height:9px;border-width:2px}
+.phdr .mark b{font-size:14px}.phdr .mark small{font-size:8px}
+.pbody{padding:16px;display:flex;flex-direction:column;gap:14px;background:var(--page)}
+.pver{position:relative;padding:22px 16px 16px;display:flex;flex-direction:column;gap:6px}
+.pver p{margin:0;font:500 18px/1.3 var(--f-head);color:var(--navy)}
+.pm{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.pm .card{padding:12px}
+.pm strong{display:block;font:600 19px var(--f-head);color:var(--navy);font-variant-numeric:tabular-nums}
+.pbody .check{grid-template-columns:44px 1fr auto;padding:11px 12px}
+.pbody .check+.check{margin-top:0}
+.plist{display:flex;flex-direction:column;gap:8px}
+.ptabs{display:flex;border-top:1px solid var(--line);background:var(--surface)}
+.ptabs span{flex:1;text-align:center;font-size:11px;padding:10px 0 16px;color:var(--muted)}
+.ptabs span.on{color:var(--blue);font-weight:700;box-shadow:inset 0 3px 0 var(--blue)}
+
+svg text{fill:var(--muted);font:11px var(--f-body)}
+.legend{display:flex;gap:16px;font-size:13px;flex-wrap:wrap}
+.legend i{display:inline-block;width:14px;height:10px;margin-right:6px;vertical-align:-1px}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <symbol id="i-target" viewBox="0 0 52 52"><circle class="f" cx="26" cy="27" r="19"/><circle class="s" cx="24" cy="28" r="17"/><circle class="s" cx="24" cy="28" r="10"/><circle class="s" cx="24" cy="28" r="3"/><path class="s" d="M24 28 40 12"/><path class="rd" d="M38 6h8v4h-8z"/></symbol>
+  <symbol id="i-time" viewBox="0 0 52 52"><rect class="f" x="10" y="12" width="34" height="34" rx="3"/><rect class="s" x="7" y="10" width="34" height="34" rx="3"/><path class="s" d="M7 19h34M15 6v8M33 6v8"/><path class="s" d="M15 28h6M27 28h6M15 36h6"/><rect class="rd" x="27" y="33" width="7" height="6"/></symbol>
+  <symbol id="i-risk" viewBox="0 0 52 52"><path class="f" d="M28 8 46 14v12c0 11-8 18-18 22-10-4-18-11-18-22V14z"/><path class="s" d="M25 6 43 12v12c0 11-8 18-18 22C15 42 7 35 7 24V12z"/><path class="s" d="M16 30l6-7 5 4 8-9"/><circle class="rd" cx="35" cy="18" r="2.6"/></symbol>
+  <symbol id="i-limit" viewBox="0 0 52 52"><rect class="f" x="9" y="16" width="36" height="28" rx="3"/><path class="s" d="M6 14v30M18 14v30M30 14v30M42 14v30M4 22h42M4 36h42"/><path class="rd" d="M2 8h48v3H2z"/></symbol>
+  <symbol id="i-pref" viewBox="0 0 52 52"><circle class="f" cx="28" cy="28" r="19"/><circle class="s" cx="25" cy="26" r="18"/><path class="s" d="M25 12v4M25 36v4M11 26h4M35 26h4"/><path class="rd" d="M31 20 27 28l-6 4 4-8z"/></symbol>
+  <symbol id="i-q" viewBox="0 0 52 52"><circle class="f" cx="28" cy="28" r="19"/><circle class="s" cx="25" cy="26" r="18"/><path class="s" d="M19 21a6 6 0 1 1 9 5c-2 1-3 2-3 5"/><circle cx="25" cy="37" r="1.6" style="fill:var(--navy)"/></symbol>
+  <symbol id="i-doc" viewBox="0 0 52 52"><rect class="f" x="13" y="9" width="30" height="38" rx="3"/><rect class="s" x="10" y="6" width="30" height="38" rx="3"/><path class="s" d="M16 16h18M16 23h18M16 30h11"/><path class="rd" d="M30 34h10v10z"/></symbol>
+  <symbol id="i-clock" viewBox="0 0 52 52"><circle class="f" cx="28" cy="28" r="19"/><circle class="s" cx="25" cy="26" r="18"/><path class="s" d="M25 15v11l7 5"/><circle class="rd" cx="25" cy="26" r="2.6"/></symbol>
+</svg>
+
+<div class="canvas">
+<header>
+  <h1>CoherenceAnalyzer · écrans du produit final, v2</h1>
+  <p>Refait selon l'idiome visuel d'une banque canadienne de détail (en-tête blanc, titres marine, actions bleues en pilule, panneaux bleu pâle, rouge réservé à la marque et aux dépassements). Chiffres : rapport de prévisualisation de Robert, NVDA 10 % financé par ZST.TO, données 2022-01 à 2026-10. Profils fictifs.</p>
+</header>
+
+<!-- 0. Landing -->
+<section class="board">
+  <div class="board-label"><b>0 · Accueil</b><span>Choix du profil fictif. Pas de connexion, pas d'identifiants : c'est une simulation</span></div>
+  <div class="scroll"><div class="screen w-desk">
+    <div class="split">
+      <div class="split-l">
+        <svg id="cone-hero" viewBox="0 0 680 330" width="100%" style="position:absolute;inset:40px 0 auto 0;opacity:.95" aria-hidden="true"></svg>
+        <div class="big">Vos limites.<br><b>Votre portefeuille.</b></div>
+        <p style="margin:0;max-width:46ch;color:var(--text-2);font-size:16px">Vérifiez si une opération ou un portefeuille reste cohérent avec ce que vous avez déclaré : horizon, risque, contraintes et valeurs.</p>
+      </div>
+      <div class="split-r">
+        <div class="top">
+          <a class="lang" href="#">English</a>
+          <div class="mark"><i></i><div><b>Cohérence</b><small>Analyseur de profil</small></div></div>
+          <h2 class="t" style="font-weight:600;margin-top:12px">Bon après-midi</h2>
+          <div class="lbl" style="margin-top:4px">Choisir un profil fictif</div>
+          <div class="persona on"><div class="avatar">R</div><div><b>Robert, 59 ans</b><span>Pré-retraite · 400 000 $ · horizon 3,6 ans</span></div><span class="chip c-viol">Opération à vérifier</span></div>
+          <div class="persona"><div class="avatar">A</div><div><b>Amira</b><span>Risque élevé accepté · 60 000 $</span></div><span class="hint">Revue</span></div>
+          <div class="persona"><div class="avatar">M</div><div><b>Mateo</b><span>Critères ESG · 150 000 $</span></div><span class="hint">Revue</span></div>
+          <button class="btn btn-p wide" style="margin-top:8px">Continuer avec Robert</button>
+        </div>
+        <div class="bot">
+          <h4 class="t" style="font-weight:500;font-size:17px">Première visite?</h4>
+          <p style="margin:0;color:var(--text-2)">L'outil ne recommande rien et n'exécute aucune transaction. Il montre où une opération franchit vos propres limites et d'où viennent ces limites.</p>
+          <p class="hint" style="margin:6px 0 0">Simulation éducative avec des profils fictifs. Ceci n'est pas un conseil financier personnalisé. Aucune transaction n'est exécutée.</p>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- 1. Intent -->
+<section class="board">
+  <div class="board-label"><b>1 · Confirmer l'intention</b><span>Flux B, étape B2 : formulaire prérempli par l'analyseur d'intention, à confirmer ou corriger</span></div>
+  <div class="scroll"><div class="screen w-desk">
+    <div class="util"><span class="on">Particuliers</span><span>Simulation</span><span class="r">FR | <u>EN</u></span></div>
+    <div class="hdr"><div class="mark"><i></i><div><b>Cohérence</b><small>Analyseur de profil</small></div></div>
+      <nav><a href="#">Sommaire</a><a href="#">Portefeuille</a><a class="on" href="#">Vérifier une opération</a><a href="#">Mon profil</a><a href="#">Historique</a></nav></div>
+    <div class="content">
+      <div class="crumb"><a href="#">Vérifier une opération</a> › Nouvelle demande</div>
+      <h2 class="t">Est-ce bien ce que vous voulez vérifier?</h2>
+      <div class="steps"><div class="done"><b>✓</b>Demande saisie</div><div class="now"><b>2</b>Confirmer</div><div><b>3</b>Analyse</div><div><b>4</b>Rapport</div></div>
+      <div style="display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:32px;align-items:start">
+        <div class="panel-tint" style="padding:22px">
+          <div class="lbl">Vous avez écrit</div>
+          <div class="quote">« I want to put 10% in NVDA, everyone's talking about it »</div>
+          <div class="mono" style="color:var(--muted)">ev_robert_0007 · 2026-11-14 10:02</div>
+          <hr style="border:0;border-top:1px solid var(--tint-2);margin:18px 0">
+          <ul class="ticks">
+            <li>Les champs en bleu viennent de votre phrase.</li>
+            <li>Ils deviennent vos données dès que vous confirmez.</li>
+            <li>Rien n'est transmis à un courtier.</li>
+          </ul>
+        </div>
+        <div>
+          <div class="frow"><label>Action</label><div class="seg-ctl"><span class="on">Acheter</span><span>Vendre</span></div></div>
+          <div class="frow"><label for="tk">Titre</label><input id="tk" class="input prefill" value="NVDA · NVIDIA Corp. (USD)" readonly></div>
+          <div class="frow"><label for="tw">Pondération cible</label><div><input id="tw" class="input prefill" value="10 %" readonly><div class="hint" style="margin-top:4px">Aujourd'hui : 0 % · équivaut à 40 000 $ sur 400 000 $</div></div></div>
+          <div class="frow" style="align-items:start"><label style="padding-top:10px">Financement</label>
+            <div class="radio">
+              <div class="on"><i></i>Vendre une partie de ZST.TO<span class="mono">13 % → 3 %</span></div>
+              <div><i></i>Au prorata de tous les placements<span class="hint">par défaut</span></div>
+              <div><i></i>Au prorata d'une catégorie d'actifs<span class="hint">choisir</span></div>
+              <div><i></i>Nouvelle contribution en espèces<span class="hint">montant</span></div>
+            </div></div>
+          <div style="display:flex;gap:12px;justify-content:flex-end;margin-top:18px"><button class="btn btn-o">Annuler</button><button class="btn btn-p">Confirmer et analyser</button></div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+</section>
+
+<!-- 2. Report -->
+<section class="board">
+  <div class="board-label"><b>2 · Rapport de cohérence</b><span>Flux B : verdict, ce qui change, vos limites par facteur, explication étiquetée, options dans vos limites</span></div>
+  <div class="scroll"><div class="screen w-desk">
+    <div class="util"><span class="on">Particuliers</span><span>Simulation</span><span class="r">FR | <u>EN</u></span></div>
+    <div class="hdr"><div class="mark"><i></i><div><b>Cohérence</b><small>Analyseur de profil</small></div></div>
+      <nav><a href="#">Sommaire</a><a href="#">Portefeuille</a><a class="on" href="#">Vérifier une opération</a><a href="#">Mon profil</a><a href="#">Historique</a></nav></div>
+    <div style="background:var(--page)">
+    <div class="content" style="display:flex;flex-direction:column;gap:24px">
+      <div>
+        <div class="crumb"><a href="#">Vérifier une opération</a> › Acheter NVDA à 10 %, financé par ZST.TO › Rapport <span class="mono">01JCX…7Q</span></div>
+        <div class="card verdict"><span class="flag">Incohérent</span>
+          <div class="vh">Demander NVDA à 10 % franchit 6 de vos propres limites.</div>
+          <div class="counts"><span class="chip c-viol">6 hors limite</span><span class="chip c-warn">1 avertissement</span><span class="chip c-unk">2 non vérifiables</span></div>
+        </div>
+      </div>
+      <div class="metrics">
+        <div class="card metric"><span class="lbl">Volatilité annuelle</span><div class="v"><s>7,3 %</s>9,8 %</div><span class="lim bad">Votre bande : 5 % à 9 %</span></div>
+        <div class="card metric"><span class="lbl">Pire repli historique</span><div class="v"><s>-7,7 %</s>-13,4 %</div><span class="lim bad">Votre maximum : -12 %</span></div>
+        <div class="card metric"><span class="lbl">Valeur pessimiste (P5)</span><div class="v"><s>366 719 $</s>316 971 $</div><span class="lim bad">Votre plancher : 360 000 $</span></div>
+        <div class="card metric"><span class="lbl">Probabilité de perte</span><div class="v"><s>13,5 %</s>21,3 %</div><span class="lim">Information</span></div>
+      </div>
+      <div class="grid2">
+        <div class="card pad">
+          <div class="sec-h"><h3 class="t">Cône de valeur jusqu'en juin 2030</h3><div class="legend"><span><i style="background:var(--cur-fill);border-top:2px solid var(--cur)"></i>Actuel</span><span><i style="background:var(--prop-fill);border-top:2px solid var(--prop)"></i>Proposé</span><span><i style="border-top:2px dashed var(--viol)"></i>Plancher</span></div></div>
+          <svg id="cone" viewBox="0 0 680 250" width="100%" role="img" aria-label="Cône P5 à P95, portefeuille actuel et proposé"></svg>
+          <div style="display:flex;gap:10px;align-items:center;margin-top:8px"><span class="tag k-assumption">Hypothèse</span><span class="hint">Bootstrap par blocs de 12 mois, 5 000 trajectoires, rendements attendus fixés par l'équipe. Ce n'est pas une prévision.</span></div>
+        </div>
+        <div class="card pad">
+          <div class="sec-h"><h3 class="t">Principaux moteurs de risque</h3><span class="hint">proposé</span></div>
+          <div id="drivers"></div>
+        </div>
+      </div>
+
+      <div>
+        <div class="sec-h"><h3 class="t" style="font-size:24px;font-weight:500">Vos limites, par facteur</h3><a href="#" class="hint" style="color:var(--blue)">Comment lire ces vérifications?</a></div>
+        <div class="tabs"><span class="on">Toutes les vérifications</span><span><em>01</em>Objectif</span><span><em>02</em>Horizon</span><span><em>03</em>Risque</span><span><em>04</em>Contraintes</span><span><em>05</em>Préférences</span></div>
+        <div class="tabpanel">
+          <div class="fgroup"><div class="fgh"><svg class="icon" viewBox="0 0 52 52" style="width:28px;height:28px"><use href="#i-time"/></svg><span class="n">02</span><b>Horizon</b><span>Quand l'argent sera-t-il requis?</span></div>
+            <div class="check"><span class="id">H9</span><div class="what"><b>Valeur pessimiste à l'horizon</b><span>Protège 90 % de la valeur actuelle au premier retrait</span></div><span class="val">316 971 $<small>min. 360 000 $</small></span><span class="chip c-viol">Hors limite</span></div></div>
+          <div class="fgroup"><div class="fgh"><svg class="icon" viewBox="0 0 52 52" style="width:28px;height:28px"><use href="#i-risk"/></svg><span class="n">03</span><b>Risque</b><span>Quelle perte peut être absorbée?</span></div>
+            <div class="check sel"><span class="id">H4</span><div class="what"><b>Revenu fixe minimum</b><span>22 % XBB.TO + 3 % ZST.TO après l'opération · <a href="#">D'où vient cette limite?</a></span></div><span class="val">25 %<small>min. 30 %</small></span><span class="chip c-viol">Hors limite</span></div>
+            <div class="check"><span class="id">H7</span><div class="what"><b>Bande de volatilité</b><span>Fixée par votre risque effectif</span></div><span class="val">9,8 %<small>5 % à 9 %</small></span><span class="chip c-viol">Hors limite</span></div>
+            <div class="check"><span class="id">H8</span><div class="what"><b>Repli maximal accepté</b><span>Le repli que vous avez déclaré pouvoir accepter</span></div><span class="val">-13,4 %<small>max. -12 %</small></span><span class="chip c-viol">Hors limite</span></div>
+            <div class="check"><span class="id">S1</span><div class="what"><b>Écart de comportement</b><span>Demandes récentes de type modéré-élevé · inférence, confiance 0,55</span></div><span class="val">2 niveaux<small>ev_0004, ev_0007</small></span><span class="chip c-warn">Avertissement</span></div></div>
+          <div class="fgroup"><div class="fgh"><svg class="icon" viewBox="0 0 52 52" style="width:28px;height:28px"><use href="#i-limit"/></svg><span class="n">04</span><b>Contraintes</b><span>Quelles limites s'appliquent?</span></div>
+            <div class="check"><span class="id">H3</span><div class="what"><b>Titre individuel maximum</b><span>NVDA</span></div><span class="val">10 %<small>max. 8 %</small></span><span class="chip c-viol">Hors limite</span></div>
+            <div class="check"><span class="id">H10</span><div class="what"><b>Part du risque d'un secteur</b><span>Technologies de l'information</span></div><span class="val">34,7 %<small>max. 30 %</small></span><span class="chip c-viol">Hors limite</span></div>
+            <div class="check"><span class="id">H6</span><div class="what"><b>Secteur de votre employeur (santé)</b><span>SPY, XIU.TO : pas de transparence des FNB</span></div><span class="val">—<small>max. 15 %</small></span><span class="chip c-unk">Non vérifiable</span></div></div>
+          <div class="fgroup"><div class="fgh"><svg class="icon" viewBox="0 0 52 52" style="width:28px;height:28px"><use href="#i-pref"/></svg><span class="n">05</span><b>Préférences</b><span>Qu'est-ce qui oriente les choix?</span></div>
+            <div class="check"><span class="id">S4</span><div class="what"><b>Vous avez écrit : « No hype stocks unless I can explain the business. »</b><span>Règle approuvée, non vérifiable par le code</span></div><span class="val"></span><span class="chip c-info">Rappel</span></div></div>
+          <div class="fgroup"><div class="fgh"><svg class="icon" viewBox="0 0 52 52" style="width:28px;height:28px"><use href="#i-target"/></svg><span class="n">01</span><b>Objectif</b><span>Pourquoi investir?</span></div>
+            <div class="check"><span class="id">G1</span><div class="what"><b>Retraite à 63 ans : 450 000 $ en juin 2030</b><span>Part des trajectoires simulées au-dessus de l'objectif</span></div><span class="val">—<small>en calcul</small></span><span class="chip c-info">Info</span></div></div>
+          <div class="principle">Les contraintes établissent les limites. Les préférences orientent les choix à l'intérieur de ces limites.</div>
+        </div>
+      </div>
+
+      <div class="card pad">
+        <div class="sec-h"><h3 class="t">Explication</h3><span class="mono" style="color:var(--muted)">mode : llm · chiffres vérifiés</span></div>
+        <div class="seg"><span><span class="tag k-fact">Fait</span></span><p>Vous avez demandé de porter NVDA à 10 % du portefeuille, financé par ZST.TO.<span class="refs">intent</span></p></div>
+        <div class="seg"><span><span class="tag k-fact">Fait</span></span><p>La volatilité historique passe de 7,3 % à 9,8 %. Le pire repli depuis 2022 passe de -7,7 % à -13,4 %.<span class="refs">metrics_proposed.vol · mdd</span></p></div>
+        <div class="seg"><span><span class="tag k-assumption">Hypothèse</span></span><p>Dans la simulation, la valeur pessimiste à l'horizon passe de 366 719 $ à 316 971 $.<span class="refs">metrics_proposed.p5_T</span></p></div>
+        <div class="seg"><span><span class="tag k-fact">Fait</span></span><p>Votre minimum de 30 % en revenu fixe vient de votre risque effectif, faible-modéré. Ce niveau vient de votre premier retrait prévu en juin 2030, dans 3,6 ans.<span class="refs">H4 · limits_trace</span></p></div>
+        <div class="seg"><span><span class="tag k-inference">Inférence</span></span><p>Deux de vos demandes récentes suivent l'engouement du moment. C'est une inférence (confiance 0,55), jamais un blocage.<span class="refs">S1 · ev_robert_0004 · ev_robert_0007</span></p></div>
+        <div class="seg"><span><span class="tag k-unknown">Inconnu</span></span><p>On ne peut pas vérifier l'exposition sectorielle ni celle de votre employeur à l'intérieur des FNB larges.<span class="refs">H6 · H10</span></p></div>
+      </div>
+
+      <div>
+        <div class="sec-h"><h3 class="t" style="font-size:24px;font-weight:500">Ce qui tient dans vos limites</h3><span class="tag k-option">Option</span></div>
+        <div class="opts">
+          <div class="card opt"><span class="lbl">Prorata, tous les placements</span><div class="big">2,0 %</div><hr><ul class="ticks"><li>Volatilité 7,5 %</li><li>Pire repli -8,7 %</li><li>P5 à l'horizon 360 101 $</li></ul><span class="hint">Limite atteinte : <span class="mono">H9</span> plancher</span></div>
+          <div class="card opt"><span class="lbl">Prorata, FNB d'actions</span><div class="big">2,0 %</div><hr><ul class="ticks"><li>Volatilité 7,4 %</li><li>Pire repli -8,6 %</li><li>P5 à l'horizon 360 630 $</li></ul><span class="hint">Limite atteinte : <span class="mono">H9</span> plancher</span></div>
+          <div class="card opt"><span class="lbl">Depuis ZST.TO</span><div class="big">1,5 %</div><hr><ul class="ticks"><li>Volatilité 7,5 %</li><li>Pire repli -8,6 %</li><li>P5 à l'horizon 360 503 $</li></ul><span class="hint">Limite atteinte : <span class="mono">H9</span> plancher</span></div>
+        </div>
+        <p class="hint" style="margin:10px 0 0">Calculé par le code à partir de vos propres limites. Ce sont des faits sur votre profil, pas une recommandation.</p>
+      </div>
+
+      <div class="help">
+        <div class="card"><svg class="icon" viewBox="0 0 52 52"><use href="#i-q"/></svg><h4 class="t">Ce qu'on ne peut pas vérifier</h4><p>Secteurs et employeur à l'intérieur des FNB larges (H6, H10).</p><button class="btn btn-o">Voir les 2 éléments</button></div>
+        <div class="card"><svg class="icon" viewBox="0 0 52 52"><use href="#i-doc"/></svg><h4 class="t">Hypothèses de l'équipe</h4><p>Rendements attendus, fenêtre 2022–2026, biais du survivant.</p><button class="btn btn-o">Lire les hypothèses</button></div>
+        <div class="card"><svg class="icon" viewBox="0 0 52 52"><use href="#i-clock"/></svg><h4 class="t">Journal d'audit</h4><p>Entrées, versions des invites, modèle et graine de cette analyse.</p><button class="btn btn-o">Ouvrir le journal</button></div>
+      </div>
+    </div>
+    </div>
+    <div class="foot">
+      <div class="cols">
+        <div><h5>Méthodologie</h5><a href="#">Les cinq facteurs</a><a href="#">Vérifications strictes</a><a href="#">Simulation par bootstrap</a></div>
+        <div><h5>Données</h5><a href="#">Univers de titres</a><a href="#">Taux USDCAD fin de mois</a><a href="#">Étiquettes ESG sourcées</a></div>
+        <div><h5>Limites connues</h5><a href="#">Fenêtre de 5 ans</a><a href="#">Biais du survivant</a><a href="#">Transparence des FNB</a></div>
+        <div><h5>Projet</h5><a href="#">Datathon 2026</a><a href="#">Code source</a><a href="#">English</a></div>
+      </div>
+      <div class="disc">Simulation éducative avec des profils fictifs. Ceci n'est pas un conseil financier personnalisé. Aucune transaction n'est exécutée.</div>
+    </div>
+  </div></div>
+</section>
+
+<div class="row-boards">
+<!-- 3. Chain -->
+<section class="board" style="min-width:0;max-width:100%">
+  <div class="board-label"><b>3 · D'où vient cette limite?</b><span>Panneau latéral sur H4 : la chaîne derived_from jusqu'à vos réponses</span></div>
+  <div class="scroll"><div class="screen" style="width:580px">
+    <div style="padding:26px 28px;display:flex;flex-direction:column;gap:20px">
+      <div style="display:flex;justify-content:space-between;align-items:start;gap:12px">
+        <div><div class="lbl">Vérification H4 · 03 Risque</div><h3 class="t" style="font-size:24px;font-weight:500;margin-top:6px">Revenu fixe minimum : 30 %</h3></div>
+        <span class="chip c-viol">25 % proposé</span>
+      </div>
+      <div class="chain">
+        <div class="node bad"><div class="dot">H4</div><div class="nb"><b>Revenu fixe ≥ 30 % du portefeuille</b><span class="p">limits.min_fixed_income_weight</span><span class="by rule">Règle · table de limites de l'équipe</span></div></div>
+        <div class="node"><div class="dot">R</div><div class="nb"><b>Risque effectif : faible-modéré</b><span class="p">risk.effective = min(déclaré, capacité)</span>
+          <div class="kids"><div class="leaf"><span class="by user">Vous l'avez déclaré</span><b>Faible-modéré</b><span class="p">risk.declared</span></div><div class="leaf"><span class="by rule">Règle</span><b>Capacité : faible-modérée</b><span class="p">risk.capacity</span></div></div></div></div>
+        <div class="node"><div class="dot">C</div><div class="nb"><b>Votre capacité vient de votre situation</b><span class="p">rule:capacity(horizon, revenu, fonds d'urgence, retraits)</span>
+          <div class="kids">
+            <div class="leaf"><span class="by rule">Règle</span><b>Horizon effectif 3,6 ans</b><span class="p">objectives.effective_horizon_years</span></div>
+            <div class="leaf"><span class="by user">Déclaré</span><b>Retrait juin 2030, 60 000 $</b><span class="p">situation.planned_withdrawals</span></div>
+            <div class="leaf"><span class="by rule">Règle</span><b>Fonds d'urgence 4,6 mois</b><span class="p">emergency_fund / monthly_expenses</span></div>
+            <div class="leaf"><span class="by rule">Règle</span><b>Stabilité du revenu : élevée</b><span class="p">situation.income_stability</span></div>
+          </div></div></div>
+        <div class="node ok"><div class="dot">✓</div><div class="nb"><b>Aucun champ inféré par l'IA dans cette chaîne</b><span class="hint">Les limites viennent seulement de vos réponses et de règles. Un test le garantit à chaque version.</span></div></div>
+      </div>
+      <div style="display:flex;gap:12px"><button class="btn btn-p">Modifier mon profil</button><button class="btn btn-o">Fermer</button></div>
+    </div>
+  </div></div>
+</section>
+
+<!-- 4. Values -->
+<section class="board" style="min-width:0;max-width:100%">
+  <div class="board-label"><b>4 · Approuver vos valeurs</b><span>N3 : règles lues dans vos notes, citées mot pour mot</span></div>
+  <div class="scroll"><div class="screen" style="width:600px">
+    <div style="padding:26px 28px;display:flex;flex-direction:column;gap:16px;background:var(--page)">
+      <div><div class="crumb"><a href="#">Mon profil</a> › 05 Préférences</div><h3 class="t" style="font-size:24px;font-weight:500">Ce qu'on a compris de vos notes</h3></div>
+      <div class="notes">I prefer companies I understand. <mark>No hype stocks unless I can explain the business.</mark></div>
+      <div class="card rule"><div><div style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><span class="tag k-inference">Inférence · 0,8</span><span class="chip c-pass">Approuvée</span></div><b style="color:var(--navy)">Préférer des entreprises que vous comprenez</b><div class="rk">prefer_attribute · understandable_business</div><div class="hint">« I prefer companies I understand. »</div></div><button class="btn btn-o">Retirer</button></div>
+      <div class="card rule" style="border:2px solid var(--blue)"><div><div style="display:flex;gap:8px;align-items:center;margin-bottom:6px"><span class="tag k-inference">Inférence · 0,8</span><span class="chip c-unk">À approuver</span></div><b style="color:var(--navy)">Éviter les titres à la mode</b><div class="rk">avoid_attribute · hype</div><div class="hint">« <mark>No hype stocks unless I can explain the business.</mark> »</div></div><div style="display:flex;flex-direction:column;gap:8px"><button class="btn btn-p">Approuver</button><button class="btn btn-o">Rejeter</button></div></div>
+      <p class="hint" style="margin:0">Une règle approuvée reste une préférence : elle produit un rappel, jamais un blocage. Pour en faire une limite stricte, ajoutez-la à vos exclusions.</p>
+    </div>
+  </div></div>
+</section>
+</div>
+
+<!-- 5. Mobile -->
+<section class="board">
+  <div class="board-label"><b>5 · Mobile</b><span>Revue du portefeuille actuel (flux C) et vérification NVDA (flux B)</span></div>
+  <div class="row-boards">
+  <div class="screen w-phone">
+    <div class="phdr"><div class="mark"><i></i><div><b>Cohérence</b><small>Analyseur de profil</small></div></div><span class="hint">robert-main</span></div>
+    <div class="pbody">
+      <div class="card pver"><span class="flag" style="background:var(--warn)">Avec avertissements</span><p>Le portefeuille actuel de Robert reste dans toutes ses propres limites.</p></div>
+      <div class="pm">
+        <div class="card"><span class="lbl">Volatilité</span><strong>7,3 %</strong><span class="hint">bande 5 à 9 %</span></div>
+        <div class="card"><span class="lbl">Pire repli</span><strong>-7,7 %</strong><span class="hint">max. -12 %</span></div>
+        <div class="card"><span class="lbl">Pessimiste P5</span><strong>366 719 $</strong><span class="hint">plancher 360 000 $</span></div>
+        <div class="card"><span class="lbl">Revenu fixe</span><strong>35 %</strong><span class="hint">min. 30 %</span></div>
+      </div>
+      <div class="plist">
+        <div class="check"><span class="id">S1</span><div class="what"><b>Écart de comportement</b><span>Inférence · 0,55</span></div><span class="chip c-warn">Avert.</span></div>
+        <div class="check"><span class="id">H6</span><div class="what"><b>Secteur employeur</b><span>Pas de transparence FNB</span></div><span class="chip c-unk">?</span></div>
+        <div class="check"><span class="id">H10</span><div class="what"><b>Risque sectoriel</b><span>Pas de transparence FNB</span></div><span class="chip c-unk">?</span></div>
+        <div class="check"><span class="id">H1–H9</span><div class="what"><b>9 limites respectées</b><span><a href="#">Voir le détail</a></span></div><span class="chip c-pass">OK</span></div>
+      </div>
+      <button class="btn btn-p wide">Vérifier une opération</button>
+      <p class="hint" style="margin:0">Simulation éducative avec des profils fictifs. Ceci n'est pas un conseil financier personnalisé. Aucune transaction n'est exécutée.</p>
+    </div>
+    <div class="ptabs"><span>Sommaire</span><span class="on">Cohérence</span><span>Vérifier</span><span>Profil</span></div>
+  </div>
+  <div class="screen w-phone">
+    <div class="phdr"><div class="mark"><i></i><div><b>Cohérence</b><small>Analyseur de profil</small></div></div><span class="hint">NVDA 10 %</span></div>
+    <div class="pbody">
+      <div class="card pver"><span class="flag">Incohérent</span><p>Demander NVDA à 10 % franchit 6 de vos propres limites.</p></div>
+      <div class="card" style="padding:10px"><svg id="cone-m" viewBox="0 0 680 250" width="100%" role="img" aria-label="Cône actuel et proposé"></svg></div>
+      <div class="plist">
+        <div class="check"><span class="id">H4</span><div class="what"><b>Revenu fixe 25 %</b><span>min. 30 %</span></div><span class="chip c-viol">Hors</span></div>
+        <div class="check"><span class="id">H3</span><div class="what"><b>NVDA 10 %</b><span>max. 8 %</span></div><span class="chip c-viol">Hors</span></div>
+        <div class="check"><span class="id">H9</span><div class="what"><b>P5 316 971 $</b><span>plancher 360 000 $</span></div><span class="chip c-viol">Hors</span></div>
+        <div class="check"><span class="id">+3</span><div class="what"><b>H7, H8, H10</b><span><a href="#">Voir les 5 facteurs</a></span></div><span class="chip c-viol">Hors</span></div>
+      </div>
+      <div class="card" style="padding:16px"><span class="tag k-option">Option</span><p style="margin:8px 0 0;color:var(--navy)"><b>Jusqu'à 2,0 %</b> tient dans vos limites (prorata, tous les placements). Limite atteinte : H9.</p></div>
+    </div>
+    <div class="ptabs"><span>Sommaire</span><span>Cohérence</span><span class="on">Vérifier</span><span>Profil</span></div>
+  </div>
+  </div>
+</section>
+</div>
+
+<script>
+(function(){
+  const cur={p5:[386,368,365,365,362,363,365,366],p50:[402,413,425,432,440,450,461,472],p95:[415,445,470,494,519,542,564,587]};
+  const pro={p5:[380,339,329,332,330,324,319,319],p50:[404,416,434,443,453,458,472,480],p95:[420,459,492,520,551,583,614,642]};
+  const months=[0,6,12,18,24,30,36,42];
+  function draw(id,mode){
+    const s=document.getElementById(id); if(!s) return;
+    const hero=mode==="hero", small=mode==="small";
+    const W=680,H=hero?330:250,L=hero?20:58,R=14,T=12,B=hero?20:28,ymin=300,ymax=660;
+    const x=m=>L+(m/42)*(W-L-R), y=v=>T+(1-(v-ymin)/(ymax-ymin))*(H-T-B);
+    const pts=a=>a.map((v,i)=>x(months[i]).toFixed(1)+","+y(v).toFixed(1));
+    const band=c=>"M"+pts(c.p95).join(" L")+" L"+pts(c.p5).slice().reverse().join(" L")+" Z";
+    let g="";
+    if(!hero){for(let v=300;v<=650;v+=50){g+=`<line x1="${L}" x2="${W-R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line-2)" stroke-width="1"/><text x="${L-8}" y="${y(v)+4}" text-anchor="end">${v} k$</text>`;}
+      [0,12,24,36,42].forEach(m=>{g+=`<text x="${x(m)}" y="${H-8}" text-anchor="middle">${m===42?"juin 2030":"+"+m+" m"}</text>`});}
+    g+=`<path d="${band(cur)}" fill="var(--cur-fill)"/><path d="${band(pro)}" fill="var(--prop-fill)"/>`;
+    g+=`<line x1="${L}" x2="${W-R}" y1="${y(360)}" y2="${y(360)}" stroke="var(--viol)" stroke-width="1.5" stroke-dasharray="5 4"/>`;
+    g+=`<polyline points="${pts(cur.p50).join(" ")}" fill="none" stroke="var(--cur)" stroke-width="2"/>`;
+    g+=`<polyline points="${pts(pro.p50).join(" ")}" fill="none" stroke="var(--prop)" stroke-width="2"/>`;
+    g+=`<polyline points="${pts(cur.p5).join(" ")}" fill="none" stroke="var(--cur)" stroke-width="1" stroke-dasharray="2 3"/>`;
+    g+=`<polyline points="${pts(pro.p5).join(" ")}" fill="none" stroke="var(--prop)" stroke-width="1.5"/>`;
+    g+=`<circle cx="${x(42)}" cy="${y(319)}" r="4" fill="var(--prop)"/><circle cx="${x(42)}" cy="${y(366)}" r="4" fill="var(--cur)"/>`;
+    if(mode==="full"){g+=`<text x="${x(42)-8}" y="${y(319)+16}" text-anchor="end" style="fill:var(--prop);font-weight:600">P5 proposé 316 971 $</text><text x="${x(42)-8}" y="${y(366)-8}" text-anchor="end" style="fill:var(--cur);font-weight:600">P5 actuel 366 719 $</text><text x="${L+6}" y="${y(360)-6}" style="fill:var(--viol)">Plancher 360 000 $</text>`;}
+    s.innerHTML=g;
+  }
+  draw("cone","full"); draw("cone-m","small"); draw("cone-hero","hero");
+  const drv=[["NVDA",.10,.347],["XIU.TO",.18,.1917],["SPY",.12,.1438],["XBB.TO",.22,.101]];
+  const fmt=v=>(v*100).toFixed(1).replace(".",",")+" %";
+  document.getElementById("drivers").innerHTML=drv.map(([t,w,r])=>`<div style="display:grid;grid-template-columns:64px 1fr 58px;gap:10px;align-items:center;padding:6px 0 0"><span class="mono" style="color:var(--navy)">${t}</span><div style="background:var(--grey);height:10px;border-radius:5px;overflow:hidden"><div style="width:${r/0.35*100}%;height:100%;background:${t==="NVDA"?"var(--prop)":"var(--cur)"}"></div></div><span class="num" style="text-align:right;font-weight:600;color:var(--navy)">${fmt(r)}</span></div><div class="hint" style="margin:0 0 4px 74px">poids ${fmt(w)}</div>`).join("")+`<p class="hint" style="margin:10px 0 0">Part du risque total. NVDA pèse 10 % mais porte 34,7 % du risque.</p>`;
+  document.querySelectorAll(".tabpanel .check").forEach(c=>c.addEventListener("click",()=>{document.querySelectorAll(".tabpanel .check").forEach(o=>o.classList.remove("sel"));c.classList.add("sel")}));
+  document.querySelectorAll(".tabs span").forEach(t=>t.addEventListener("click",()=>{document.querySelectorAll(".tabs span").forEach(o=>o.classList.remove("on"));t.classList.add("on")}));
+})();
+</script>
