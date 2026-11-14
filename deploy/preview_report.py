@@ -252,6 +252,67 @@ def sections(prof: dict, lim: dict, checks: list[dict], metrics: dict) -> list[d
     return out
 
 
+# ---------- internal coherence (docs/spec-factors.md §20.9, D8; preview of P0.11) ----------
+
+_C_Q = {"C1": "Votre horizon est de {h} ans, mais l'objectif « {goal} » est daté de {date}. Lequel faut-il ajuster?",
+        "C2": "Une perte maximale de {dd} % ne correspond pas au niveau de risque déclaré. Lequel reflète votre intention?",
+        "C3": "Un objectif de croissance avec un risque déclaré faible : lequel prime?",
+        "C4": "Ce type d'actif est à la fois permis et refusé. Lequel est le bon?",
+        "C5": "Votre réaction à une baisse de 20 % ne correspond pas au risque déclaré. Laquelle reflète votre intention?"}
+_N6_Q = "Vos réponses pour « {a} » et « {b} » semblent tirer dans des directions différentes. Laquelle reflète votre intention?"
+_STATUS = {"contradiction": "warning", "tension": "info"}
+
+
+def _ym(s: str) -> int:
+    y, m = s[:7].split("-")
+    return int(y) * 12 + int(m) - 1
+
+
+def profile_coherence(profile: dict, as_of: str) -> dict:
+    """C1-C5 rules (code) + the N6 output that P0.11 records for Robert (hand-written until then)."""
+    obj, risk, pref = profile.get("objectives", {}), profile.get("risk", {}), profile.get("preferences", {})
+    out = []
+    h = obj.get("horizon_years")
+    if isinstance(h, (int, float)):
+        end = _ym(as_of) + round(h * 12)
+        for i, g in enumerate(obj.get("goals") or []):
+            if g.get("date") and _ym(g["date"]) > end:
+                out.append({"id": "C1", "source": "rule:C1", "kind": "contradiction",
+                            "fields": ["objectives.horizon_years", f"objectives.goals[{i}].date"], "values": [f"{h} ans", g["date"]],
+                            "reason": None, "question": _C_Q["C1"].format(h=h, goal=g.get("name", ""), date=g["date"])})
+    lv, dd = risk.get("declared"), risk.get("max_acceptable_drawdown_pct")
+    if lv in LEVELS and isinstance(dd, (int, float)):
+        i = LEVELS.index(lv)
+        tight = limits_mod.LIMITS_TABLE[LEVELS[i - 1]]["max_dd_pct"] if i > 0 else None
+        loose = limits_mod.LIMITS_TABLE[LEVELS[i + 1]]["max_dd_pct"] if i < len(LEVELS) - 1 else None
+        if (tight is not None and dd > tight) or (loose is not None and dd < loose):
+            out.append({"id": "C2", "source": "rule:C2", "kind": "contradiction", "fields": ["risk.declared", "risk.max_acceptable_drawdown_pct"],
+                        "values": [lv, f"{dd} %"], "reason": None, "question": _C_Q["C2"].format(dd=dd)})
+    if obj.get("primary") in ("growth", "aggressive_growth") and lv in ("low", "low_moderate"):
+        out.append({"id": "C3", "source": "rule:C3", "kind": "contradiction", "fields": ["objectives.primary", "risk.declared"],
+                    "values": [obj["primary"], lv], "reason": None, "question": _C_Q["C3"]})
+    both = sorted(set(pref.get("asset_types_allowed") or []) & set(pref.get("asset_types_refused") or []))
+    if both:
+        out.append({"id": "C4", "source": "rule:C4", "kind": "contradiction",
+                    "fields": ["preferences.asset_types_allowed", "preferences.asset_types_refused"], "values": [both[0], both[0]],
+                    "reason": None, "question": _C_Q["C4"]})
+    r = risk.get("reaction_to_20pct_drop")
+    if lv in LEVELS and ((r == "buy_more" and LEVELS.index(lv) <= 1) or (r == "sell_all" and LEVELS.index(lv) >= 3)):
+        out.append({"id": "C5", "source": "rule:C5", "kind": "contradiction", "fields": ["risk.reaction_to_20pct_drop", "risk.declared"],
+                    "values": [r, lv], "reason": None, "question": _C_Q["C5"]})
+    notes = (profile.get("values") or {}).get("notes") or ""
+    quote = "No hype stocks unless I can explain the business."
+    if "new_opportunities" in (pref.get("interests") or []) and quote in notes:
+        out.append({"id": "N6.1", "source": "llm:profile_consistency", "kind": "tension",
+                    "fields": ["preferences.interests", "values.notes"], "quotes": ["new_opportunities", quote],
+                    "reason": "Interest in new opportunities sits next to a refusal of hype stocks the investor cannot explain.",
+                    "question": _N6_Q.format(a="preferences.interests", b="values.notes")})
+    for f in out:
+        f["status"] = _STATUS[f["kind"]]
+    st = "warning" if any(f["status"] == "warning" for f in out) else "info" if out else "pass"
+    return {"status": st, "findings": out, "llm": {"gate_status": "preview:hand-written", "call_log": None}}
+
+
 def soft_checks(profile: dict) -> list[dict]:
     b = profile["risk"]["behavioural"]
     gap = LEVELS.index(b["value"]) - LEVELS.index(_val(profile["risk"]["effective"]))
@@ -396,7 +457,8 @@ def build(out_dir: Path) -> list[Path]:
             "value_cad": value, "as_of": as_of, "first_withdrawal": prof["situation"]["planned_withdrawals"][0]}
     preview = {"real": ["engine.analyse", "rules.derive", "rules.limits", "limits_trace", "hard checks H1-H10, H14"],
                "preview": ["what-if grid + options (stand-in for intent.apply + resizer)",
-                           "factor sections + template text (P0.7)", "LLM narration (P0.8, not run)", "report assembly (P0.9)"],
+                           "factor sections + template text (P0.7)", "LLM narration (P0.8, not run)", "report assembly (P0.9)",
+                           "profile coherence C1-C5 + hand-written N6 (P0.11)"],
                "built_by": "deploy/preview_report.py"}
 
     # D7 headline demo: Flow C review of a portfolio that already holds the NVDA position
@@ -408,7 +470,8 @@ def build(out_dir: Path) -> list[Path]:
     common = {"profile_id": profile["meta"]["profile_id"], "profile_version": profile["meta"].get("version"),
               "portfolio_id": portfolio["portfolio_id"], "assumptions": assumptions,
               "data_window": ["2022-01-31", "2026-10-31"], "disclaimer": DISCLAIMER, "limits": lim,
-              "limits_trace": trace, "profile_card": card, "weights_current": w0, "preview": preview}
+              "limits_trace": trace, "profile_card": card, "weights_current": w0, "preview": preview,
+              "profile_coherence": profile_coherence(profile, as_of)}
     reports = {
         "robert-review-nvda": {"run_id": "preview-robert-review-nvda", "flow": "C", "intent": None, "verdict": verdict(rev_checks),
                                "checks_current": rev_checks, "checks_proposed": None, "diff": None, "metrics_current": rev,

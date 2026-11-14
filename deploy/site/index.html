@@ -78,6 +78,18 @@ a { color: inherit }
 .sect-title { grid-column: span 12; display: flex; align-items: baseline; gap: 12px; margin-top: 14px }
 .sect-title h2 { font-size: 24px } .sect-title p { color: var(--fg-2); font-size: 14px }
 
+/* profile coherence (§20.9) */
+.pc { display: grid; grid-template-columns: minmax(0, 260px) minmax(0, 1fr); gap: 24px; align-items: start }
+@media (max-width: 760px) { .pc { grid-template-columns: 1fr } }
+.pc h2 { font-size: 20px; margin: 8px 0 6px }
+.pc-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px }
+.pc-list li { border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; display: flex; flex-direction: column; gap: 6px; background: var(--surface-2) }
+.pc-head { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; font-size: 13px }
+.pc-src { font: 600 11.5px/1 var(--f-mono); color: var(--fg-2); border: 1px solid var(--line); border-radius: 999px; padding: 3px 8px }
+.pc-pair { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); gap: 10px; align-items: center; font-size: 13.5px }
+.pc-pair > div { min-width: 0; overflow-wrap: anywhere } .pc-pair code { color: var(--fg-2) } .pc-pair .vs { color: var(--muted); font-weight: 700 }
+@media (max-width: 520px) { .pc-pair { grid-template-columns: 1fr } .pc-pair .vs { display: none } }
+.pc-q { font-size: 14px } .pc-q b { color: var(--brand-ink) }
 /* five factors */
 .factors { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 12px }
 @media (max-width: 980px) { .factors { grid-template-columns: repeat(3, minmax(0, 1fr)) } }
@@ -210,7 +222,7 @@ details summary { cursor: pointer; color: var(--fg-2); font-size: 13px; margin-t
 <div class="top-bar"><div class="wrap">
   <header class="top">
     <div class="brand"><span class="mark" aria-hidden="true">C</span>CoherenceAnalyzer <span class="sub">profile ↔ portfolio</span></div>
-    <nav class="nav" aria-label="Sections"><a href="#factors">Profile factors</a><a href="#outcomes">Outcomes</a><a href="#checks">Checks</a><a href="#assumptions">Assumptions</a></nav>
+    <nav class="nav" aria-label="Sections"><a href="#profile-check">Profile check</a><a href="#factors">Factors</a><a href="#outcomes">Outcomes</a><a href="#checks">Checks</a><a href="#assumptions">Assumptions</a></nav>
     <label class="sr" for="pick">Report</label>
     <select id="pick" aria-label="Report"></select>
     <button class="iconbtn" id="theme" type="button" aria-label="Toggle dark mode">◐</button>
@@ -345,6 +357,25 @@ details summary { cursor: pointer; color: var(--fg-2); font-size: 13px; margin-t
       }).join("") + "</tbody></table></div>";
   }
 
+  // ---------- internal coherence (docs/spec-factors.md §20.9) ----------
+  const PC_LABEL = {warning: "Contradiction", info: "Tension", pass: "No contradiction"};
+  function profileCoherence(rep) {
+    const pc = rep.profile_coherence;
+    if (!pc) return "";
+    const n = pc.findings.length;
+    return `<section class="card c12" id="profile-check"><div class="pc">
+      <div><div class="eyebrow">Profile check</div><h2>Does the profile contradict itself?</h2>
+        <p class="small muted">Checked on the profile alone, before any portfolio. Rules C1–C5 run first; the LLM (N6) only looks for what rules can't express, and code checks every field and quote it cites. This never changes the portfolio verdict.</p>
+        <div style="margin-top:10px">${chip(pc.status, n ? `${n} point${n > 1 ? "s" : ""} to clarify` : PC_LABEL.pass)}</div></div>
+      ${n ? `<ul class="pc-list">${pc.findings.map(f => {
+        const vals = f.values || f.quotes || [];
+        return `<li><div class="pc-head">${chip(f.status, PC_LABEL[f.status])}<span class="pc-src">${f.source.startsWith("llm") ? "LLM · inference" : "rule " + esc(f.id)}</span></div>
+          <div class="pc-pair"><div><code>${esc(f.fields[0])}</code><br>“${esc(vals[0])}”</div><span class="vs">vs</span><div><code>${esc(f.fields[1])}</code><br>“${esc(vals[1])}”</div></div>
+          ${f.reason ? `<div class="small muted">${esc(f.reason)}</div>` : ""}
+          <div class="pc-q"><b>Question for the investor:</b> ${esc(f.question)}</div></li>`; }).join("")}</ul>`
+        : `<p class="muted">No contradiction found between the profile's answers.</p>`}
+    </div></section>`;
+  }
   // ---------- five factors (docs/spec-factors.md §20.4, §20.7) ----------
   const ST_LABEL = {violation: "Diverges", warning: "Warning", unknown: "Can't verify", info: "Info", pass: "Consistent"};
   function factorCards(rep) {
@@ -455,6 +486,7 @@ details summary { cursor: pointer; color: var(--fg-2); font-size: 13px; margin-t
         </div>
       </div></section>
 
+      ${profileCoherence(rep)}
       ${rep.sections ? `<div class="sect-title" id="factors"><h2>Profile factors</h2><p>Les contraintes établissent les limites. Les préférences orientent les choix à l'intérieur de ces limites.</p></div>
       <section class="c12">${factorCards(rep)}</section>` : ""}
 
