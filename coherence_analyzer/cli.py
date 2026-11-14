@@ -1,6 +1,7 @@
 """`python -m coherence_analyzer.cli {refresh,check,review,audit,demo}` (SPEC §12, docs/spec-decisions.md D7).
 
-`review` is the headline command; `check` (Flow B) is P2 and raises NotImplementedError. `demo` reviews every persona
+`review` is the headline command; `check` is Flow B (trade check): without `--auto-confirm` it stops at B2 and shows the
+N4 draft intent; with it, it runs B3-B9 and prints the verdict, the diff and the options. `demo` reviews every persona
 whose fixtures are complete (profile.json, events.jsonl, portfolio.json) and prints a notice for the others.
 """
 from __future__ import annotations
@@ -25,6 +26,42 @@ def _print_review(label: str, rep: dict) -> None:
         print(f"  cannot verify: {', '.join(unknown)}")
     print(f"  run_id {rep['run_id']}  report {store.root() / 'reports' / (rep['run_id'] + '.json')}")
     print(profile_line(rep["profile_coherence"]))
+
+
+def _intent_line(intent: dict) -> str:
+    f = intent.get("funding") or {}
+    src = f.get("ticker") or f.get("asset_class") or f.get("amount_cad") or ""
+    return (f"{intent.get('action')} {intent.get('ticker')} to {intent.get('target_weight_pct')} % "
+            f"(funding: {f.get('kind')}{' ' + str(src) if src != '' else ''})")
+
+
+def _print_draft(res: dict) -> None:
+    """B2: the N4 draft the user would confirm or edit; nothing has run yet beyond N4 and nothing is saved."""
+    print(f"order_intent {res['event']['event_id']}: \"{res['event']['text']}\"")
+    draft = res["draft"]
+    print(f"  draft intent (N4, gate {res['draft_gate']}): " + (_intent_line(draft) if draft else "none"))
+    print(f"  intent {res['intent_id']} on file: {_intent_line(res['intent'])}")
+    print("  waiting for confirmation: re-run with --auto-confirm to check this trade")
+
+
+def _print_check(rep: dict) -> None:
+    print(f"{rep['intent']['intent_id']}: {_intent_line(rep['intent'])}")
+    flips = ", ".join(f"{f['id']} {f['from']}->{f['to']}" for f in rep["diff"]["flipped"])
+    statuses = ", ".join(f"{s['factor']}={s['status']}" for s in rep["sections"])
+    print(f"{rep['verdict']}  (explanation: {rep['explanation']['mode']})")
+    print(f"  sections: {statuses}")
+    if flips:
+        print(f"  changed by the trade: {flips}")
+    for o in rep["alternatives"]:
+        f = o["funding"]
+        print(f"  fits your limits: up to {o['max_weight_pct']} % funded by {f.get('ticker') or f['kind']}"
+              f" (stopped by {o['binding_check']})")
+    unknown = sorted({u["id"] for u in rep["unknowns"]})
+    if unknown:
+        print(f"  cannot verify: {', '.join(unknown)}")
+    print(f"  run_id {rep['run_id']}  report {store.root() / 'reports' / (rep['run_id'] + '.json')}")
+    print(profile_line(rep["profile_coherence"]))
+    print(rep["disclaimer"])
 
 
 def profile_line(block: dict) -> str:
@@ -72,7 +109,11 @@ def main(argv: list[str] | None = None) -> None:
         print(f"profile {meta['profile_id']} v{meta['version']}: {len(out['profile_diff'])} field(s) changed; "
               f"run_id {out['run_id']}")
     elif a.cmd == "check":
-        pipeline.check(a.fixture, a.intent, auto_confirm=a.auto_confirm)
+        res = pipeline.check(a.fixture, a.intent, auto_confirm=a.auto_confirm)
+        if res.get("status") == pipeline.AWAITING:
+            _print_draft(res)
+        else:
+            _print_check(res)
     elif a.cmd == "review":
         _print_review(a.fixture.name, pipeline.review(a.fixture, a.portfolio))
     elif a.cmd == "audit":
