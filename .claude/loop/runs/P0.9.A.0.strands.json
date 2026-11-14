@@ -1,0 +1,39 @@
+{
+  "duration_s": 314.4,
+  "guard_cancellations": [
+    {
+      "reason": "'save_audit\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'call_log\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'call_log' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'^[A-Z_]+' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'values_parser\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "command substitution is not allowed; run the inner command on its own",
+      "tool": "shell"
+    }
+  ],
+  "is_error": false,
+  "model_id": "us.anthropic.claude-sonnet-5-5",
+  "num_turns": 30,
+  "result": "is unchanged, and the weights load and validate (D7 \u00a75, SPEC \u00a73.5).\n- `test_review_nvda_report_is_schema_valid_and_has_the_section_13_shape`: the report validates against `report.json`, has every \u00a713 key and a ULID `run_id`, and has no intent or proposed side (SPEC \u00a713, \u00a74, D4, D7).\n- `test_review_nvda_verdict_and_sections_in_display_order`: verdict is incoherent; the five sections come in display order; horizon, risque and contraintes are violation; objectif and preferences are pass; the verdict equals the one derived from the section statuses (D7, \u00a720.4).\n- `test_review_nvda_checks_match_the_hard_checks_and_carry_a_factor_key`: `checks_current` equals `hard.run_all` on `ROBERT_NVDA` to 1e-9. Violations are exactly H3, H4, H7, H8, H9, H10. H3 is 0.10 vs 0.08 and H4 is 0.25 vs 0.30. Every check has a `factor` key. Soft checks are limited to S2 and S4 and are never a violation. Unknowns are listed (\u00a77.3, \u00a720.4, D3, D7, invariant 3).\n- `test_review_nvda_metrics_are_the_engine_values`: `metrics_current` equals `engine.analyse(ROBERT_NVDA, 48 months, 400 000)` to 1e-9, and `p5_T` is below the 360 000 floor (SPEC \u00a75, D2).\n- `test_review_nvda_narration_modes_are_recorded_per_section_and_verified`: each section records a narration mode and its verifier result; pass sections use the template; template sections equal `template_section`; failing sections cite their violated checks (\u00a720.5, V1-V5, invariant 9).\n- `test_review_nvda_explanation_is_template_headline_section_segments_and_fixed_disclaimer`: the headline is the template headline; `explanation.segments` are the section segments in display order with a `factor` key; the mode is the worst non-pass mode; the disclaimer is the fixed \u00a79.4 text; numbers pass numcheck and there is no advisory wording (\u00a720.5, \u00a79.4, invariants 6-7).\n- `test_review_nvda_llm_calls_are_explainer_only_for_the_three_failing_sections`: no N1, N2 or N4 call; at most 2 explainer calls per non-pass section, none for pass sections; every call is a mock cache hit (D7, \u00a720.5).\n- `test_review_nvda_audit_record`: the audit has the \u00a710 fields, engine seed 7, n 5000, block 12, drift `assumed`, the as_of date, `model_id`, every LLM call with its input hash, and per-section modes matching the report (\u00a710, D1, D6, D7).\n- `test_cli_audit_prints_the_record`: `cli audit <run_id>` prints the run's record (\u00a712).\n- `test_review_nvda_run_leaves_the_fixtures_unchanged`: the review run adds or rewrites nothing in `fixtures/robert/` (D7 \u00a75).\n- `test_running_the_review_twice_gives_byte_identical_reports_except_run_id_and_timestamps`: two runs differ only by `run_id` and ISO timestamps (invariant 8, D7).\n- `test_review_current_portfolio_is_coherent_with_h6_h10_unknown`: the current portfolio is coherent with H6 and H10 in unknowns and no violation or warning. `contraintes` is unknown and the other sections pass. Metrics match `engine.ROBERT`, and only the `contraintes` section is narrated (D7, D3, \u00a720.4).\n- `test_pipeline_review_returns_the_report`: `pipeline.review(fixture_dir)` returns a schema-valid report for the current portfolio (\u00a74 Flow C).\n- `test_refresh_derives_the_rule_fields_and_limits_without_n1_n2`: Flow A matches the rules module (effective horizon 3.6, capacity and effective `low_moderate`, limits and trace equal), and it calls no N1/N2/N4 (\u00a74 Flow A, D7).\n- `test_refresh_new_notes_go_through_n3_and_the_gate_and_start_unapproved`: changed notes call N3 once with only the notes as payload. Quotes are exact substrings, rules start `approved_by_user: false`, limits don't change, and the meta version bumps (D7 point 1, \u00a76.2 N3, \u00a711, invariant 2).\n- `test_demo_reviews_the_personas_with_complete_fixtures_and_notices_the_rest`: `demo` writes a valid Flow C report for each persona with complete fixtures, prints each verdict, and prints a notice naming each incomplete persona. It calls no N1/N2/N4 and does no Flow B (D7, \u00a712).\n- `test_flow_b_is_not_wired_in_p0`: `pipeline.check` still raises `NotImplementedError` (D7 point 3).\n",
+  "stop_reason": "end_turn",
+  "usage": {
+    "inputTokens": 1971923,
+    "outputTokens": 43557,
+    "totalTokens": 2015480
+  }
+}

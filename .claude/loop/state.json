@@ -7,6 +7,7 @@
     "P0.5": "impl",
     "P0.6": "impl",
     "P0.7": "impl",
-    "P0.8": "impl"
+    "P0.8": "impl",
+    "P0.9": "tests"
   }
 }
