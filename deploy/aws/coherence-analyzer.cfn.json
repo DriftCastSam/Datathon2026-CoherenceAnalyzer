@@ -1,10 +1,15 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
   "Description": "CoherenceAnalyzer AWS footprint (SPEC section 14): S3 store bucket, Bedrock Guardrail for the explainer call only, least-privilege IAM managed policy. Educational simulation, no execution.",
+  "Metadata": {
+    "AWSToolsMetrics": {
+      "AWSAgentToolkit": "aws-cloudformation@3"
+    }
+  },
   "Parameters": {
     "ModelArn": {
       "Type": "String",
-      "Description": "ARN of the Bedrock model or inference profile used for BEDROCK_MODEL_ID. bedrock:InvokeModel is granted on this ARN only.",
+      "Description": "ARN of the Bedrock model or inference profile used for BEDROCK_MODEL_ID. bedrock:InvokeModel is granted on this ARN and on FoundationModelId.",
       "AllowedPattern": "arn:aws[a-z-]*:bedrock:.+"
     },
     "S3Prefix": {
@@ -12,6 +17,12 @@
       "Default": "ca/",
       "Description": "Key prefix the app may read and write, with a trailing slash (the app setting COHERENCE_ANALYZER_S3_PREFIX is the same value without the slash).",
       "AllowedPattern": "([A-Za-z0-9_.-]+/)*"
+    },
+    "FoundationModelId": {
+      "Type": "String",
+      "Default": "anthropic.claude-sonnet-5-5",
+      "Description": "Foundation model id behind ModelArn. A cross-region inference profile needs bedrock:InvokeModel on this model in every destination Region it routes to.",
+      "AllowedPattern": "[a-z0-9.-]+(:[0-9]+)?"
     }
   },
   "Resources": {
@@ -46,6 +57,15 @@
             }
           ]
         }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Store backend for COHERENCE_ANALYZER_STORE=s3 (SPEC section 10): profiles, events, reports, audit.",
+          "must": [
+            "Keep public access blocked, encryption and versioning on",
+            "Retain on delete: audit records are evidence"
+          ]
+        }
       }
     },
     "DataBucketPolicy": {
@@ -64,7 +84,10 @@
               "Action": "s3:*",
               "Resource": [
                 {
-                  "Fn::GetAtt": ["DataBucket", "Arn"]
+                  "Fn::GetAtt": [
+                    "DataBucket",
+                    "Arn"
+                  ]
                 },
                 {
                   "Fn::Sub": "${DataBucket.Arn}/*"
@@ -78,12 +101,22 @@
             }
           ]
         }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Encryption in transit for every request.",
+          "must": [
+            "Deny any request without aws:SecureTransport"
+          ]
+        }
       }
     },
     "ExplainerGuardrail": {
       "Type": "AWS::Bedrock::Guardrail",
       "Properties": {
-        "Name": "coherence-analyzer-explainer",
+        "Name": {
+          "Fn::Sub": "${AWS::StackName}-explainer"
+        },
         "Description": "Applied to the explainer call only. Denies personalised investment recommendations.",
         "BlockedInputMessaging": "Cette demande ne peut pas être traitée : l'outil ne donne pas de conseil en placement personnalisé. This request cannot be processed: the tool gives no personalised investment advice.",
         "BlockedOutputsMessaging": "Cette réponse a été bloquée : l'outil ne donne pas de conseil en placement personnalisé. This answer was blocked: the tool gives no personalised investment advice.",
@@ -103,15 +136,32 @@
             }
           ]
         }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "SPEC section 14: denied topic on the N5 explainer call only; other nodes return structured data.",
+          "must": [
+            "Never attach to N1, N3, N4 or N6 calls",
+            "Blocked messaging stays fixed text, never LLM output"
+          ]
+        }
       }
     },
     "ExplainerGuardrailVersion": {
       "Type": "AWS::Bedrock::GuardrailVersion",
       "Properties": {
         "GuardrailIdentifier": {
-          "Fn::GetAtt": ["ExplainerGuardrail", "GuardrailId"]
+          "Fn::GetAtt": [
+            "ExplainerGuardrail",
+            "GuardrailId"
+          ]
         },
         "Description": "Immutable version of the explainer guardrail"
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "The app pins an immutable guardrail version in BEDROCK_GUARDRAIL_VERSION."
+        }
       }
     },
     "AppAccessPolicy": {
@@ -124,27 +174,39 @@
             {
               "Sid": "InvokeConfiguredModel",
               "Effect": "Allow",
-              "Action": ["bedrock:InvokeModel"],
+              "Action": [
+                "bedrock:InvokeModel"
+              ],
               "Resource": [
                 {
                   "Ref": "ModelArn"
+                },
+                {
+                  "Fn::Sub": "arn:${AWS::Partition}:bedrock:*::foundation-model/${FoundationModelId}"
                 }
               ]
             },
             {
               "Sid": "ApplyExplainerGuardrail",
               "Effect": "Allow",
-              "Action": ["bedrock:ApplyGuardrail"],
+              "Action": [
+                "bedrock:ApplyGuardrail"
+              ],
               "Resource": [
                 {
-                  "Fn::GetAtt": ["ExplainerGuardrail", "GuardrailArn"]
+                  "Fn::GetAtt": [
+                    "ExplainerGuardrail",
+                    "GuardrailArn"
+                  ]
                 }
               ]
             },
             {
               "Sid": "ReadStoreObjects",
               "Effect": "Allow",
-              "Action": ["s3:GetObject"],
+              "Action": [
+                "s3:GetObject"
+              ],
               "Resource": [
                 {
                   "Fn::Sub": "${DataBucket.Arn}/${S3Prefix}*"
@@ -154,7 +216,9 @@
             {
               "Sid": "WriteStoreObjects",
               "Effect": "Allow",
-              "Action": ["s3:PutObject"],
+              "Action": [
+                "s3:PutObject"
+              ],
               "Resource": [
                 {
                   "Fn::Sub": "${DataBucket.Arn}/${S3Prefix}*"
@@ -164,10 +228,15 @@
             {
               "Sid": "ListStorePrefix",
               "Effect": "Allow",
-              "Action": ["s3:ListBucket"],
+              "Action": [
+                "s3:ListBucket"
+              ],
               "Resource": [
                 {
-                  "Fn::GetAtt": ["DataBucket", "Arn"]
+                  "Fn::GetAtt": [
+                    "DataBucket",
+                    "Arn"
+                  ]
                 }
               ],
               "Condition": {
@@ -180,6 +249,15 @@
                 }
               }
             }
+          ]
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "One least-privilege policy for whoever runs the app.",
+          "must": [
+            "No action or resource wildcards beyond the one model id across inference-profile Regions",
+            "S3 access limited to the S3Prefix"
           ]
         }
       }
@@ -195,13 +273,19 @@
     "GuardrailId": {
       "Description": "Value for BEDROCK_GUARDRAIL_ID",
       "Value": {
-        "Fn::GetAtt": ["ExplainerGuardrail", "GuardrailId"]
+        "Fn::GetAtt": [
+          "ExplainerGuardrail",
+          "GuardrailId"
+        ]
       }
     },
     "GuardrailVersion": {
       "Description": "Value for BEDROCK_GUARDRAIL_VERSION",
       "Value": {
-        "Fn::GetAtt": ["ExplainerGuardrailVersion", "Version"]
+        "Fn::GetAtt": [
+          "ExplainerGuardrailVersion",
+          "Version"
+        ]
       }
     },
     "AccessPolicyArn": {
