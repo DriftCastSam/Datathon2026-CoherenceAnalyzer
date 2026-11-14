@@ -7,7 +7,7 @@ Status: v1, 2026-11-14. Owner: Sam's team (Datathon 2026 / PolyFinances AlphaFor
 
 ## 0. One-paragraph summary
 
-CoherenceAnalyzer checks whether a self-directed investor's **portfolio** (or a **trade they want to make**) is coherent with their **own profile**: age, horizon, goals, risk tolerance and capacity, knowledge, values. The pipeline is a scripted DAG, not a free-roaming agent. Deterministic rules own everything that can block or limit. LLM nodes (AWS Bedrock) fill narrow, schema-constrained slots: behaviour reading, question quality, values parsing, intent parsing, explanation. Every LLM output passes through a deterministic **gate** before it touches the profile, and LLM-derived fields can only raise **warnings**, never violations. Output: a coherence report with a verdict, per-check results traced back to profile fields, risk metrics from `engine.py`, options that fit within the user's own limits, and a plain-language explanation whose numbers are machine-verified.
+CoherenceAnalyzer checks whether a self-directed investor's **portfolio** (or a **trade they want to make**) is coherent with their **own profile**: age, horizon, goals, risk tolerance and capacity, knowledge, values. The pipeline is a scripted DAG, not a free-roaming agent. Deterministic rules own everything that can block or limit. LLM nodes (AWS Bedrock) fill narrow, schema-constrained slots: behaviour reading, question quality, values parsing, intent parsing, explanation. Every LLM output passes through a deterministic **gate** before it touches the profile, and LLM-derived fields can only raise **warnings**, never violations. Output: a coherence report with a verdict, per-check results traced back to profile fields, risk metrics from `engine.py`, for a proposed trade the headroom it has before it crosses one of the user's own limits, and a plain-language explanation whose numbers are machine-verified.
 
 The persona the case highlights is **Robert asking for 10% NVDA**. The system must flag the incoherence, explain the risk, and put the request back in context. It must not just say yes or no.
 
@@ -21,7 +21,7 @@ The persona the case highlights is **Robert asking for 10% NVDA**. The system mu
 4. **Every LLM output is schema-validated and gated** (§6) before it's merged. If it fails, the previous value stays and the failure goes in the audit log.
 5. **Every LLM evidence item must reference something that exists**: an `event_id` in the event log, or a substring of the user's own notes. Invented evidence means the whole output is rejected.
 6. **Every number in the explanation must appear in the facts payload** (within rounding tolerance). Otherwise regenerate once, then fall back to a template.
-7. **Simulation only.** No order execution and no buy/sell recommendations. The alternatives shown are "what fits within *your own* stated limits", computed by code. Every user-facing output carries the disclaimer (§9.4).
+7. **Simulation and description only.** No order execution and no recommendations of any kind. The product describes how the portfolio, or a trade the user proposed, compares with the user's own profile. It never says what to buy, sell, hold, reduce, increase, rebalance or switch; never proposes a trade, ticker, funding source or size the user did not state; never ranks portfolios or choices; and never presents a "next step". The only trade-related figure is the headroom of the user's own trade (§8), computed by code and stated as a fact. Every user-facing output carries the disclaimer (§9.4).
 8. **Reproducible.** Same inputs + same `prompt_version` + same model give the same report (LLM responses are cached by input hash, temperature 0, fixed bootstrap seed). `COHERENCE_ANALYZER_LLM=mock` runs the whole pipeline offline from recorded responses.
 9. **Facts, assumptions and inferences are labelled** everywhere they appear: report, explanation and UI. This is a jury requirement.
 
@@ -63,7 +63,7 @@ coherence_analyzer/
 │   │   ├── soft.py            # S-checks
 │   │   └── report.py          # aggregation, verdict, schema
 │   ├── intent.py              # apply a confirmed intent to a portfolio
-│   ├── resizer.py             # options that fit within limits
+│   ├── resizer.py             # headroom of the user's own trade before a limit
 │   ├── explain.py             # explainer call + numcheck + template fallback
 │   ├── pipeline.py            # flows A/B/C (§4)
 │   ├── store.py               # profiles, events, portfolios, audit (local FS or S3)
@@ -234,7 +234,7 @@ Persona demo matrix (the case asks for ≥ 2 contrasting situations):
 
 | Persona | Flow | What it should show |
 |---|---|---|
-| Robert | B: NVDA 10% from ZST | incoherent: single-stock and fixed-income violations, behaviour-gap warning, options within limits |
+| Robert | B: NVDA 10% from ZST | incoherent: single-stock and fixed-income violations, behaviour-gap warning, headroom of the trade before it crosses a limit |
 | Amira | C | high risk accepted, but crypto above the high-tier cap and tech concentration vs her own "not only tech" note. "High risk ≠ anything goes" |
 | Mateo | C | ESG: energy names are `unknown` until sourced tags exist, `violation` once a sourced tag matches. "Says what it doesn't know" |
 
@@ -389,7 +389,7 @@ Each check returns:
 | H4 | Fixed income | Σ `etf_bond` | < min → violation |
 | H5 | Foreign currency | Σ non-CAD weight (USD stocks, ETFs, GLD, crypto) | > max → violation |
 | H6 | Employer sector | Σ equity weight in `employer_sector` (+ ETF look-through if available) | > max → violation; ETF part missing → also emit `unknown` for the ETF part |
-| H7 | Volatility band | `engine.vol` | > band hi → violation; < band lo → info ("more conservative than your profile needs") |
+| H7 | Volatility band | `engine.vol` | > band hi → violation; < band lo → info ("below the lower bound of the band for your profile": value and bound only, no judgement) |
 | H8 | Max drawdown | `engine.mdd` (historical, monthly, 2022-01→2026-10) | worse than limit → violation |
 | H9 | Floor at horizon | `engine.p5_T` | < floor → violation |
 | H10 | Sector risk concentration | max sector `risk` share from `groups.sector` | > max → violation. "Broad market" is excluded from the max when look-through is off, and flagged `unknown` |
@@ -423,17 +423,17 @@ For flow B, also compute `diff`: checks whose status changed between current and
 
 ## 8. Resizer (`resizer.py`)
 
-Goal: show what *would* fit within the user's own limits. These are facts about the profile, not advice.
+Goal: answer one factual question about the trade the user asked for: "how far can *this* trade, funded the way *I* said, go before it crosses one of my own limits?" It is a measurement of headroom, not a suggestion. The resizer never chooses a funding source, ticker or size the user did not state, never compares or ranks variants of the trade, and its result is never phrased as something to do.
 
-For a failing intent `(ticker, target w*, funding)`:
-1. For each funding mode in `[user's funding, pro_rata_all, pro_rata_class=etf_equity, pro_rata_class=equity]`, de-duplicated:
-   - Scan `w` from 0 to w* in 0.5 pp steps. Run the **cheap** checks (H1–H6, H11–H13) at each step and stop at the first failure.
-   - At the last passing `w`, run the engine checks (H7–H10) with `n=1000`. If any fails, binary-search downward on `w` with `n=1000`.
-   - Confirm the final `w` with full `n=5000`.
-2. Return up to 3 options: `{funding, max_weight_pct, binding_check, metrics}`. `binding_check` names the limit that stops it.
-3. If the max is 0 under every funding mode, return `{none_fit: true, binding_checks: [...]}`.
+For a failing intent `(ticker, target w*, funding)`, with the user's own funding only:
+1. Scan `w` from 0 to w* in 0.5 pp steps. Run the **cheap** checks (H1–H6, H11–H13) at each step and stop at the first failure.
+2. At the last passing `w`, run the engine checks (H7–H10) with `n=1000`. If any fails, binary-search downward on `w` with `n=1000`.
+3. Confirm the final `w` with full `n=5000`.
+4. Return `{funding, max_weight_pct, binding_check, metrics}`, where `funding` is the user's funding unchanged and `binding_check` names the first of the user's limits the trade crosses beyond `max_weight_pct`. If even the smallest step crosses a limit, return `{none_fit: true, binding_checks: [...]}`.
 
-Expected for Robert, NVDA from ZST: H4 binds first. Fixed income = 22 + (13 − w) ≥ 30 → **w ≤ 5%**. With pro-rata funding from equities, fixed income stays at 35% and H3 binds at **8%**. Both are subject to H7–H10 passing (verify on the real data and record in golden tests).
+Presentation is template text in a factual form, never LLM text: FR « Avec le financement indiqué (ZST.TO), la transaction franchit votre limite H9 au-delà de X %. » / EN "With the funding you gave (ZST.TO), this trade crosses your limit H9 above X %." Wording such as "you could buy X %", "options" or "alternatives" is not allowed.
+
+Expected for Robert, NVDA from ZST: on fixed income alone, 22 + (13 − w) ≥ 30 → w ≤ 5% (H4), but the engine checks bind earlier on the starter data (D2: below 5%, binding H9). Record the engine's value in the golden test.
 
 ---
 
@@ -446,7 +446,7 @@ Expected for Robert, NVDA from ZST: H4 binds first. Fixed income = 22 + (13 − 
  "intent": {...}, "verdict": "incoherent",
  "checks": [...non-pass checks with value, limit, derived_from, source, confidence...],
  "metrics_current": {...}, "metrics_proposed": {...}, "diff": {...},
- "alternatives": [...], "unknowns": [...], "assumptions": [...],
+ "headroom": null | {...}, "unknowns": [...], "assumptions": [...],
  "evidence_events": [{"event_id", "date", "text"}],
  "locale": "fr-CA"}
 ```
@@ -457,20 +457,20 @@ Numbers are pre-formatted in the payload (e.g. `"vol_pct": "7.4 %"`), so the LLM
 
 ```json
 {"headline": "<= 140 chars",
- "segments": [{"kind": "fact|assumption|inference|option|unknown",
+ "segments": [{"kind": "fact|assumption|inference|unknown",
                "text": "...", "refs": ["H3", "metrics_proposed.vol", "ev_robert_0007"]}],
  "disclaimer": "..."}
 ```
 
-Sections in order: what you asked → what it changes (numbers) → which of *your* limits it crosses and **why that limit exists** (walk `derived_from`: e.g. "your 30% minimum in bonds comes from your effective risk level, low-moderate, which comes from your first planned withdrawal in June 2030, 3.6 years from now") → behaviour note (kind `inference`, with confidence) → what we can't verify → options within your limits → disclaimer.
+Sections in order: what you asked → what it changes (numbers) → which of *your* limits it crosses and **why that limit exists** (walk `derived_from`: e.g. "your 30% minimum in bonds comes from your effective risk level, low-moderate, which comes from your first planned withdrawal in June 2030, 3.6 years from now") → behaviour note (kind `inference`, with confidence) → what we can't verify → headroom of the trade before it crosses your limits (template text, §8; flow B only) → disclaimer.
 
-Prompt rules: only use payload content; every segment has ≥ 1 ref; no imperative buy/sell language ("you should buy/sell"); `inference` segments must state they are inferences; write in `locale` (fr-CA default, en-CA supported).
+Prompt rules: only use payload content; every segment has ≥ 1 ref; describe, never prescribe: no imperative or suggestive language about any action on the portfolio (buy, sell, hold, reduce, increase, rebalance, switch, "consider", "you could", "it would be wise"), in any person or mood; no ranking of choices and no claim that one portfolio or trade is better or more suitable for the user than another; stating a measured effect is allowed ("this trade would bring fixed income to 25 %"); `inference` segments must state they are inferences; write in `locale` (fr-CA default, en-CA supported).
 
 ### 9.3 Post-checks (deterministic)
 
 1. Every `ref` resolves to a payload key, check id or event_id.
 2. **numcheck:** regex all numbers in `headline` + `segments[].text` (handles `7,4 %`, `7.4%`, `360 000 $`, `$360,000`, dates). Each must match a payload number within ±0.05 absolute for percentages, ±0.5% relative for amounts, exact for dates and years. Small integers ≤ 10 used as counts are exempt.
-3. A blocklist of advisory phrasing (FR + EN), e.g. `tu devrais acheter`, `je recommande`, `you should buy`, `we recommend`.
+3. A blocklist of advisory phrasing (FR + EN) that covers suggestions as well as orders, matched case- and accent-insensitively. At least: `tu devrais`, `vous devriez`, `tu pourrais`, `vous pourriez`, `envisage`, `il serait judicieux`, `il serait préférable`, `je recommande`, `nous recommandons`, `je conseille`, `nous conseillons`, `je suggère`, `rééquilibr`, `you should`, `you could`, `you may want to`, `you might want to`, `consider`, `it would be wise`, `it would be better`, `we recommend`, `i recommend`, `we suggest`, `i suggest`, `we advise`, `rebalanc`, `next step`, `prochaine étape`.
 4. If anything fails → regenerate once with the failure list. If it fails again → `template_explain(payload)`: a deterministic French/English template built from the same checks. The report records `explanation.mode = llm | llm_retry | template`.
 
 Optional: apply a Bedrock Guardrail (denied topic: personalised investment recommendations) to this call. It's a visible AWS integration point.
@@ -564,7 +564,7 @@ The UI (existing design: cone, risk decomposition, drivers) consumes `reports/<r
  "checks_current": [...], "checks_proposed": [...] | null,
  "diff": null | {"flipped": [{"id", "from", "to"}], "metrics_delta": {...}},
  "metrics_current": {...engine...}, "metrics_proposed": null | {...},
- "alternatives": [...], "unknowns": [...],
+ "headroom": null | {...}, "unknowns": [...],
  "assumptions": [...], "data_window": ["2022-01-31", "2026-10-31"],
  "explanation": {"mode", "headline", "segments", "disclaimer"},
  "disclaimer": "..."}
@@ -599,7 +599,7 @@ IAM: one role, least privilege (`bedrock:InvokeModel` on the chosen model ARN, t
   - Amira baseline: H2 violation (crypto 0.15 > 0.10 at `high`), assuming her fixture derives effective `high`.
   - Mateo: XOM with no tag rows and an excluded controversy category → H11 `unknown`; add a sourced tag row in a temp meta → `violation`.
 - `test_gate.py`: invented event_id → rejected; quote not in notes → rejected; behavioural jump low_moderate→high → clamped to moderate; abstain keeps the old value.
-- `test_resizer.py`: Robert NVDA from ZST → max 5.0% (binding H4); pro-rata equities → 8.0% (binding H3). Skip-mark if engine checks bind earlier on the real data, then update the golden values.
+- `test_resizer.py`: Robert NVDA from ZST → the engine's golden value (D2: below 5%, binding H9). The result carries only the user's own funding; no other funding source is ever evaluated or returned.
 - `test_numcheck.py`: accepts `7,4 %`, `7.4%`, `360 000 $`; rejects a number not in the payload; rejects advisory phrases.
 - `test_pipeline_offline.py`: `cli demo` end-to-end in mock mode → 3 reports, schema-valid, verdicts `incoherent` / `incoherent` / `coherent_with_warnings|unknown-bearing` as fixtures dictate.
 
@@ -645,7 +645,8 @@ All persona financial figures beyond the case brief are **fictional team assumpt
 ## 18. Non-goals
 
 - No chatbot. Text input exists only to capture events (questions, intents). It's not a conversational advisor.
-- No portfolio optimisation and no "best portfolio" output. The resizer only answers "how much fits within your limits".
+- No portfolio optimisation and no "best portfolio" output. The resizer only answers "how far does the trade I asked for go before it crosses one of my limits".
+- No recommendations, suggestions, alternatives or "next steps". Every user-facing sentence describes the portfolio, the trade or the profile; none prescribes an action.
 - No real accounts, no real banking data, no execution.
 - No LLM-generated ESG facts. ESG status comes only from sourced, human-entered tags.
 

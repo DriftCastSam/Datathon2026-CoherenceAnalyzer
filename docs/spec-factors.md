@@ -130,7 +130,7 @@ strings in `locale`, so the writer copies them:
     `event_id` in `facts.evidence_events`; every segment has >= 1 ref.
   - V2 numcheck (§9.3 rules): every number in the text exists in `facts`.
   - V3 coverage: every check id in `facts.checks` with status `violation` or `warning` is referenced.
-  - V4 advisory blocklist (§9.3, FR + EN).
+  - V4 advisory blocklist (§9.3, FR + EN): suggestions as well as orders, case- and accent-insensitive.
   - V5 shape: 1-4 segments, each <= 300 chars; `inference` segments only when the section has an
     `llm:`-derived field or evidence events.
 - Loop: call -> verify -> pass: `mode = llm`. Fail: call again with the failure list appended to the
@@ -139,7 +139,7 @@ strings in `locale`, so the writer copies them:
 - `template_section(facts)` is deterministic (same facts -> byte-identical) and always passes V1-V5.
 - Report-level text stays deterministic: `explanation.headline` is a template from the verdict and the
   failing check ids; `explanation.segments` = the section segments in display order, each with a
-  `factor` key; options (resizer, §8) and the disclaimer (§9.4) are template text, never LLM text.
+  `factor` key; the headroom line (resizer, §8, flow B only) and the disclaimer (§9.4) are template text, never LLM text.
   `explanation.mode` = the worst section mode (`template > llm_retry > llm`).
 - Cost: at most 2 x (number of non-pass sections) LLM calls per report. Robert + NVDA: 3 sections.
 
@@ -156,7 +156,7 @@ strings in `locale`, so the writer copies them:
 
 Five factor cards in slide order (title, question, status chip, the declared vs derived facts, the
 narrative with fact / assumption / inference / unknown tags, its checks with the `derived_from`
-chain, `not_covered`). The verdict hero, cone and alternatives stay above the cards.
+chain, `not_covered`). The verdict hero, cone and (flow B only) headroom line stay above the cards.
 
 ## 20.8 Tests
 

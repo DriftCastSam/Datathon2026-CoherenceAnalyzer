@@ -107,3 +107,15 @@ a profile). Rule list C1-C5, N6 schema and gate details are a first proposal; ch
 2. **Parallel lanes.** Narration of the non-pass sections runs concurrently; output identical to sequential.
 3. **Five factors kept.** Horizon stays its own lane (it owns H9); folding it into Objectif is a UI choice.
 
+## D10. Describe, never prescribe (SPEC inv. 7, §7.3 H7, §8, §9.1-9.3, §13, §15, §18). Approved 2026-11-14
+The product is informative only. This entry wins over SPEC.md until a human folds the prepared patch into it.
+1. Invariant 7 widened: no recommendation of any kind, not only buy/sell. Nothing proposes a trade, ticker,
+   funding source or size the user did not state, ranks choices, or presents a "next step".
+2. Resizer (§8) evaluates the user's own funding only. The `pro_rata_*` and class funding modes it tried on its
+   own are dropped (they stay valid as funding the user states in an intent). One result, stated as a fact in
+   template text: "this trade crosses your limit H_ above X %". Report key `alternatives` becomes `headroom`
+   (null | object); explanation segment kind `option` is removed; `test_resizer.py` checks the user's funding only.
+3. H7 below-band info states value and bound only ("more conservative than your profile needs" removed).
+4. Narration prompt rules and the V4 blocklist cover suggestions ("consider", "you could", "vous pourriez",
+   "envisage", "rebalance", "next step", ...), not only buy/sell imperatives; matching is case- and
+   accent-insensitive. Stating a measured effect of the user's own trade stays allowed.
