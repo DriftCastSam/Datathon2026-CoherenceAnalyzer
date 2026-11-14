@@ -31,6 +31,7 @@ tests/                       pytest, all offline (COHERENCE_ANALYZER_LLM=mock)
 
 The build order follows SPEC §17. Done:
 - **P2.D10B:** D10 "Describe, never prescribe" applied to the site copy (`tests/test_d10_site.py`). `deploy/site/design.html`: the `Option` tag / `k-option` style, the "Ce qui tient dans vos limites" block and the "Jusqu'à 2,0 %" card are gone; flow B shows one factual headroom line in the SPEC §8 FR template (« Avec le financement indiqué (ZST.TO), la transaction franchit votre limite H9 au-delà de 1,5 %. »), the prorata funding radios and the "ajoutez-la à vos exclusions" hint are removed. `deploy/whatif.py`: docstring now presents scenarios as inputs the user picks (asset, size, funding), no ordering or selection by outcome; output schema unchanged. `index.html`, `preview_report.py`, `build_site.py` are not touched (P2.SITE / P2.D10C).
+- **P2.15:** Flow B as a Step Functions state machine, not deployed: `deploy/aws/flow_b.asl.json` (B1 Task, B2 Choice on `auto_confirm`, B3 and B4 Tasks, B5 Parallel current / proposed, B6 Task, B7 Choice on `has_violations`, B8 and B9 Tasks; Retry on the Lambda service errors, Catch to the `FlowBFailed` Fail state), `coherence_analyzer/lambda_handler.py` (one Lambda, `event.step` = the pipeline step function), and in the CloudFormation template a Lambda, its log group, two least-privilege roles, the state machine and the `StateMachineArn` output (existing resources unchanged). `pipeline.b5_analyse` is split into `b5_analyse_current` / `b5_analyse_proposed`. `tests/test_stepfunctions.py` runs the ASL locally with a test-only interpreter and gets the same report as `pipeline.check`. See AWS deploy.
 - **P2.16:** `stress.py` (rate-scenario stress, `tests/test_stress.py`): bond ETF price change ~ -duration x Δy for parallel shocks of -100 / +100 / +200 bp plus a historical scenario (each held series' largest 12-month rise on month-end values in `macro_rates.csv`, up to the reference date). `data.load_macro_series` added; `pipeline.review` attaches a `stress` block (report schema: `status` is `info`, `feeds_limits` is `false`; never a check, never in the verdict or the limits). Numbers to narrate are pre-formatted in `stress.facts` (numcheck). Equities, crypto and gold are not modelled and the block says so. Durations are ASSUMED (see Assumptions); `data/meta/asset_meta.csv` columns `effective_duration`, `duration_source_url`, `duration_as_of` would make them sourced (none exist yet).
 - **P2.13:** ETF sector look-through: `data.etf_sector_shares`, `engine.sector_lookthrough` (+ `meta_dir` hook on `analyse`), H6 adds the ETF look-through part, H10 stops flagging `Broad market` when `lookthrough` is true, `lookthrough` in the report `metrics` schema; `tests/test_lookthrough.py` passes. `data/meta/etf_sector_weights.csv` (XIU.TO, SPY, QQQ, ESGV) is a human task and not built, so real runs are unchanged (`lookthrough: false`).
 - **P2.FB:** Flow B trade check wired end to end offline (`pipeline.check` = `b1_parse_intent` ... `b9_save`, each step a dict-in / dict-out function with JSON-only content, ready to be wrapped as Step Functions states; `cli check <fixture> --intent in_0001 [--auto-confirm]`). N4 draft + draft gate, B2 stop without `--auto-confirm`, B3 Flow A with N1 through `gate.py`, `intent.apply`, engine on both sides (same seed), hard + soft checks (new S1 and S3 in `soft.py`, never `violation`), `report.diff` (flipped checks, deltas, top-3 drivers), resizer options as `alternatives`, five sections on the proposed checks, audit with model id / as_of / every gate decision. Hand-written N5 entries for the three non-pass Flow B sections: `python scripts/handwrite_flow_b_cache.py`. `tests/test_flow_b.py` passes. The P0 stub pin in the offline pipeline tests was inverted to pin the wired check (oracle fix, standing approval).
@@ -225,6 +226,8 @@ All persona financial figures beyond the case brief are fictional team assumptio
   - The Flow B verdict, sections and `unknowns` are computed on the proposed checks (§20.4). Limits (floor, vol band, ...) are computed once on the current portfolio value. The simulation horizon is the declared `objectives.horizon_years x 12` months on both sides. The resizer runs only when the proposed portfolio has a hard violation; `alternatives` = its options, `[]` when none, and when no funding mode fits an assumption line names the binding checks. Options are not part of the explanation segments (§20.5 pins them to the segment list of the sections).
   - Flow B narration facts differ from Flow C ones (intent, proposed metrics, S1/S3 evidence), so they have their own hand-written N5 entries (`scripts/handwrite_flow_b_cache.py`, model `fixture:hand-written`); a variant run (a different N1 confidence, another intent) misses the mock cache and falls back to the template, which is the designed behaviour.
 
+  - Flow B on Step Functions (P2.15): SPEC-AMBIGUITY (B2): the confirmation is a Choice on the execution input's `auto_confirm`; there is no task-token callback, so an unconfirmed execution ends with the draft and the user confirms by starting a new one. The Lambda handler confirms the intent (`pipeline.b2_confirm(state, True)`) at the start of B3. B5 runs `pipeline.b5_analyse_current` / `b5_analyse_proposed` (each returns only the keys it adds; `b5_analyse` is their merge), merged before B6 with `States.JsonMerge`. B6 adds `has_violations` for the B7 Choice; a skipped B7 is `alternatives: []`, `resizer: null` (what `b7_resize` returns without a violation). B9 returns `{report}` only, keeping every state under the 256 KiB Step Functions limit (largest state about 90 KB for Robert). Lambda timeout 900 s and 2048 MB are a guess for the resizer's repeated engine runs, not measured on AWS.
+
 ## AWS deploy
 
 The template is `deploy/aws/coherence-analyzer.cfn.json` (S3 bucket with versioning, public access block, SSE and a TLS-only policy; Bedrock Guardrail with a denied topic for personalised investment recommendations; one least-privilege managed policy). It is never deployed by the tests or the build. To deploy by hand:
@@ -255,6 +258,94 @@ BEDROCK_MODEL_ID=<model id matching ModelArn>
 BEDROCK_GUARDRAIL_ID=<GuardrailId output>
 BEDROCK_GUARDRAIL_VERSION=<GuardrailVersion output>
 ```
+
+### Flow B on Step Functions (P2.15)
+
+The same template also holds Flow B as a Step Functions state machine (`FlowBStateMachine`, definition
+`deploy/aws/flow_b.asl.json`, copied inline into the template) and the one Lambda that runs every step
+(`FlowBFunction`, handler `coherence_analyzer.lambda_handler.handler`, python3.11). Each Task sends
+`{"step": "<pipeline step function>", ...}`; the steps are the pipeline's own functions, so an execution gives the
+same report as `python -m coherence_analyzer.cli check ... --auto-confirm`. The Lambda runs with
+`COHERENCE_ANALYZER_LLM=live` and `COHERENCE_ANALYZER_STORE=s3` on the stack's bucket and prefix (report and audit go to
+`<prefix>/reports/` and `<prefix>/audit/`), the guardrail of the stack, and `BEDROCK_MODEL_ID` from the `BedrockModelId`
+parameter. Its role is `AppAccessPolicy` plus its own log group; the state machine role may only call
+`lambda:InvokeFunction` on that function. Nothing here is deployed by the tests or the build.
+
+Package the Lambda code (dependencies, the package, the starter data, the meta tables and the fixtures the execution
+input names) as a zip, upload it to S3, then update the stack. The three new parameters have no default, so the
+first update after this change must pass them:
+
+```
+rm -rf build && mkdir build
+pip install -r requirements.txt --target build --platform manylinux2014_x86_64 --only-binary=:all: --python-version 3.11
+cp -r coherence_analyzer build/ && mkdir -p build/data && cp -r data/starter data/meta build/data/ && cp -r fixtures build/
+(cd build && zip -qr ../flow-b-lambda.zip . -x '*/__pycache__/*')
+aws s3 cp flow-b-lambda.zip s3://<artifact bucket>/coherence-analyzer/flow-b-lambda-<version>.zip
+aws cloudformation deploy \
+  --template-file deploy/aws/coherence-analyzer.cfn.json \
+  --stack-name coherence-analyzer \
+  --capabilities CAPABILITY_IAM \
+  --parameter-overrides ModelArn=<same as before> S3Prefix=ca/ BedrockModelId=<model id> \
+      LambdaCodeS3Bucket=<artifact bucket> LambdaCodeS3Key=coherence-analyzer/flow-b-lambda-<version>.zip
+aws cloudformation describe-stacks --stack-name coherence-analyzer \
+  --query "Stacks[0].Outputs[?OutputKey=='StateMachineArn'].OutputValue" --output text
+aws stepfunctions start-execution --state-machine-arn <StateMachineArn output> \
+  --input '{"fixture_dir": "fixtures/robert", "intent_id": "in_0001", "auto_confirm": true}'
+```
+
+A new zip needs a new `LambdaCodeS3Key` (CloudFormation does not see a changed object under the same key; or use
+`aws lambda update-function-code` for a quick test). After editing `flow_b.asl.json`, copy it into
+`FlowBStateMachine.Properties.Definition` (`tests/test_stepfunctions_sync.py` fails until both are equal). The
+`fixture_dir` of the execution input is a path inside the zip (relative to `/var/task`), like the CLI's
+`fixtures/<persona>`. The live LLM cache goes to `/tmp/llm-cache` (`COHERENCE_ANALYZER_RUNTIME_CACHE_DIR`), the package
+directory being read-only.
+
+Execution input `{fixture_dir, intent_id, auto_confirm}`; output: `{"report": <Flow B report>}`, or, when `auto_confirm`
+is false, the draft (`status: awaiting_confirmation`, `draft`, `draft_gate`, `intent`, `event`) and nothing saved.
+There is no task-token callback: confirming means starting a new execution with `auto_confirm: true`. Every Task
+retries the four Lambda service errors (3 attempts, backoff 2) and catches every other error into the `FlowBFailed`
+Fail state, which carries the Lambda error type and message.
+
+```mermaid
+stateDiagram-v2
+    [*] --> B1: execution input
+    B1: B1 parse intent (N4 + draft gate)
+    B2: B2 confirmed? (Choice on auto_confirm)
+    B1 --> B2
+    B2 --> Draft: auto_confirm false
+    Draft: Awaiting confirmation (draft, nothing saved)
+    Draft --> [*]
+    B2 --> B3: auto_confirm true
+    B3: B3 refresh (Flow A + N1)
+    B4: B4 apply intent
+    B3 --> B4
+    state "B5 analyse (Parallel)" as B5 {
+        [*] --> B5current
+        B5current: B5 analyse current
+        --
+        [*] --> B5proposed
+        B5proposed: B5 analyse proposed
+    }
+    B4 --> B5
+    B6: B6 checks + diff (has_violations)
+    B5 --> B6
+    B7c: B7 violations? (Choice)
+    B6 --> B7c
+    B7c --> B7: has_violations true
+    B7: B7 resize
+    B7c --> B8: no violation
+    B7 --> B8
+    B8: B8 explain (N5 + verifier, N6)
+    B9: B9 save report + audit (S3)
+    B8 --> B9
+    B9 --> [*]
+    B1 --> FlowBFailed: error after retries
+    B6 --> FlowBFailed: error after retries
+    FlowBFailed: FlowBFailed (Fail, carries Error and Cause)
+    FlowBFailed --> [*]
+```
+
+Every Task (B1, B3 to B9, both B5 branches) and the Parallel state lead to `FlowBFailed` on error; the diagram shows two.
 
 ## Disclaimer
 Educational simulation with fictional profiles. This is not personalised financial advice. No transaction is executed.

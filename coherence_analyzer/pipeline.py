@@ -416,14 +416,29 @@ def _horizon_months(profile: dict) -> int:
     return int(round(float(_val(profile["objectives"]["horizon_years"])) * 12))
 
 
-def b5_analyse(state: dict) -> dict:
-    """B5: engine.analyse on the current and the proposed portfolio, same seed, same horizon."""
-    pf, new = state["portfolio"], state["proposed"]
+def _b5_side(state: dict, side: str) -> dict:
+    """One side of B5: only the keys it adds (a delta, not the whole state), so that the two sides can run as the two
+    branches of a Step Functions Parallel state and be merged by key (P2.15). Same seed and horizon on both sides."""
+    pf = state["portfolio"] if side == "current" else state["proposed"]
     horizon_m = _horizon_months(state["profile"])
     market = engine.load_market(str(config.DATA_DIR))
-    return {**state, "horizon_months": horizon_m, "data_window": list(market.window),
-            "metrics_current": store.plain(engine.analyse(market, pf["weights_pct"], horizon_m, pf["value_cad"])),
-            "metrics_proposed": store.plain(engine.analyse(market, new["weights_pct"], horizon_m, new["value_cad"]))}
+    return {"horizon_months": horizon_m, "data_window": list(market.window),
+            f"metrics_{side}": store.plain(engine.analyse(market, pf["weights_pct"], horizon_m, pf["value_cad"]))}
+
+
+def b5_analyse_current(state: dict) -> dict:
+    """B5, current side: `{horizon_months, data_window, metrics_current}` (delta)."""
+    return _b5_side(state, "current")
+
+
+def b5_analyse_proposed(state: dict) -> dict:
+    """B5, proposed side: `{horizon_months, data_window, metrics_proposed}` (delta)."""
+    return _b5_side(state, "proposed")
+
+
+def b5_analyse(state: dict) -> dict:
+    """B5: engine.analyse on the current and the proposed portfolio, same seed, same horizon."""
+    return {**state, **b5_analyse_current(state), **b5_analyse_proposed(state)}
 
 
 # ---------------------------------------------------------------- Flow C

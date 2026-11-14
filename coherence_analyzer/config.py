@@ -14,7 +14,8 @@ DATA_DIR = Path(os.getenv("COHERENCE_ANALYZER_DATA", ROOT / "data" / "starter"))
 META_DIR = ROOT / "data" / "meta"
 FIXTURES_DIR = ROOT / "fixtures"
 LLM_CACHE_DIR = FIXTURES_DIR / "llm_cache"   # recorded responses (mock/record)
-RUNTIME_CACHE_DIR = ROOT / ".cache" / "llm"  # live-call cache
+# live-call cache; the Lambda (P2.15) points it at /tmp, its package directory being read-only
+RUNTIME_CACHE_DIR = Path(os.getenv("COHERENCE_ANALYZER_RUNTIME_CACHE_DIR", ROOT / ".cache" / "llm"))
 PROMPTS_DIR = Path(__file__).parent / "llm" / "prompts"
 LLM_SCHEMAS_DIR = Path(__file__).parent / "llm" / "schemas"
 SCHEMAS_DIR = Path(__file__).parent / "schemas"
