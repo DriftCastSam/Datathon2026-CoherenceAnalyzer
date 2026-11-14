@@ -26,3 +26,15 @@ P0.5 task note. Measured context: Robert + NVDA 10% also fails H8 (mdd -13.4% vs
 ## D4. Data window stays 58 months (`iloc[2:-1]`, 2022-01 -> 2026-10)
 No engine math change; golden test untouched. The dropped (full) Dec 2021 month is documented in
 README "Assumptions".
+
+## D5. Five-factor architecture, option C: rules decide, agents explain, code checks the agents
+Adopted 2026-11-14. Full text: `docs/spec-factors.md` (paste-ready as SPEC.md §20). It wins over
+§9 (one explanation call) and §13 (report gains `sections`, checks gain `factor`) and replaces
+§17 steps 7-8 with: P0.7 factors + sections + template + numcheck, P0.8 per-section narration loop
+(N5 + verifier V1-V5 + one retry + template), P0.9 pipeline flows B/C + cli demo. Intake loop is P1.
+The analysis layer (§7, §8) is unchanged: no LLM decides a status, a verdict or a number.
+
+## D6. No `temperature` in Bedrock calls (SPEC §6.1, inv. 8)
+The team's Claude model on Bedrock rejects `temperature` ("deprecated for this model"). `call_tool`
+does not send it. Reproducibility rests on the input-hash cache (record/live) and the recorded mock
+cache, which is what the tests run on. Record the model id in every audit record.

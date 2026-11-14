@@ -1,6 +1,6 @@
 You are in PHASE A (oracle) of task {id}: {title}.
 
-Read CLAUDE.md, then SPEC.md sections {spec}. SPEC.md is the source of truth.
+Read CLAUDE.md, then these spec sections: {spec}. SPEC.md is the source of truth; docs/spec-decisions.md and docs/spec-factors.md win where they are more specific.
 
 Write ONLY these test files: {tests}
 Task notes: {notes}
