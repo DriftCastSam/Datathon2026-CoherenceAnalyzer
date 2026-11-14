@@ -479,6 +479,90 @@
     "README.md"
    ],
    "notes": "Fill pipeline.check() (stub). Robert in_0001 = NVDA 10% from ZST.TO. B1 N4 -> gate -> B2 draft (CLI stops at B2 unless --auto-confirm) -> B3 Flow A refresh with N1 -> B4 intent.apply -> B5 analyse current+proposed same seed -> B6 hard+soft on both + diff (flipped checks + deltas vol, mdd, p5_T, width, loss_prob, top-3 drivers) -> B7 resizer if violations (D2 golden: binding H9 below 5% from ZST) -> B8 explain -> B9 save + audit (model id, as_of, gate decisions). Verdict incoherent. S1/S3 only from gated N1, never violation. Make each step a separate function taking/returning JSON-serialisable dicts (a later task wraps them as Step Functions + Lambda). Hand-written mock cache entries must pass schema + gate. Don't restructure pipeline.review() or engine.py. These P2 tasks run IN PARALLEL in separate worktrees: edit only the files your task owns (plus README.md and new test files). No network, no pip install, no real AWS calls in code paths the tests run. Never write data/meta/activity_tags.csv. Golden test (tests/test_engine_golden.py) must stay green."
+  },
+  {
+   "id": "P2.D10A",
+   "title": "D10 core: resizer = headroom of the user's own trade, alternatives -> headroom, no option segments, H7 wording, wider advisory blocklist, explainer prompt v2",
+   "spec": [
+    "docs/spec-decisions.md D10",
+    "§1 inv. 7",
+    "§7.3 H7",
+    "§8",
+    "§9.1",
+    "§9.2",
+    "§9.3",
+    "§13",
+    "§15 test_resizer",
+    "§18",
+    "docs/spec-factors.md §20.5, §20.7",
+    "docs/spec-decisions.md D2"
+   ],
+   "tests": [
+    "tests/test_d10.py",
+    "tests/test_resizer.py",
+    "tests/test_flow_b.py",
+    "tests/test_pipeline_offline.py",
+    "tests/test_numcheck.py",
+    "tests/test_explain.py"
+   ],
+   "code": [
+    "coherence_analyzer/resizer.py",
+    "coherence_analyzer/coherence/report.py",
+    "coherence_analyzer/schemas/report.json",
+    "coherence_analyzer/pipeline.py",
+    "coherence_analyzer/cli.py",
+    "coherence_analyzer/explain.py",
+    "coherence_analyzer/llm/prompts/explainer.v2.md",
+    "coherence_analyzer/llm/schemas/explainer.json",
+    "scripts/handwrite_explainer_cache.py",
+    "fixtures/llm_cache/",
+    "README.md"
+   ],
+   "notes": "SPEC.md was updated by a human and docs/spec-decisions.md D10 ('Describe, never prescribe') is new: read both first; D10 wins. The product is informative only: no recommendation of any kind, never a trade, ticker, funding source or size the user did not state, no ranking of choices, no 'next step'. Phase A: the listed existing test files were UNFROZEN for this task so you can bring their assertions in line with D10 (they pinned the old multi-funding resizer, the `alternatives` key and the narrow blocklist); keep every assertion D10 does not touch, and add tests/test_d10.py for the new rules. Phase B must not edit any other frozen test. Required behaviour: (1) resizer evaluates the user's own funding ONLY (no pro_rata_all / pro_rata_class candidates of its own; pro_rata_* stay valid when the user states them in the intent, intent.py unchanged) and returns ONE result {funding, max_weight_pct, binding_check, metrics} or {none_fit: true, binding_checks}; Robert NVDA from ZST.TO keeps the engine's golden value (D2, binding H9); (2) report key `alternatives` becomes `headroom` (null | object) in Flow B and C reports, report.json schema, pipeline facts payload, audit and cli; Flow C has headroom null; (3) the headroom line is deterministic template text, FR « Avec le financement indiqué (ZST.TO), la transaction franchit votre limite H9 au-delà de X %. » / EN \"With the funding you gave (ZST.TO), this trade crosses your limit H9 above X %.\"; never the words options, alternatives, 'you could', 'pourriez'; (4) explainer segment kind enum is fact|assumption|inference|unknown (no option) in schema, verifier and templates; (5) H7 below-band info template states value and bound only (drop 'more conservative than your profile' / 'plus prudent que votre profil'); (6) explain.ADVISORY_BLOCKLIST holds at least every phrase listed in SPEC §9.3 item 3 and V4 matches case- and accent-insensitively (normalise with unicodedata NFKD, strip combining marks, casefold); make sure every deterministic template text (template_section, headline, headroom line, H-check templates) still passes V4 under the wider list, e.g. French 'considéré' or 'envisagé' would now match 'consider'/'envisage': reword templates, do not weaken the list; (7) explainer prompt: create prompts/explainer.v2.md (CLAUDE.md: prompt changes bump the version) with D10 rule 'describe, never prescribe' (no imperative or suggestive language about any action on the portfolio in any person or mood, no ranking, stating a measured effect of the user's own trade is allowed), point the extractor at v2, and re-key the hand-written explainer mock entries to v2 with scripts/handwrite_explainer_cache.py (real recorded entries become cache misses and fall back to template: acceptable, a human re-records them). Leave deploy/ alone (site lanes P2.D10B/C own it). Record D10 assumptions in README."
+  },
+  {
+   "id": "P2.D10B",
+   "title": "D10 site copy: product-screens design and what-if precompute describe, never prescribe",
+   "spec": [
+    "docs/spec-decisions.md D10",
+    "§1 inv. 7",
+    "§8",
+    "§12 UI",
+    "§18",
+    "docs/spec-factors.md §20.7"
+   ],
+   "tests": [
+    "tests/test_d10_site.py"
+   ],
+   "code": [
+    "deploy/site/design.html",
+    "deploy/whatif.py",
+    "README.md"
+   ],
+   "notes": "SPEC.md was updated by a human and docs/spec-decisions.md D10 ('Describe, never prescribe') is new: read both first; D10 wins. The product is informative only: no recommendation of any kind, never a trade, ticker, funding source or size the user did not state, no ranking of choices, no 'next step'. Edit ONLY deploy/site/design.html and deploy/whatif.py (deploy/site/index.html, deploy/preview_report.py and deploy/build_site.py belong to the running P2.SITE lane and to P2.D10C). design.html: remove the 'Option' tag / k-option style, the 'Ce qui tient dans vos limites' / 'options dans vos limites' block and the 'Jusqu'à 2,0 % tient dans vos limites' card; replace with a factual headroom line in the §8 template form (FR « Avec le financement indiqué (ZST.TO), la transaction franchit votre limite H9 au-delà de X %. »), shown for flow B only; no text anywhere that suggests an action (scan against the SPEC §9.3 item 3 blocklist, case/accent-insensitive). whatif.py: scenarios are inputs the user picks (asset, size, funding) in the Simulation tab, so keep them, but its output and docstrings must present them as user-chosen scenarios, carry no ranking/ordering by outcome, no 'best'/'fits'/'option' fields or labels, and any narrative it emits must pass the widened blocklist. tests/test_d10_site.py: parse design.html text (strip tags) and assert no blocklist phrase and no 'option'/'alternative' wording outside the disclaimer; assert whatif output schema has no ranking/option fields (run its pure helpers on a tiny input, no network)."
+  },
+  {
+   "id": "P2.D10C",
+   "title": "D10 dashboard: headroom instead of alternatives in index.html, preview_report.py, build_site.py (after P2.SITE merges)",
+   "spec": [
+    "docs/spec-decisions.md D10",
+    "§1 inv. 7",
+    "§8",
+    "§12 UI",
+    "§13",
+    "§18",
+    "docs/spec-factors.md §20.7"
+   ],
+   "tests": [
+    "tests/test_d10_dashboard.py"
+   ],
+   "code": [
+    "deploy/site/index.html",
+    "deploy/preview_report.py",
+    "deploy/build_site.py",
+    "README.md"
+   ],
+   "notes": "SPEC.md was updated by a human and docs/spec-decisions.md D10 ('Describe, never prescribe') is new: read both first; D10 wins. The product is informative only: no recommendation of any kind, never a trade, ticker, funding source or size the user did not state, no ranking of choices, no 'next step'. Run only after P2.SITE and P2.D10A are merged. Dashboard reads `headroom` (null | object) instead of `alternatives`; preview_report.py emits no `option` segments and no 'within your own limits ... would fit up to' text; the headroom line uses the §8 template wording, flow B only; all user-facing strings pass the SPEC §9.3 item 3 blocklist (case/accent-insensitive) apart from the fixed disclaimer and the Recherche refusal message."
   }
  ]
 }
