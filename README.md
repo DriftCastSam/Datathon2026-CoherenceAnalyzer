@@ -71,6 +71,8 @@ Working copies live under `COHERENCE_ANALYZER_STORE_DIR` (default: the current d
 
 ## Assumptions
 
+- **`data/meta/asset_meta.csv` themes are a team assumption** (`tech_heavy` = QQQ + single tech names; broad index ETFs carry no theme). Five ETF MERs are sourced from issuer pages (2026-11-14); XIU.TO, XBB.TO, ZST.TO, ESGV are blank until a human sources them, so H12 is `unknown` for them. Details: `data/meta/SOURCES.md`.
+
 All persona financial figures beyond the case brief are fictional team assumptions.
 
 - **Engine drift (annual, CAD):** Stocks / Equity ETFs 6%, Bonds 3%, Gold 3%, Crypto 6%. A team assumption, not a forecast.
