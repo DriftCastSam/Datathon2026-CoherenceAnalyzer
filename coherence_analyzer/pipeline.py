@@ -570,7 +570,6 @@ def b6_checks_and_diff(state: dict) -> dict:
             + soft.run_all(profile, state["intent"], w_new, assets, behaviour=True))
     checks_current, checks_proposed = store.plain(report_mod.tag_checks(cur)), store.plain(report_mod.tag_checks(prop))
     return {**state, "checks_current": checks_current, "checks_proposed": checks_proposed,
-            "has_violations": any(c["status"] == "violation" for c in checks_proposed),     # B7 Choice (P2.15)
             "diff": report_mod.diff(checks_current, checks_proposed, state["metrics_current"],
                                     state["metrics_proposed"])}
 
@@ -616,7 +615,7 @@ def b9_save(state: dict) -> dict:
     """B9: the report and the audit record (model id, as_of, every call with its gate decision) go to the store."""
     profile, pf, refresh_ = state["profile"], state["portfolio"], state["refresh"]
     notes = list(state["metrics_current"]["assumptions"]) + list(FLOW_B_ASSUMPTIONS)
-    res = state.get("resizer")          # absent when B7 was skipped (Step Functions Choice): no violation, no options
+    res = state.get("resizer")
     if res and res.get("none_fit"):
         notes.append("Resizer: no funding mode keeps this trade within your limits at any weight above the current "
                      f"one; binding checks: {', '.join(res['binding_checks'])}.")
@@ -625,7 +624,7 @@ def b9_save(state: dict) -> dict:
         portfolio_id=pf["portfolio_id"], intent=state["intent"], checks_current=state["checks_current"],
         checks_proposed=state["checks_proposed"], metrics_current=state["metrics_current"],
         metrics_proposed=state["metrics_proposed"], sections=state["sections"], explanation=state["explanation"],
-        alternatives=state.get("alternatives", []), assumptions=notes, data_window=state["data_window"],
+        alternatives=state["alternatives"], assumptions=notes, data_window=state["data_window"],
         disclaimer=config.DISCLAIMER[state["locale"]], profile_coherence=state["profile_coherence"])
     store.save_portfolio(pf)
     store.save_report(rep)

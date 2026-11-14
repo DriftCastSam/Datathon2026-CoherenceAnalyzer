@@ -1,0 +1,447 @@
+{
+  "Comment": "CoherenceAnalyzer Flow B, trade check (SPEC section 4, B1 to B9). Every Task invokes the one Flow B Lambda (coherence_analyzer.lambda_handler.handler) with a step name. Educational simulation: no recommendation, no execution.",
+  "StartAt": "B1 parse intent",
+  "States": {
+    "B1 parse intent": {
+      "Type": "Task",
+      "Comment": "N4 intent parser on the order_intent event text, then the draft gate.",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${FlowBFunctionArn}",
+        "Payload": {
+          "step": "b1_parse_intent",
+          "fixture_dir.$": "$.fixture_dir",
+          "intent_id.$": "$.intent_id",
+          "auto_confirm.$": "$.auto_confirm"
+        }
+      },
+      "ResultSelector": {
+        "state.$": "$.Payload"
+      },
+      "ResultPath": "$",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2,
+          "JitterStrategy": "FULL"
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.error",
+          "Next": "FlowBFailed"
+        }
+      ],
+      "Next": "B2 confirmed?"
+    },
+    "B2 confirmed?": {
+      "Type": "Choice",
+      "Comment": "B2 confirmation: only an auto-confirmed run goes on; otherwise the run stops with the draft for the user to confirm.",
+      "Choices": [
+        {
+          "Variable": "$.state.auto_confirm",
+          "BooleanEquals": true,
+          "Next": "B3 refresh"
+        }
+      ],
+      "Default": "Awaiting confirmation"
+    },
+    "Awaiting confirmation": {
+      "Type": "Pass",
+      "Comment": "Output = the draft, as pipeline.check returns it without auto_confirm. Nothing is saved.",
+      "Parameters": {
+        "status": "awaiting_confirmation",
+        "intent_id.$": "$.state.intent_id",
+        "draft.$": "$.state.draft",
+        "draft_gate.$": "$.state.draft_gate",
+        "intent.$": "$.state.fixture_intent",
+        "event.$": "$.state.event"
+      },
+      "ResultPath": "$",
+      "End": true
+    },
+    "B3 refresh": {
+      "Type": "Task",
+      "Comment": "Confirms the intent (fixture intent, user-declared) and runs Flow A up to the order_intent, with N1.",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${FlowBFunctionArn}",
+        "Payload": {
+          "step": "b3_refresh",
+          "state.$": "$.state"
+        }
+      },
+      "ResultSelector": {
+        "state.$": "$.Payload"
+      },
+      "ResultPath": "$",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2,
+          "JitterStrategy": "FULL"
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.error",
+          "Next": "FlowBFailed"
+        }
+      ],
+      "Next": "B4 apply"
+    },
+    "B4 apply": {
+      "Type": "Task",
+      "Comment": "intent.apply: the proposed portfolio.",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${FlowBFunctionArn}",
+        "Payload": {
+          "step": "b4_apply",
+          "state.$": "$.state"
+        }
+      },
+      "ResultSelector": {
+        "state.$": "$.Payload"
+      },
+      "ResultPath": "$",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2,
+          "JitterStrategy": "FULL"
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.error",
+          "Next": "FlowBFailed"
+        }
+      ],
+      "Next": "B5 analyse"
+    },
+    "B5 analyse": {
+      "Type": "Parallel",
+      "Comment": "B5: current and proposed portfolios analysed in two parallel branches.",
+      "Branches": [
+        {
+          "StartAt": "B5 analyse current",
+          "States": {
+            "B5 analyse current": {
+              "Type": "Task",
+              "Comment": "engine.analyse on the current portfolio (same seed and horizon on both sides); returns only the keys it adds.",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Parameters": {
+                "FunctionName": "${FlowBFunctionArn}",
+                "Payload": {
+                  "step": "b5_analyse_current",
+                  "state.$": "$.state"
+                }
+              },
+              "ResultPath": "$",
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "Lambda.ServiceException",
+                    "Lambda.AWSLambdaException",
+                    "Lambda.SdkClientException",
+                    "Lambda.TooManyRequestsException"
+                  ],
+                  "IntervalSeconds": 2,
+                  "MaxAttempts": 3,
+                  "BackoffRate": 2,
+                  "JitterStrategy": "FULL"
+                }
+              ],
+              "Catch": [
+                {
+                  "ErrorEquals": [
+                    "States.ALL"
+                  ],
+                  "ResultPath": "$.error",
+                  "Next": "B5 current failed"
+                }
+              ],
+              "End": true,
+              "OutputPath": "$.Payload"
+            },
+            "B5 current failed": {
+              "Type": "Fail",
+              "Comment": "Carries the error of the failed step (Lambda error type and message).",
+              "ErrorPath": "$.error.Error",
+              "CausePath": "$.error.Cause"
+            }
+          }
+        },
+        {
+          "StartAt": "B5 analyse proposed",
+          "States": {
+            "B5 analyse proposed": {
+              "Type": "Task",
+              "Comment": "engine.analyse on the proposed portfolio (same seed and horizon on both sides); returns only the keys it adds.",
+              "Resource": "arn:aws:states:::lambda:invoke",
+              "Parameters": {
+                "FunctionName": "${FlowBFunctionArn}",
+                "Payload": {
+                  "step": "b5_analyse_proposed",
+                  "state.$": "$.state"
+                }
+              },
+              "ResultPath": "$",
+              "Retry": [
+                {
+                  "ErrorEquals": [
+                    "Lambda.ServiceException",
+                    "Lambda.AWSLambdaException",
+                    "Lambda.SdkClientException",
+                    "Lambda.TooManyRequestsException"
+                  ],
+                  "IntervalSeconds": 2,
+                  "MaxAttempts": 3,
+                  "BackoffRate": 2,
+                  "JitterStrategy": "FULL"
+                }
+              ],
+              "Catch": [
+                {
+                  "ErrorEquals": [
+                    "States.ALL"
+                  ],
+                  "ResultPath": "$.error",
+                  "Next": "B5 proposed failed"
+                }
+              ],
+              "End": true,
+              "OutputPath": "$.Payload"
+            },
+            "B5 proposed failed": {
+              "Type": "Fail",
+              "Comment": "Carries the error of the failed step (Lambda error type and message).",
+              "ErrorPath": "$.error.Error",
+              "CausePath": "$.error.Cause"
+            }
+          }
+        }
+      ],
+      "ResultPath": "$.b5",
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.error",
+          "Next": "FlowBFailed"
+        }
+      ],
+      "Next": "B6 checks and diff"
+    },
+    "B6 checks and diff": {
+      "Type": "Task",
+      "Comment": "Hard and soft checks on both portfolios, the diff, and has_violations.",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${FlowBFunctionArn}",
+        "Payload": {
+          "step": "b6_checks_and_diff",
+          "state.$": "States.JsonMerge(States.JsonMerge($.state, $.b5[0], false), $.b5[1], false)"
+        }
+      },
+      "ResultSelector": {
+        "state.$": "$.Payload"
+      },
+      "ResultPath": "$",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2,
+          "JitterStrategy": "FULL"
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.error",
+          "Next": "FlowBFailed"
+        }
+      ],
+      "Next": "B7 violations?"
+    },
+    "B7 violations?": {
+      "Type": "Choice",
+      "Comment": "B7: the resizer runs only when the proposed portfolio has a hard violation.",
+      "Choices": [
+        {
+          "Variable": "$.state.has_violations",
+          "BooleanEquals": true,
+          "Next": "B7 resize"
+        }
+      ],
+      "Default": "B8 explain"
+    },
+    "B7 resize": {
+      "Type": "Task",
+      "Comment": "Resizer (SPEC section 8): weights and funding modes that keep the trade within the limits.",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${FlowBFunctionArn}",
+        "Payload": {
+          "step": "b7_resize",
+          "state.$": "$.state"
+        }
+      },
+      "ResultSelector": {
+        "state.$": "$.Payload"
+      },
+      "ResultPath": "$",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2,
+          "JitterStrategy": "FULL"
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.error",
+          "Next": "FlowBFailed"
+        }
+      ],
+      "Next": "B8 explain"
+    },
+    "B8 explain": {
+      "Type": "Task",
+      "Comment": "Five sections, N5 narration through the gate and the verifier, N6 internal coherence.",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${FlowBFunctionArn}",
+        "Payload": {
+          "step": "b8_explain",
+          "state.$": "$.state"
+        }
+      },
+      "ResultSelector": {
+        "state.$": "$.Payload"
+      },
+      "ResultPath": "$",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2,
+          "JitterStrategy": "FULL"
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.error",
+          "Next": "FlowBFailed"
+        }
+      ],
+      "Next": "B9 save"
+    },
+    "B9 save": {
+      "Type": "Task",
+      "Comment": "Report and audit record written to the store (S3 in AWS); the execution output is the report.",
+      "Resource": "arn:aws:states:::lambda:invoke",
+      "Parameters": {
+        "FunctionName": "${FlowBFunctionArn}",
+        "Payload": {
+          "step": "b9_save",
+          "state.$": "$.state"
+        }
+      },
+      "ResultSelector": {
+        "report.$": "$.Payload.report"
+      },
+      "ResultPath": "$",
+      "Retry": [
+        {
+          "ErrorEquals": [
+            "Lambda.ServiceException",
+            "Lambda.AWSLambdaException",
+            "Lambda.SdkClientException",
+            "Lambda.TooManyRequestsException"
+          ],
+          "IntervalSeconds": 2,
+          "MaxAttempts": 3,
+          "BackoffRate": 2,
+          "JitterStrategy": "FULL"
+        }
+      ],
+      "Catch": [
+        {
+          "ErrorEquals": [
+            "States.ALL"
+          ],
+          "ResultPath": "$.error",
+          "Next": "FlowBFailed"
+        }
+      ],
+      "End": true
+    },
+    "FlowBFailed": {
+      "Type": "Fail",
+      "Comment": "Carries the error of the failed step (Lambda error type and message).",
+      "ErrorPath": "$.error.Error",
+      "CausePath": "$.error.Cause"
+    }
+  }
+}
