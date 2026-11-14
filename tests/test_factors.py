@@ -588,10 +588,15 @@ def test_facts_check_entries_horizon_and_risque(secs_trade):
         assert (_norm(e["value"]), _norm(e["limit"])) == (val, lim), cid
 
 
+META_IDS = {"H11", "H12", "H13"}   # need the data/meta files (P1.2)
+
+
 def test_facts_check_entries_contraintes(secs_trade):
     c = secs_trade["contraintes"]["facts"]
-    assert sorted((e["id"], e["status"]) for e in c["checks"]) == [
+    # P1.2 oracle fix: H11-H13 now run; with no data/meta CSV each of their entries is `unknown` (SPEC §7.3, D7 point 4).
+    assert sorted((e["id"], e["status"]) for e in c["checks"] if e["id"] not in META_IDS) == [
         ("H10", "unknown"), ("H10", "violation"), ("H3", "violation"), ("H6", "unknown")]
+    assert all(e["status"] == "unknown" for e in c["checks"] if e["id"] in META_IDS)
     h3, h10 = _entry(c, "H3", "violation"), _entry(c, "H10", "violation")
     assert (_norm(h3["value"]), _norm(h3["limit"])) == ("10,0 %", "8,0 %")
     assert (_norm(h10["value"]), _norm(h10["limit"])) == ("34,7 %", "30,0 %")
@@ -602,7 +607,9 @@ def test_facts_check_entries_contraintes(secs_trade):
 
 def test_facts_baseline_contraintes_lists_only_the_unknowns(secs_base):
     c = secs_base["contraintes"]["facts"]
-    assert sorted((e["id"], e["status"]) for e in c["checks"]) == [("H10", "unknown"), ("H6", "unknown")]
+    assert sorted((e["id"], e["status"]) for e in c["checks"] if e["id"] not in META_IDS) == [
+        ("H10", "unknown"), ("H6", "unknown")]
+    assert all(e["status"] == "unknown" for e in c["checks"] if e["id"] in META_IDS)   # P1.2 oracle fix, no meta CSV yet
     blob = json.dumps(c["unknowns"], default=str)
     assert "H6" in blob and "H10" in blob
 
