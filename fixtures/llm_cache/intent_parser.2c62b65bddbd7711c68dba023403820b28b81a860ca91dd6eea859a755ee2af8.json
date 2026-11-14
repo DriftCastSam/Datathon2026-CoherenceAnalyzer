@@ -1,0 +1,166 @@
+{
+  "cache_key": "2c62b65bddbd7711c68dba023403820b28b81a860ca91dd6eea859a755ee2af8",
+  "call_log": {
+    "hand_written": true,
+    "latency_ms": 0,
+    "tokens_in": 0,
+    "tokens_out": 0
+  },
+  "input_hash": "sha256:012b26c58854abfabbba4c5971b15d472eab2b5653883812934bc57888e5fef4",
+  "model_id": "fixture:hand-written",
+  "node": "intent_parser",
+  "output": {
+    "action": "buy",
+    "ambiguous_fields": [
+      "funding"
+    ],
+    "funding": {
+      "kind": "pro_rata_all"
+    },
+    "target_weight_pct": 10,
+    "ticker": "NVDA",
+    "unresolved_mentions": []
+  },
+  "prompt_version": "intent_parser.v1",
+  "user_payload": {
+    "text": "I want to put 10% in NVDA, everyone's talking about it",
+    "universe": [
+      {
+        "name": "Apple",
+        "ticker": "AAPL"
+      },
+      {
+        "name": "iShares Core U.S. Aggregate Bond ETF",
+        "ticker": "AGG"
+      },
+      {
+        "name": "Amazon",
+        "ticker": "AMZN"
+      },
+      {
+        "name": "Alimentation Couche-Tard",
+        "ticker": "ATD.TO"
+      },
+      {
+        "name": "Bitcoin",
+        "ticker": "BTC-USD"
+      },
+      {
+        "name": "Canadian Natural Resources",
+        "ticker": "CNQ.TO"
+      },
+      {
+        "name": "Canadian National Railway",
+        "ticker": "CNR.TO"
+      },
+      {
+        "name": "Constellation Software",
+        "ticker": "CSU.TO"
+      },
+      {
+        "name": "Enbridge",
+        "ticker": "ENB.TO"
+      },
+      {
+        "name": "Vanguard ESG U.S. Stock ETF",
+        "ticker": "ESGV"
+      },
+      {
+        "name": "Ether",
+        "ticker": "ETH-USD"
+      },
+      {
+        "name": "Fortis",
+        "ticker": "FTS.TO"
+      },
+      {
+        "name": "SPDR Gold Shares",
+        "ticker": "GLD"
+      },
+      {
+        "name": "Alphabet (Class A)",
+        "ticker": "GOOGL"
+      },
+      {
+        "name": "Johnson & Johnson",
+        "ticker": "JNJ"
+      },
+      {
+        "name": "JPMorgan Chase",
+        "ticker": "JPM"
+      },
+      {
+        "name": "Manulife Financial",
+        "ticker": "MFC.TO"
+      },
+      {
+        "name": "Microsoft",
+        "ticker": "MSFT"
+      },
+      {
+        "name": "NVIDIA",
+        "ticker": "NVDA"
+      },
+      {
+        "name": "Procter & Gamble",
+        "ticker": "PG"
+      },
+      {
+        "name": "Invesco QQQ Trust (Nasdaq-100)",
+        "ticker": "QQQ"
+      },
+      {
+        "name": "Royal Bank of Canada",
+        "ticker": "RY.TO"
+      },
+      {
+        "name": "Shopify",
+        "ticker": "SHOP.TO"
+      },
+      {
+        "name": "SPDR S&P 500 ETF Trust",
+        "ticker": "SPY"
+      },
+      {
+        "name": "Toronto-Dominion Bank",
+        "ticker": "TD.TO"
+      },
+      {
+        "name": "iShares 20+ Year Treasury Bond ETF",
+        "ticker": "TLT"
+      },
+      {
+        "name": "Tesla",
+        "ticker": "TSLA"
+      },
+      {
+        "name": "iShares Core Canadian Universe Bond Index ETF",
+        "ticker": "XBB.TO"
+      },
+      {
+        "name": "iShares S&P/TSX 60 Index ETF",
+        "ticker": "XIU.TO"
+      },
+      {
+        "name": "Exxon Mobil",
+        "ticker": "XOM"
+      },
+      {
+        "name": "BMO Ultra Short-Term Bond ETF",
+        "ticker": "ZST.TO"
+      }
+    ],
+    "weights_pct": {
+      "ENB.TO": 6,
+      "FTS.TO": 7,
+      "GLD": 5,
+      "JNJ": 5,
+      "PG": 5,
+      "RY.TO": 7,
+      "SPY": 12,
+      "XBB.TO": 22,
+      "XIU.TO": 18,
+      "ZST.TO": 13
+    }
+  }
+}

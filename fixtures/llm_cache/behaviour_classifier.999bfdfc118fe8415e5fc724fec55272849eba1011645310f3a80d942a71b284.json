@@ -1,0 +1,52 @@
+{
+  "cache_key": "999bfdfc118fe8415e5fc724fec55272849eba1011645310f3a80d942a71b284",
+  "call_log": {
+    "hand_written": true,
+    "latency_ms": 0,
+    "tokens_in": 0,
+    "tokens_out": 0
+  },
+  "input_hash": "sha256:ac9fb825082ef99dd8d9c276a65972d1642da32e8b9306d5f94ff62d24126847",
+  "model_id": "fixture:hand-written",
+  "node": "behaviour_classifier",
+  "output": {
+    "abstain": false,
+    "confidence": 0.55,
+    "evidence": [
+      {
+        "event_id": "ev_robert_0007",
+        "note": "asks to put 10% in one stock because everyone is talking about it",
+        "signal": "hype_chasing"
+      },
+      {
+        "event_id": "ev_robert_0004",
+        "note": "asks which AI stock is the next big one",
+        "signal": "hype_chasing"
+      }
+    ],
+    "value": "moderate_high"
+  },
+  "prompt_version": "behaviour_classifier.v1",
+  "user_payload": {
+    "events": [
+      {
+        "event_id": "ev_robert_0004",
+        "text": "Which AI stock is the next big one?",
+        "ts": "2026-11-10T19:30:00-05:00",
+        "type": "question"
+      },
+      {
+        "event_id": "ev_robert_0005",
+        "text": "What does XBB's duration mean for my bonds if rates drop?",
+        "ts": "2026-11-12T08:15:00-05:00",
+        "type": "question"
+      },
+      {
+        "event_id": "ev_robert_0007",
+        "text": "I want to put 10% in NVDA, everyone's talking about it",
+        "ts": "2026-11-14T10:02:00-05:00",
+        "type": "order_intent"
+      }
+    ]
+  }
+}

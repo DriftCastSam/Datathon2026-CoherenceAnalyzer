@@ -1,0 +1,28 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "intent_parser (N4) tool input: a draft intent (SPEC 3.6 fields) + ambiguous_fields + unresolved_mentions",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["action", "ticker", "target_weight_pct", "funding", "ambiguous_fields", "unresolved_mentions"],
+  "properties": {
+    "action": {"type": "string", "enum": ["buy", "sell"]},
+    "ticker": {"type": "string", "description": "The runtime adds an enum with the universe tickers (extractors.intent_parser)."},
+    "target_weight_pct": {"type": "number", "minimum": 0, "maximum": 100},
+    "funding": {
+      "description": "Default when the user names no source: {\"kind\": \"pro_rata_all\"}, and list `funding` in ambiguous_fields.",
+      "anyOf": [
+        {"type": "object", "additionalProperties": false, "required": ["kind", "ticker"],
+         "properties": {"kind": {"const": "specific"}, "ticker": {"type": "string"}}},
+        {"type": "object", "additionalProperties": false, "required": ["kind"],
+         "properties": {"kind": {"const": "pro_rata_all"}}},
+        {"type": "object", "additionalProperties": false, "required": ["kind", "asset_class"],
+         "properties": {"kind": {"const": "pro_rata_class"},
+                        "asset_class": {"type": "string", "enum": ["equity", "etf_equity", "etf_bond", "etf_commodity", "crypto"]}}},
+        {"type": "object", "additionalProperties": false, "required": ["kind", "amount_cad"],
+         "properties": {"kind": {"const": "cash_contribution"}, "amount_cad": {"type": "number", "minimum": 0}}}
+      ]
+    },
+    "ambiguous_fields": {"type": "array", "items": {"type": "string", "enum": ["action", "ticker", "target_weight_pct", "funding"]}},
+    "unresolved_mentions": {"type": "array", "items": {"type": "string"}}
+  }
+}

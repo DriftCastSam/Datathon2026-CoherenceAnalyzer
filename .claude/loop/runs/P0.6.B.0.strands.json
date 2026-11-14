@@ -1,0 +1,35 @@
+{
+  "duration_s": 208.4,
+  "guard_cancellations": [
+    {
+      "reason": "'llm\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'sed' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'python' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "command substitution is not allowed; run the inner command on its own",
+      "tool": "shell"
+    },
+    {
+      "reason": "'Status\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    }
+  ],
+  "is_error": false,
+  "model_id": "us.anthropic.claude-sonnet-5-5",
+  "num_turns": 26,
+  "result": "`tests/test_gate.py` and `tests/test_bedrock_mock.py` now pass with no skips. The full suite with `COHERENCE_ANALYZER_LLM=mock` gives 438 passed and 2 skipped. The two skips are `test_numcheck` (step 7) and `test_pipeline_offline` (step 8).\n\n**Files changed**\n- `coherence_analyzer/llm/bedrock.py`: the Converse wrapper in mock, record and live modes. boto3 is imported only in record and live, and each call is cached in a file named `<node>.<cache_key>.json`.\n- `coherence_analyzer/llm/extractors.py`: N1 and N4 with the runtime ticker enum, plus `*_call` variants that return the call log. The other nodes are still stubs.\n- `coherence_analyzer/gate.py`: abstain, evidence, enum and range, movement clamp, confidence, stamp. It handles N1 and N3.\n- `coherence_analyzer/llm/schemas/behaviour_classifier.json` and `intent_parser.json`: the N1 and N4 schemas (draft 2020-12).\n- `coherence_analyzer/llm/prompts/behaviour_classifier.v1.md` and `intent_parser.v1.md`: the N1 and N4 prompts. The N1 prompt carries no profile wording, so it can't anchor the model.\n- `scripts/handwrite_llm_cache.py`: builds the two Robert cache entries from the real extractor payloads.\n- `fixtures/llm_cache/behaviour_classifier.<key>.json` and `intent_parser.<key>.json`: the hand-written Robert N1 and N4 responses (N1 is `moderate_high` @ 0.55, N4 is NVDA 10% with `pro_rata_all`).\n- `README.md`: Status line for P0.6 and an Assumptions block.\n\n**SPEC ambiguities I resolved (all recorded in README \u2192 Assumptions)**\n- **Cache files:** one file per call, with the cache key in the file name. Mock never reads `.cache/llm`.\n- **Mock model id:** the cache key uses `BEDROCK_MODEL_ID`, then falls back to `fixture:hand-written`. This keeps the offline suite green whatever the local `.env` says. I couldn't read `.env`, because the shell guard blocked the command.\n- **N1 schema and gate:** the schema requires `value` and `confidence` only when `abstain` is false. The gate treats an empty evidence list on a non-abstaining output as `rejected:evidence`.\n- **N1 window:** with `as_of` (D1) it keeps events from the 30 days before it and has no upper bound. That keeps `ev_robert_0007`, which is dated after `portfolio.as_of`. Without `as_of` there is no window filter.\n- **N4 schema:** one flat object. The \u00a73.6 fields are there except `intent_id`, `event_id` and `status`, which the LLM doesn't produce. The ticker enum is also applied to `funding.specific.ticker`.\n- **N3 gate:** a rule identical to one the user already approved keeps `approved_by_user: true`. Every other rule starts `false`. N3 emits no confidence, so the previous one is kept, with 0.8 as the fallback.\n- **Unresolved mentions in N4:** \"the next big AI stock\" can't be expressed as a valid draft today, because `ticker` is required and enum-bound (the frozen test requires this). The call fails validation. Handling that case is a P1 pipeline task.\n",
+  "stop_reason": "end_turn",
+  "usage": {
+    "inputTokens": 1208411,
+    "outputTokens": 27436,
+    "totalTokens": 1235847
+  }
+}

@@ -35,6 +35,7 @@ The build order follows SPEC §17. Done:
 - **P0.3:** `coherence_analyzer/schemas/profile.v2.json` (JSON Schema draft 2020-12) and the Robert fixture converted to schema v2 (`fixtures/robert/{profile.json, events.jsonl, intents.json}`).
 
 - **P0.5:** `intent.py` (`apply` for every `funding.kind`) and `resizer.py` (SPEC §8 as written, docs/spec-decisions.md D2) + `tests/test_intent.py`, `tests/test_resizer.py`. Measured on the starter data: Robert + NVDA from ZST.TO tops out at 1.5% (H9 binds; SPEC §8's 5.0% / H4 is only the cheap-scan stop), pro_rata_all 2.0%, pro-rata etf_equity 2.0%, pro-rata equity 1.5%, all binding H9.
+- **P0.6:** `llm/bedrock.py` (Converse wrapper, mock / record / live, lazy boto3), N1 `behaviour_classifier` + N4 `intent_parser` (schemas, `*.v1.md` prompts, extractors), `gate.py` (N1 and N3 paths, SPEC §11), hand-written Robert N1 + N4 responses in `fixtures/llm_cache/` (regenerate with `python scripts/handwrite_llm_cache.py`) + `tests/test_gate.py`, `tests/test_bedrock_mock.py`.
 
 Everything else is stubbed with signatures and `NotImplementedError`. The matching tests are skip-marked with their build step.
 
@@ -77,6 +78,15 @@ All persona financial figures beyond the case brief are fictional team assumptio
   - "Binary search downward" runs on the 0.5 pp grid of the cheap scan (`config.RESIZER_STEP_PP`), so results are grid values. After the n=1000 search, the n=5000 confirmation steps down while H7-H10 fail and up while the next grid point still passes. A held target ticker starts the grid at its current weight.
   - Returned options are the modes with a max above the current weight, ranked by max weight (ties by mode order: user's funding, `pro_rata_all`, etf_equity, equity). The user's own funding is always kept in the top 3 when it fits. `binding_check` is the first violated check at the next grid point (`None` when the whole target fits, `FUNDING` when the source cannot cover it). When no mode fits, `binding_checks` lists the sorted union.
   - Golden values are in `tests/test_resizer.py` (D2 replaces the "5.0% H4 / 8.0% H3" expectation).
+- **LLM wrapper, N1, N4, gate (P0.6):**
+  - Cache files: one per call, `<node>.<cache_key>.json` (the key is `cache_key()`), holding payload, output and call log. `mock` and `record` use `fixtures/llm_cache/`, `live` uses `.cache/llm/`; `mock` never falls back to the live cache. `record` reuses a fixtures hit instead of calling Bedrock again.
+  - Mock model id: the key uses `BEDROCK_MODEL_ID`, then falls back to `fixture:hand-written`, the model id stamped on the hand-written entries, so the offline suite passes whatever the local `.env` says. `record` / `live` require `BEDROCK_MODEL_ID`.
+  - The hand-written N1 response for Robert is `moderate_high` @ 0.55 citing ev_robert_0007 and ev_robert_0004 as `hype_chasing` (same as the profile fixture). The hand-written N4 draft is NVDA 10% with the default funding `pro_rata_all`, and `funding` listed in `ambiguous_fields`, since the sentence names no source.
+  - Retry on a schema failure: the model's tool call is replayed, then a user turn carrying a `toolResult` with `status: error` and the validator message.
+  - N1 input is `{"events": [{event_id, ts, type, text}]}`, oldest first, newest 20. With `as_of` (D1) it drops events older than 30 days before it and has no upper bound, so ev_robert_0007 (dated after `portfolio.as_of`) is included. Without `as_of` there is no window filter.
+  - N1 schema: `abstain` and `evidence` are always required; `value` and `confidence` (0 to 0.8) are required when `abstain` is false, with at least one evidence item. The gate also treats an empty evidence list on a non-abstaining output as `rejected:evidence`.
+  - N4 schema is one flat object (the §3.6 fields minus `intent_id`, `event_id`, `status`, which the LLM does not produce) plus `ambiguous_fields` and `unresolved_mentions`. `ticker` (and `funding.specific.ticker`) get an enum generated from the universe at runtime. A mention that maps to no ticker cannot be expressed as a valid draft yet: the call fails validation. Handling that case is a P1 pipeline task.
+  - Gate: confidence outside 0 to `BEHAVIOUR_MAX_CONF` (0.8) is `rejected:schema`. A value that is not in the level enum, or an unknown signal, is `rejected:schema`. A first behavioural value (no previous one) is not clamped. N3: a rule identical to one the user already approved keeps `approved_by_user: true`, every other rule starts `false`. N3 has no confidence in its output, so the previous confidence is kept, with 0.8 as the fallback. Gates for N2 are a P1 step; the gate returns `rejected:schema` for nodes it does not know.
 
 ## Disclaimer
 
