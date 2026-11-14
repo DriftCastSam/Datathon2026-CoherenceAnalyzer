@@ -1,0 +1,226 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://coherence-analyzer.local/schemas/profile.v2.json",
+  "title": "CoherenceAnalyzer investor profile, schema v2 (SPEC §3.3)",
+  "description": "Plain values are user-declared. Objects with `by` are computed: `rule:<name>` (deterministic) or `llm:<name>` (inferred, warnings only). Validate on every load and save.",
+  "type": "object",
+  "required": ["meta", "identity", "situation", "objectives", "risk", "knowledge", "values", "preferences"],
+  "properties": {
+    "_conventions": {"type": "object"},
+    "meta": {
+      "type": "object",
+      "required": ["profile_id", "schema_version"],
+      "properties": {
+        "profile_id": {"type": "string", "minLength": 1},
+        "schema_version": {"const": 2},
+        "updated_at": {"type": "string"},
+        "version": {"type": "integer", "minimum": 1},
+        "locale": {"enum": ["fr-CA", "en-CA"]},
+        "province": {"type": "string"}
+      }
+    },
+    "identity": {
+      "type": "object",
+      "required": ["age", "retirement_target_age", "employment_type"],
+      "properties": {
+        "age": {"type": "integer", "minimum": 0},
+        "dependants": {"type": "integer", "minimum": 0},
+        "retirement_target_age": {"type": "integer", "minimum": 0},
+        "employment_type": {"type": "string"},
+        "employer_sector": {"type": "string"},
+        "life_stage": {"$ref": "#/$defs/ruleField"}
+      }
+    },
+    "situation": {
+      "type": "object",
+      "required": ["monthly_expenses", "emergency_fund", "planned_withdrawals"],
+      "properties": {
+        "monthly_expenses": {"type": "number", "exclusiveMinimum": 0},
+        "emergency_fund": {"type": "number", "minimum": 0},
+        "income_stability": {"$ref": "#/$defs/ruleField"},
+        "emergency_fund_months": {"$ref": "#/$defs/ruleField"},
+        "planned_withdrawals": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["date", "amount"],
+            "properties": {
+              "date": {"type": "string", "pattern": "^\\d{4}-\\d{2}(-\\d{2})?$"},
+              "amount": {"type": "number", "minimum": 0},
+              "purpose": {"type": "string"}
+            }
+          }
+        },
+        "monthly_contribution": {"type": "number", "minimum": 0}
+      }
+    },
+    "objectives": {
+      "type": "object",
+      "required": ["horizon_years"],
+      "properties": {
+        "horizon_years": {"type": "number", "minimum": 0},
+        "effective_horizon_years": {"$ref": "#/$defs/ruleField"},
+        "goals": {"type": "array", "items": {"type": "object"}}
+      }
+    },
+    "risk": {
+      "type": "object",
+      "required": ["declared"],
+      "properties": {
+        "declared": {"$ref": "#/$defs/level"},
+        "max_acceptable_drawdown_pct": {"type": "number", "maximum": 0},
+        "capacity": {"$ref": "#/$defs/ruleLevelField"},
+        "effective": {"$ref": "#/$defs/ruleLevelField"},
+        "behavioural": {
+          "allOf": [{"$ref": "#/$defs/llmField"}],
+          "properties": {
+            "value": {"anyOf": [{"$ref": "#/$defs/level"}, {"type": "null"}]},
+            "evidence": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["event_id", "signal", "note"],
+                "additionalProperties": false,
+                "properties": {
+                  "event_id": {"$ref": "#/$defs/eventId"},
+                  "signal": {"enum": ["hype_chasing", "concentration_request", "panic_selling_intent",
+                                      "loss_aversion", "overtrading", "market_timing", "long_term_framing",
+                                      "diversification_request", "risk_questioning"]},
+                  "note": {"type": "string", "minLength": 1}
+                }
+              }
+            }
+          },
+          "required": ["evidence"]
+        }
+      }
+    },
+    "knowledge": {
+      "type": "object",
+      "properties": {
+        "declared_level": {"enum": ["novice", "intermediate", "advanced", "expert"]},
+        "quiz_score": {"type": "number", "minimum": 0, "maximum": 1},
+        "question_quality": {
+          "allOf": [{"$ref": "#/$defs/llmField"}],
+          "properties": {
+            "value": {"type": ["number", "null"], "minimum": 0, "maximum": 1},
+            "evidence": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["event_id", "score"],
+                "additionalProperties": false,
+                "properties": {
+                  "event_id": {"$ref": "#/$defs/eventId"},
+                  "score": {"type": "number", "minimum": 0, "maximum": 1}
+                }
+              }
+            }
+          },
+          "required": ["evidence"]
+        },
+        "score": {
+          "allOf": [{"$ref": "#/$defs/ruleField"}],
+          "properties": {
+            "value": {"type": "number", "minimum": 0, "maximum": 100},
+            "history": {
+              "type": "array",
+              "items": {
+                "type": "object",
+                "required": ["date", "value"],
+                "properties": {"date": {"type": "string"}, "value": {"type": "number"}}
+              }
+            }
+          }
+        }
+      }
+    },
+    "values": {
+      "type": "object",
+      "properties": {
+        "environment": {"$ref": "#/$defs/pillar"},
+        "social": {"$ref": "#/$defs/pillar"},
+        "governance": {"$ref": "#/$defs/pillar"},
+        "notes": {"type": "string"},
+        "parsed_notes": {
+          "allOf": [{"$ref": "#/$defs/llmField"}],
+          "properties": {
+            "value": {"type": "array", "items": {"$ref": "#/$defs/parsedRule"}}
+          }
+        }
+      }
+    },
+    "preferences": {
+      "type": "object",
+      "properties": {
+        "asset_types_allowed": {"type": "array", "items": {"type": "string"}},
+        "asset_types_refused": {"type": "array", "items": {"type": "string"}},
+        "max_fee_mer_pct": {"type": "number", "minimum": 0}
+      }
+    },
+    "limits": {
+      "type": "object",
+      "properties": {
+        "by": {"type": "string", "pattern": "^rule:"}
+      }
+    },
+    "limits_trace": {
+      "type": "object",
+      "additionalProperties": {"type": "array", "items": {"type": "string"}}
+    }
+  },
+  "$defs": {
+    "level": {"enum": ["low", "low_moderate", "moderate", "moderate_high", "high"]},
+    "eventId": {"type": "string", "pattern": "^ev_[a-z0-9]+_\\d{4}$"},
+    "ruleField": {
+      "type": "object",
+      "required": ["value", "by", "confidence"],
+      "properties": {
+        "by": {"type": "string", "pattern": "^rule:"},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1}
+      }
+    },
+    "ruleLevelField": {
+      "allOf": [{"$ref": "#/$defs/ruleField"}],
+      "properties": {"value": {"$ref": "#/$defs/level"}}
+    },
+    "llmField": {
+      "type": "object",
+      "required": ["value", "by", "confidence", "prompt_version", "model_id", "updated_at", "input_hash"],
+      "properties": {
+        "by": {"type": "string", "pattern": "^llm:"},
+        "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "prompt_version": {"type": "string", "pattern": "v\\d+"},
+        "model_id": {"type": "string", "minLength": 1},
+        "updated_at": {"type": "string", "minLength": 10},
+        "input_hash": {"type": "string", "minLength": 1}
+      }
+    },
+    "pillar": {
+      "type": "object",
+      "properties": {
+        "importance": {"type": "integer", "minimum": 0, "maximum": 5},
+        "exclusions": {"type": "array", "items": {"type": "string"}}
+      }
+    },
+    "parsedRule": {
+      "type": "object",
+      "required": ["rule_kind", "params", "applies_to", "quote", "approved_by_user"],
+      "properties": {
+        "rule_kind": {"enum": ["exclude_activity", "max_theme_weight", "prefer_attribute", "avoid_attribute", "other"]},
+        "params": {"type": "object"},
+        "applies_to": {"enum": ["all", "single_stocks", "etf"]},
+        "quote": {"type": "string", "minLength": 1},
+        "approved_by_user": {"type": "boolean"}
+      },
+      "allOf": [
+        {"if": {"properties": {"rule_kind": {"const": "exclude_activity"}}},
+         "then": {"properties": {"params": {"required": ["tag"]}}}},
+        {"if": {"properties": {"rule_kind": {"const": "max_theme_weight"}}},
+         "then": {"properties": {"params": {"required": ["theme"]}}}},
+        {"if": {"properties": {"rule_kind": {"enum": ["prefer_attribute", "avoid_attribute"]}}},
+         "then": {"properties": {"params": {"required": ["attribute"]}}}}
+      ]
+    }
+  }
+}

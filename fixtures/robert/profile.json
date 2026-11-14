@@ -9,6 +9,7 @@
   "meta": {
     "profile_id": "persona-robert",
     "updated_at": "2026-11-14",
+    "schema_version": 2,
     "version": 1,
     "locale": "fr-CA",
     "province": "QC"
@@ -59,9 +60,13 @@
       "value": "moderate_high",
       "by": "llm:behaviour_classifier",
       "confidence": 0.55,
+      "prompt_version": "behaviour_classifier.v1",
+      "model_id": "fixture:hand-written",
+      "updated_at": "2026-11-14T10:03:00-05:00",
+      "input_hash": "sha256:4b0ed6a8b94dae66ff5f5e74405592593a84a2ce839e6e65d42b884f3261e671",
       "evidence": [
-        "2026-11-14: asked to put 10% in NVDA after news coverage",
-        "2026-11-10: asked which AI stock is 'the next big one'"
+        {"event_id": "ev_robert_0007", "signal": "hype_chasing", "note": "asks to put 10% in one stock because everyone is talking about it"},
+        {"event_id": "ev_robert_0004", "signal": "hype_chasing", "note": "asks which AI stock is the next big one"}
       ]
     },
     "effective": {"value": "low_moderate", "by": "rule:min(declared, capacity)", "confidence": 1.0}
@@ -76,9 +81,13 @@
       "value": 0.62,
       "by": "llm:question_rubric",
       "confidence": 0.6,
+      "prompt_version": "question_rubric.v1",
+      "model_id": "fixture:hand-written",
+      "updated_at": "2026-11-14T10:03:00-05:00",
+      "input_hash": "sha256:5f2e9de3bb93a0c0131ae9a2e854cb2661da52848a0a6f4288c8b31d2b6208f5",
       "evidence": [
-        {"date": "2026-11-12", "question": "What does XBB's duration mean for my bonds if rates drop?", "score": 0.9},
-        {"date": "2026-11-10", "question": "Which AI stock is the next big one?", "score": 0.3}
+        {"event_id": "ev_robert_0005", "score": 0.9},
+        {"event_id": "ev_robert_0004", "score": 0.3}
       ]
     },
     "score": {
@@ -95,9 +104,18 @@
     "governance": {"importance": 3, "exclusions": ["accounting_fraud_last_5y"]},
     "notes": "I prefer companies I understand. No hype stocks unless I can explain the business.",
     "parsed_notes": {
-      "value": [{"rule": "prefer_understandable_business", "applies_to": "single_stocks", "approved_by_user": true}],
+      "value": [
+        {"rule_kind": "prefer_attribute", "params": {"attribute": "understandable_business"}, "applies_to": "single_stocks",
+         "quote": "I prefer companies I understand.", "approved_by_user": true},
+        {"rule_kind": "avoid_attribute", "params": {"attribute": "hype"}, "applies_to": "single_stocks",
+         "quote": "No hype stocks unless I can explain the business.", "approved_by_user": true}
+      ],
       "by": "llm:values_parser",
-      "confidence": 0.8
+      "confidence": 0.8,
+      "prompt_version": "values_parser.v1",
+      "model_id": "fixture:hand-written",
+      "updated_at": "2026-11-14T10:03:00-05:00",
+      "input_hash": "sha256:836c82c57f4ea7712016d8e3ebfa13d1626477c669c4d954235bdfb760319216"
     }
   },
 
@@ -126,5 +144,21 @@
     "excluded_asset_types": ["crypto", "options", "leveraged_etf", "margin"],
     "excluded_activities": ["tobacco", "accounting_fraud_last_5y"],
     "max_fee_mer_pct": 0.5
+  },
+
+  "limits_trace": {
+    "vol_band_annual": ["risk.effective", "risk.declared", "risk.capacity", "objectives.effective_horizon_years", "objectives.horizon_years", "situation.planned_withdrawals", "situation.emergency_fund_months", "situation.emergency_fund", "situation.monthly_expenses", "situation.income_stability", "identity.employment_type"],
+    "floor_at_horizon": ["risk.effective", "risk.declared", "risk.capacity", "objectives.effective_horizon_years", "objectives.horizon_years", "situation.planned_withdrawals", "situation.emergency_fund_months", "situation.emergency_fund", "situation.monthly_expenses", "situation.income_stability", "identity.employment_type"],
+    "max_drawdown_pct": ["risk.effective", "risk.declared", "risk.capacity", "objectives.effective_horizon_years", "objectives.horizon_years", "situation.planned_withdrawals", "situation.emergency_fund_months", "situation.emergency_fund", "situation.monthly_expenses", "situation.income_stability", "identity.employment_type", "risk.max_acceptable_drawdown_pct"],
+    "min_fixed_income_weight": ["risk.effective", "risk.declared", "risk.capacity", "objectives.effective_horizon_years", "objectives.horizon_years", "situation.planned_withdrawals", "situation.emergency_fund_months", "situation.emergency_fund", "situation.monthly_expenses", "situation.income_stability", "identity.employment_type"],
+    "max_single_stock_weight": ["risk.effective", "risk.declared", "risk.capacity", "objectives.effective_horizon_years", "objectives.horizon_years", "situation.planned_withdrawals", "situation.emergency_fund_months", "situation.emergency_fund", "situation.monthly_expenses", "situation.income_stability", "identity.employment_type"],
+    "max_sector_risk_share": ["risk.effective", "risk.declared", "risk.capacity", "objectives.effective_horizon_years", "objectives.horizon_years", "situation.planned_withdrawals", "situation.emergency_fund_months", "situation.emergency_fund", "situation.monthly_expenses", "situation.income_stability", "identity.employment_type"],
+    "max_crypto_weight": ["risk.effective", "risk.declared", "risk.capacity", "objectives.effective_horizon_years", "objectives.horizon_years", "situation.planned_withdrawals", "situation.emergency_fund_months", "situation.emergency_fund", "situation.monthly_expenses", "situation.income_stability", "identity.employment_type"],
+    "max_foreign_currency_weight": ["risk.effective", "risk.declared", "risk.capacity", "objectives.effective_horizon_years", "objectives.horizon_years", "situation.planned_withdrawals", "situation.emergency_fund_months", "situation.emergency_fund", "situation.monthly_expenses", "situation.income_stability", "identity.employment_type"],
+    "max_employer_sector_weight": [],
+    "excluded_asset_types": ["risk.effective", "risk.declared", "risk.capacity", "objectives.effective_horizon_years", "objectives.horizon_years", "situation.planned_withdrawals", "situation.emergency_fund_months", "situation.emergency_fund", "situation.monthly_expenses", "situation.income_stability", "identity.employment_type", "preferences.asset_types_refused"],
+    "excluded_activities": ["values.environment.exclusions", "values.social.exclusions", "values.governance.exclusions", "values.parsed_notes[approved_by_user]"],
+    "max_fee_mer_pct": ["preferences.max_fee_mer_pct"],
+    "max_theme_weight": ["values.parsed_notes[approved_by_user]"]
   }
 }

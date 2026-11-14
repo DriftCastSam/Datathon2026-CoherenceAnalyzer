@@ -31,12 +31,14 @@ tests/                       pytest, all offline (COHERENCE_ANALYZER_LLM=mock)
 
 The build order follows SPEC §17. Done:
 - **P0.1:** `data.py`, the engine refactor, and the golden test.
+- **P0.2:** `levels.py`, `rules/registry.py`, `rules/derive.py`, `rules/limits.py` + tests.
+- **P0.3:** `coherence_analyzer/schemas/profile.v2.json` (JSON Schema draft 2020-12) and the Robert fixture converted to schema v2 (`fixtures/robert/{profile.json, events.jsonl, intents.json}`).
 
 Everything else is stubbed with signatures and `NotImplementedError`. The matching tests are skip-marked with their build step.
 
 Remaining TODOs:
-- Convert `fixtures/robert/profile.json` to schema v2 (P0.3). It is still the v1 example.
 - Amira and Mateo have portfolios only; their profiles and events are P1.
+- Robert's `llm:` fields are hand-written (`model_id: fixture:hand-written`) until the Bedrock cache is recorded (P1.11).
 
 ## Data
 
@@ -54,6 +56,14 @@ All persona financial figures beyond the case brief are fictional team assumptio
 - **Limits table (SPEC §7.2):** team calibrations, not regulation. *TODO: justify each column.*
 - **Knowledge score weights:** 0.4 quiz / 0.3 declared / 0.3 question quality, with `declared_map` calibrated so Robert = 74.
 - **Mateo portfolio:** suggested in SPEC §3.5 (fictional).
+- **Schema location:** `profile.v2.json` lives in `coherence_analyzer/schemas/` (`config.SCHEMAS_DIR`), which is what SPEC §3.3's `schemas/profile.v2.json` refers to.
+- **Robert v2 conversion (P0.3):**
+  - The `llm:` field values (behavioural `moderate_high` @ 0.55, question quality 0.62 @ 0.6, parsed notes @ 0.8) are kept from the v1 example. They are hand-written stand-ins, stamped `model_id: fixture:hand-written`, `prompt_version: <node>.v1`, `updated_at: 2026-11-14T10:03:00-05:00`.
+  - `input_hash` = `sha256:` of the node input as canonical JSON (sorted keys, `,`/`:` separators, UTF-8): behaviour = the question/order_intent events `[{event_id, ts, type, text}]` (all three, including ev_0007 dated after `portfolio.as_of`); question rubric = `[{event_id, text}]` for the question events; values parser = the `values.notes` string.
+  - Question quality 0.62 is not the N2 EWMA of the two scores (that would give 0.48). It is kept because knowledge.score = 74 is calibrated on it; N2 recomputes it in P1.
+  - The v1 free-text parsed rule `prefer_understandable_business` (approved) is split into two approved items, one per sentence of the notes: `prefer_attribute {attribute: understandable_business}` and `avoid_attribute {attribute: hype}`, both `applies_to: single_stocks`. Neither kind is promoted into `limits` (§6.2 N3), so limits are unchanged.
+  - Event timestamps carry the Montreal local offset (-05:00; DST ended 2026-11-01 at 02:00, before the quiz event); intent `in_0001` is confirmed 3 minutes after ev_0007.
+  - `limits_trace` is the output of `rules.limits.build_trace()`, written verbatim (a test checks it matches).
 
 ## Disclaimer
 
