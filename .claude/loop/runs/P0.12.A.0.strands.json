@@ -1,0 +1,63 @@
+{
+  "duration_s": 230.0,
+  "guard_cancellations": [
+    {
+      "reason": "'^###' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'D3\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'^#' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'^@pytest\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'cwd' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'def' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'sys.path.insert(0,/home/safraa/Downloads/Datathon2026/Coherence_analyzer)' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'print(list(f.keys()),' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "command substitution is not allowed; run the inner command on its own",
+      "tool": "shell"
+    },
+    {
+      "reason": "'ERROR' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'FAILED)' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'^tests' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    }
+  ],
+  "is_error": false,
+  "model_id": "us.anthropic.claude-sonnet-5-5",
+  "num_turns": 34,
+  "result": "that file.\n\nOne test relies on a naming assumption. The pipeline must call `internal.check_profile` through the module attribute. I patch both `internal.check_profile` and `pipeline.check_profile`, so a direct import by name also works.\n\nTest functions:\n- `test_explain_uses_a_five_worker_thread_pool_and_matches_the_sequential_run`: `explain` builds a `ThreadPoolExecutor` with `max_workers=5`. Mode, headline, segments, disclaimer and section order equal a sequential run even when the lanes finish in reverse order (\u00a720.10, D8.2).\n- `test_explain_output_is_independent_of_lane_timing`: opposite lane delays give byte-identical explanations (D8.2).\n- `test_non_pass_sections_really_overlap`: the three non-pass lanes sit inside narration together on three distinct worker threads, never the caller's. A barrier proves it with no timing (\u00a720.10).\n- `test_total_wall_time_is_well_under_the_sum_of_section_sleeps`: three lanes sleeping 0.4 s each finish in under 0.8 s, against a sum of 1.2 s (\u00a720.10).\n- `test_exception_in_one_lane_falls_back_to_the_template_and_keeps_the_others`: when `narrate_section` raises for `risque`, that section gets the template, the others keep their results, order holds, `explain` doesn't raise, and the mode is `template` (\u00a720.10, \u00a720.5).\n- `test_real_narration_with_one_failing_writer_keeps_the_other_sections`: with the real `narrate_section` and a writer exception on `risque`, `horizon` and `contraintes` stay `llm`. `risque` falls back to the template and passes V1\u2013V5, and pass sections never reach the writer (\u00a720.5, \u00a720.10).\n- `test_pass_sections_make_no_llm_call_in_the_lanes`: only non-pass sections call the writer, once each. A cache miss on `contraintes` leaves the others unaffected (\u00a720.5).\n- `test_robert_report_has_the_profile_coherence_block`: the report block is exactly `{status, findings}`. On Robert it is status `warning` with C1 (rule) then N6.1 (llm), with fr and en questions and no `violation`, equal to `check_profile(profile, \"2026-11-12\")` (\u00a720.9).\n- `test_review_calls_check_profile_once_with_the_portfolio_as_of`: one call per review, with `as_of` equal to `portfolio.as_of`, not the clock (D1, \u00a720.9).\n- `test_profile_coherence_never_changes_verdict_or_section_status`: with `check_profile` returning 3 warnings, the verdict, section statuses, checks, unknowns and explanation headline and mode are unchanged. It runs on both Robert portfolios, `coherent` and `incoherent` (\u00a720.9, D3).\n- `test_report_with_the_new_block_is_schema_valid_and_the_block_is_required`: `profile_coherence` is in `required` and `properties`. A report without it is rejected. `pass`, `info` and `warning` validate, while `violation` and a missing status are rejected (\u00a713, \u00a720.9, invariant 3).\n- `test_report_with_three_warnings_validates_against_the_schema`: the finding shape (`values` for rules, `quotes` for N6) validates (\u00a713, \u00a720.9).\n- `test_audit_records_the_n6_call_and_its_gate_status`: the audit has exactly one `profile_consistency` entry in `llm_calls`. It has the call-log keys, gate `accepted`, and fields matching the call log `check_profile` returns (\u00a710, \u00a720.9).\n- `test_audit_carries_the_gate_status_whatever_it_is`: a `rejected:evidence` gate status is logged as-is, with the input hash (\u00a710, \u00a711).\n- `test_reports_are_deterministic_apart_from_the_run_id`: two reviews give identical report text once `run_id` is masked, and the block is present (invariant 8).\n- `test_cli_review_prints_one_profile_line`: `cli review` prints exactly one unindented line, `profile: warning (C1, N6.1)` (\u00a712).\n- `test_cli_review_profile_line_lists_the_finding_ids_in_order`: the line format is `profile: <status> (<ids joined by \", \">)`, shown with `C2, C3, N6.1` (\u00a712).\n- `test_cli_demo_prints_a_profile_line_per_review`: `cli demo` prints the profile line once for each of Robert's two reviews. The Amira and Mateo fixtures are incomplete, so they produce none (\u00a712, D7).\n\nI marked the ambiguous choices with `# SPEC-AMBIGUITY:` comments where they occur.\n",
+  "stop_reason": "end_turn",
+  "usage": {
+    "inputTokens": 1554926,
+    "outputTokens": 32093,
+    "totalTokens": 1587019
+  }
+}

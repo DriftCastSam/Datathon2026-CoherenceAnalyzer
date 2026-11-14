@@ -2,6 +2,7 @@
   "done": {
     "P0.10": "impl",
     "P0.11": "impl",
+    "P0.12": "tests",
     "P0.2": "impl",
     "P0.3": "impl",
     "P0.4": "impl",
