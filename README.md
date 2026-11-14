@@ -30,6 +30,7 @@ tests/                       pytest, all offline (COHERENCE_ANALYZER_LLM=mock)
 ## Status
 
 The build order follows SPEC §17. Done:
+- **P2.13:** ETF sector look-through: `data.etf_sector_shares`, `engine.sector_lookthrough` (+ `meta_dir` hook on `analyse`), H6 adds the ETF look-through part, H10 stops flagging `Broad market` when `lookthrough` is true, `lookthrough` in the report `metrics` schema; `tests/test_lookthrough.py` passes. `data/meta/etf_sector_weights.csv` (XIU.TO, SPY, QQQ, ESGV) is a human task and not built, so real runs are unchanged (`lookthrough: false`).
 - **P1.2:** `data.load_meta` validates the three meta files (§3.2: columns, sourced `activity_tags` rows, `mer_source_url` for any ETF fee, `themes` parsed to a list) and `coherence/hard.py` gains H11 (excluded activities), H12 (fees), H13 (theme weight) in `run_cheap`, owned by `contraintes`. `tests/test_meta_checks.py` passes. The real `data/meta/*.csv` do not exist yet, so on Robert H11 and H12 report `unknown` for every held equity / ETF; two older frozen tests in `tests/test_factors.py` pin the P0 list of contraintes checks and now fail: see `.claude/loop/BLOCKED.md`.
 - **P0.1:** `data.py`, the engine refactor, and the golden test.
 - **P0.2:** `levels.py`, `rules/registry.py`, `rules/derive.py`, `rules/limits.py` + tests.
@@ -166,6 +167,14 @@ All persona financial figures beyond the case brief are fictional team assumptio
   - Intake answer/skip accept only the checklist paths of `intake.REQUIRED` plus the `max_pct` of a parsed theme rule without a number. Anything else (limits, `llm:` fields) is a 422, and bodies reject unknown keys. A result that no longer matches `profile.v2.json` is a 422 and is not saved.
   - A rule decision takes `approved` (strict bool) and, only for a `max_theme_weight` rule without a number, `max_pct` in (0, 100] (percent; the rules layer converts it to a fraction). A rule that already has a number answers 409.
   - After a review, the refreshed profile saved by the pipeline (limits recomputed) becomes the working `profile.json`. Intake and decisions edit the working profile without bumping `meta.version`.
+
+- **ETF sector look-through (P2.13):**
+  - Input: `data/meta/etf_sector_weights.csv` (`etf, sector, weight, source_url, as_of`; `weight` a fraction 0-1), meant for XIU.TO, SPY, QQQ and ESGV from the issuers' holdings pages, **entered by a human** (the file is not committed yet; no code or LLM writes it). The loader rejects a row without `etf`, `sector`, `source_url` or `as_of`, and a weight outside 0-1.
+  - An ETF is *covered* when its sector weights sum to 1 +- 0.01 (issuer rounding; rescaled to exactly 1). An ETF whose sum is off is treated as not covered: nothing is guessed. Duplicate (etf, sector) rows add up.
+  - `engine.analyse(..., meta_dir=None)` reads the file from `config.META_DIR` (or `meta_dir`). `sector_lookthrough` splits a covered equity ETF's weight and risk contribution across its sectors by weight in `groups.sector` only; vol, drawdown, cone, drivers, country and class groups do not move. An uncovered equity ETF keeps its `Broad market (...)` bucket. `lookthrough` is `true` only when the file has rows and every held equity ETF is covered; no file or a header-only file gives output identical to before and `lookthrough: false`. A line is added to `assumptions` when any ETF was split.
+  - H6 = direct equity weight in `employer_sector` + Σ covered equity ETF weight x its share in that sector (0 when the ETF has no row for it). An equity ETF with no rows still emits an `unknown` H6 whose value is the weight that could not be looked through (uncovered ETFs only; with no file, all equity ETF weight). Bond and gold ETFs are never looked through and never raise an `unknown`.
+  - H10 is unchanged: with `lookthrough` true the max includes every sector and no `unknown` is emitted. H11 is unchanged: sector weights carry no activity evidence, so an ETF stays `unknown` and only a sourced `activity_tags` row can give a `violation`.
+  - Not changed (other owners): `pipeline.FLOW_C_ASSUMPTIONS` still says look-through is unavailable, and the pipeline does not yet pass the meta dir; it uses the default, which is the same directory.
 
 - **S3 store and guardrail (P1.3):**
   - `store.append_event` on s3 is a `get` + `put` of the whole `events.jsonl` object: **non-atomic**, a concurrent append can be lost (fine for one demo user; use a table or versioned append for more). The local backend still appends a line.

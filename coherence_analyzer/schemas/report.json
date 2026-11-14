@@ -111,7 +111,8 @@
         "p50_T": {"type": "number"},
         "p95_T": {"type": "number"},
         "cone": {"type": "object", "required": ["p5", "p25", "p50", "p75", "p95"]},
-        "assumptions": {"type": "array", "items": {"type": "string"}}
+        "assumptions": {"type": "array", "items": {"type": "string"}},
+        "lookthrough": {"type": "boolean"}
       }
     },
     "segment": {

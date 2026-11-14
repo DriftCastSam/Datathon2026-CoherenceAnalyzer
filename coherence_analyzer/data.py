@@ -135,6 +135,31 @@ def load_meta(name: str, meta_dir: Path = META_DIR) -> pd.DataFrame | None:
     return _validate_meta(name, df, p)
 
 
+SHARES_SUM_TOL = 0.01   # issuer rounding: an ETF whose sector weights sum to 1 +- 0.01 is covered
+
+
+def etf_sector_shares(df: pd.DataFrame | None) -> dict[str, dict[str, float]]:
+    """{etf: {sector: share}} from the loaded etf_sector_weights frame (SPEC §3.2, §5). Fractions summing to 1.
+
+    Duplicate (etf, sector) rows add up. An ETF whose weights do not sum to 1 +- SHARES_SUM_TOL is left out
+    (not covered: nothing is guessed); a sum within tolerance is rescaled to exactly 1. Sorted iteration.
+    """
+    if df is None or len(df) == 0:
+        return {}
+    acc: dict[str, dict[str, float]] = {}
+    for etf, sec, w in zip(df["etf"], df["sector"], df["weight"]):
+        d = acc.setdefault(str(etf), {})
+        d[str(sec)] = d.get(str(sec), 0.0) + float(w)
+    out: dict[str, dict[str, float]] = {}
+    for etf in sorted(acc):
+        total = sum(acc[etf].values())
+        if abs(total - 1.0) > SHARES_SUM_TOL:
+            continue
+        scale = 1.0 if abs(total - 1.0) < 1e-9 else total
+        out[etf] = {s: acc[etf][s] / scale for s in sorted(acc[etf])}
+    return out
+
+
 def load_portfolio(path: Path, assets: pd.DataFrame | None = None) -> dict:
     """Load portfolio.json, validate weights (sum 100 +- 0.01, known tickers), add `weights` as fractions."""
     pf = json.loads(Path(path).read_text())

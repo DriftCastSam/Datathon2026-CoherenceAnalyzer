@@ -10,7 +10,7 @@ from __future__ import annotations
 
 from typing import Literal, TypedDict
 
-from ..data import ASSET_CLASS_MAP
+from ..data import ASSET_CLASS_MAP, etf_sector_shares
 
 Status = Literal["pass", "violation", "info", "unknown"]
 
@@ -147,14 +147,18 @@ def _h6(weights, profile, assets, meta) -> list[Check]:
     held = _held(weights)
     direct = sum(weights[t] for t in held
                  if assets.loc[t, "asset_class"] == "equity" and assets.loc[t, "sector"] == sector)
-    # P0: no etf_sector_weights look-through yet, so every equity ETF's employer-sector part is unverifiable.
-    has_lookthrough = meta.get("etf_sector_weights") is not None
+    # ETF part (SPEC §7.3): Σ ETF weight x its share of the employer sector, for the equity ETFs covered by
+    # etf_sector_weights; the weight of an equity ETF with no rows cannot be looked through -> unknown.
+    shares = etf_sector_shares((meta or {}).get("etf_sector_weights"))
     etfs = [t for t in held if assets.loc[t, "asset_class"] == "etf_equity"]
-    status = "violation" if _gt(direct, lim) else "pass"
-    out = [_check("H6", status, sector, _r(direct), lim, "weight", der, "rule:max_employer_sector",
+    via_etf = sum(weights[t] * shares[t].get(sector, 0.0) for t in etfs if t in shares)
+    uncovered = [t for t in etfs if t not in shares]
+    total = direct + via_etf
+    status = "violation" if _gt(total, lim) else "pass"
+    out = [_check("H6", status, sector, _r(total), lim, "weight", der, "rule:max_employer_sector",
                   "employer_sector_over" if status == "violation" else "employer_sector_ok")]
-    if etfs and not has_lookthrough:
-        out.append(_check("H6", "unknown", sector, _r(sum(weights[t] for t in etfs)), lim, "weight", der,
+    if uncovered:
+        out.append(_check("H6", "unknown", sector, _r(sum(weights[t] for t in uncovered)), lim, "weight", der,
                           "rule:max_employer_sector", "employer_sector_etf_part_unknown"))
     return out
 
