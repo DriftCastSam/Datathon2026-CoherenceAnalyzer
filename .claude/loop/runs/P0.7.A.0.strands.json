@@ -1,0 +1,43 @@
+{
+  "duration_s": 368.5,
+  "guard_cancellations": [
+    {
+      "reason": "'^[A-Z_]*' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'^[A-Za-z_]*' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'p[limits],p[limits_trace]=lim,tr' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "command substitution is not allowed; run the inner command on its own",
+      "tool": "shell"
+    },
+    {
+      "reason": "'ERROR)\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'error\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'passed\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    }
+  ],
+  "is_error": false,
+  "model_id": "us.anthropic.claude-sonnet-5-5",
+  "num_turns": 31,
+  "result": "e gives `coherent`, NVDA gives `incoherent`, and section statuses agree.\n- `test_warning_gives_coherent_with_warnings_and_unknown_never_changes_the_verdict`: a synthetic S1 warning gives `coherent_with_warnings`, and unknowns leave the verdict alone.\n- `test_section_status_is_the_worst_of_its_checks`: ranking is violation > warning > unknown > info > pass.\n- `test_section_with_no_checks_is_pass`: a section with no checks is `pass`.\n- `test_hard_checks_cannot_make_a_warning_section`: hard checks alone never yield `warning`.\n- `test_facts_payload_shape_flow_b`: the payload keys, status, verdict and empty evidence.\n- `test_facts_intent`: the intent facts are `NVDA`, `10 %`, `ZST.TO` in flow B and null in flow C.\n- `test_facts_verdict_is_the_report_verdict`: facts carry the report verdict.\n- `test_facts_list_only_non_pass_checks`: pass checks are left out of the facts.\n- `test_facts_check_entries_horizon_and_risque`: H9 `316 971 $` against `360 000 $`; H4, H7 and H8 at `25,0 %`/`30,0 %`, `9,8 %`/`9,0 %` and `-13,4 %`/`-12,0 %`.\n- `test_facts_check_entries_contraintes`: H3 `10,0 %`/`8,0 %`, H10 `34,7 %`/`30,0 %`, plus the H6 and H10 unknowns.\n- `test_facts_baseline_contraintes_lists_only_the_unknowns`: baseline contraintes lists only H6 and H10 as unknown.\n- `test_facts_check_entries_trace_to_the_limit`: each entry has string value and limit, and its `derived_from` starts at the limit with no `llm:` path.\n- `test_facts_metrics_quote_only_the_factors_metrics_flow_b`: fr-CA strings for current and proposed, using the measured values (for example `316 971 $`, `9,8 %`).\n- `test_facts_preferences_quote_no_metrics`: preferences quote no metrics.\n- `test_facts_metrics_flow_c_has_current_only`: flow C has `current` only.\n- `test_facts_english_locale_uses_en_ca_numbers`: a decimal point and no decimal comma.\n- `test_facts_declared_and_derived_follow_the_profile`: declared fields are plain, derived fields have `value`, `by` and `because`, and paths match FIELDS.\n- `test_facts_risque_declared_and_derived`: `low_moderate`, `-12 %`, and the `because` lines for declared and capacity.\n- `test_facts_llm_field_is_labelled_llm_never_rule`: `risk.behavioural` is labelled `llm:`.\n- `test_facts_horizon_declared_and_derived`: the effective horizon quoted as 3,6 (D1).\n- `test_facts_contraintes_declared_and_derived`: employer sector `Health Care` and emergency-fund months 4,6.\n- `test_facts_objectif_and_preferences_declared`: primary objective, life stage and home-bias preference appear.\n- `test_build_sections_is_pure_and_deterministic`: repeated calls give identical output and the context is unchanged.\n- `test_module_facts_is_the_section_facts`: each module's `facts()` equals its section's facts.\n- `test_template_section_passes_v1_v3_v4_v5_and_numcheck`: V1, V3, V4 and V5 via local helpers, and V2 via `explain.numcheck` against its own facts, across three contexts and five factors.\n- `test_template_section_passes_in_english`: the same checks under en-CA.\n- `test_template_section_is_deterministic_and_pure`: byte-identical output and unchanged input.\n- `test_template_section_covers_every_violation_and_quotes_only_its_facts`: refs cover H9, H4, H7, H8, H3 and H10.\n- `test_template_section_says_what_it_cannot_verify`: baseline contraintes gets an `unknown` segment that refs H6 or H10.\n- `test_template_section_for_pass_section_makes_no_claim_of_violation`: pass sections get no `unknown` segment and still pass V1-V5.\n- `test_template_section_has_no_buy_sell_advice`: no blocklist phrase appears in any template section.\n\n- **Pre-formatted values:** the fr-CA values in the facts payload come from the measured Robert runs. Both test files treat the NBSP and NNBSP separators as plain spaces when comparing, which is a `SPEC-AMBIGUITY` choice.\n- **Verifier tests not run:** `explain.verify_section` is P0.8, so I did not call it. If I had, these tests could not pass at the end of P0.7. The advisory-phrase check in `test_numcheck.py` covers only the blocklist constant.\n",
+  "stop_reason": "end_turn",
+  "usage": {
+    "inputTokens": 1884757,
+    "outputTokens": 52454,
+    "totalTokens": 1937211
+  }
+}
