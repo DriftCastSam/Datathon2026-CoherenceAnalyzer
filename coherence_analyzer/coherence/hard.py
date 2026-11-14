@@ -1,7 +1,7 @@
 """Hard checks H1-H14 + G1 (SPEC §7.3). Only these may return `violation`.
 
-P0 step 4 implements H1-H10 and H14. H11-H13 need the hand-built meta files (P1) and G1 needs
-`engine.goal_probs` (P2); they are not emitted yet.
+P0 step 4 implements H1-H10 and H14. H11-H13 read the hand-built meta files (SPEC §3.2, P1.2): a missing file or
+row gives `unknown`, never a guess. G1 needs `engine.goal_probs` (P2) and is not emitted yet.
 
 Pure functions. Weights are fractions (0-1). Comparisons tolerate float noise from percent/100
 conversion (EPS), so a weight exactly at a limit never flips the status.
@@ -159,10 +159,110 @@ def _h6(weights, profile, assets, meta) -> list[Check]:
     return out
 
 
+ETF_CLASSES = ("etf_equity", "etf_bond", "etf_commodity")
+
+
+def _asset_rows(meta: dict) -> dict[str, dict] | None:
+    """asset_meta as {ticker: row}; None when the file is not built (SPEC §3.2)."""
+    df = (meta or {}).get("asset_meta")
+    if df is None:
+        return None
+    return {str(r["ticker"]): r for r in df.to_dict("records")}
+
+
+def _themes(cell) -> list[str]:
+    if isinstance(cell, str):
+        return [x.strip() for x in cell.split(";") if x.strip()]
+    return [str(x) for x in (cell if cell is not None else [])]
+
+
+def _h11(weights, profile, assets, meta) -> list[Check]:
+    """Excluded activities. Violation only from a sourced, human-written tag row; otherwise `unknown`."""
+    excluded = sorted(set(profile["limits"].get("excluded_activities") or []))
+    der = _derived(profile, "excluded_activities")
+    src = "rule:excluded_activities"
+    if not excluded:
+        return [_check("H11", "pass", None, 0.0, None, "weight", der, src, "excluded_activities_ok")]
+    tags = (meta or {}).get("activity_tags")
+    rows: dict[tuple[str, str], list[str]] = {}          # (ticker, tag) -> source urls, in file order
+    if tags is not None:
+        for r in tags.to_dict("records"):
+            url = str(r.get("source_url") or "").strip()
+            if r["tag"] in excluded and url:
+                rows.setdefault((str(r["ticker"]), str(r["tag"])), []).append(url)
+    assets_meta = _asset_rows(meta)
+    out: list[Check] = []
+    for t in _held(weights):
+        cls = assets.loc[t, "asset_class"]
+        if cls == "equity":
+            hits = [tag for tag in excluded if (t, tag) in rows]
+            for tag in hits:
+                c = _check("H11", "violation", t, tag, None, "weight", der, src, "excluded_activity_held")
+                c["weight"] = _r(weights[t])
+                c["evidence"] = list(rows[(t, tag)])           # source_url(s) of the human-written tag row(s)
+                out.append(c)
+            if not hits:
+                out.append(_check("H11", "unknown", t, _r(weights[t]), None, "weight", der, src,
+                                  "excluded_activity_no_tag_rows"))
+        elif cls in ETF_CLASSES:
+            # No constituent tag data exists in v1 (§3.2), so an ETF is never verified, with or without look-through.
+            row = (assets_meta or {}).get(t)
+            look = bool(row["has_lookthrough"]) if row is not None else False
+            out.append(_check("H11", "unknown", t, _r(weights[t]), None, "weight", der, src,
+                              "excluded_activity_etf_constituents_unknown" if look
+                              else "excluded_activity_etf_no_lookthrough"))
+    return out
+
+
+def _h12(weights, profile, assets, meta) -> list[Check]:
+    """Fees: each held ETF's MER (percent points) against limits.max_fee_mer_pct. Missing MER -> unknown."""
+    lim = profile["limits"].get("max_fee_mer_pct")
+    if lim is None:
+        return []
+    der = _derived(profile, "max_fee_mer_pct")
+    rows = _asset_rows(meta)
+    out: list[Check] = []
+    for t in _held(weights):
+        if assets.loc[t, "asset_class"] not in ETF_CLASSES:
+            continue
+        mer = (rows or {}).get(t, {}).get("mer_pct")
+        mer = None if mer is None or mer != mer or mer == "" else float(mer)
+        if mer is None:
+            out.append(_check("H12", "unknown", t, None, lim, "pct", der, "rule:max_fee", "fee_unknown"))
+            continue
+        status = "violation" if _gt(mer, lim) else "pass"
+        out.append(_check("H12", status, t, _r(mer), lim, "pct", der, "rule:max_fee",
+                          "fee_over" if status == "violation" else "fee_ok"))
+    return out
+
+
+def _h13(weights, profile, assets, meta) -> list[Check]:
+    """Theme weight: Σ weight of held assets whose asset_meta themes contain the theme (an ETF counts fully)."""
+    limits = profile["limits"].get("max_theme_weight") or {}
+    if not limits:
+        return []
+    der = _derived(profile, "max_theme_weight")
+    rows = _asset_rows(meta)
+    out: list[Check] = []
+    for theme in sorted(limits):
+        lim = limits[theme]
+        if rows is None:
+            out.append(_check("H13", "unknown", theme, None, lim, "weight", der, "rule:max_theme_weight",
+                              "theme_weight_unknown"))
+            continue
+        v = sum(weights[t] for t in _held(weights) if theme in _themes(rows.get(t, {}).get("themes")))
+        status = "violation" if _gt(v, lim) else "pass"
+        out.append(_check("H13", status, theme, _r(v), lim, "weight", der, "rule:max_theme_weight",
+                          "theme_weight_over" if status == "violation" else "theme_weight_ok"))
+    return out
+
+
 def run_cheap(weights: dict[str, float], profile: dict, assets, meta: dict) -> list[Check]:
-    """H1-H6 on fraction weights (H11-H13: P1, need meta files)."""
+    """H1-H6 and H11-H13 (CHEAP order) on fraction weights. H11-H13 read the meta files; a missing file -> unknown."""
     return (_h1(weights, profile, assets) + _h2(weights, profile, assets) + _h3(weights, profile, assets)
-            + _h4(weights, profile, assets) + _h5(weights, profile, assets) + _h6(weights, profile, assets, meta))
+            + _h4(weights, profile, assets) + _h5(weights, profile, assets) + _h6(weights, profile, assets, meta)
+            + _h11(weights, profile, assets, meta) + _h12(weights, profile, assets, meta)
+            + _h13(weights, profile, assets, meta))
 
 
 # ---------------------------------------------------------------- engine checks
