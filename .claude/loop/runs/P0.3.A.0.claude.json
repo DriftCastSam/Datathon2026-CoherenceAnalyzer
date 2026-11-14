@@ -1,0 +1,203 @@
+{
+  "api_error_status": null,
+  "credential_expires_at": "2026-11-29T15:06:17.285Z",
+  "duration_api_ms": 132744,
+  "duration_ms": 134168,
+  "fast_mode_state": "off",
+  "first_content_frame_ms": 1041,
+  "input_attachments_detail": {
+    "ambient_start_ms": 3,
+    "ambient_wait_ms": 7,
+    "cpu_ms": 20,
+    "major_faults": 0,
+    "producers": 40,
+    "prompt_producers_ms": 0,
+    "render_ms": 1,
+    "setup_ms": 0,
+    "slowest_producer": "deferred_tools_delta",
+    "slowest_producer_ms": 8,
+    "token_counts": 0
+  },
+  "is_error": false,
+  "message_normalization_detail": {
+    "after_ms": 0,
+    "before_ms": 0,
+    "images_ms": 0,
+    "messages": 12,
+    "normalize_ms": 1,
+    "other_ms": 0,
+    "post_process_ms": 0,
+    "wire_messages": 2
+  },
+  "modelUsage": {
+    "claude-haiku-5-5": {
+      "cacheCreationEphemeral1hInputTokens": 0,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationInputTokens": 0,
+      "cacheReadInputTokens": 0,
+      "canonicalModel": "claude-haiku-5-5",
+      "contextWindow": 1000000,
+      "costBasis": "list",
+      "costUSD": 0.00019660000000000004,
+      "inputTokens": 1861,
+      "maxOutputTokens": 128000,
+      "outputTokens": 21,
+      "provider": "firstParty",
+      "thinkingTokens": 0,
+      "webSearchRequests": 0
+    },
+    "claude-opus-5-5": {
+      "cacheCreationEphemeral1hInputTokens": 64409,
+      "cacheCreationEphemeral5mInputTokens": 0,
+      "cacheCreationInputTokens": 64409,
+      "cacheReadInputTokens": 647128,
+      "canonicalModel": "claude-opus-5-5",
+      "contextWindow": 1000000,
+      "costBasis": "list",
+      "costUSD": 0.9617576,
+      "inputTokens": 20,
+      "maxOutputTokens": 128000,
+      "outputTokens": 15849,
+      "provider": "firstParty",
+      "thinkingTokens": 4563,
+      "webSearchRequests": 0
+    }
+  },
+  "num_turns": 12,
+  "permission_denials": [
+    {
+      "tool_input": {
+        "command": "sed -n 60,140p tests/test_rules.py; grep -n \"pytestmark\\|def test_\" tests/test_rules.py | head -60; cat coherence_analyzer/config.py; cat coherence_analyzer/levels.py | head -30; ls ../portee 2>/dev/null | head",
+        "description": "Read more of test_rules and config"
+      },
+      "tool_name": "Bash",
+      "tool_use_id": "toolu_01JG4HUyjcijTDNFThJfvosq"
+    }
+  ],
+  "process_turn_index": 0,
+  "queued_turn_count": 0,
+  "request_build_detail": {
+    "cache_break_record_ms": 0,
+    "headers_ms": 0,
+    "other_ms": 0,
+    "plans_ms": 1,
+    "record_attempt_ms": 2,
+    "records_ms": 0,
+    "retry_setup_ms": 0,
+    "sent_build_cache_breakpoints_ms": 0,
+    "sent_build_ms": 1,
+    "sent_build_safety_context_ms": 0,
+    "sent_build_surrogate_scan_ms": 0,
+    "system_ms": 1
+  },
+  "result": "I wrote `tests/test_profile_schema.py`, and it is the only file I touched. With `COHERENCE_ANALYZER_LLM=mock` it currently gives **6 failed, 43 errors, 7 passed**, which is what Phase A should look like:\n- **The 43 errors** all have one cause: `coherence_analyzer/schemas/profile.v2.json` doesn't exist yet.\n- **The 6 failures** come from the profile still being in v1 form.\n- **The 7 passes** are the checks on `events.jsonl`, `intents.json` and IDs across files. Those files already match \u00a716.\n\nI didn't run `test_rules.py`. Nothing outside `tests/` changed, so it's unaffected for now. It needs to pass again once the profile is converted.\n\n**One choice to check:** \u00a73.3 says the schema lives at `schemas/profile.v2.json`, but `config.SCHEMAS_DIR` points to `coherence_analyzer/schemas/`. The tests load it from the `config.SCHEMAS_DIR` path. If you want a top-level `schemas/` folder instead, the fixture path needs changing.\n\nTest functions:\n- `test_schema_is_draft_2020_12`: the schema declares draft 2020-12 in `$schema` and is itself a valid schema (\u00a73.3, \u00a72).\n- `test_robert_profile_validates`: `fixtures/robert/profile.json` validates against the v2 schema with zero errors (\u00a73.3).\n- `test_robert_schema_version_is_2`: `meta.schema_version` is the integer 2 (\u00a73.3 item 6).\n- `test_schema_rejects_wrong_schema_version`: the schema rejects schema_version values 1, 3, \"2\", null, or missing (\u00a73.3 item 6; ambiguity: required and fixed to 2).\n- `test_schema_enforces_risk_level_enum`: `risk.declared`, `capacity`, `effective` and `behavioural` must be one of the five levels (\u00a73.3).\n- `test_llm_objects_are_exactly_the_three_llm_fields`: the only `llm:` objects are `risk.behavioural`, `knowledge.question_quality` and `values.parsed_notes` (\u00a71 inv. 1, \u00a73.3).\n- `test_every_llm_object_has_stamp`: every `llm:` object has non-empty prompt_version (containing `v<N>`), model_id, updated_at (ISO-8601) and input_hash, plus `value` and a confidence between 0 and 1 (\u00a73.3 item 1, \u00a711 step 6).\n- `test_schema_rejects_llm_object_missing_stamp`: removing any of the 4 stamp keys from any of the 3 `llm:` fields makes the profile invalid (\u00a73.3 item 1).\n- `test_schema_rejects_llm_field_with_rule_by`: the 3 inferred fields can't be stamped `by: rule:` (\u00a71 inv. 1).\n- `test_behavioural_evidence_shape_and_refs`: evidence is a list of objects with exactly the keys `{event_id, signal, note}`. Each signal is in the N1 list, and each event_id exists and is a question or order_intent. The set is {ev_0007, ev_0004}. Value stays `moderate_high` and confidence stays 0.55, which is at most 0.8 (\u00a73.3 item 2, \u00a76.2 N1, \u00a71 inv. 5).\n- `test_schema_rejects_bad_behavioural_evidence`: v1 free strings, a signal outside the list, and items missing any key are rejected (\u00a73.3 item 2).\n- `test_question_quality_evidence_shape_and_refs`: evidence has exactly `{event_id, score}`, every event_id is a question event, and scores are ev_0005\u21920.9 and ev_0004\u21920.3 (\u00a73.3 item 3).\n- `test_schema_rejects_bad_question_quality_evidence`: the v1 shape, a duplicated question text, a missing score and a score above 1 are rejected (\u00a73.3 item 3).\n- `test_parsed_notes_items`: each item has a valid rule_kind, applies_to and params, a boolean approved_by_user, and a quote that is an exact substring of `values.notes` (\u00a73.3 item 4, \u00a76.2 N3).\n- `test_schema_rejects_parsed_rule_missing_field`: an item missing rule_kind, params, quote or approved_by_user is rejected (\u00a73.3 item 4).\n- `test_schema_rejects_parsed_rule_bad_enum`: the old v1 `rule` name used as rule_kind, a bad applies_to, and a non-boolean approval are rejected (\u00a76.2 N3).\n- `test_limits_trace_present_and_generated`: the profile contains `limits_trace`, and it equals what `rules/limits.py` builds (\u00a73.3 item 5, \u00a77.2; ambiguity: the field is required).\n- `test_derived_profile_still_validates`: the output of `derive_all` on the v2 profile still validates (\u00a73.3 \"validate on every load and save\").\n- `test_events_jsonl_lines_are_wellformed`: every line parses, has the \u00a73.4 keys, a known type, a unique `ev_robert_NNNN` id, a timestamp with a timezone offset, and timestamps never go backwards (\u00a73.4).\n- `test_events_match_spec_16`: the events are exactly ev_0001, 0004, 0005 and 0007, with the types, dates and texts \u00a716 gives (\u00a716; ambiguity: no extra events allowed).\n- `test_quiz_event_payload`: ev_0001's payload is `{\"score\": 0.8, \"quiz_id\": \"kq_v1\"}` (\u00a73.4, \u00a716).\n- `test_quiz_score_matches_profile`: `knowledge.quiz_score` equals the quiz event's score (\u00a716).\n- `test_intent_in_0001`: in_0001 is linked to the order_intent ev_0007 and is buy NVDA at 10%, funded `{specific, ZST.TO}`, status confirmed. It was confirmed after the event, and ZST.TO is a current holding (\u00a73.6, \u00a716).\n- `test_profile_ids_consistent`: the profile, events and portfolio share `persona-robert`, and `portfolio.as_of` is 2026-11-12 (\u00a73.4, \u00a73.5, D1).",
+  "result_index": 0,
+  "safety_stops": 0,
+  "session_id": "d1c173b4-9855-4e55-8488-d5843d1c244b",
+  "stop_reason": "end_turn",
+  "subagent_stats": {
+    "by_type": {},
+    "completed": 0,
+    "failed": 0,
+    "killed": {
+      "parent": 0,
+      "system": 0,
+      "user": 0
+    },
+    "max_depth": 0,
+    "refused": {
+      "budget": 0,
+      "concurrency_limit": 0,
+      "depth_limit": 0
+    },
+    "requested": {
+      "background": 0,
+      "foreground": 0,
+      "unset": 0
+    },
+    "spawned": 0,
+    "spawned_by_subagents": 0,
+    "started_in_background": 0
+  },
+  "subtype": "success",
+  "terminal_reason": "completed",
+  "time_to_request_cpu_ms": 115,
+  "time_to_request_loop_lag_ms": 25,
+  "time_to_request_major_faults": 0,
+  "time_to_request_ms": 75,
+  "time_to_request_phases_ms": {
+    "autocompact": 1,
+    "client_creation": 2,
+    "conversation_append": 1,
+    "engine_pickup": 1,
+    "init_frame_send": 5,
+    "init_message": 5,
+    "input_attachments": 13,
+    "input_hooks": 1,
+    "loop_entry": 2,
+    "message_normalization": 1,
+    "message_prep": 1,
+    "model_config_wait": 1,
+    "model_gates": 0,
+    "other": 2,
+    "process_user_input": 2,
+    "query_setup": 0,
+    "request_announcements": 5,
+    "request_build": 5,
+    "resume_other": 0,
+    "system_prompt": 9,
+    "tool_pool_refresh": 2,
+    "tool_schema_build": 13,
+    "transcript_persist": 3
+  },
+  "tool_schema_build_detail": {
+    "after_ms": 1,
+    "betas_ms": 0,
+    "new_schemas": 13,
+    "other_ms": 0,
+    "placement_ms": 1,
+    "render_ms": 11,
+    "tools": 13,
+    "waits_ms": 0
+  },
+  "total_cost_usd": 0.9619542,
+  "ttft_ms": 1517,
+  "ttft_stream_ms": 1041,
+  "turn_start_resume_kind": "none",
+  "type": "result",
+  "usage": {
+    "cache_creation": {
+      "ephemeral_1h_input_tokens": 64409,
+      "ephemeral_5m_input_tokens": 0
+    },
+    "cache_creation_input_tokens": 64409,
+    "cache_read_input_tokens": 647128,
+    "fallback_credit": null,
+    "inference_geo": "global",
+    "input_tokens": 20,
+    "iterations": [
+      {
+        "cache_creation": {
+          "ephemeral_1h_input_tokens": 645,
+          "ephemeral_5m_input_tokens": 0
+        },
+        "cache_creation_input_tokens": 645,
+        "cache_read_input_tokens": 88316,
+        "input_tokens": 2,
+        "output_tokens": 2172,
+        "type": "message"
+      }
+    ],
+    "output_tokens": 15849,
+    "output_tokens_details": {
+      "thinking_tokens": 4563
+    },
+    "server_tool_use": {
+      "web_fetch_requests": 0,
+      "web_search_requests": 0
+    },
+    "service_tier": "standard",
+    "speed": "standard"
+  },
+  "uuid": "e3d45bfd-69ef-4577-8bad-7629168420cc"
+}

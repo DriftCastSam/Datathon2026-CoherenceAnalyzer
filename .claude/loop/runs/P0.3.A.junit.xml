@@ -1,0 +1,563 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="43" failures="6" skipped="0" tests="56" time="0.316" timestamp="2026-11-14T20:20:06.559733+00:00" hostname="bomboclat-laptop"><testcase classname="tests.test_profile_schema" name="test_schema_is_draft_2020_12" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_robert_profile_validates" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_robert_schema_version_is_2" time="0.000"><failure message="KeyError: 'schema_version'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_robert_schema_version_is_2(robert):
+&gt;       v = robert["meta"]["schema_version"]
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'schema_version'
+
+tests/test_profile_schema.py:130: KeyError</failure></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_wrong_schema_version[1]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_wrong_schema_version[3]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_wrong_schema_version[2]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_wrong_schema_version[None]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_wrong_schema_version[missing]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_enforces_risk_level_enum[risk.declared]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_enforces_risk_level_enum[risk.capacity.value]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_enforces_risk_level_enum[risk.effective.value]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_enforces_risk_level_enum[risk.behavioural.value]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_llm_objects_are_exactly_the_three_llm_fields" time="0.000" /><testcase classname="tests.test_profile_schema" name="test_every_llm_object_has_stamp" time="0.001"><failure message="AssertionError: risk.behavioural.prompt_version&#10;assert (False)&#10; +  where False = isinstance(None, str)&#10; +    where None = &lt;built-in method get of dict object at 0x7bfadebf4bc0&gt;('prompt_version')&#10; +      where &lt;built-in method get of dict object at 0x7bfadebf4bc0&gt; = {'value': 'moderate_high', 'by': 'llm:behaviour_classifier', 'confidence': 0.55, 'evidence': ['2026-11-14: asked to put 10% in NVDA after news coverage', &quot;2026-11-10: asked which AI stock is 'the next big one'&quot;]}.get">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_every_llm_object_has_stamp(robert):
+        found = list(_walk_llm_objects(robert))
+        assert found
+        for path, obj in found:
+            for key in LLM_STAMP:
+&gt;               assert isinstance(obj.get(key), str) and obj[key].strip(), f"{path}.{key}"
+E               AssertionError: risk.behavioural.prompt_version
+E               assert (False)
+E                +  where False = isinstance(None, str)
+E                +    where None = &lt;built-in method get of dict object at 0x7bfadebf4bc0&gt;('prompt_version')
+E                +      where &lt;built-in method get of dict object at 0x7bfadebf4bc0&gt; = {'value': 'moderate_high', 'by': 'llm:behaviour_classifier', 'confidence': 0.55, 'evidence': ['2026-11-14: asked to put 10% in NVDA after news coverage', "2026-11-10: asked which AI stock is 'the next big one'"]}.get
+
+tests/test_profile_schema.py:168: AssertionError</failure></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_llm_object_missing_stamp[prompt_version-knowledge.question_quality]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_llm_object_missing_stamp[prompt_version-risk.behavioural]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_llm_object_missing_stamp[prompt_version-values.parsed_notes]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_llm_object_missing_stamp[model_id-knowledge.question_quality]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_llm_object_missing_stamp[model_id-risk.behavioural]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_llm_object_missing_stamp[model_id-values.parsed_notes]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_llm_object_missing_stamp[updated_at-knowledge.question_quality]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_llm_object_missing_stamp[updated_at-risk.behavioural]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_llm_object_missing_stamp[updated_at-values.parsed_notes]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_llm_object_missing_stamp[input_hash-knowledge.question_quality]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_llm_object_missing_stamp[input_hash-risk.behavioural]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_llm_object_missing_stamp[input_hash-values.parsed_notes]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_llm_field_with_rule_by[knowledge.question_quality]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_llm_field_with_rule_by[risk.behavioural]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_llm_field_with_rule_by[values.parsed_notes]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_behavioural_evidence_shape_and_refs" time="0.001"><failure message="AssertionError: 2026-11-14: asked to put 10% in NVDA after news coverage&#10;assert (False)&#10; +  where False = isinstance('2026-11-14: asked to put 10% in NVDA after news coverage', dict)">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+events_by_id = {'ev_robert_0001': {'event_id': 'ev_robert_0001', 'profile_id': 'persona-robert', 'ts': '2026-11-01T09:00:00-04:00', '...id': 'ev_robert_0007', 'profile_id': 'persona-robert', 'ts': '2026-11-14T10:02:00-05:00', 'type': 'order_intent', ...}}
+
+    def test_behavioural_evidence_shape_and_refs(robert, events_by_id):
+        beh = robert["risk"]["behavioural"]
+        assert beh["by"] == "llm:behaviour_classifier"
+        assert beh["value"] == "moderate_high"          # unchanged from the example profile
+        assert beh["confidence"] == pytest.approx(0.55, abs=1e-9)
+        assert beh["confidence"] &lt;= config.BEHAVIOUR_MAX_CONF
+        ev = beh["evidence"]
+        assert isinstance(ev, list) and ev
+        for item in ev:
+            # SPEC-AMBIGUITY: "[{event_id, signal, note}]" read as exactly these keys.
+&gt;           assert isinstance(item, dict) and set(item) == {"event_id", "signal", "note"}, item
+E           AssertionError: 2026-11-14: asked to put 10% in NVDA after news coverage
+E           assert (False)
+E            +  where False = isinstance('2026-11-14: asked to put 10% in NVDA after news coverage', dict)
+
+tests/test_profile_schema.py:204: AssertionError</failure></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_bad_behavioural_evidence[bad0]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_bad_behavioural_evidence[bad1]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_bad_behavioural_evidence[bad2]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_bad_behavioural_evidence[bad3]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_bad_behavioural_evidence[bad4]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_question_quality_evidence_shape_and_refs" time="0.001"><failure message="AssertionError: {'date': '2026-11-12', 'question': &quot;What does XBB's duration mean for my bonds if rates drop?&quot;, 'score': 0.9}&#10;assert (True and {'date', 'question', 'score'} == {'event_id', 'score'}&#10; +  where True = isinstance({'date': '2026-11-12', 'question': &quot;What does XBB's duration mean for my bonds if rates drop?&quot;, 'score': 0.9}, dict)&#10;  &#10;  Extra items in the left set:&#10;  'question'&#10;  'date'&#10;  Extra items in the right set:&#10;  'event_id'&#10;  Use -v to get more diff)">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+events_by_id = {'ev_robert_0001': {'event_id': 'ev_robert_0001', 'profile_id': 'persona-robert', 'ts': '2026-11-01T09:00:00-04:00', '...id': 'ev_robert_0007', 'profile_id': 'persona-robert', 'ts': '2026-11-14T10:02:00-05:00', 'type': 'order_intent', ...}}
+
+    def test_question_quality_evidence_shape_and_refs(robert, events_by_id):
+        qq = robert["knowledge"]["question_quality"]
+        assert qq["by"] == "llm:question_rubric"
+        ev = qq["evidence"]
+        assert isinstance(ev, list) and ev
+        for item in ev:
+            # Question text lives in the event log, not duplicated here: exactly {event_id, score}.
+&gt;           assert isinstance(item, dict) and set(item) == {"event_id", "score"}, item
+E           AssertionError: {'date': '2026-11-12', 'question': "What does XBB's duration mean for my bonds if rates drop?", 'score': 0.9}
+E           assert (True and {'date', 'question', 'score'} == {'event_id', 'score'}
+E            +  where True = isinstance({'date': '2026-11-12', 'question': "What does XBB's duration mean for my bonds if rates drop?", 'score': 0.9}, dict)
+E             
+E             Extra items in the left set:
+E             'question'
+E             'date'
+E             Extra items in the right set:
+E             'event_id'
+E             Use -v to get more diff)
+
+tests/test_profile_schema.py:236: AssertionError</failure></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_bad_question_quality_evidence[bad0]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_bad_question_quality_evidence[bad1]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_bad_question_quality_evidence[bad2]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_bad_question_quality_evidence[bad3]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_parsed_notes_items" time="0.000"><failure message="AssertionError: {'rule': 'prefer_understandable_business', 'applies_to': 'single_stocks', 'approved_by_user': True}&#10;assert {'applies_to'..., 'rule_kind'} &lt;= {'applies_to'...user', 'rule'}&#10;  &#10;  Extra items in the left set:&#10;  'quote'&#10;  'rule_kind'&#10;  'params'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_parsed_notes_items(robert):
+        notes = robert["values"]["notes"]
+        pn = robert["values"]["parsed_notes"]
+        assert pn["by"] == "llm:values_parser"
+        items = pn["value"]
+        assert isinstance(items, list) and items
+        for item in items:
+&gt;           assert {"rule_kind", "params", "quote", "approved_by_user", "applies_to"} &lt;= set(item), item
+E           AssertionError: {'rule': 'prefer_understandable_business', 'applies_to': 'single_stocks', 'approved_by_user': True}
+E           assert {'applies_to'..., 'rule_kind'} &lt;= {'applies_to'...user', 'rule'}
+E             
+E             Extra items in the left set:
+E             'quote'
+E             'rule_kind'
+E             'params'
+
+tests/test_profile_schema.py:265: AssertionError</failure></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_parsed_rule_missing_field[rule_kind]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_parsed_rule_missing_field[params]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_parsed_rule_missing_field[quote]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_parsed_rule_missing_field[approved_by_user]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_parsed_rule_bad_enum[rule_kind-prefer_understandable_business]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_parsed_rule_bad_enum[applies_to-everything]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_schema_rejects_parsed_rule_bad_enum[approved_by_user-yes]" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_limits_trace_present_and_generated" time="0.002"><failure message="assert 'limits_trace' in {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': &quot;Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_limits_trace_present_and_generated(robert):
+        from coherence_analyzer.rules import derive, limits as limits_mod
+    
+        # SPEC-AMBIGUITY: §3.3 item 5 adds `limits_trace` to the profile; stricter reading = the converted fixture
+        # carries it, and it must equal what rules/limits.py generates (never hand-written, §7.2).
+&gt;       assert "limits_trace" in robert
+E       assert 'limits_trace' in {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+tests/test_profile_schema.py:304: AssertionError</failure></testcase><testcase classname="tests.test_profile_schema" name="test_derived_profile_still_validates" time="0.000"><error message="failed on setup with &quot;AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file&quot;">@pytest.fixture(scope="module")
+    def schema() -&gt; dict:
+        # SPEC-AMBIGUITY: §3.3 says `schemas/profile.v2.json`; §2 has no top-level schemas/ and config.SCHEMAS_DIR
+        # is the package schemas dir, so the schema must live at config.SCHEMAS_DIR / "profile.v2.json".
+        path = config.SCHEMAS_DIR / "profile.v2.json"
+&gt;       assert path.is_file(), f"missing {path}"
+E       AssertionError: missing /home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/coherence_analyzer/schemas/profile.v2.json').is_file
+
+tests/test_profile_schema.py:55: AssertionError</error></testcase><testcase classname="tests.test_profile_schema" name="test_events_jsonl_lines_are_wellformed" time="0.000" /><testcase classname="tests.test_profile_schema" name="test_events_match_spec_16" time="0.000" /><testcase classname="tests.test_profile_schema" name="test_quiz_event_payload" time="0.000" /><testcase classname="tests.test_profile_schema" name="test_quiz_score_matches_profile" time="0.000" /><testcase classname="tests.test_profile_schema" name="test_intent_in_0001" time="0.000" /><testcase classname="tests.test_profile_schema" name="test_profile_ids_consistent" time="0.000" /></testsuite></testsuites>
