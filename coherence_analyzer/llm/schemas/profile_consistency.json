@@ -1,0 +1,36 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "profile_consistency (N6) tool input: statements inside one investor profile that pull in different directions (docs/spec-factors.md 20.9)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["abstain", "findings"],
+  "properties": {
+    "abstain": {"type": "boolean", "description": "true when the input does not allow a judgement; findings are then ignored."},
+    "findings": {
+      "type": "array",
+      "maxItems": 5,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "fields", "quotes", "reason"],
+        "properties": {
+          "kind": {"type": "string", "enum": ["tension", "contradiction"]},
+          "fields": {
+            "type": "array",
+            "minItems": 2,
+            "items": {"type": "string", "minLength": 1},
+            "description": "Paths of the declared fields involved, e.g. preferences.interests or objectives.goals[1].date."
+          },
+          "quotes": {
+            "type": "array",
+            "minItems": 2,
+            "items": {"type": "string", "minLength": 1},
+            "description": "One quote per path, in the same order: the value at that path as text; for values.notes an exact substring of the notes."
+          },
+          "reason": {"type": "string", "minLength": 1, "maxLength": 200, "pattern": "^[^0-9]*$",
+                     "description": "At most 200 characters, no digits, no advice."}
+        }
+      }
+    }
+  }
+}

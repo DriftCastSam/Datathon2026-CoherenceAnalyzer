@@ -169,3 +169,61 @@ chain, `not_covered`). The verdict hero, cone and alternatives stay above the ca
 - `test_explain.py`: verifier V1-V5 each rejects a crafted bad output; mock cache with a good
   response -> `llm`; bad then good -> `llm_retry`; bad twice -> `template`; `pass` sections make no
   LLM call; disclaimer is the fixed text.
+
+## 20.9 Internal coherence: does the profile contradict itself? (D8)
+
+Runs on the **profile alone** (no portfolio, no market data), after Flow A refresh and before Flow C.
+Module `coherence_analyzer/coherence/internal.py`. Two layers; the rules run first.
+
+**Layer 1: contradiction rules (code, deterministic).** `as_of` = `portfolio.as_of` (D1). Each rule reads
+declared fields only and yields at most one finding, status `warning`:
+
+| id | Fires when | fields |
+|---|---|---|
+| C1 | a goal in `objectives.goals` has `date` (YYYY-MM) later than `as_of` + `objectives.horizon_years` years (month precision); one finding per goal | `objectives.horizon_years`, `objectives.goals[i].date` |
+| C2 | `risk.max_acceptable_drawdown_pct` is tighter than the `max_dd_pct` of the level one below `risk.declared`, or looser than the level one above (LIMITS_TABLE; no neighbour = no bound on that side) | `risk.declared`, `risk.max_acceptable_drawdown_pct` |
+| C3 | `objectives.primary` in {`growth`, `aggressive_growth`} and `risk.declared` in {`low`, `low_moderate`} | `objectives.primary`, `risk.declared` |
+| C4 | `preferences.asset_types_allowed` and `preferences.asset_types_refused` share an item | both |
+| C5 | `risk.reaction_to_20pct_drop` = `buy_more` with `risk.declared` <= `low_moderate`, or `sell_all` with `risk.declared` >= `moderate_high` | both |
+
+A missing field makes the rule skip (no finding, no error). Robert: C1 fires once (horizon 4 years from
+2026-11 ends 2030-11; goal "Help children with a down payment" is dated 2032-01); C2-C5 do not fire.
+
+**Layer 2: N6 `profile_consistency` (LLM, one call).** Finds what rules cannot express, mostly free text
+against fields. Input payload (`n6_payload(profile)`): the **declared** fields only (plain values; no
+`{value, by}` objects, no `limits`, no `llm:` fields), `values.notes`, and the ids + fields of the C-findings
+already raised (so it does not repeat them). Output schema:
+`{abstain: bool, findings: [{kind: "tension"|"contradiction", fields: [path, path, ...], quotes: [str, ...], reason: str}]}`.
+The prompt asks for at most 5 findings, each between two or more fields, `reason` <= 200 chars, no numbers,
+no advice. Prompt `llm/prompts/profile_consistency.v1.md`, schema `llm/schemas/profile_consistency.json`.
+
+**Gate branch `profile_consistency`** (`gate.gate`, context carries `profile`): abstain -> kept:abstain.
+Then every finding must satisfy: each path resolves in the profile to a declared value (not a `{value, by}`
+object; list indices like `goals[1].date` allowed); >= 2 distinct paths; one quote per path, in order, and
+each quote equals the value at its path (`str()` for scalars, or one element for a list), except for
+`values.notes` whose quote must be an exact substring; `reason` <= 200 chars, contains no digit and no
+`explain.ADVISORY_BLOCKLIST` phrase; <= 5 findings. Any failure -> `rejected:evidence` (paths/quotes) or
+`rejected:schema` (rest) and **the whole output is dropped**. Accepted -> `{value: findings, ...stamp}`.
+
+**Status and effect.** `contradiction` -> `warning`, `tension` -> `info`. N6 can never produce `violation`
+(invariant 3) and nothing in this section feeds `limits` (invariant 2). A finding whose path set equals a
+C-finding's path set is dropped (rules win). Internal coherence **does not change the portfolio verdict**:
+it is reported as a separate block `profile_coherence = {status, findings}` where `status` is the worst
+finding status or `pass`. Each finding carries a fixed clarification question (fr-CA / en-CA) chosen by
+code from its source (one template per C-rule; one generic template for N6 that names the two first
+fields), never written by the LLM (D7 point 1).
+
+Finding shape: `{id: "C1".."C5" | "N6.<k>", source: "rule:C1" | "llm:profile_consistency", kind, status,
+fields: [...], values: [...] (rules) | quotes: [...] (N6), reason: str | null, question: {fr-CA, en-CA}}`.
+
+`internal.check_profile(profile, as_of, *, use_llm=True) -> {status, findings, llm: {gate_status, call_log} | null}`.
+In mock mode a missing recording (`LLMCacheMiss`) leaves the rules' findings only and
+`llm.gate_status = "skipped:cache_miss"`.
+
+## 20.10 Parallel factor lanes (D8)
+
+The five sections are independent once the shared computation (derive -> limits -> engine -> hard checks ->
+`tag_checks`) is done. `explain.explain()` narrates the non-pass sections concurrently
+(`concurrent.futures.ThreadPoolExecutor`, `max_workers = 5`); results are reassembled in display order, so the
+output is identical to the sequential run. N6 runs as a sixth lane alongside. The aggregator stays code:
+verdict = worst section status (D3), template headline, `profile_coherence` block, disclaimer.

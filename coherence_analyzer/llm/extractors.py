@@ -16,8 +16,9 @@ N1_NODE = "behaviour_classifier"
 N3_NODE = "values_parser"
 N4_NODE = "intent_parser"
 N5_NODE = "explainer"
+N6_NODE = "profile_consistency"
 PROMPT_VERSIONS = {N1_NODE: f"{N1_NODE}.v1", N3_NODE: f"{N3_NODE}.v1", N4_NODE: f"{N4_NODE}.v1",
-                   N5_NODE: f"{N5_NODE}.v1"}
+                   N5_NODE: f"{N5_NODE}.v1", N6_NODE: f"{N6_NODE}.v1"}
 N1_EVENT_TYPES = ("question", "order_intent")
 N1_MAX_EVENTS = 20
 N1_WINDOW_DAYS = 30
@@ -121,3 +122,13 @@ def explainer_call(facts: dict, retry_failures: list[str] | None = None) -> dict
 def explainer(facts: dict, retry_failures: list[str] | None = None) -> dict:
     """N5. Raw output {segments}; verification and the retry loop live in `coherence_analyzer.explain`."""
     return explainer_call(facts, retry_failures)["output"]
+
+
+def profile_consistency_call(payload: dict) -> dict:
+    """N6 (§20.9): `{output, call_log}` for `internal.n6_payload(...)`."""
+    return bedrock.call_tool(N6_NODE, load_schema(N6_NODE), load_prompt(N6_NODE), payload, prompt_version(N6_NODE))
+
+
+def profile_consistency(payload: dict) -> dict:
+    """N6. Findings between >= 2 declared fields, exact quotes; gated by gate.gate("profile_consistency", ...)."""
+    return profile_consistency_call(payload)["output"]
