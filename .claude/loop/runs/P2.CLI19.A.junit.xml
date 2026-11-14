@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="11" skipped="0" tests="16" time="1.103" timestamp="2026-11-14T23:44:02.108086+00:00" hostname="bomboclat-laptop"><testcase classname="tests.test_cli_disclaimer" name="test_config_disclaimer_is_the_spec_text" time="0.000" /><testcase classname="tests.test_cli_disclaimer" name="test_print_review_prints_the_fixed_disclaimer_once_and_last" time="0.001"><failure message="assert 0 == 1&#10; +  where 0 = &lt;built-in method count of str object at 0x7a9627cf5a10&gt;(&quot;Simulation éducative avec des profils fictifs. Ceci n'est pas un conseil financier personnalisé. Aucune transaction n'est exécutée.&quot;)&#10;[+1 more line; full report in element text]">def test_print_review_prints_the_fixed_disclaimer_once_and_last():
+        # SPEC §1 inv. 7 / §9.4: every user-facing output carries the disclaimer; it closes the output, as in `check`.
+        out = _capture(cli._print_review, "robert", _fake_report(config.DISCLAIMER["fr-CA"]))
+&gt;       assert out.count(config.DISCLAIMER["fr-CA"]) == 1
+E       assert 0 == 1
+E        +  where 0 = &lt;built-in method count of str object at 0x7a9627cf5a10&gt;("Simulation éducative avec des profils fictifs. Ceci n'est pas un conseil financier personnalisé. Aucune transaction n'est exécutée.")
+E        +    where &lt;built-in method count of str object at 0x7a9627cf5a10&gt; = 'robert: coherent  (explanation: template)\n  sections: goals=pass, risk=warning\n  cannot verify: H11, H6\n  run_id 2...wnloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p2-cli19/reports/20260101T000000Z-test.json\nprofile: pass\n'.count
+
+tests/test_cli_disclaimer.py:81: AssertionError</failure></testcase><testcase classname="tests.test_cli_disclaimer" name="test_print_review_follows_the_report_locale" time="0.000"><failure message="AssertionError: assert 'profile: pass' == 'Educational ... is executed.'&#10;  &#10;  - Educational simulation with fictional profiles. This is not personalised financial advice. No transaction is executed.&#10;  + profile: pass">def test_print_review_follows_the_report_locale():
+        # SPEC-AMBIGUITY: §9.4 gives FR and EN; stricter reading: the CLI prints the text of the report's own locale
+        # (the text the report carries from config.DISCLAIMER), never a hard-coded FR one.
+        out = _capture(cli._print_review, "robert", _fake_report(config.DISCLAIMER["en-CA"]))
+&gt;       assert _last_line(out) == config.DISCLAIMER["en-CA"]
+E       AssertionError: assert 'profile: pass' == 'Educational ... is executed.'
+E         
+E         - Educational simulation with fictional profiles. This is not personalised financial advice. No transaction is executed.
+E         + profile: pass
+
+tests/test_cli_disclaimer.py:89: AssertionError</failure></testcase><testcase classname="tests.test_cli_disclaimer" name="test_print_review_keeps_its_existing_lines" time="0.000" /><testcase classname="tests.test_cli_disclaimer" name="test_print_review_does_not_retype_the_disclaimer" time="0.001"><failure message="assert ('disclaimer' in 'def _print_review(label: str, rep: dict) -&gt; none:\n    unknown = sorted({u[&quot;id&quot;] for u in rep[&quot;unknowns&quot;]})\n    stat...rt {store.root() / \'reports\' / (rep[\'run_id\'] + \'.json\')}&quot;)\n    print(profile_line(rep[&quot;profile_coherence&quot;]))\n' or 'DISCLAIMER' in 'def _print_review(label: str, rep: dict) -&gt; None:\n    unknown = sorted({u[&quot;id&quot;] for u in rep[&quot;unknowns&quot;]})\n    stat...rt {store.root() / \'reports\' / (rep[\'run_id\'] + \'.json\')}&quot;)\n    print(profile_line(rep[&quot;...&#10;[+2 more lines; full report in element text]">def test_print_review_does_not_retype_the_disclaimer():
+        # CLAUDE.md / §9.4: the text comes from config.py. No literal copy of either locale in the function source.
+        src = inspect.getsource(cli._print_review)
+        assert "Simulation" not in src and "Educational" not in src and "transaction" not in src
+&gt;       assert "disclaimer" in src.lower() or "DISCLAIMER" in src
+E       assert ('disclaimer' in 'def _print_review(label: str, rep: dict) -&gt; none:\n    unknown = sorted({u["id"] for u in rep["unknowns"]})\n    stat...rt {store.root() / \'reports\' / (rep[\'run_id\'] + \'.json\')}")\n    print(profile_line(rep["profile_coherence"]))\n' or 'DISCLAIMER' in 'def _print_review(label: str, rep: dict) -&gt; None:\n    unknown = sorted({u["id"] for u in rep["unknowns"]})\n    stat...rt {store.root() / \'reports\' / (rep[\'run_id\'] + \'.json\')}")\n    print(profile_line(rep["profile_coherence"]))\n')
+E        +  where 'def _print_review(label: str, rep: dict) -&gt; none:\n    unknown = sorted({u["id"] for u in rep["unknowns"]})\n    stat...rt {store.root() / \'reports\' / (rep[\'run_id\'] + \'.json\')}")\n    print(profile_line(rep["profile_coherence"]))\n' = &lt;built-in method lower of str object at 0x2d3b00f0&gt;()
+E        +    where &lt;built-in method lower of str object at 0x2d3b00f0&gt; = 'def _print_review(label: str, rep: dict) -&gt; None:\n    unknown = sorted({u["id"] for u in rep["unknowns"]})\n    stat...rt {store.root() / \'reports\' / (rep[\'run_id\'] + \'.json\')}")\n    print(profile_line(rep["profile_coherence"]))\n'.lower
+
+tests/test_cli_disclaimer.py:108: AssertionError</failure></testcase><testcase classname="tests.test_cli_disclaimer" name="test_cli_review_command_prints_the_disclaimer" time="0.223"><failure message="assert &quot;Simulation éducative avec des profils fictifs. Ceci n'est pas un conseil financier personnalisé. Aucune transaction n'est exécutée.&quot; in 'robert: coherent  (explanation: llm)\n  sections: objectif=pass, horizon=pass, risque=pass, contraintes=unknown, pref...pytest-290/test_cli_review_command_prints0/work/reports/01M7E74MVBN540VYNSWKBV2C2Z.json\nprofile: warning (C1, N6.1)\n'">review_run = 'robert: coherent  (explanation: llm)\n  sections: objectif=pass, horizon=pass, risque=pass, contraintes=unknown, pref...pytest-290/test_cli_review_command_prints0/work/reports/01M7E74MVBN540VYNSWKBV2C2Z.json\nprofile: warning (C1, N6.1)\n'
+
+    def test_cli_review_command_prints_the_disclaimer(review_run):
+        # SPEC §12 CLI: `review fixtures/robert` end to end (mock LLM). Robert's profile locale is fr-CA.
+&gt;       assert config.DISCLAIMER["fr-CA"] in review_run
+E       assert "Simulation éducative avec des profils fictifs. Ceci n'est pas un conseil financier personnalisé. Aucune transaction n'est exécutée." in 'robert: coherent  (explanation: llm)\n  sections: objectif=pass, horizon=pass, risque=pass, contraintes=unknown, pref...pytest-290/test_cli_review_command_prints0/work/reports/01M7E74MVBN540VYNSWKBV2C2Z.json\nprofile: warning (C1, N6.1)\n'
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p2-cli19/tests/test_cli_disclaimer.py:113: AssertionError</failure></testcase><testcase classname="tests.test_cli_disclaimer" name="test_cli_review_output_describes_and_never_prescribes" time="0.173" /><testcase classname="tests.test_cli_disclaimer" name="test_demo_still_prints_the_disclaimer" time="0.363" /><testcase classname="tests.test_cli_disclaimer" name="test_readme_has_a_known_limitations_section_with_a_body" time="0.001"><failure message="AssertionError: README.md needs a 'Known limitations' heading (SPEC §19: document them)&#10;assert None">def test_readme_has_a_known_limitations_section_with_a_body():
+&gt;       assert len(_limitations_section().strip()) &gt; 400
+                   ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_cli_disclaimer.py:153: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _limitations_section() -&gt; str:
+        text = README.read_text(encoding="utf-8")
+        m = re.search(r"^(#{2,3})\s+Known limitations\b.*$", text, flags=re.MULTILINE | re.IGNORECASE)
+&gt;       assert m, "README.md needs a 'Known limitations' heading (SPEC §19: document them)"
+E       AssertionError: README.md needs a 'Known limitations' heading (SPEC §19: document them)
+E       assert None
+
+tests/test_cli_disclaimer.py:145: AssertionError</failure></testcase><testcase classname="tests.test_cli_disclaimer" name="test_readme_limitation_window_bootstrap_and_assumed_drift" time="0.001"><failure message="AssertionError: README.md needs a 'Known limitations' heading (SPEC §19: document them)&#10;assert None">def test_readme_limitation_window_bootstrap_and_assumed_drift():
+        # SPEC §19 bullet 1: 5-year window; block bootstrap reuses that history; drift is a team assumption (ASSUMED).
+&gt;       s = _limitations_section()
+            ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_cli_disclaimer.py:158: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _limitations_section() -&gt; str:
+        text = README.read_text(encoding="utf-8")
+        m = re.search(r"^(#{2,3})\s+Known limitations\b.*$", text, flags=re.MULTILINE | re.IGNORECASE)
+&gt;       assert m, "README.md needs a 'Known limitations' heading (SPEC §19: document them)"
+E       AssertionError: README.md needs a 'Known limitations' heading (SPEC §19: document them)
+E       assert None
+
+tests/test_cli_disclaimer.py:145: AssertionError</failure></testcase><testcase classname="tests.test_cli_disclaimer" name="test_readme_limitation_survivorship_bias" time="0.001"><failure message="AssertionError: README.md needs a 'Known limitations' heading (SPEC §19: document them)&#10;assert None">def test_readme_limitation_survivorship_bias():
+        # SPEC §19 bullet 2.
+&gt;       assert "survivorship" in _limitations_section().lower()
+                                 ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_cli_disclaimer.py:169: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _limitations_section() -&gt; str:
+        text = README.read_text(encoding="utf-8")
+        m = re.search(r"^(#{2,3})\s+Known limitations\b.*$", text, flags=re.MULTILINE | re.IGNORECASE)
+&gt;       assert m, "README.md needs a 'Known limitations' heading (SPEC §19: document them)"
+E       AssertionError: README.md needs a 'Known limitations' heading (SPEC §19: document them)
+E       assert None
+
+tests/test_cli_disclaimer.py:145: AssertionError</failure></testcase><testcase classname="tests.test_cli_disclaimer" name="test_readme_limitation_lookthrough_unknowns_and_what_it_covers_now" time="0.001"><failure message="AssertionError: README.md needs a 'Known limitations' heading (SPEC §19: document them)&#10;assert None">def test_readme_limitation_lookthrough_unknowns_and_what_it_covers_now():
+        # SPEC §19 bullet 3 + README "ETF sector look-through (P2.13)": without it sector / employer / activity checks
+        # on ETFs are unknown; the section must also say what look-through covers now (sector + employer H6 and H10 from
+        # data/meta/etf_sector_weights.csv; H11 activity stays unknown without a sourced activity_tags row).
+&gt;       s = _limitations_section()
+            ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_cli_disclaimer.py:176: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _limitations_section() -&gt; str:
+        text = README.read_text(encoding="utf-8")
+        m = re.search(r"^(#{2,3})\s+Known limitations\b.*$", text, flags=re.MULTILINE | re.IGNORECASE)
+&gt;       assert m, "README.md needs a 'Known limitations' heading (SPEC §19: document them)"
+E       AssertionError: README.md needs a 'Known limitations' heading (SPEC §19: document them)
+E       assert None
+
+tests/test_cli_disclaimer.py:145: AssertionError</failure></testcase><testcase classname="tests.test_cli_disclaimer" name="test_readme_limitation_behaviour_classification" time="0.000"><failure message="AssertionError: README.md needs a 'Known limitations' heading (SPEC §19: document them)&#10;assert None">def test_readme_limitation_behaviour_classification():
+        # SPEC §19 bullet 4: noisy, confidence capped at 0.8, needs &gt;= 2 events, a warning and never a block.
+&gt;       s = _limitations_section()
+            ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_cli_disclaimer.py:189: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _limitations_section() -&gt; str:
+        text = README.read_text(encoding="utf-8")
+        m = re.search(r"^(#{2,3})\s+Known limitations\b.*$", text, flags=re.MULTILINE | re.IGNORECASE)
+&gt;       assert m, "README.md needs a 'Known limitations' heading (SPEC §19: document them)"
+E       AssertionError: README.md needs a 'Known limitations' heading (SPEC §19: document them)
+E       assert None
+
+tests/test_cli_disclaimer.py:145: AssertionError</failure></testcase><testcase classname="tests.test_cli_disclaimer" name="test_readme_limitation_amf_ciro_kyc_out_of_scope" time="0.001"><failure message="AssertionError: README.md needs a 'Known limitations' heading (SPEC §19: document them)&#10;assert None">def test_readme_limitation_amf_ciro_kyc_out_of_scope():
+        # SPEC §19 bullet 5 (and the UI note in deploy/site/index.html): team calibrations, not regulation.
+&gt;       s = _limitations_section()
+            ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_cli_disclaimer.py:200: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _limitations_section() -&gt; str:
+        text = README.read_text(encoding="utf-8")
+        m = re.search(r"^(#{2,3})\s+Known limitations\b.*$", text, flags=re.MULTILINE | re.IGNORECASE)
+&gt;       assert m, "README.md needs a 'Known limitations' heading (SPEC §19: document them)"
+E       AssertionError: README.md needs a 'Known limitations' heading (SPEC §19: document them)
+E       assert None
+
+tests/test_cli_disclaimer.py:145: AssertionError</failure></testcase><testcase classname="tests.test_cli_disclaimer" name="test_readme_limitations_are_descriptive_not_advisory" time="0.001"><failure message="AssertionError: README.md needs a 'Known limitations' heading (SPEC §19: document them)&#10;assert None">def test_readme_limitations_are_descriptive_not_advisory():
+        # D10: the section describes limits of the tool; it gives no advice.
+&gt;       low = _limitations_section().lower()
+              ^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_cli_disclaimer.py:210: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _limitations_section() -&gt; str:
+        text = README.read_text(encoding="utf-8")
+        m = re.search(r"^(#{2,3})\s+Known limitations\b.*$", text, flags=re.MULTILINE | re.IGNORECASE)
+&gt;       assert m, "README.md needs a 'Known limitations' heading (SPEC §19: document them)"
+E       AssertionError: README.md needs a 'Known limitations' heading (SPEC §19: document them)
+E       assert None
+
+tests/test_cli_disclaimer.py:145: AssertionError</failure></testcase><testcase classname="tests.test_cli_disclaimer" name="test_readme_disclaimer_section_is_kept" time="0.000" /></testsuite></testsuites>
