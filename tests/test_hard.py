@@ -346,12 +346,20 @@ def test_crypto_triggers_h1_and_h2(profile, assets, meta):
 
 
 def test_boundaries_are_inclusive(profile, assets, meta):
-    """NVDA 8% from ZST: single stock 0.08 is not > 0.08; fixed income 0.30 is not < 0.30."""
-    checks = _cheap(profile, assets, meta, _variant(engine.ROBERT, NVDA=8, ZST_TO=-8))
+    """Exactly at the limit is not over it.
+
+    H3: NVDA 8% funded from XIU.TO -> single stock 0.08 is not > 0.08 (fixed income stays 0.35).
+    H4: NVDA 5% funded from ZST.TO -> fixed income 0.22 + 0.08 = 0.30 is not < 0.30 (SPEC §8: w <= 5%).
+    (Oracle fix, human-approved: the original used NVDA 8% from ZST for both, which leaves fixed income
+    at 0.27, so H4 is genuinely violated there.)
+    """
     # SPEC-AMBIGUITY: weights come from percent/100; float noise at exactly the limit must not flip the status.
-    assert "violation" not in _statuses(checks, "H3")
-    assert _one(checks, "H4")["status"] == "pass"
-    assert _one(checks, "H4")["value"] == pytest.approx(0.30, abs=1e-9)
+    h3_case = _cheap(profile, assets, meta, _variant(engine.ROBERT, NVDA=8, XIU_TO=-8))
+    assert "violation" not in _statuses(h3_case, "H3")
+    assert _one(h3_case, "H4")["status"] == "pass"
+    h4_case = _cheap(profile, assets, meta, _variant(engine.ROBERT, NVDA=5, ZST_TO=-5))
+    assert _one(h4_case, "H4")["status"] == "pass"
+    assert _one(h4_case, "H4")["value"] == pytest.approx(0.30, abs=1e-9)
 
 
 def test_h5_foreign_currency_over(profile, assets, meta):
