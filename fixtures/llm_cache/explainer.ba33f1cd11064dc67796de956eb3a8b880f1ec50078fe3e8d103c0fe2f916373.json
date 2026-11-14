@@ -1,5 +1,5 @@
 {
-  "cache_key": "bb838c0b4ca108023abae1e571dc172eec718e126d5995957483aa1417efc69a",
+  "cache_key": "ba33f1cd11064dc67796de956eb3a8b880f1ec50078fe3e8d103c0fe2f916373",
   "call_log": {
     "hand_written": true,
     "latency_ms": 0,
@@ -49,7 +49,7 @@
       }
     ]
   },
-  "prompt_version": "explainer.v1",
+  "prompt_version": "explainer.v2",
   "user_payload": {
     "checks": [
       {

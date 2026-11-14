@@ -19,7 +19,7 @@ N4_NODE = "intent_parser"
 N5_NODE = "explainer"
 N6_NODE = "profile_consistency"
 PROMPT_VERSIONS = {N1_NODE: f"{N1_NODE}.v1", N2_NODE: f"{N2_NODE}.v1", N3_NODE: f"{N3_NODE}.v1", N4_NODE: f"{N4_NODE}.v1",
-                   N5_NODE: f"{N5_NODE}.v1", N6_NODE: f"{N6_NODE}.v1"}
+                   N5_NODE: f"{N5_NODE}.v2", N6_NODE: f"{N6_NODE}.v1"}
 N1_EVENT_TYPES = ("question", "order_intent")
 N1_MAX_EVENTS = 20
 N1_WINDOW_DAYS = 30

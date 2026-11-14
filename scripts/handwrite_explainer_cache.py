@@ -125,10 +125,21 @@ def _with(out: dict, prefix: str = "", suffix: str = "") -> dict:
     return out
 
 
+def drop_stale_hand_written(version: str) -> None:
+    """Remove hand-written explainer entries of an older prompt version (CLAUDE.md: a prompt bump re-records the mock
+    cache). Real recordings (any other model_id) are left alone: under a new prompt version they are plain misses."""
+    for p in sorted(config.LLM_CACHE_DIR.glob(f"{NODE}.*.json")):
+        entry = json.loads(p.read_text(encoding="utf-8"))
+        if entry.get("model_id") == bedrock.MOCK_MODEL_ID and entry.get("prompt_version") != version:
+            p.unlink()
+            print("removed", p.relative_to(ROOT))
+
+
 def main() -> None:
     facts_by = {s["factor"]: s["facts"] for s in robert_nvda_sections()}
     validator = Draft202012Validator(extractors.load_schema(NODE))
     version = extractors.prompt_version(NODE)
+    drop_stale_hand_written(version)
     hor, ris, con = facts_by["horizon"], facts_by["risque"], facts_by["contraintes"]
     base = contraintes_base(con)
     cur = {s["factor"]: s["facts"] for s in robert_sections(engine.ROBERT)}["contraintes"]    # current portfolio

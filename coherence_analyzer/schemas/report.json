@@ -24,7 +24,32 @@
     },
     "metrics_current": {"$ref": "#/$defs/metrics"},
     "metrics_proposed": {"oneOf": [{"type": "null"}, {"$ref": "#/$defs/metrics"}]},
-    "headroom": {"type": ["object", "null"]},
+    "headroom": {
+      "description": "Headroom of the user's own trade before it crosses one of the user's limits (SPEC §8): null, or the result for the funding the user gave. `line` is the template sentence (SPEC §8) in the report locale.",
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "required": ["funding", "max_weight_pct", "binding_check", "metrics"],
+          "properties": {
+            "funding": {"type": "object", "required": ["kind"], "properties": {"kind": {"type": "string"}}},
+            "max_weight_pct": {"type": "number", "minimum": 0},
+            "binding_check": {"type": ["string", "null"]},
+            "metrics": {"type": "object"},
+            "line": {"type": "string"}
+          }
+        },
+        {
+          "type": "object",
+          "required": ["none_fit", "binding_checks"],
+          "properties": {
+            "none_fit": {"const": true},
+            "binding_checks": {"type": "array", "items": {"type": "string"}},
+            "line": {"type": "string"}
+          }
+        }
+      ]
+    },
     "unknowns": {"type": "array", "items": {"$ref": "#/$defs/check"}},
     "assumptions": {"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 1},
     "data_window": {"type": "array", "items": {"type": "string"}, "minItems": 2, "maxItems": 2},

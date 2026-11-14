@@ -123,8 +123,8 @@ def _solve_mode(ev: _Evaluator, grid: list[float]) -> dict:
 
 
 def resize(portfolio: dict, intent: dict, profile: dict, market, meta: dict) -> dict:
-    """Return the headroom of the user's own trade, `{funding, max_weight_pct, binding_check, binding_checks,
-    metrics}`, or `{"none_fit": True, "funding", "binding_checks": [...]}` when even the first step above the current
+    """Return the headroom of the user's own trade (SPEC §8 step 4), `{funding, max_weight_pct, binding_check,
+    metrics}`, or `{"none_fit": True, "binding_checks": [...]}` when even the first step above the current
     weight crosses a limit.
 
     `funding` is the intent's funding, unchanged. `portfolio` needs `weights_pct`, `value_cad` and `horizon_months`
@@ -140,10 +140,9 @@ def resize(portfolio: dict, intent: dict, profile: dict, market, meta: dict) -> 
     funding = dict(intent["funding"])
     s = _solve_mode(_Evaluator(portfolio, intent, profile, market, meta, funding), grid)
     if s["idx"] == 0:
-        return {"none_fit": True, "funding": funding, "binding_checks": sorted(set(s["binding"]))}
+        return {"none_fit": True, "binding_checks": sorted(set(s["binding"]))}
     return {"funding": funding, "max_weight_pct": float(grid[s["idx"]]),
-            "binding_check": s["binding"][0] if s["binding"] else None,
-            "binding_checks": list(s["binding"]), "metrics": dict(s["metrics"])}
+            "binding_check": s["binding"][0] if s["binding"] else None, "metrics": dict(s["metrics"])}
 
 
 # ---------------------------------------------------------------- template text (SPEC §8 presentation)
@@ -173,26 +172,29 @@ def _pct(x: float, locale: str) -> str:
     return (s.replace(".", ",") + " %") if locale == "fr-CA" else (s + " %")
 
 
-def headroom_text(headroom: dict | None, ticker: str, target_pct: float, locale: str = "fr-CA") -> str | None:
-    """One factual sentence about the user's own trade (D10: describes, never prescribes). None when no headroom."""
+def headroom_text(headroom: dict | None, funding: dict, target_pct: float, locale: str = "fr-CA") -> str | None:
+    """One factual sentence about the user's own trade (D10: describes, never prescribes). None when no headroom.
+
+    `funding` is the user's funding (the `none_fit` record does not carry it); `target_pct` is the weight asked for.
+    """
     if not headroom:
         return None
     fr = locale == "fr-CA"
-    src = _funding_label(headroom["funding"], locale)
+    src = _funding_label(funding, locale)
     if headroom.get("none_fit"):
         ids = ", ".join(headroom["binding_checks"])
-        return (f"Avec le financement indiqué ({src}), la transaction sur {ticker} franchit votre limite {ids} "
+        return (f"Avec le financement indiqué ({src}), la transaction franchit votre limite {ids} "
                 f"dès le premier palier." if fr else
-                f"With the funding you gave ({src}), the {ticker} trade crosses your limit {ids} from the first step.")
+                f"With the funding you gave ({src}), this trade crosses your limit {ids} from the first step.")
     w, b = _pct(headroom["max_weight_pct"], locale), headroom["binding_check"]
     if b is None:
-        return (f"Avec le financement indiqué ({src}), la transaction sur {ticker} reste dans vos limites jusqu'à "
+        return (f"Avec le financement indiqué ({src}), la transaction reste dans vos limites jusqu'à "
                 f"{_pct(target_pct, locale)}." if fr else
-                f"With the funding you gave ({src}), the {ticker} trade stays within your limits up to "
+                f"With the funding you gave ({src}), this trade stays within your limits up to "
                 f"{_pct(target_pct, locale)}.")
     if b == FUNDING_BINDING:
-        return (f"Le financement indiqué ({src}) ne couvre pas la transaction sur {ticker} au-delà de {w}." if fr else
-                f"The funding you gave ({src}) does not cover the {ticker} trade above {w}.")
-    return (f"Avec le financement indiqué ({src}), la transaction sur {ticker} franchit votre limite {b} "
+        return (f"Le financement indiqué ({src}) ne couvre pas la transaction au-delà de {w}." if fr else
+                f"The funding you gave ({src}) does not cover this trade above {w}.")
+    return (f"Avec le financement indiqué ({src}), la transaction franchit votre limite {b} "
             f"au-delà de {w}." if fr else
-            f"With the funding you gave ({src}), the {ticker} trade crosses your limit {b} above {w}.")
+            f"With the funding you gave ({src}), this trade crosses your limit {b} above {w}.")

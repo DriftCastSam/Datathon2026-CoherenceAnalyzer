@@ -10,7 +10,7 @@ import argparse
 import json
 from pathlib import Path
 
-from . import config, pipeline, resizer, store
+from . import config, pipeline, store
 
 PERSONAS = ("robert", "amira", "mateo")
 REQUIRED_FILES = ("profile.json", "events.jsonl", "portfolio.json")
@@ -52,10 +52,8 @@ def _print_check(rep: dict) -> None:
     print(f"  sections: {statuses}")
     if flips:
         print(f"  changed by the trade: {flips}")
-    line = resizer.headroom_text(rep["headroom"], rep["intent"]["ticker"], rep["intent"]["target_weight_pct"],
-                                 "en-CA")
-    if line:
-        print(f"  {line}")
+    if rep["headroom"]:
+        print(f"  {rep['headroom']['line']}")
     unknown = sorted({u["id"] for u in rep["unknowns"]})
     if unknown:
         print(f"  cannot verify: {', '.join(unknown)}")

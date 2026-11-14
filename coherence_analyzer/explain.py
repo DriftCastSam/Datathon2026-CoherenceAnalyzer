@@ -32,8 +32,8 @@ ADVISORY_BLOCKLIST = (
 
 
 def _fold(text: str) -> str:
-    """Casefold and strip accents, so `rééquilibrer` and `reequilibrer` match the same entry."""
-    return "".join(c for c in unicodedata.normalize("NFKD", text.casefold()) if not unicodedata.combining(c))
+    """NFKD, strip combining marks, casefold (SPEC §9.3 item 3): `rééquilibrer` and `REEQUILIBRER` match the same entry."""
+    return "".join(c for c in unicodedata.normalize("NFKD", text) if not unicodedata.combining(c)).casefold()
 
 
 def advisory_hits(text: str) -> list[str]:

@@ -601,6 +601,9 @@ def b9_save(state: dict) -> dict:
     profile, pf, refresh_ = state["profile"], state["portfolio"], state["refresh"]
     notes = list(state["metrics_current"]["assumptions"]) + list(FLOW_B_ASSUMPTIONS)
     res = state.get("headroom")
+    if res:      # the headroom line is template text (SPEC §8), stated in the report so the CLI and the UI show it as is
+        res = {**res, "line": resizer.headroom_text(res, state["intent"]["funding"],
+                                                    state["intent"]["target_weight_pct"], state["locale"])}
     if res and res.get("none_fit"):
         notes.append("Headroom: with the funding the user gave, the trade crosses a limit from the first step above "
                      f"the current weight; binding checks: {', '.join(res['binding_checks'])}.")
@@ -609,7 +612,7 @@ def b9_save(state: dict) -> dict:
         portfolio_id=pf["portfolio_id"], intent=state["intent"], checks_current=state["checks_current"],
         checks_proposed=state["checks_proposed"], metrics_current=state["metrics_current"],
         metrics_proposed=state["metrics_proposed"], sections=state["sections"], explanation=state["explanation"],
-        headroom=state["headroom"], assumptions=notes, data_window=state["data_window"],
+        headroom=res, assumptions=notes, data_window=state["data_window"],
         disclaimer=config.DISCLAIMER[state["locale"]], profile_coherence=state["profile_coherence"])
     store.save_portfolio(pf)
     store.save_report(rep)
