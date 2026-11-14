@@ -1,10 +1,14 @@
 #!/usr/bin/env python3
-"""Scripted Claude Code build loop for CoherenceAnalyzer (SPEC §17).
+"""Scripted agentic build loop for CoherenceAnalyzer (SPEC §17).
+
+Coding agent backends (--backend):
+  strands  (default) Strands Agents on Amazon Bedrock, see scripts/strands_coder.py
+  claude   headless Claude Code (`claude -p`)
 
 For each pending task in .claude/loop/tasks.json:
-  Phase A  `claude -p` writes the oracle tests from SPEC.md  -> verify (only tests/ changed, collected,
+  Phase A  the agent writes the oracle tests from SPEC.md  -> verify (only tests/ changed, collected,
            no skips, red)  -> freeze test hashes  -> git commit
-  Phase B  `claude -p` implements until frozen tests pass     -> verify (hashes intact, protected
+  Phase B  the agent implements until frozen tests pass     -> verify (hashes intact, protected
            paths untouched, acceptance green with 0 skips, full suite green)  -> git commit
   Failure  retry with the verifier output appended (max --retries), then stop for a human.
 
@@ -19,6 +23,7 @@ Usage:
   python scripts/agent_loop.py --stop-after-tests   # human reviews oracle tests before code
   python scripts/agent_loop.py --dry-run        # print prompts + plan, change nothing
   python scripts/agent_loop.py --verify P0.4    # just run the verifier for a task
+  python scripts/agent_loop.py --backend claude  # use claude -p instead of Strands
 """
 from __future__ import annotations
 
@@ -38,6 +43,12 @@ TASKS, STATE, FROZEN, RUNS = LOOP / "tasks.json", LOOP / "state.json", LOOP / "f
 BLOCKED = LOOP / "BLOCKED.md"
 PROTECTED = ("SPEC.md", "data/starter/", "data/meta/activity_tags.csv", "scripts/engine_v0.py")
 BRANCH = "loop/p0"
+
+try:  # BEDROCK_MODEL_ID / AWS_* for the Strands backend; never overrides the pinned values below
+    from dotenv import load_dotenv
+    load_dotenv(ROOT / ".env")
+except ImportError:
+    pass
 
 ENV = {**os.environ, "COHERENCE_ANALYZER_LLM": "mock", "PYTHONHASHSEED": "0", "TZ": "UTC",
        "PATH": f"{ROOT / '.venv' / 'bin'}{os.pathsep}{os.environ.get('PATH', '')}"}
@@ -152,6 +163,25 @@ def render(name: str, task: dict, retry: str = "") -> str:
                       notes=task.get("notes", ""), skip_rule=skip_rule, retry=retry)
 
 
+def agent(prompt: str, tag: str, args) -> dict:
+    return strands(prompt, tag, args) if args.backend == "strands" else claude(prompt, tag, args)
+
+
+def strands(prompt: str, tag: str, args) -> dict:
+    sys.path.insert(0, str(ROOT / "scripts"))
+    import strands_coder
+    os.environ.update(ENV)  # the agent's shell runs in-process: same pinned env as pytest_run
+    log(f"strands  [{tag}]")
+    out = strands_coder.run(prompt, max_turns=args.max_turns, timeout=args.timeout, model_id=args.model)
+    jsave(RUNS / f"{tag}.strands.json", out)
+    u = out.get("usage") or {}
+    log(f"  tool_calls={out.get('num_turns')} tokens_in={u.get('inputTokens')} tokens_out={u.get('outputTokens')} "
+        f"blocked={len(out.get('guard_cancellations') or [])} error={out.get('is_error')}")
+    if out.get("is_error"):
+        log("  " + str(out.get("result"))[:500])
+    return out
+
+
 def claude(prompt: str, tag: str, args) -> dict:
     cmd = ["claude", "-p", prompt, "--output-format", "json", "--max-turns", str(args.max_turns),
            "--permission-mode", "acceptEdits",
@@ -180,7 +210,7 @@ def phase(task: dict, name: str, verify, args) -> bool:
     retry = ""
     for attempt in range(args.retries + 1):
         tag = f"{task['id']}.{'A' if name == 'write_tests' else 'B'}.{attempt}"
-        claude(render(name, task, retry), tag, args)
+        agent(render(name, task, retry), tag, args)
         errs = verify(task)
         jsave(RUNS / f"{tag}.verify.json", {"errors": errs})
         if not errs:
@@ -215,7 +245,8 @@ def main() -> None:
     ap.add_argument("--retries", type=int, default=2)
     ap.add_argument("--max-turns", type=int, default=80)
     ap.add_argument("--timeout", type=int, default=3600)
-    ap.add_argument("--model")
+    ap.add_argument("--model", help="Bedrock model id (strands) or Claude model alias (claude)")
+    ap.add_argument("--backend", choices=("strands", "claude"), default="strands")
     ap.add_argument("--stop-after-tests", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--verify")

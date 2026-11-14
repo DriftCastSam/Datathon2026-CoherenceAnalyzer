@@ -47,6 +47,26 @@ def blocked(path: str, locked: set[str]) -> str | None:
     return None
 
 
+PY_WRITE = re.compile(r"write_text|write_bytes|open\([^)]*['\"][wax+]|shutil\.|os\.(remove|unlink|rename|replace)|\.unlink\(")
+
+
+def check_bash(cmd: str, locked: set[str] | None = None) -> str | None:
+    """Return a block message if a shell command writes to a protected or frozen path."""
+    locked = frozen() if locked is None else locked
+    for target in [*PROTECTED, *locked]:
+        t = re.escape(target.rstrip("/"))
+        if not re.search(t, cmd):
+            continue
+        redirect = re.search(rf"(>>?|\btee(\s+-a)?)\s*['\"]?\S*{t}", cmd)
+        mutate = WRITE_VERBS.search(cmd) and re.search(rf"\b(sed\s+-i|rm|mv|cp|truncate|chmod)\b[^;&|]*{t}", cmd)
+        # Any Python write API anywhere in a command that names the path. Stricter than matching
+        # path-then-write on one segment: `p = Path("x"); p.write_text(...)` used to slip through.
+        pywrite = PY_WRITE.search(cmd)
+        if redirect or mutate or pywrite:
+            return f"shell write touching {target}. {blocked(target, locked) or ''}"
+    return None
+
+
 def main() -> int:
     ev = json.load(sys.stdin)
     tool, ti = ev.get("tool_name", ""), ev.get("tool_input", {}) or {}
@@ -57,15 +77,9 @@ def main() -> int:
             print(f"BLOCKED: {msg}", file=sys.stderr)
             return 2
     elif tool == "Bash":
-        cmd = ti.get("command", "")
-        for target in [*PROTECTED, *locked]:
-            t = re.escape(target.rstrip("/"))
-            redirect = re.search(rf"(>>?|\btee(\s+-a)?)\s*['\"]?\S*{t}", cmd)
-            mutate = WRITE_VERBS.search(cmd) and re.search(rf"\b(sed\s+-i|rm|mv|truncate|chmod)\b[^;&|]*{t}", cmd)
-            pywrite = re.search(rf"{t}[^;&|]*(write_text|open\([^)]*['\"][wa])", cmd)
-            if redirect or mutate or pywrite:
-                print(f"BLOCKED: shell write touching {target}. {blocked(target, locked) or ''}", file=sys.stderr)
-                return 2
+        if msg := check_bash(ti.get("command", ""), locked):
+            print(f"BLOCKED: {msg}", file=sys.stderr)
+            return 2
     return 0
 
 
