@@ -1,0 +1,272 @@
+<title>Portée on Bedrock</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Sans+Condensed:wght@500;600&display=swap">
+<style>
+/* Layout: one reading column; diagrams are vertical state-machine stacks so they survive phone width. Node colour = who owns the step. */
+:root {
+  --bg: #f6f7f9; --surface: #ffffff; --fg: #18202b; --muted: #5a6575; --line: #d5dae2;
+  --code: #1f6f5c; --code-bg: #e7f3ef;         /* deterministic Python (Lambda) */
+  --llm: #8a4b0f; --llm-bg: #fbefdf;           /* Bedrock call */
+  --gate: #a3261f; --gate-bg: #fbe8e6;         /* gate / post-check */
+  --store: #3b4a5e; --store-bg: #e9edf2;       /* S3 / human */
+  --accent: #1f4fa3;
+  --f-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-head: "IBM Plex Sans Condensed", "IBM Plex Sans", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #11161d; --surface: #182029; --fg: #e6eaf0; --muted: #9aa5b4; --line: #2c3744;
+  --code: #6fd0b4; --code-bg: #15302a; --llm: #f0b46a; --llm-bg: #36280f;
+  --gate: #f2847b; --gate-bg: #3a1c1a; --store: #b9c4d3; --store-bg: #222c38; --accent: #7fa7ec; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #11161d; --surface: #182029; --fg: #e6eaf0; --muted: #9aa5b4; --line: #2c3744;
+  --code: #6fd0b4; --code-bg: #15302a; --llm: #f0b46a; --llm-bg: #36280f;
+  --gate: #f2847b; --gate-bg: #3a1c1a; --store: #b9c4d3; --store-bg: #222c38; --accent: #7fa7ec; color-scheme: dark }
+
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--fg); font: 15px/1.6 var(--f-body);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 40px 72px }
+.wrap { max-width: 980px; margin: 0 auto; display: grid; gap: 56px }
+h1, h2, h3 { font-family: var(--f-head); font-weight: 600; text-wrap: balance; margin: 0; line-height: 1.2 }
+h1 { font-size: clamp(30px, 5vw, 42px); letter-spacing: -0.01em }
+h2 { font-size: 26px }
+h3 { font-size: 18px }
+p { margin: 0; max-width: 68ch }
+code, .mono { font-family: var(--f-mono); font-size: 0.88em }
+.eyebrow { font: 500 12px/1 var(--f-mono); letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted) }
+section { display: grid; gap: 18px; min-width: 0 }
+.lede { font-size: 17px; color: var(--fg) }
+.sub { color: var(--muted) }
+
+/* legend */
+.legend { display: flex; flex-wrap: wrap; gap: 10px 18px; font-size: 13px; color: var(--muted) }
+.legend span { display: inline-flex; align-items: center; gap: 8px }
+.sw { width: 14px; height: 14px; border-radius: 3px; border: 1.5px solid; display: inline-block }
+.sw.code { background: var(--code-bg); border-color: var(--code) }
+.sw.llm { background: var(--llm-bg); border-color: var(--llm); border-style: dashed }
+.sw.gate { background: var(--gate-bg); border-color: var(--gate) }
+.sw.store { background: var(--store-bg); border-color: var(--store) }
+
+/* diagram primitives */
+.diagram { overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 24px 20px }
+.flow { display: flex; flex-direction: column; align-items: center; min-width: 560px }
+.n { width: min(100%, 440px); border: 1.5px solid; border-radius: 7px; padding: 9px 14px; display: grid; gap: 2px }
+.n b { font: 600 14px/1.35 var(--f-body) }
+.n small { font-size: 12.5px; color: var(--muted); line-height: 1.45 }
+.n .id { font: 500 11px/1 var(--f-mono); letter-spacing: .04em; opacity: .85 }
+.n.code { background: var(--code-bg); border-color: var(--code) } .n.code .id { color: var(--code) }
+.n.llm { background: var(--llm-bg); border-color: var(--llm); border-style: dashed } .n.llm .id { color: var(--llm) }
+.n.gate { background: var(--gate-bg); border-color: var(--gate) } .n.gate .id { color: var(--gate) }
+.n.store { background: var(--store-bg); border-color: var(--store) } .n.store .id { color: var(--store) }
+.arr { width: 2px; height: 26px; background: var(--muted); position: relative; flex: none }
+.arr::after { content: ""; position: absolute; left: -4px; bottom: -1px; border: 5px solid transparent; border-top: 7px solid var(--muted); border-bottom: 0 }
+.arr[data-l]::before { content: attr(data-l); position: absolute; left: 10px; top: 4px; white-space: nowrap; font: 11px/1 var(--f-mono); color: var(--muted) }
+.par { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 14px; width: 100%; max-width: 760px;
+  border: 1.5px dashed var(--line); border-radius: 10px; padding: 26px 12px 12px; position: relative }
+.par > .tag { position: absolute; top: 7px; left: 12px; font: 500 11px/1 var(--f-mono); color: var(--muted); letter-spacing: .04em }
+.par .lane { display: flex; flex-direction: column; align-items: center; min-width: 0 }
+.par .n { width: 100% }
+.feature { width: 100%; max-width: 800px; border-left: 3px solid var(--accent); padding: 6px 0 6px 14px; display: flex; flex-direction: column; align-items: center; position: relative; margin-block: 4px }
+.feature > .ft { align-self: flex-start; font: 600 13px/1.3 var(--f-head); color: var(--accent); letter-spacing: .02em; margin-bottom: 10px }
+.choice { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; width: 100%; max-width: 760px }
+.choice .lane { display: flex; flex-direction: column; align-items: center; gap: 0 }
+.choice .lab { font: 11px/1.3 var(--f-mono); color: var(--muted); margin-bottom: 6px; text-align: center }
+.loopback { font: 11px/1.3 var(--f-mono); color: var(--gate); margin-top: 6px; text-align: center }
+
+/* tables */
+.tbl { overflow-x: auto; border: 1px solid var(--line); border-radius: 10px; background: var(--surface) }
+table { border-collapse: collapse; width: 100%; min-width: 640px; font-size: 13.5px }
+th, td { text-align: left; vertical-align: top; padding: 10px 14px; border-bottom: 1px solid var(--line) }
+th { font: 600 12px/1.3 var(--f-head); letter-spacing: .04em; text-transform: uppercase; color: var(--muted); background: var(--bg) }
+tr:last-child td { border-bottom: 0 }
+td:first-child { font-weight: 600; white-space: nowrap }
+.pill { display: inline-block; font: 500 11px/1 var(--f-mono); padding: 4px 7px; border-radius: 99px; border: 1px solid; white-space: nowrap }
+.pill.ok { color: var(--code); border-color: var(--code); background: var(--code-bg) }
+.pill.warn { color: var(--llm); border-color: var(--llm); background: var(--llm-bg) }
+.pill.no { color: var(--gate); border-color: var(--gate); background: var(--gate-bg) }
+
+.cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px }
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 16px 18px; display: grid; gap: 8px; align-content: start; min-width: 0 }
+.card ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; font-size: 14px }
+pre { margin: 0; overflow-x: auto; background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; font: 12.5px/1.55 var(--f-mono); color: var(--fg) }
+.k { color: var(--accent) } .s { color: var(--code) } .c { color: var(--muted) }
+@media (max-width: 640px) { .choice { grid-template-columns: 1fr } .par { grid-auto-flow: row } .flow { min-width: 0 } .arr[data-l]::before { white-space: normal; width: 42vw; font-size: 10px } }
+</style>
+
+<div class="wrap">
+
+<header style="display:grid; gap:14px">
+  <div class="eyebrow">Portée · Datathon 2026 · architecture proposal v1</div>
+  <h1>Portée on Amazon Bedrock</h1>
+  <p class="lede">Two features, coherence analysis and auto-explanation, run as one scripted AWS Step Functions state machine. Bedrock is called at five fixed points, each with a forced tool schema. The model never chooses the next step, never sets a limit and never writes a number we did not compute.</p>
+  <div class="legend">
+    <span><i class="sw code"></i>Deterministic Python (Lambda, same package as local)</span>
+    <span><i class="sw llm"></i>Bedrock Converse call, forced tool use</span>
+    <span><i class="sw gate"></i>Deterministic gate or post-check</span>
+    <span><i class="sw store"></i>S3, user, fixed text</span>
+  </div>
+</header>
+
+<!-- ============ OVERVIEW ============ -->
+<section>
+  <div class="eyebrow">Flow B · trade check (SPEC §4)</div>
+  <h2>The whole state machine</h2>
+  <p class="sub">Flow C (portfolio review) is the same machine with the intent states skipped. Every box is one Step Functions state. Each Lambda imports <code>portee</code>, so the cloud runs the exact code the tests cover.</p>
+  <div class="diagram"><div class="flow">
+    <div class="n store"><span class="id">B2 · UI</span><b>User confirms the intent</b><small>NVDA 10 %, funded from ZST.TO. The confirmed intent is user-declared data.</small></div>
+    <div class="arr" data-l="StartExecution"></div>
+    <div class="n code"><span class="id">LoadContext</span><b>store.load</b><small>profile v2, events.jsonl, portfolio from S3 · canonical JSON, events sorted by ts</small></div>
+    <div class="arr"></div>
+
+    <div class="feature"><div class="ft">Feature 1 · Coherence analysis</div>
+      <div class="n code"><span class="id">A1 · DeriveRules</span><b>rules.derive</b><small>life_stage, ef_months, effective horizon, capacity, effective risk</small></div>
+      <div class="arr"></div>
+      <div class="par"><span class="tag">Parallel state · only branches whose inputs changed</span>
+        <div class="lane"><div class="n llm"><span class="id">N1</span><b>behaviour_classifier</b><small>events only, no profile fields</small></div><div class="arr"></div><div class="n gate"><span class="id">gate</span><b>evidence, clamp ±1</b></div></div>
+        <div class="lane"><div class="n llm"><span class="id">N2 · Map</span><b>question_rubric</b><small>sub-scores, code sums</small></div><div class="arr"></div><div class="n gate"><span class="id">gate</span><b>evidence, ±5 pts</b></div></div>
+        <div class="lane"><div class="n llm"><span class="id">N3</span><b>values_parser</b><small>quotes must be exact substrings</small></div><div class="arr"></div><div class="n gate"><span class="id">gate</span><b>quote check</b></div></div>
+      </div>
+      <div class="arr"></div>
+      <div class="n code"><span class="id">A4–A5 · BuildLimits</span><b>rules.derive → rules.limits</b><small>inputs: <code>rule:</code> fields + user values only · writes limits_trace</small></div>
+      <div class="arr"></div>
+      <div class="n code"><span class="id">B4 · ApplyIntent</span><b>intent.apply</b><small>current → proposed weights</small></div>
+      <div class="arr"></div>
+      <div class="par"><span class="tag">Parallel state · same seed</span>
+        <div class="lane"><div class="n code"><span class="id">B5</span><b>engine.analyse(current)</b><small>seed 7 · n 5000 · block 12</small></div></div>
+        <div class="lane"><div class="n code"><span class="id">B5</span><b>engine.analyse(proposed)</b><small>seed 7 · n 5000 · block 12</small></div></div>
+      </div>
+      <div class="arr"></div>
+      <div class="n code"><span class="id">B6 · Checks</span><b>hard H1–H14 → violation · soft S1–S4 → warning at most</b><small>status diff current vs proposed · verdict by fixed rule (§7.5)</small></div>
+      <div class="arr" data-l="Choice: any violation?"></div>
+      <div class="n code"><span class="id">B7 · Resizer</span><b>what fits within your own limits</b><small>0.5 pp scan on cheap checks, binary search on engine checks, confirm at n 5000</small></div>
+    </div>
+
+    <div class="arr"></div>
+
+    <div class="feature"><div class="ft">Feature 2 · Auto-explanation</div>
+      <div class="n code"><span class="id">B8a · BuildFacts</span><b>explain.build_payload</b><small>non-pass checks, derived_from chains, metrics pre-formatted as strings</small></div>
+      <div class="arr"></div>
+      <div class="n llm"><span class="id">N5 · Explain</span><b>explainer + Bedrock Guardrail</b><small>segments typed fact / assumption / inference / option / unknown, each with refs</small></div>
+      <div class="arr"></div>
+      <div class="n gate"><span class="id">B8b · PostCheck</span><b>refs resolve · numcheck · advisory blocklist</b></div>
+      <div class="arr" data-l="Choice"></div>
+      <div class="choice">
+        <div class="lane"><div class="lab">pass</div><div class="n code"><b>mode = llm</b><small>or llm_retry on 2nd try</small></div></div>
+        <div class="lane"><div class="lab">fail twice</div><div class="n code"><b>template_explain</b><small>mode = template · always valid</small></div></div>
+      </div>
+      <div class="loopback">↺ first failure: back to N5 once, with the failure list</div>
+    </div>
+
+    <div class="arr"></div>
+    <div class="n store"><span class="id">B9 · Save</span><b>fixed disclaimer → reports/&lt;run_id&gt; + audit/&lt;run_id&gt;</b><small>S3 · audit lists every LLM call, input_hash, cache hit, gate status</small></div>
+  </div></div>
+</section>
+
+<!-- ============ FEATURE 1 ============ -->
+<section>
+  <div class="eyebrow">Feature 1</div>
+  <h2>Coherence analysis: the LLM can only add warnings</h2>
+  <p>The analysis has two lanes that meet only at the verdict. The rule lane computes limits and hard checks from user-declared values and <code>rule:</code> fields. The LLM lane reads behaviour, questions and free-text values, passes the gate, and feeds soft checks. Its strongest possible effect is a <span class="pill warn">warning</span>. A <span class="pill no">violation</span> can only come from the rule lane.</p>
+  <div class="cols">
+    <div class="card"><h3>Rule lane</h3><ul>
+      <li><code>derive</code> → <code>limits</code> → H1–H14: pure functions, registered with their input paths.</li>
+      <li><code>test_limits_no_llm_inputs</code> walks the registry and fails if any <code>llm:</code> path reaches <code>limits</code>.</li>
+      <li>N3 rules enter limits only after the user approves them, which makes them user-declared.</li>
+    </ul></div>
+    <div class="card"><h3>LLM lane</h3><ul>
+      <li>N1, N2, N3 run in a Parallel state. A branch is skipped when its input hash is unchanged.</li>
+      <li>The gate keeps the old value on abstain and rejects the whole output if one cited event_id or quote doesn't exist.</li>
+      <li>Soft checks run only when confidence ≥ 0.5. Otherwise they report <span class="pill ok">info</span> "insufficient evidence".</li>
+    </ul></div>
+  </div>
+</section>
+
+<!-- ============ FEATURE 2 ============ -->
+<section>
+  <div class="eyebrow">Feature 2</div>
+  <h2>Auto-explanation: worst case is a deterministic template</h2>
+  <p>The explainer sees only the facts payload, never the raw profile. Numbers arrive pre-formatted (<code>"vol_pct": "7.4 %"</code>), so the model copies them and never computes. Post-checks are code. If they fail twice, the template writes the explanation from the same checks. Each report records which path it took in <code>explanation.mode</code>.</p>
+  <pre><span class="c">// Step Functions ASL fragment: the explanation retry is a state, not a model decision</span>
+<span class="k">"PostCheck"</span>: { <span class="k">"Type"</span>: <span class="s">"Task"</span>, <span class="k">"Resource"</span>: <span class="s">"arn:aws:lambda:…:portee-postcheck"</span>, <span class="k">"Next"</span>: <span class="s">"ExplainOk?"</span> },
+<span class="k">"ExplainOk?"</span>: { <span class="k">"Type"</span>: <span class="s">"Choice"</span>, <span class="k">"Choices"</span>: [
+  { <span class="k">"Variable"</span>: <span class="s">"$.post.ok"</span>, <span class="k">"BooleanEquals"</span>: true, <span class="k">"Next"</span>: <span class="s">"Save"</span> },
+  { <span class="k">"Variable"</span>: <span class="s">"$.post.attempt"</span>, <span class="k">"NumericLessThan"</span>: 2, <span class="k">"Next"</span>: <span class="s">"Explain"</span> } ],
+  <span class="k">"Default"</span>: <span class="s">"TemplateExplain"</span> }</pre>
+</section>
+
+<!-- ============ NODE CONTRACT ============ -->
+<section>
+  <div class="eyebrow">One contract for every Bedrock call</div>
+  <h2>The five LLM nodes</h2>
+  <p class="sub">All five use <code>llm/bedrock.call_tool</code>: Converse with one toolSpec, <code>toolChoice</code> forced to that tool, temperature 0, jsonschema validation with one retry, and a cache keyed by <code>sha256(node, prompt_version, model_id, payload)</code>.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Node</th><th>Sees</th><th>Returns</th><th>Admitted by</th><th>Strongest effect</th></tr></thead>
+    <tbody>
+      <tr><td>N1 behaviour_classifier</td><td>≤ 20 question / order_intent events in the 30 days before the triggering event</td><td>level, confidence ≤ 0.8, evidence by event_id</td><td>gate: evidence, ±1 level clamp</td><td><span class="pill warn">warning</span> S1, S3</td></tr>
+      <tr><td>N2 question_rubric</td><td>one question event</td><td>four 0–3 sub-scores (code computes the score)</td><td>gate: ±5 pts on knowledge.score</td><td><span class="pill warn">warning</span> S2</td></tr>
+      <tr><td>N3 values_parser</td><td><code>values.notes</code></td><td>rules with exact quotes</td><td>gate: quote ⊂ notes, then user approval</td><td><span class="pill warn">warning</span>, or a limit after approval</td></tr>
+      <tr><td>N4 intent_parser</td><td>order text, universe enum, weights</td><td>draft intent + ambiguities</td><td>ticker enum in schema, user confirms in B2</td><td><span class="pill ok">draft only</span></td></tr>
+      <tr><td>N5 explainer</td><td>facts payload only</td><td>headline + typed segments with refs</td><td>refs, numcheck, blocklist, Guardrail</td><td><span class="pill ok">text</span> (template fallback)</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============ DETERMINISM ============ -->
+<section>
+  <div class="eyebrow">Where variance can enter and what pins it</div>
+  <h2>Determinism, layer by layer</h2>
+  <p>Temperature 0 makes Bedrock output stable, not bit-exact. Reproducibility comes from the cache: a recorded response is replayed exactly, and <code>PORTEE_LLM=mock</code> runs the full pipeline from <code>fixtures/llm_cache/</code> with no network.</p>
+  <div class="tbl"><table>
+    <thead><tr><th>Layer</th><th>Source of variance</th><th>Pinned by</th></tr></thead>
+    <tbody>
+      <tr><td>Control flow</td><td>A model picking the next step</td><td>Fixed ASL. No ReAct loop, no InvokeAgent orchestration.</td></tr>
+      <tr><td>LLM input</td><td>Key order, clock-relative windows</td><td>Canonical JSON (sorted keys). The 30-day window is anchored on the triggering event's ts, not on wall-clock time.</td></tr>
+      <tr><td>LLM output shape</td><td>Free text, missing fields</td><td>Forced toolChoice + JSON Schema + validator retry, then <code>LLMOutputInvalid</code></td></tr>
+      <tr><td>LLM output content</td><td>Sampling, model updates</td><td>Cache by input hash. Pinned model ID. <code>prompts/&lt;node&gt;.vN.md</code> bumps change the key and force a re-record.</td></tr>
+      <tr><td>Admission</td><td>Invented evidence, big jumps</td><td>gate.py: evidence must exist, movement clamps, abstain keeps the old value</td></tr>
+      <tr><td>Effect</td><td>LLM changing a verdict</td><td>LLM fields reach soft checks only. Limits trace test.</td></tr>
+      <tr><td>Numbers in prose</td><td>Hallucinated or recomputed figures</td><td>Pre-formatted payload + numcheck + template fallback</td></tr>
+      <tr><td>Simulation</td><td>Monte Carlo noise</td><td>seed 7, n 5000, block 12, the same seed for current and proposed</td></tr>
+      <tr><td>Report</td><td>run_id, timestamps</td><td>Kept only in audit metadata. Two runs give byte-identical reports apart from those fields (P0.8 test).</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============ BEDROCK OPTIONS ============ -->
+<section>
+  <div class="eyebrow">Which Bedrock product</div>
+  <h2>Why Step Functions + Converse instead of Bedrock Agents</h2>
+  <div class="tbl"><table>
+    <thead><tr><th>Option</th><th>Who decides the next step</th><th>Fit for Portée</th></tr></thead>
+    <tbody>
+      <tr><td>Step Functions + Converse <span class="pill ok">recommended</span></td><td>Our ASL</td><td>Matches SPEC "scripted DAG". The local pipeline and the cloud share one Python package, and mock mode works unchanged. The diagram is already planned for the video (SPEC §17 step 15).</td></tr>
+      <tr><td>Bedrock Flows <span class="pill warn">alternative</span></td><td>Our flow graph (prompt, Lambda, condition, iterator/collector, inline-code nodes)</td><td>Also a fixed DAG, so it would work for the explanation subgraph. Keep the gate and numcheck in Lambda nodes. Before choosing it, check that a prompt node can force a tool schema on our model. If it can't, call Converse from a Lambda node, which gives the Step Functions design again.</td></tr>
+      <tr><td>Bedrock Agents (InvokeAgent) <span class="pill no">not for the core</span></td><td>The model, via its orchestration loop over action groups</td><td>The same input can take different paths, which conflicts with invariant 8. Return-of-control only hands execution back to the app. The model still picks the action. Possible later for a free-text intake front-end, never for checks or limits.</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+<!-- ============ DEV LOOP ============ -->
+<section>
+  <div class="eyebrow">Development side · scripts/agent_loop.py</div>
+  <h2>The build loop applies the same idea to Claude Code</h2>
+  <p>The coding agent proposes diffs. Pytest, git and sha256 decide whether a step is done. The spec's numbers become frozen tests before any implementation exists.</p>
+  <div class="diagram"><div class="flow">
+    <div class="n store"><span class="id">.claude/loop/tasks.json</span><b>Fixed queue P0.2 → P0.8 (SPEC §17)</b></div>
+    <div class="arr"></div>
+    <div class="n llm"><span class="id">Phase A · claude -p</span><b>Write oracle tests from SPEC §15</b><small>may only touch tests/</small></div>
+    <div class="arr"></div>
+    <div class="n gate"><span class="id">verify A</span><b>only tests/ changed · collected · no skips · red</b></div>
+    <div class="arr" data-l="freeze sha256 · commit"></div>
+    <div class="n llm"><span class="id">Phase B · claude -p</span><b>Implement until the frozen tests pass</b><small>PreToolUse hook blocks frozen tests, SPEC.md, starter data, activity_tags.csv</small></div>
+    <div class="arr"></div>
+    <div class="n gate"><span class="id">verify B</span><b>hashes intact · protected paths clean · acceptance green, 0 skips · full suite green</b></div>
+    <div class="arr" data-l="pass → commit · fail → retry ≤ 2, then stop"></div>
+    <div class="n code"><span class="id">env</span><b>PORTEE_LLM=mock · PYTHONHASHSEED=0 · TZ=UTC · branch loop/p0</b></div>
+  </div></div>
+</section>
+
+<footer class="sub" style="font-size:13px">Educational simulation with fictional profiles. This is not personalised financial advice. No transaction is executed.</footer>
+</div>
