@@ -34,8 +34,24 @@ def load_fx(data_dir: Path = DATA_DIR) -> pd.Series:
 
 
 def load_macro(data_dir: Path = DATA_DIR) -> pd.DataFrame:
-    """Not used in v1 (P2: rate-scenario stress)."""
+    """Long format `date, series_id, value, unit, frequency, label, source`. Used by the rate stress (P2.16)."""
     return pd.read_csv(Path(data_dir) / "macro_rates.csv", parse_dates=["date"])
+
+
+def macro_series(macro: pd.DataFrame, series_id: str, upto: str | None = None) -> pd.Series:
+    """One series of a `load_macro` frame as a float Series indexed by date (sorted, NaN dropped), up to and including
+    `upto` (D1: the reference date, never the wall clock). KeyError if the series is absent."""
+    rows = macro[macro["series_id"] == series_id]
+    if rows.empty:
+        raise KeyError(f"macro series {series_id!r} not in macro_rates.csv")
+    s = rows.set_index("date")["value"].astype(float).dropna().sort_index()
+    if upto is not None:
+        s = s[s.index <= pd.Timestamp(upto)]
+    return s
+
+
+def load_macro_series(series_id: str, data_dir: Path = DATA_DIR, upto: str | None = None) -> pd.Series:
+    return macro_series(load_macro(data_dir), series_id, upto)
 
 
 META_COLUMNS: dict[str, tuple[str, ...]] = {

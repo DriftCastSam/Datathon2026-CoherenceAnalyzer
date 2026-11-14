@@ -49,6 +49,79 @@
         "findings": {"type": "array", "items": {"$ref": "#/$defs/profile_finding"}}
       }
     },
+    "stress": {
+      "description": "Rate-scenario stress (SPEC §17 step 16, coherence_analyzer/stress.py): bond ETF price change ~= -duration x delta_y. Information only: never a check, never in the verdict, never an input of limits (invariants 2, 3). Labelled assumptions; sourced = false when durations come from the ASSUMED table.",
+      "type": "object",
+      "required": ["status", "kind", "sourced", "feeds_limits", "as_of", "value_cad", "method", "bond_holdings",
+                   "missing_duration", "not_modelled", "scenarios", "rate_context", "assumptions", "facts"],
+      "properties": {
+        "status": {"const": "info"},
+        "kind": {"const": "rate_scenario"},
+        "sourced": {"type": "boolean"},
+        "feeds_limits": {"const": false},
+        "as_of": {"type": ["string", "null"]},
+        "value_cad": {"type": "number"},
+        "method": {"type": "string"},
+        "bond_holdings": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["ticker", "weight", "duration", "duration_source", "series_id"],
+            "properties": {
+              "ticker": {"type": "string"},
+              "weight": {"type": "number", "minimum": 0, "maximum": 1},
+              "duration": {"type": "number", "minimum": 0},
+              "duration_source": {"type": "string", "minLength": 1},
+              "duration_as_of": {"type": ["string", "null"]},
+              "series_id": {"type": ["string", "null"]}
+            }
+          }
+        },
+        "missing_duration": {"type": "array", "items": {"type": "string"}},
+        "not_modelled": {
+          "type": "object",
+          "required": ["weight", "tickers"],
+          "properties": {"weight": {"type": "number"}, "tickers": {"type": "array", "items": {"type": "string"}}}
+        },
+        "scenarios": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["id", "kind", "shock_bp", "impact", "impact_cad", "holdings"],
+            "properties": {
+              "id": {"type": "string"},
+              "kind": {"enum": ["parallel", "historical"]},
+              "shock_bp": {"type": ["number", "null"]},
+              "impact": {"type": "number"},
+              "impact_cad": {"type": "number"},
+              "holdings": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "required": ["ticker", "shock_bp", "price_impact", "impact_cad"],
+                  "properties": {"ticker": {"type": "string"}, "shock_bp": {"type": "number"},
+                                 "price_impact": {"type": "number"}, "impact_cad": {"type": "number"}}
+                }
+              }
+            }
+          }
+        },
+        "rate_context": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["series_id", "label", "current", "current_date", "min", "max", "max_12m_rise_bp",
+                         "max_12m_rise_end"],
+            "properties": {"series_id": {"type": "string"}, "label": {"type": "string"}, "current": {"type": "number"},
+                           "current_date": {"type": "string"}, "min": {"type": "number"}, "max": {"type": "number"},
+                           "max_12m_rise_bp": {"type": ["number", "null"]},
+                           "max_12m_rise_end": {"type": ["string", "null"]}}
+          }
+        },
+        "assumptions": {"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 1},
+        "facts": {"type": "object", "required": ["locale", "scenarios", "rate_context"]}
+      }
+    },
     "sections": {
       "type": "array",
       "minItems": 5,
