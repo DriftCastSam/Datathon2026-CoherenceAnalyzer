@@ -34,6 +34,8 @@ The build order follows SPEC §17. Done:
 - **P0.2:** `levels.py`, `rules/registry.py`, `rules/derive.py`, `rules/limits.py` + tests.
 - **P0.3:** `coherence_analyzer/schemas/profile.v2.json` (JSON Schema draft 2020-12) and the Robert fixture converted to schema v2 (`fixtures/robert/{profile.json, events.jsonl, intents.json}`).
 
+- **P0.5:** `intent.py` (`apply` for every `funding.kind`) and `resizer.py` (SPEC §8 as written, docs/spec-decisions.md D2) + `tests/test_intent.py`, `tests/test_resizer.py`. Measured on the starter data: Robert + NVDA from ZST.TO tops out at 1.5% (H9 binds; SPEC §8's 5.0% / H4 is only the cheap-scan stop), pro_rata_all 2.0%, pro-rata etf_equity 2.0%, pro-rata equity 1.5%, all binding H9.
+
 Everything else is stubbed with signatures and `NotImplementedError`. The matching tests are skip-marked with their build step.
 
 Remaining TODOs:
@@ -64,6 +66,17 @@ All persona financial figures beyond the case brief are fictional team assumptio
   - The v1 free-text parsed rule `prefer_understandable_business` (approved) is split into two approved items, one per sentence of the notes: `prefer_attribute {attribute: understandable_business}` and `avoid_attribute {attribute: hype}`, both `applies_to: single_stocks`. Neither kind is promoted into `limits` (§6.2 N3), so limits are unchanged.
   - Event timestamps carry the Montreal local offset (-05:00; DST ended 2026-11-01 at 02:00, before the quiz event); intent `in_0001` is confirmed 3 minutes after ev_0007.
   - `limits_trace` is the output of `rules.limits.build_trace()`, written verbatim (a test checks it matches).
+
+- **intent.apply (P0.5), cases SPEC §3.6 leaves open:**
+  - Only `buy` with a target at or above the current weight is applied; anything else raises `ValueError`.
+  - `specific`: a funding ticker holding less than the needed weight raises `ValueError` (never negative weights). Tickers that reach 0 are dropped from the result.
+  - `pro_rata_class`: the pool is every held ticker of that `asset_class` (from `assets_universe`) *except the target*, which never funds itself. An empty or too-small pool raises `ValueError`.
+  - `cash_contribution`: new value = value + amount; nothing is sold, so existing holdings keep their CAD value. The ticker gets the cash up to its target (of the enlarged portfolio). An under-funded purchase leaves the ticker below target. Cash beyond the target is spread pro rata over the other holdings, so weights always sum to 100.
+- **Resizer (P0.5):**
+  - The portfolio dict passed in carries `horizon_months` (SPEC §3.5 fixture value, 48 for Robert), since §8 gives the resizer no horizon argument.
+  - "Binary search downward" runs on the 0.5 pp grid of the cheap scan (`config.RESIZER_STEP_PP`), so results are grid values. After the n=1000 search, the n=5000 confirmation steps down while H7-H10 fail and up while the next grid point still passes. A held target ticker starts the grid at its current weight.
+  - Returned options are the modes with a max above the current weight, ranked by max weight (ties by mode order: user's funding, `pro_rata_all`, etf_equity, equity). The user's own funding is always kept in the top 3 when it fits. `binding_check` is the first violated check at the next grid point (`None` when the whole target fits, `FUNDING` when the source cannot cover it). When no mode fits, `binding_checks` lists the sorted union.
+  - Golden values are in `tests/test_resizer.py` (D2 replaces the "5.0% H4 / 8.0% H3" expectation).
 
 ## Disclaimer
 
