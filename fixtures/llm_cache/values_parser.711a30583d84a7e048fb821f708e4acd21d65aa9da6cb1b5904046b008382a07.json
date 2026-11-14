@@ -1,0 +1,52 @@
+{
+  "cache_key": "711a30583d84a7e048fb821f708e4acd21d65aa9da6cb1b5904046b008382a07",
+  "call_log": {
+    "hand_written": true,
+    "latency_ms": 0,
+    "tokens_in": 0,
+    "tokens_out": 0
+  },
+  "input_hash": "sha256:eb3a370909ae3e06362e5ef58b63f1b9ffa8b35245d902f35a8859c009fa6aa5",
+  "model_id": "fixture:hand-written",
+  "node": "values_parser",
+  "output": {
+    "rules": [
+      {
+        "applies_to": "all",
+        "params": {
+          "tag": "significant_environmental_controversy"
+        },
+        "quote": "Avoid companies with major environmental or social controversies.",
+        "rule_kind": "exclude_activity"
+      },
+      {
+        "applies_to": "all",
+        "params": {
+          "tag": "significant_social_controversy"
+        },
+        "quote": "Avoid companies with major environmental or social controversies.",
+        "rule_kind": "exclude_activity"
+      },
+      {
+        "applies_to": "all",
+        "params": {
+          "note": "open to new tech if it fits"
+        },
+        "quote": "Open to new tech if it fits",
+        "rule_kind": "other"
+      },
+      {
+        "applies_to": "all",
+        "params": {
+          "attribute": "speculative"
+        },
+        "quote": "nothing speculative.",
+        "rule_kind": "avoid_attribute"
+      }
+    ]
+  },
+  "prompt_version": "values_parser.v1",
+  "user_payload": {
+    "notes": "Avoid companies with major environmental or social controversies. Open to new tech if it fits, nothing speculative."
+  }
+}

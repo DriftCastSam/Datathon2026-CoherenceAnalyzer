@@ -475,8 +475,14 @@ def test_cli_review_profile_line_lists_the_finding_ids_in_order(monkeypatch):
 
 
 def test_cli_demo_prints_a_profile_line_per_review():
-    """§12 + D7: `cli demo` reviews Robert's current and review portfolios (Amira/Mateo fixtures are incomplete) and
-    prints the profile line for each report."""
+    """§12 + D7: `cli demo` reviews Robert's current and review portfolios, then every other persona whose fixtures are
+    complete (P1.1 completes Amira and Mateo, §16), and prints the profile line for each report.
+    Oracle fix (P1.1): the P0.12 version pinned exactly two lines, valid only while Amira/Mateo were incomplete."""
+    import re
     lines = _cli(["demo"])
     profile_lines = [ln.rstrip() for ln in lines if ln.startswith("profile:")]
-    assert profile_lines == [PROFILE_LINE, PROFILE_LINE]
+    others = [n for n in ("amira", "mateo")
+              if all((ROOT / "fixtures" / n / f).exists() for f in ("profile.json", "events.jsonl", "portfolio.json"))]
+    assert len(profile_lines) == 2 + len(others)
+    assert profile_lines[:2] == [PROFILE_LINE, PROFILE_LINE]
+    assert all(re.fullmatch(r"profile: (pass|info|warning)( \([A-Z0-9., ]+\))?", ln) for ln in profile_lines)

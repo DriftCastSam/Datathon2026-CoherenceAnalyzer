@@ -1,5 +1,6 @@
-"""Write the hand-written Robert N1 + N4 responses into fixtures/llm_cache (SPEC §16: "until Bedrock access works,
-hand-write plausible responses that pass the schemas").
+"""Write the hand-written N1, N3, N4 and N6 responses into fixtures/llm_cache (SPEC §16: "until Bedrock access works,
+hand-write plausible responses that pass the schemas"): Robert N1 + N4, N3 for Robert / Amira / Mateo, N6 for the three
+personas (P1.1 added Mateo's N3 and Amira's / Mateo's N6; it never rewrites an entry with different content).
 
     python scripts/handwrite_llm_cache.py
 
@@ -22,6 +23,8 @@ from coherence_analyzer.coherence import internal  # noqa: E402
 from coherence_analyzer.llm import bedrock, extractors  # noqa: E402
 
 ROBERT = ROOT / "fixtures" / "robert"
+AMIRA = ROOT / "fixtures" / "amira"
+MATEO = ROOT / "fixtures" / "mateo"
 CALL_LOG = {"hand_written": True, "tokens_in": 0, "tokens_out": 0, "latency_ms": 0}
 
 N1_OUTPUT = {
@@ -52,6 +55,22 @@ N3_ROBERT_OUTPUT = {"rules": [
      "quote": "No hype stocks unless I can explain the business."},
 ]}
 
+# Mateo's notes (SPEC §16): both controversy tags (the ones he declared in values.environment / values.social), the
+# "new tech if it fits" half as a non-checkable `other` rule, and a soft `speculative` reminder (S4).
+N3_MATEO_NOTES = ("Avoid companies with major environmental or social controversies. "
+                  "Open to new tech if it fits, nothing speculative.")
+_MATEO_CONTROVERSY = "Avoid companies with major environmental or social controversies."
+N3_MATEO_OUTPUT = {"rules": [
+    {"rule_kind": "exclude_activity", "params": {"tag": "significant_environmental_controversy"}, "applies_to": "all",
+     "quote": _MATEO_CONTROVERSY},
+    {"rule_kind": "exclude_activity", "params": {"tag": "significant_social_controversy"}, "applies_to": "all",
+     "quote": _MATEO_CONTROVERSY},
+    {"rule_kind": "other", "params": {"note": "open to new tech if it fits"}, "applies_to": "all",
+     "quote": "Open to new tech if it fits"},
+    {"rule_kind": "avoid_attribute", "params": {"attribute": "speculative"}, "applies_to": "all",
+     "quote": "nothing speculative."},
+]}
+
 # Amira's notes (SPEC §16): a theme rule with NO number, so the intake form asks for it (D7 point 1).
 N3_AMIRA_NOTES = "I love AI and new tech but I don't want everything in tech."
 N3_AMIRA_OUTPUT = {"rules": [
@@ -68,23 +87,35 @@ N6_ROBERT_OUTPUT = {"abstain": False, "findings": [
      "reason": "Interest in new opportunities may pull against the wish to avoid hype stocks."},
 ]}
 
+# Amira: her interest in AI / new tech sits against her own "not everything in tech" note (SPEC §16).
+N6_AMIRA_OUTPUT = {"abstain": False, "findings": [
+    {"kind": "tension", "fields": ["preferences.interests", "values.notes"],
+     "quotes": ["new_tech", "I don't want everything in tech."],
+     "reason": "Interest in new tech may pull against the wish not to hold everything in tech."},
+]}
 
-def _write_n6_robert(profile: dict) -> None:
-    as_of = json.loads((ROBERT / "portfolio.json").read_text())["as_of"]
+# Mateo: his declared exclusions, interests and notes agree; the N6 call finds nothing to flag (and does not abstain).
+N6_MATEO_OUTPUT = {"abstain": False, "findings": []}
+
+
+def _write_n6(fixture: Path, output: dict) -> None:
+    profile = json.loads((fixture / "profile.json").read_text(encoding="utf-8"))
+    as_of = json.loads((fixture / "portfolio.json").read_text())["as_of"]
     payload = internal.n6_payload(profile, internal.rule_findings(profile, as_of))
-    Draft202012Validator(extractors.load_schema("profile_consistency")).validate(N6_ROBERT_OUTPUT)
+    Draft202012Validator(extractors.load_schema("profile_consistency")).validate(output)
     context = {"event_ids": set(), "notes": profile["values"]["notes"], "profile": profile,
                "model_id": bedrock.MOCK_MODEL_ID, "prompt_version": extractors.prompt_version("profile_consistency"),
                "input_hash": bedrock.input_hash(payload)}
-    assert gate.gate("profile_consistency", None, N6_ROBERT_OUTPUT, context)[1] == "accepted"
+    assert gate.gate("profile_consistency", None, output, context)[1] == "accepted"
     p = bedrock.write_entry(config.LLM_CACHE_DIR, "profile_consistency", extractors.prompt_version("profile_consistency"),
-                            bedrock.MOCK_MODEL_ID, payload, N6_ROBERT_OUTPUT, CALL_LOG)
+                            bedrock.MOCK_MODEL_ID, payload, output, CALL_LOG)
     print(p.relative_to(ROOT))
 
 
 def main() -> None:
     profile = json.loads((ROBERT / "profile.json").read_text(encoding="utf-8"))
-    n3_cases = [(profile["values"]["notes"], N3_ROBERT_OUTPUT), (N3_AMIRA_NOTES, N3_AMIRA_OUTPUT)]
+    n3_cases = [(profile["values"]["notes"], N3_ROBERT_OUTPUT), (N3_AMIRA_NOTES, N3_AMIRA_OUTPUT),
+                (N3_MATEO_NOTES, N3_MATEO_OUTPUT)]
     for notes, out in n3_cases:
         Draft202012Validator(extractors.load_schema("values_parser")).validate(out)
         assert all(r["quote"] in notes for r in out["rules"])
@@ -92,7 +123,8 @@ def main() -> None:
                                 bedrock.MOCK_MODEL_ID, extractors.n3_payload(notes), out, CALL_LOG)
         print(p.relative_to(ROOT))
 
-    _write_n6_robert(profile)
+    for fixture, n6_output in ((ROBERT, N6_ROBERT_OUTPUT), (AMIRA, N6_AMIRA_OUTPUT), (MATEO, N6_MATEO_OUTPUT)):
+        _write_n6(fixture, n6_output)
 
     events = [json.loads(line) for line in (ROBERT / "events.jsonl").read_text().splitlines() if line.strip()]
     weights = json.loads((ROBERT / "portfolio.json").read_text())["weights_pct"]

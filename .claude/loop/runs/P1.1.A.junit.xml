@@ -1,0 +1,1263 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="34" failures="5" skipped="0" tests="41" time="1.353" timestamp="2026-11-14T22:44:04.608311+00:00" hostname="bomboclat-laptop"><testcase classname="tests.test_personas" name="test_profile_validates_and_profile_ids_match_the_portfolio_and_events[amira]" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">@pytest.fixture(scope="module")
+    def raw() -&gt; dict:
+&gt;       return {n: _read(n, "profile.json") for n in PERSONAS}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_personas.py:71: in _read
+    return json.loads((_dir(name) / file).read_text(encoding="utf-8"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_profile_validates_and_profile_ids_match_the_portfolio_and_events[mateo]" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">@pytest.fixture(scope="module")
+    def raw() -&gt; dict:
+&gt;       return {n: _read(n, "profile.json") for n in PERSONAS}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_personas.py:71: in _read
+    return json.loads((_dir(name) / file).read_text(encoding="utf-8"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_llm_fields_are_stamped_hand_written_and_limits_are_generated[amira]" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">@pytest.fixture(scope="module")
+    def raw() -&gt; dict:
+&gt;       return {n: _read(n, "profile.json") for n in PERSONAS}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_personas.py:71: in _read
+    return json.loads((_dir(name) / file).read_text(encoding="utf-8"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_llm_fields_are_stamped_hand_written_and_limits_are_generated[mateo]" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">@pytest.fixture(scope="module")
+    def raw() -&gt; dict:
+&gt;       return {n: _read(n, "profile.json") for n in PERSONAS}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_personas.py:71: in _read
+    return json.loads((_dir(name) / file).read_text(encoding="utf-8"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_amira_declared_profile_matches_section_16" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">@pytest.fixture(scope="module")
+    def raw() -&gt; dict:
+&gt;       return {n: _read(n, "profile.json") for n in PERSONAS}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_personas.py:71: in _read
+    return json.loads((_dir(name) / file).read_text(encoding="utf-8"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_mateo_declared_profile_matches_section_16" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">@pytest.fixture(scope="module")
+    def raw() -&gt; dict:
+&gt;       return {n: _read(n, "profile.json") for n in PERSONAS}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_personas.py:71: in _read
+    return json.loads((_dir(name) / file).read_text(encoding="utf-8"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_amira_rules_give_capacity_high_and_effective_high" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">@pytest.fixture(scope="module")
+    def raw() -&gt; dict:
+&gt;       return {n: _read(n, "profile.json") for n in PERSONAS}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_personas.py:71: in _read
+    return json.loads((_dir(name) / file).read_text(encoding="utf-8"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_mateo_rules_give_effective_moderate" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">@pytest.fixture(scope="module")
+    def raw() -&gt; dict:
+&gt;       return {n: _read(n, "profile.json") for n in PERSONAS}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_personas.py:71: in _read
+    return json.loads((_dir(name) / file).read_text(encoding="utf-8"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_amira_limits_are_the_high_row_of_the_table_applied_as_section_7_2" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">@pytest.fixture(scope="module")
+    def raw() -&gt; dict:
+&gt;       return {n: _read(n, "profile.json") for n in PERSONAS}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_personas.py:71: in _read
+    return json.loads((_dir(name) / file).read_text(encoding="utf-8"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_mateo_limits_are_the_moderate_row_of_the_table_applied_as_section_7_2" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">@pytest.fixture(scope="module")
+    def raw() -&gt; dict:
+&gt;       return {n: _read(n, "profile.json") for n in PERSONAS}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_personas.py:71: in _read
+    return json.loads((_dir(name) / file).read_text(encoding="utf-8"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_amira_approved_theme_rule_becomes_the_theme_limit_with_trace" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">@pytest.fixture(scope="module")
+    def raw() -&gt; dict:
+&gt;       return {n: _read(n, "profile.json") for n in PERSONAS}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_personas.py:71: in _read
+    return json.loads((_dir(name) / file).read_text(encoding="utf-8"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_amira_theme_limit_exists_only_through_the_users_approval" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">@pytest.fixture(scope="module")
+    def raw() -&gt; dict:
+&gt;       return {n: _read(n, "profile.json") for n in PERSONAS}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_personas.py:71: in _read
+    return json.loads((_dir(name) / file).read_text(encoding="utf-8"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_mateo_excluded_activities_hold_both_controversy_tags_and_no_theme_limit" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">@pytest.fixture(scope="module")
+    def raw() -&gt; dict:
+&gt;       return {n: _read(n, "profile.json") for n in PERSONAS}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_personas.py:71: in _read
+    return json.loads((_dir(name) / file).read_text(encoding="utf-8"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_mateo_parsed_rules_are_unapproved_except_where_the_user_declared_them" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">@pytest.fixture(scope="module")
+    def raw() -&gt; dict:
+&gt;       return {n: _read(n, "profile.json") for n in PERSONAS}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_personas.py:71: in _read
+    return json.loads((_dir(name) / file).read_text(encoding="utf-8"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_n3_mock_entry_is_hand_written_schema_valid_exact_quotes_and_gate_accepted[amira]" time="0.001" /><testcase classname="tests.test_personas" name="test_n3_mock_entry_is_hand_written_schema_valid_exact_quotes_and_gate_accepted[mateo]" time="0.000"><failure message="AssertionError: missing hand-written values_parser cache entry for this input: values_parser.711a30583d84a7e048fb821f708e4acd21d65aa9da6cb1b5904046b008382a07.json&#10;assert False&#10; +  where False = is_file()&#10; +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/llm_cache/values_parser.711a30583d84a7e048fb821f708e4acd21d65aa9da6cb1b5904046b008382a07.json').is_file">name = 'mateo'
+
+    @pytest.mark.parametrize("name", PERSONAS)
+    def test_n3_mock_entry_is_hand_written_schema_valid_exact_quotes_and_gate_accepted(name):
+        """§16 llm_cache + §6.2 N3 + §11: the N3 entry for the persona's notes exists (model fixture:hand-written), its
+        input is exactly the notes, the mock call returns it, it validates against schemas/values_parser.json, every
+        quote is an exact substring of the notes, and the gate accepts it with every rule starting unapproved."""
+        notes = NOTES[name]
+        payload = extractors.n3_payload(notes)
+        assert payload == {"notes": notes}                                         # the notes only, no profile field
+&gt;       entry = _cache_entry(N3, payload)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:412: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = 'values_parser'
+payload = {'notes': 'Avoid companies with major environmental or social controversies. Open to new tech if it fits, nothing speculative.'}
+
+    def _cache_entry(node: str, payload: dict) -&gt; dict:
+        key = bedrock.cache_key(node, extractors.prompt_version(node), MOCK_MODEL, payload)
+        path = config.LLM_CACHE_DIR / f"{node}.{key}.json"
+&gt;       assert path.is_file(), f"missing hand-written {node} cache entry for this input: {path.name}"
+E       AssertionError: missing hand-written values_parser cache entry for this input: values_parser.711a30583d84a7e048fb821f708e4acd21d65aa9da6cb1b5904046b008382a07.json
+E       assert False
+E        +  where False = is_file()
+E        +    where is_file = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/llm_cache/values_parser.711a30583d84a7e048fb821f708e4acd21d65aa9da6cb1b5904046b008382a07.json').is_file
+
+tests/test_personas.py:168: AssertionError</failure></testcase><testcase classname="tests.test_personas" name="test_n3_amira_entry_parses_a_tech_theme_rule_with_no_number" time="0.000" /><testcase classname="tests.test_personas" name="test_n3_mateo_entry_excludes_both_controversy_tags_and_avoids_speculative" time="0.000"><failure message="coherence_analyzer.llm.bedrock.LLMCacheMiss: values_parser values_parser.v1: no recorded response in /home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/llm_cache for this input (model us.anthropic.claude-sonnet-5-5); record it with COHERENCE_ANALYZER_LLM=record">def test_n3_mateo_entry_excludes_both_controversy_tags_and_avoids_speculative():
+        """§16 mateo/: N3 -&gt; exclude_activity for both controversy tags plus avoid_attribute speculative."""
+&gt;       rules = extractors.values_parser(NOTES["mateo"])["rules"]
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:439: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+coherence_analyzer/llm/extractors.py:81: in values_parser
+    return values_parser_call(notes)["output"]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+coherence_analyzer/llm/extractors.py:75: in values_parser_call
+    return bedrock.call_tool(N3_NODE, load_schema(N3_NODE), load_prompt(N3_NODE), n3_payload(notes),
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = 'values_parser'
+schema = {'$schema': 'https://json-schema.org/draft/2020-12/schema', 'title': "values_parser (N3) tool input: rules parsed from the user's free-text values notes (SPEC 6.2 N3)", 'type': 'object', 'additionalProperties': False, ...}
+system = "You turn an investor's free-text notes about their values into a short list of structured rules for a simulation. Not...e statement (usually one sentence).\n3. Do not give investment advice and do not say what the user should buy or sell."
+user_payload = {'notes': 'Avoid companies with major environmental or social controversies. Open to new tech if it fits, nothing speculative.'}
+prompt_version = 'values_parser.v1'
+
+    def call_tool(node: str, schema: dict, system: str, user_payload: dict, prompt_version: str) -&gt; dict:
+        """mock: read fixtures/llm_cache only (raise LLMCacheMiss). record: call + write fixtures/llm_cache.
+        live: call with .cache/llm. No temperature (D6), toolChoice forced to `node`, jsonschema-validate,
+        retry once with validator message, then raise LLMOutputInvalid. Returns {output, call_log}."""
+        mode = _mode()
+        model_id = BEDROCK_MODEL_ID
+        cache_dir = Path(LLM_CACHE_DIR if mode in ("mock", "record") else RUNTIME_CACHE_DIR)
+    
+        if mode == "mock":
+            # Hand-written entries are keyed with MOCK_MODEL_ID; a configured real model id is tried first.
+            for mid in dict.fromkeys([model_id or MOCK_MODEL_ID, MOCK_MODEL_ID]):
+                entry = _read_entry(cache_dir, node, cache_key(node, prompt_version, mid, user_payload))
+                if entry is not None:
+                    return _hit(entry, node, prompt_version, mid, user_payload)
+&gt;           raise LLMCacheMiss(f"{node} {prompt_version}: no recorded response in {cache_dir} for this input "
+                               f"(model {model_id or MOCK_MODEL_ID}); record it with COHERENCE_ANALYZER_LLM=record")
+E           coherence_analyzer.llm.bedrock.LLMCacheMiss: values_parser values_parser.v1: no recorded response in /home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/llm_cache for this input (model us.anthropic.claude-sonnet-5-5); record it with COHERENCE_ANALYZER_LLM=record
+
+coherence_analyzer/llm/bedrock.py:129: LLMCacheMiss</failure></testcase><testcase classname="tests.test_personas" name="test_profile_parsed_notes_are_the_n3_output_plus_the_users_approvals[amira]" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">@pytest.fixture(scope="module")
+    def raw() -&gt; dict:
+&gt;       return {n: _read(n, "profile.json") for n in PERSONAS}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_personas.py:71: in _read
+    return json.loads((_dir(name) / file).read_text(encoding="utf-8"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_profile_parsed_notes_are_the_n3_output_plus_the_users_approvals[mateo]" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">@pytest.fixture(scope="module")
+    def raw() -&gt; dict:
+&gt;       return {n: _read(n, "profile.json") for n in PERSONAS}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_personas.py:71: in _read
+    return json.loads((_dir(name) / file).read_text(encoding="utf-8"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_refresh_keeps_the_approved_rules_and_does_not_call_n3[amira]" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">@pytest.fixture(scope="module")
+    def raw() -&gt; dict:
+&gt;       return {n: _read(n, "profile.json") for n in PERSONAS}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_personas.py:71: in _read
+    return json.loads((_dir(name) / file).read_text(encoding="utf-8"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_refresh_keeps_the_approved_rules_and_does_not_call_n3[mateo]" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">@pytest.fixture(scope="module")
+    def raw() -&gt; dict:
+&gt;       return {n: _read(n, "profile.json") for n in PERSONAS}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_personas.py:71: in _read
+    return json.loads((_dir(name) / file).read_text(encoding="utf-8"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_events_are_wellformed_dated_up_to_as_of_and_include_a_quiz_result[amira]" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">@pytest.fixture(scope="module")
+    def raw() -&gt; dict:
+&gt;       return {n: _read(n, "profile.json") for n in PERSONAS}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_personas.py:71: in _read
+    return json.loads((_dir(name) / file).read_text(encoding="utf-8"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_events_are_wellformed_dated_up_to_as_of_and_include_a_quiz_result[mateo]" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">@pytest.fixture(scope="module")
+    def raw() -&gt; dict:
+&gt;       return {n: _read(n, "profile.json") for n in PERSONAS}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_personas.py:71: in _read
+    return json.loads((_dir(name) / file).read_text(encoding="utf-8"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_amira_events_show_long_term_framing_and_one_crypto_fomo_question" time="0.000"><failure message="FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/events.jsonl'">def test_amira_events_show_long_term_framing_and_one_crypto_fomo_question():
+        """§16 amira/: a quiz_result, &gt;= 2 questions framed on the long term, and a crypto FOMO question (one or more,
+        distinct from the long-term ones)."""
+&gt;       questions = _questions("amira")
+                    ^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:547: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_personas.py:541: in _questions
+    return [e for e in _events(name) if e["type"] == "question"]
+                       ^^^^^^^^^^^^^
+tests/test_personas.py:75: in _events
+    lines = (_dir(name) / "events.jsonl").read_text(encoding="utf-8").splitlines()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/events.jsonl')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/events.jsonl'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</failure></testcase><testcase classname="tests.test_personas" name="test_mateo_events_show_a_quiz_result_and_two_esg_or_controversy_questions" time="0.000"><failure message="FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/mateo/events.jsonl'">def test_mateo_events_show_a_quiz_result_and_two_esg_or_controversy_questions():
+        """§16 mateo/: a quiz_result and &gt;= 2 questions about ESG / controversies."""
+&gt;       esg = [q for q in _questions("mateo") if ESG_WORD.search(q["text"])]
+                          ^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:557: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_personas.py:541: in _questions
+    return [e for e in _events(name) if e["type"] == "question"]
+                       ^^^^^^^^^^^^^
+tests/test_personas.py:75: in _events
+    lines = (_dir(name) / "events.jsonl").read_text(encoding="utf-8").splitlines()
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/mateo/events.jsonl')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/mateo/events.jsonl'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</failure></testcase><testcase classname="tests.test_personas" name="test_n6_mock_entry_exists_for_the_refreshed_profile_and_is_gate_valid[amira]" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">@pytest.fixture(scope="module")
+    def raw() -&gt; dict:
+&gt;       return {n: _read(n, "profile.json") for n in PERSONAS}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_personas.py:71: in _read
+    return json.loads((_dir(name) / file).read_text(encoding="utf-8"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_n6_mock_entry_exists_for_the_refreshed_profile_and_is_gate_valid[mateo]" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">@pytest.fixture(scope="module")
+    def raw() -&gt; dict:
+&gt;       return {n: _read(n, "profile.json") for n in PERSONAS}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_personas.py:71: in _read
+    return json.loads((_dir(name) / file).read_text(encoding="utf-8"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_amira_cheap_checks_h2_violation_h6_per_the_starter_sectors" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">@pytest.fixture(scope="module")
+    def raw() -&gt; dict:
+&gt;       return {n: _read(n, "profile.json") for n in PERSONAS}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_personas.py:71: in _read
+    return json.loads((_dir(name) / file).read_text(encoding="utf-8"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_amira_other_cheap_checks_follow_from_the_data_and_her_limits" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">@pytest.fixture(scope="module")
+    def raw() -&gt; dict:
+&gt;       return {n: _read(n, "profile.json") for n in PERSONAS}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_personas.py:71: in _read
+    return json.loads((_dir(name) / file).read_text(encoding="utf-8"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_mateo_cheap_checks_h1_to_h5_pass_at_moderate" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">@pytest.fixture(scope="module")
+    def raw() -&gt; dict:
+&gt;       return {n: _read(n, "profile.json") for n in PERSONAS}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_personas.py:71: in _read
+    return json.loads((_dir(name) / file).read_text(encoding="utf-8"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_review_returns_a_schema_valid_flow_c_report_with_profile_coherence[amira]" time="0.003"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=None, _trace=&lt;pluggy._tracing.TagTracerSub object at 0x7d40e7304d60&gt;, _basetemp=PosixPath('/tmp/pytest-of-safraa/pytest-127'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def reviews(tmp_path_factory):
+        """`pipeline.review(fixtures/&lt;persona&gt;)` in mock mode, in a temp working directory (the store writes there)."""
+        mp = pytest.MonkeyPatch()
+        mp.chdir(tmp_path_factory.mktemp("personas"))
+        try:
+            out = {}
+            for name in PERSONAS:
+&gt;               rep = pipeline.review(_dir(name))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:674: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+coherence_analyzer/pipeline.py:287: in review
+    profile_in = _load_profile(fixture_dir)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+coherence_analyzer/pipeline.py:70: in _load_profile
+    profile = json.loads(path.read_text(encoding="utf-8"))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_review_returns_a_schema_valid_flow_c_report_with_profile_coherence[mateo]" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=None, _trace=&lt;pluggy._tracing.TagTracerSub object at 0x7d40e7304d60&gt;, _basetemp=PosixPath('/tmp/pytest-of-safraa/pytest-127'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def reviews(tmp_path_factory):
+        """`pipeline.review(fixtures/&lt;persona&gt;)` in mock mode, in a temp working directory (the store writes there)."""
+        mp = pytest.MonkeyPatch()
+        mp.chdir(tmp_path_factory.mktemp("personas"))
+        try:
+            out = {}
+            for name in PERSONAS:
+&gt;               rep = pipeline.review(_dir(name))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:674: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+coherence_analyzer/pipeline.py:287: in review
+    profile_in = _load_profile(fixture_dir)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+coherence_analyzer/pipeline.py:70: in _load_profile
+    profile = json.loads(path.read_text(encoding="utf-8"))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_amira_review_is_incoherent_because_crypto_exceeds_the_high_tier_cap" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=None, _trace=&lt;pluggy._tracing.TagTracerSub object at 0x7d40e7304d60&gt;, _basetemp=PosixPath('/tmp/pytest-of-safraa/pytest-127'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def reviews(tmp_path_factory):
+        """`pipeline.review(fixtures/&lt;persona&gt;)` in mock mode, in a temp working directory (the store writes there)."""
+        mp = pytest.MonkeyPatch()
+        mp.chdir(tmp_path_factory.mktemp("personas"))
+        try:
+            out = {}
+            for name in PERSONAS:
+&gt;               rep = pipeline.review(_dir(name))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:674: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+coherence_analyzer/pipeline.py:287: in review
+    profile_in = _load_profile(fixture_dir)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+coherence_analyzer/pipeline.py:70: in _load_profile
+    profile = json.loads(path.read_text(encoding="utf-8"))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_mateo_review_verdict_is_one_of_the_three_and_unknowns_never_change_it" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=None, _trace=&lt;pluggy._tracing.TagTracerSub object at 0x7d40e7304d60&gt;, _basetemp=PosixPath('/tmp/pytest-of-safraa/pytest-127'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def reviews(tmp_path_factory):
+        """`pipeline.review(fixtures/&lt;persona&gt;)` in mock mode, in a temp working directory (the store writes there)."""
+        mp = pytest.MonkeyPatch()
+        mp.chdir(tmp_path_factory.mktemp("personas"))
+        try:
+            out = {}
+            for name in PERSONAS:
+&gt;               rep = pipeline.review(_dir(name))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:674: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+coherence_analyzer/pipeline.py:287: in review
+    profile_in = _load_profile(fixture_dir)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+coherence_analyzer/pipeline.py:70: in _load_profile
+    profile = json.loads(path.read_text(encoding="utf-8"))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_audit_has_no_n3_or_n6_cache_miss_and_n6_passed_the_gate[amira]" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=None, _trace=&lt;pluggy._tracing.TagTracerSub object at 0x7d40e7304d60&gt;, _basetemp=PosixPath('/tmp/pytest-of-safraa/pytest-127'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def reviews(tmp_path_factory):
+        """`pipeline.review(fixtures/&lt;persona&gt;)` in mock mode, in a temp working directory (the store writes there)."""
+        mp = pytest.MonkeyPatch()
+        mp.chdir(tmp_path_factory.mktemp("personas"))
+        try:
+            out = {}
+            for name in PERSONAS:
+&gt;               rep = pipeline.review(_dir(name))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:674: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+coherence_analyzer/pipeline.py:287: in review
+    profile_in = _load_profile(fixture_dir)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+coherence_analyzer/pipeline.py:70: in _load_profile
+    profile = json.loads(path.read_text(encoding="utf-8"))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_audit_has_no_n3_or_n6_cache_miss_and_n6_passed_the_gate[mateo]" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=None, _trace=&lt;pluggy._tracing.TagTracerSub object at 0x7d40e7304d60&gt;, _basetemp=PosixPath('/tmp/pytest-of-safraa/pytest-127'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def reviews(tmp_path_factory):
+        """`pipeline.review(fixtures/&lt;persona&gt;)` in mock mode, in a temp working directory (the store writes there)."""
+        mp = pytest.MonkeyPatch()
+        mp.chdir(tmp_path_factory.mktemp("personas"))
+        try:
+            out = {}
+            for name in PERSONAS:
+&gt;               rep = pipeline.review(_dir(name))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:674: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+coherence_analyzer/pipeline.py:287: in review
+    profile_in = _load_profile(fixture_dir)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+coherence_analyzer/pipeline.py:70: in _load_profile
+    profile = json.loads(path.read_text(encoding="utf-8"))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_review_leaves_the_persona_fixtures_unchanged[amira]" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=None, _trace=&lt;pluggy._tracing.TagTracerSub object at 0x7d40e7304d60&gt;, _basetemp=PosixPath('/tmp/pytest-of-safraa/pytest-127'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def reviews(tmp_path_factory):
+        """`pipeline.review(fixtures/&lt;persona&gt;)` in mock mode, in a temp working directory (the store writes there)."""
+        mp = pytest.MonkeyPatch()
+        mp.chdir(tmp_path_factory.mktemp("personas"))
+        try:
+            out = {}
+            for name in PERSONAS:
+&gt;               rep = pipeline.review(_dir(name))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:674: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+coherence_analyzer/pipeline.py:287: in review
+    profile_in = _load_profile(fixture_dir)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+coherence_analyzer/pipeline.py:70: in _load_profile
+    profile = json.loads(path.read_text(encoding="utf-8"))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_review_leaves_the_persona_fixtures_unchanged[mateo]" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">tmp_path_factory = TempPathFactory(_given_basetemp=None, _trace=&lt;pluggy._tracing.TagTracerSub object at 0x7d40e7304d60&gt;, _basetemp=PosixPath('/tmp/pytest-of-safraa/pytest-127'), _retention_count=3, _retention_policy='all')
+
+    @pytest.fixture(scope="module")
+    def reviews(tmp_path_factory):
+        """`pipeline.review(fixtures/&lt;persona&gt;)` in mock mode, in a temp working directory (the store writes there)."""
+        mp = pytest.MonkeyPatch()
+        mp.chdir(tmp_path_factory.mktemp("personas"))
+        try:
+            out = {}
+            for name in PERSONAS:
+&gt;               rep = pipeline.review(_dir(name))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:674: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+coherence_analyzer/pipeline.py:287: in review
+    profile_in = _load_profile(fixture_dir)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^
+coherence_analyzer/pipeline.py:70: in _load_profile
+    profile = json.loads(path.read_text(encoding="utf-8"))
+                         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase><testcase classname="tests.test_personas" name="test_demo_now_reviews_three_complete_personas" time="0.204"><failure message="AssertionError: assert 'incomplete' not in 'robert (cur... exécutée.\n'&#10;  &#10;  'incomplete' is contained here:&#10;     fixtures incomplete (missing profile.json, events.jsonl); no report for amira&#10;  ?           ++++++++++&#10;    notice: mateo: fixtures incomplete (missing profile.json, events.jsonl); no report for mateo&#10;    simulation éducative avec des profils fictifs. ceci n'est pas un conseil financier personnalisé. aucune transaction n'est exécutée.">tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-127/test_demo_now_reviews_three_co0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7d40b9b227b0&gt;
+report_schema = {'$schema': 'https://json-schema.org/draft/2020-12/schema', '$id': 'https://coherence-analyzer.local/schemas/report.js...ts have intent, checks_proposed, metrics_proposed and diff = null and alternatives = []. Flow B fills them (P2).', ...}
+
+    def test_demo_now_reviews_three_complete_personas(tmp_path, monkeypatch, report_schema):
+        """D7 acceptance + §15 test_pipeline_offline: `cli demo` finds robert, amira and mateo complete, writes a
+        schema-valid Flow C report for each (no \"incomplete\" notice), and Amira's verdict is incoherent."""
+        monkeypatch.chdir(tmp_path)
+        out = io.StringIO()
+        with contextlib.redirect_stdout(out):
+            cli.main(["demo"])
+        text = out.getvalue()
+&gt;       assert "incomplete" not in text.lower()
+E       AssertionError: assert 'incomplete' not in 'robert (cur... exécutée.\n'
+E         
+E         'incomplete' is contained here:
+E            fixtures incomplete (missing profile.json, events.jsonl); no report for amira
+E         ?           ++++++++++
+E           notice: mateo: fixtures incomplete (missing profile.json, events.jsonl); no report for mateo
+E           simulation éducative avec des profils fictifs. ceci n'est pas un conseil financier personnalisé. aucune transaction n'est exécutée.
+
+/home/safraa/Downloads/Datathon2026/ca-p1-1/tests/test_personas.py:764: AssertionError</failure></testcase><testcase classname="tests.test_personas" name="test_readme_assumptions_list_the_fictional_figures_of_amira_and_mateo" time="0.000"><error message="failed on setup with &quot;FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'&quot;">@pytest.fixture(scope="module")
+    def raw() -&gt; dict:
+&gt;       return {n: _read(n, "profile.json") for n in PERSONAS}
+                   ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_personas.py:100: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_personas.py:71: in _read
+    return json.loads((_dir(name) / file).read_text(encoding="utf-8"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p1-1/fixtures/amira/profile.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</error></testcase></testsuite></testsuites>

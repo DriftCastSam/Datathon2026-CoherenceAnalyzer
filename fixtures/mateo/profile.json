@@ -1,0 +1,140 @@
+{
+  "_conventions": {
+    "plain_value": "Declared by the user. Only the user changes it.",
+    "object_with_by": "Computed or estimated by the system: {value, by, confidence}. by = 'rule:<name>' (code, deterministic) or 'llm:<name>' (inferred, may only trigger warnings).",
+    "currency": "CAD",
+    "fictional": "All profiles are fictional, as the case requires. Figures beyond the case brief are team assumptions (README -> Assumptions)."
+  },
+
+  "meta": {
+    "profile_id": "persona-mateo",
+    "updated_at": "2026-11-12",
+    "schema_version": 2,
+    "version": 1,
+    "locale": "fr-CA",
+    "province": "QC"
+  },
+
+  "identity": {
+    "age": 41,
+    "marital_status": "common_law",
+    "dependants": 2,
+    "occupation": "Operations manager",
+    "employer_sector": "Industrials",
+    "employment_type": "salaried",
+    "retirement_target_age": 65,
+    "life_stage": {"value": "accumulation", "by": "rule:life_stage", "confidence": 1.0}
+  },
+
+  "situation": {
+    "annual_income_band": "120k-150k",
+    "income_stability": {"value": "high", "by": "rule:income_stability", "confidence": 1.0},
+    "monthly_expenses": 5200,
+    "emergency_fund": 31200,
+    "emergency_fund_months": {"value": 6.0, "by": "rule:emergency_fund_months", "confidence": 1.0},
+    "debt": {"mortgage": 260000, "consumer": 0},
+    "other_assets": {"real_estate_equity": 220000, "pension": 0},
+    "planned_withdrawals": [
+      {"date": "2034-09", "amount": 40000, "purpose": "children's post-secondary education, year 1"}
+    ],
+    "monthly_contribution": 1200
+  },
+
+  "objectives": {
+    "primary": "balanced_growth",
+    "secondary": ["education_funding"],
+    "goals": [
+      {"name": "Children's post-secondary education", "date": "2034-09", "amount": 40000, "priority": 1}
+    ],
+    "horizon_years": 10,
+    "effective_horizon_years": {"value": 7.8, "by": "rule:effective_horizon", "confidence": 1.0}
+  },
+
+  "risk": {
+    "declared": "moderate",
+    "max_acceptable_drawdown_pct": -20,
+    "reaction_to_20pct_drop": "hold",
+    "capacity": {"value": "moderate", "by": "rule:capacity", "confidence": 1.0},
+    "effective": {"value": "moderate", "by": "rule:effective_risk", "confidence": 1.0}
+  },
+
+  "knowledge": {
+    "declared_level": "intermediate",
+    "years_investing": 9,
+    "products_used": ["stocks", "etf", "bonds"],
+    "quiz_score": 0.7,
+    "score": {
+      "value": 43.0,
+      "by": "rule:knowledge_score",
+      "confidence": 0.85,
+      "history": [{"date": "2026-11-12", "value": 43.0}]
+    }
+  },
+
+  "values": {
+    "environment": {"importance": 5, "exclusions": ["significant_environmental_controversy"]},
+    "social": {"importance": 4, "exclusions": ["significant_social_controversy"]},
+    "notes": "Avoid companies with major environmental or social controversies. Open to new tech if it fits, nothing speculative.",
+    "parsed_notes": {
+      "value": [
+        {"rule_kind": "exclude_activity", "params": {"tag": "significant_environmental_controversy"}, "applies_to": "all",
+         "quote": "Avoid companies with major environmental or social controversies.", "approved_by_user": true},
+        {"rule_kind": "exclude_activity", "params": {"tag": "significant_social_controversy"}, "applies_to": "all",
+         "quote": "Avoid companies with major environmental or social controversies.", "approved_by_user": true},
+        {"rule_kind": "other", "params": {"note": "open to new tech if it fits"}, "applies_to": "all",
+         "quote": "Open to new tech if it fits", "approved_by_user": false},
+        {"rule_kind": "avoid_attribute", "params": {"attribute": "speculative"}, "applies_to": "all",
+         "quote": "nothing speculative.", "approved_by_user": false}
+      ],
+      "by": "llm:values_parser",
+      "confidence": 0.8,
+      "prompt_version": "values_parser.v1",
+      "model_id": "fixture:hand-written",
+      "updated_at": "2026-11-12T09:30:00-05:00",
+      "input_hash": "sha256:eb3a370909ae3e06362e5ef58b63f1b9ffa8b35245d902f35a8859c009fa6aa5"
+    }
+  },
+
+  "preferences": {
+    "asset_types_allowed": ["stocks", "etf", "bonds", "gold"],
+    "asset_types_refused": ["crypto", "options", "leveraged_etf", "margin"],
+    "prefers_dividends": true,
+    "prefers_large_caps": true,
+    "home_bias_ok": true,
+    "max_fee_mer_pct": 0.5,
+    "interests": ["esg_funds", "dividend_income"]
+  },
+
+  "limits": {
+    "_note": "Derived from the profile only. This is what the portfolio struct gets compared against.",
+    "by": "rule:limits_table[risk.effective] + goals + preferences",
+    "vol_band_annual": [0.08, 0.12],
+    "floor_at_horizon": 127500.0,
+    "max_drawdown_pct": -20,
+    "min_fixed_income_weight": 0.2,
+    "max_single_stock_weight": 0.1,
+    "max_sector_risk_share": 0.35,
+    "max_crypto_weight": 0.02,
+    "max_foreign_currency_weight": 0.5,
+    "max_employer_sector_weight": 0.15,
+    "excluded_asset_types": ["crypto", "options", "leveraged_etf", "margin"],
+    "excluded_activities": ["significant_environmental_controversy", "significant_social_controversy"],
+    "max_fee_mer_pct": 0.5
+  },
+
+  "limits_trace": {
+    "vol_band_annual": ["risk.effective", "risk.declared", "risk.capacity", "objectives.effective_horizon_years", "objectives.horizon_years", "situation.planned_withdrawals", "situation.emergency_fund_months", "situation.emergency_fund", "situation.monthly_expenses", "situation.income_stability", "identity.employment_type"],
+    "floor_at_horizon": ["risk.effective", "risk.declared", "risk.capacity", "objectives.effective_horizon_years", "objectives.horizon_years", "situation.planned_withdrawals", "situation.emergency_fund_months", "situation.emergency_fund", "situation.monthly_expenses", "situation.income_stability", "identity.employment_type"],
+    "max_drawdown_pct": ["risk.effective", "risk.declared", "risk.capacity", "objectives.effective_horizon_years", "objectives.horizon_years", "situation.planned_withdrawals", "situation.emergency_fund_months", "situation.emergency_fund", "situation.monthly_expenses", "situation.income_stability", "identity.employment_type", "risk.max_acceptable_drawdown_pct"],
+    "min_fixed_income_weight": ["risk.effective", "risk.declared", "risk.capacity", "objectives.effective_horizon_years", "objectives.horizon_years", "situation.planned_withdrawals", "situation.emergency_fund_months", "situation.emergency_fund", "situation.monthly_expenses", "situation.income_stability", "identity.employment_type"],
+    "max_single_stock_weight": ["risk.effective", "risk.declared", "risk.capacity", "objectives.effective_horizon_years", "objectives.horizon_years", "situation.planned_withdrawals", "situation.emergency_fund_months", "situation.emergency_fund", "situation.monthly_expenses", "situation.income_stability", "identity.employment_type"],
+    "max_sector_risk_share": ["risk.effective", "risk.declared", "risk.capacity", "objectives.effective_horizon_years", "objectives.horizon_years", "situation.planned_withdrawals", "situation.emergency_fund_months", "situation.emergency_fund", "situation.monthly_expenses", "situation.income_stability", "identity.employment_type"],
+    "max_crypto_weight": ["risk.effective", "risk.declared", "risk.capacity", "objectives.effective_horizon_years", "objectives.horizon_years", "situation.planned_withdrawals", "situation.emergency_fund_months", "situation.emergency_fund", "situation.monthly_expenses", "situation.income_stability", "identity.employment_type"],
+    "max_foreign_currency_weight": ["risk.effective", "risk.declared", "risk.capacity", "objectives.effective_horizon_years", "objectives.horizon_years", "situation.planned_withdrawals", "situation.emergency_fund_months", "situation.emergency_fund", "situation.monthly_expenses", "situation.income_stability", "identity.employment_type"],
+    "max_employer_sector_weight": [],
+    "excluded_asset_types": ["risk.effective", "risk.declared", "risk.capacity", "objectives.effective_horizon_years", "objectives.horizon_years", "situation.planned_withdrawals", "situation.emergency_fund_months", "situation.emergency_fund", "situation.monthly_expenses", "situation.income_stability", "identity.employment_type", "preferences.asset_types_refused"],
+    "excluded_activities": ["values.environment.exclusions", "values.social.exclusions", "values.governance.exclusions", "values.parsed_notes[approved_by_user]"],
+    "max_fee_mer_pct": ["preferences.max_fee_mer_pct"],
+    "max_theme_weight": ["values.parsed_notes[approved_by_user]"]
+  }
+}
