@@ -1,11 +1,319 @@
-"""Thin FastAPI over pipeline + store (SPEC §12). P1 step 12."""
+"""Thin FastAPI over the Flow C pipeline (SPEC §12; docs/spec-decisions.md D7; P1.4).
+
+Profiles, intake, events, parsed-rule decisions, review, reports, audit. Run: `uvicorn coherence_analyzer.api:app`.
+
+Working copies: `fixtures/` is never written. On first access to a profile its fixture files (profile.json,
+events.jsonl, portfolio*.json, intents.json) are copied to `store.root()/profiles/<profile_id>/` and every endpoint
+works there (`pipeline.review(<that dir>)`). The URL id is `meta.profile_id`.
+
+Invariants kept here (SPEC §1):
+- inv. 2: no request body carries `limits`, `limits_trace` or any `llm:` field. Bodies forbid unknown keys (422), and
+  intake paths are restricted to the intake checklist. Limits are recomputed by `pipeline.review`; the refreshed
+  profile (limits included) replaces the working profile.json after each review.
+- inv. 7: no route path names a trade action; `order_intent` events are refused (501, Flow B is P2, D7).
+"""
 from __future__ import annotations
 
-from fastapi import FastAPI
+import json
+import os
+import re
+import threading
+from datetime import datetime
+from pathlib import Path
+from typing import Annotated, Any, Literal
+
+from fastapi import FastAPI, HTTPException, Query
+from fastapi.middleware.cors import CORSMiddleware
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, field_validator
+
+from . import config, intake, pipeline, store
+
+EVENT_TYPES = ("question", "order_intent", "quiz_result", "profile_edit", "note", "intent_confirmed")
+COPY_PATTERNS = ("profile.json", "events.jsonl", "portfolio*.json", "intents.json")
+DEFAULT_LOCALE = "fr-CA"
+DEFAULT_SOURCE = "ui_chat"
+FLOW_B_MESSAGE = ("order_intent events are not accepted: Flow B (intent parsing, confirmation, trade simulation) "
+                  "is P2 (docs/spec-decisions.md D7). Nothing was appended.")
+
+_RUN_ID = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
+_EVENT_ID = re.compile(r"^ev_(.+)_(\d+)$")
+_ISO_DATETIME = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:\d{2})?$")
+_THEME_NUMBER_PATH = re.compile(
+    r"^" + re.escape(intake.PARSED_RULES_PATH) + r"\[(\d+)\]\.params\." + re.escape(intake.THEME_NUMBER_KEY) + r"$")
+
+_LOCK = threading.RLock()     # one writer at a time: a local demo server, files are small
 
 app = FastAPI(title="CoherenceAnalyzer")
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET", "POST"], allow_headers=["*"])
 
+
+# ---------------------------------------------------------------- request bodies (unknown keys -> 422)
+
+class _Body(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+
+class EventIn(_Body):
+    type: Literal["question", "order_intent", "quiz_result", "profile_edit", "note", "intent_confirmed"]
+    text: str = Field(min_length=1)
+    ts: str
+    source: str = Field(default=DEFAULT_SOURCE, min_length=1)
+    payload: dict[str, Any] | None = None
+    parent_event_id: str | None = None
+
+    @field_validator("text")
+    @classmethod
+    def _text_not_blank(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("text must not be blank")
+        return v
+
+    @field_validator("ts")
+    @classmethod
+    def _ts_iso(cls, v: str) -> str:
+        if not _ISO_DATETIME.match(v):
+            raise ValueError("ts must be an ISO 8601 date-time, e.g. 2026-11-15T09:30:00-05:00")
+        try:
+            datetime.fromisoformat(v.replace("Z", "+00:00"))
+        except ValueError as exc:
+            raise ValueError(f"ts is not a valid date-time: {exc}") from exc
+        return v
+
+
+class AnswerIn(_Body):
+    path: str = Field(min_length=1)
+    value: Any
+
+
+class SkipIn(_Body):
+    path: str = Field(min_length=1)
+
+
+class DecisionIn(_Body):
+    approved: StrictBool
+    max_pct: Annotated[float, Field(gt=0, le=100, strict=True)] | None = None
+
+
+# ---------------------------------------------------------------- fixtures and working copies
+
+def _fixture_dirs() -> dict[str, Path]:
+    """{meta.profile_id: fixture dir} for every fixture dir holding profile.json + events.jsonl + portfolio.json."""
+    out: dict[str, Path] = {}
+    root = config.FIXTURES_DIR
+    for d in sorted(p for p in root.iterdir() if p.is_dir()):
+        if not all((d / f).is_file() for f in ("profile.json", "events.jsonl", "portfolio.json")):
+            continue
+        try:
+            pid = json.loads((d / "profile.json").read_text(encoding="utf-8"))["meta"]["profile_id"]
+        except (OSError, ValueError, KeyError, TypeError):
+            continue
+        if isinstance(pid, str) and pid:
+            out.setdefault(pid, d)
+    return out
+
+
+def _workdir(profile_id: str) -> tuple[Path, Path]:
+    """(working dir, fixture dir); copies the fixture on first access. 404 for an unknown id."""
+    fixture = _fixture_dirs().get(profile_id)
+    if fixture is None:
+        raise HTTPException(status_code=404, detail=f"unknown profile {profile_id!r}")
+    work = store.root() / "profiles" / profile_id
+    with _LOCK:
+        if not (work / "profile.json").exists():
+            work.mkdir(parents=True, exist_ok=True)
+            for pattern in COPY_PATTERNS:
+                for src in sorted(fixture.glob(pattern)):
+                    dst = work / src.name
+                    if src.is_file() and not dst.exists():
+                        dst.write_bytes(src.read_bytes())
+    return work, fixture
+
+
+def _load(work: Path) -> dict:
+    return json.loads((work / "profile.json").read_text(encoding="utf-8"))
+
+
+def _save(work: Path, profile: dict) -> None:
+    """Validate against profile.v2.json, then replace the working profile.json (atomic rename)."""
+    try:
+        pipeline.validate_profile(profile, "profile")
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    tmp = work / "profile.json.tmp"
+    tmp.write_text(json.dumps(profile, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    os.replace(tmp, work / "profile.json")
+
+
+def _allowed_intake_paths(profile: dict) -> set[str]:
+    """Paths a user may answer or skip: the intake checklist, plus the number of a parsed theme rule without one."""
+    allowed = {p for paths in intake.REQUIRED.values() for p in paths}
+    allowed.update(p for p in intake.missing(profile, "contraintes") if _THEME_NUMBER_PATH.match(p))
+    return allowed
+
+
+def _check_intake_path(profile: dict, path: str) -> None:
+    if path not in _allowed_intake_paths(profile):
+        raise HTTPException(status_code=422, detail=f"{path!r} is not an intake path "
+                            "(limits, limits_trace and llm: fields can never be written through the API)")
+
+
+# ---------------------------------------------------------------- health, profiles, intake
 
 @app.get("/health")
 def health() -> dict:
     return {"ok": True}
+
+
+@app.get("/profiles")
+def list_profiles() -> list[dict]:
+    out = []
+    for pid, d in _fixture_dirs().items():
+        profile = json.loads((d / "profile.json").read_text(encoding="utf-8"))
+        name = (profile.get("identity") or {}).get("name") or profile["meta"].get("name") or d.name.capitalize()
+        out.append({"profile_id": pid, "name": str(name)})
+    return out
+
+
+@app.get("/profiles/{profile_id}")
+def get_profile(profile_id: str) -> dict:
+    work, _ = _workdir(profile_id)
+    return _load(work)
+
+
+@app.get("/profiles/{profile_id}/intake")
+def get_intake(profile_id: str, locale: Literal["fr-CA", "en-CA"] | None = Query(default=None)) -> dict:
+    work, _ = _workdir(profile_id)
+    profile = _load(work)
+    loc = locale or profile["meta"].get("locale") or DEFAULT_LOCALE
+    if loc not in intake.LOCALES:
+        loc = DEFAULT_LOCALE
+    return {f: {"missing": intake.missing(profile, f), "next_question": intake.next_question(profile, f, loc)}
+            for f in intake.FACTORS}
+
+
+@app.post("/profiles/{profile_id}/intake/answer")
+def post_intake_answer(profile_id: str, body: AnswerIn) -> dict:
+    work, _ = _workdir(profile_id)
+    with _LOCK:
+        profile = _load(work)
+        _check_intake_path(profile, body.path)
+        if body.value is None:
+            raise HTTPException(status_code=422, detail="value must not be null (use /intake/skip to skip a question)")
+        if _THEME_NUMBER_PATH.match(body.path):
+            v = body.value
+            if isinstance(v, bool) or not isinstance(v, (int, float)) or not 0 < v <= 100:
+                raise HTTPException(status_code=422, detail="a theme share is a percentage in (0, 100]")
+        updated = intake.answer(profile, body.path, body.value)
+        _save(work, updated)
+    return updated
+
+
+@app.post("/profiles/{profile_id}/intake/skip")
+def post_intake_skip(profile_id: str, body: SkipIn) -> dict:
+    work, _ = _workdir(profile_id)
+    with _LOCK:
+        profile = _load(work)
+        _check_intake_path(profile, body.path)
+        updated = intake.skip(profile, body.path)
+        _save(work, updated)
+    return updated
+
+
+# ---------------------------------------------------------------- events (§3.4)
+
+def _next_event_id(events: list[dict], fixture: Path) -> str:
+    """ev_<name>_NNNN with NNNN = highest existing number + 1 (ids can have gaps)."""
+    name, highest = fixture.name, 0
+    for e in events:
+        m = _EVENT_ID.match(str(e.get("event_id", "")))
+        if m:
+            name, highest = m.group(1), max(highest, int(m.group(2)))
+    return f"ev_{name}_{highest + 1:04d}"
+
+
+@app.post("/profiles/{profile_id}/events")
+def post_event(profile_id: str, body: EventIn) -> dict:
+    work, fixture = _workdir(profile_id)
+    if body.type == "order_intent":
+        raise HTTPException(status_code=501, detail=FLOW_B_MESSAGE)
+    if body.type == "intent_confirmed" and not body.payload:
+        raise HTTPException(status_code=422, detail="intent_confirmed needs the confirmed intent as payload (§3.4)")
+    path = work / "events.jsonl"
+    with _LOCK:
+        events = store.read_events(path)
+        event = {"event_id": _next_event_id(events, fixture), "profile_id": profile_id, "ts": body.ts,
+                 "type": body.type, "text": body.text, "payload": body.payload, "source": body.source}
+        if body.parent_event_id:
+            event["parent_event_id"] = body.parent_event_id
+        if path.exists() and path.stat().st_size and not path.read_bytes().endswith(b"\n"):
+            with open(path, "ab") as f:
+                f.write(b"\n")
+        store.append_event(path, event)
+    return event
+
+
+# ---------------------------------------------------------------- parsed-rule decisions (D7 point 1)
+
+@app.post("/profiles/{profile_id}/parsed-rules/{index}/decision")
+def post_decision(profile_id: str, index: int, body: DecisionIn) -> dict:
+    work, _ = _workdir(profile_id)
+    with _LOCK:
+        profile = _load(work)
+        rules = ((profile.get("values") or {}).get("parsed_notes") or {}).get("value")
+        if not isinstance(rules, list) or not 0 <= index < len(rules):
+            raise HTTPException(status_code=404, detail=f"no parsed rule at index {index}")
+        rule = rules[index]
+        if body.max_pct is not None:
+            params = rule.get("params") if isinstance(rule.get("params"), dict) else {}
+            current = params.get(intake.THEME_NUMBER_KEY)
+            if rule.get("rule_kind") != "max_theme_weight":
+                raise HTTPException(status_code=422, detail="max_pct only applies to a max_theme_weight rule")
+            if isinstance(current, (int, float)) and not isinstance(current, bool):
+                raise HTTPException(status_code=409, detail="this rule already has a number")
+            rule["params"] = {**params, intake.THEME_NUMBER_KEY: body.max_pct}
+        rule["approved_by_user"] = body.approved
+        _save(work, profile)
+    return profile
+
+
+# ---------------------------------------------------------------- review, reports, audit
+
+def _adopt_refreshed_profile(work: Path, report: dict) -> None:
+    """The pipeline saves a refreshed profile (limits recomputed) as profile.v<N>.json in this very directory when a
+    value changed. Make it the working profile so GET /profiles/{id} serves recomputed limits."""
+    audit = store.load_audit(report["run_id"])
+    if audit["profile_version_out"] != audit["profile_version_in"]:
+        refreshed = work / f"profile.v{audit['profile_version_out']}.json"
+        if refreshed.exists():
+            _save(work, json.loads(refreshed.read_text(encoding="utf-8")))
+
+
+@app.post("/profiles/{profile_id}/review")
+def post_review(profile_id: str) -> dict:
+    work, _ = _workdir(profile_id)
+    with _LOCK:
+        try:
+            report = pipeline.review(work)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        _adopt_refreshed_profile(work, report)
+    return report
+
+
+def _stored(loader, run_id: str, what: str) -> dict:
+    if not _RUN_ID.match(run_id):
+        raise HTTPException(status_code=404, detail=f"no {what} for run {run_id!r}")
+    try:
+        return loader(run_id)
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=404, detail=f"no {what} for run {run_id!r}") from exc
+
+
+@app.get("/reports/{run_id}")
+def get_report(run_id: str) -> dict:
+    return _stored(store.load_report, run_id, "report")
+
+
+@app.get("/audit/{run_id}")
+def get_audit(run_id: str) -> dict:
+    return _stored(store.load_audit, run_id, "audit record")

@@ -46,9 +46,19 @@ Everything else is stubbed with signatures and `NotImplementedError`. The matchi
 - **P0.8:** narration loop (docs/spec-factors.md §20.5): N5 `explainer` (`schemas/explainer.json`, `prompts/explainer.v1.md`, `extractors.explainer_call`), `explain.verify_section` (V1-V5), `explain.narrate_section` (`llm` -> `llm_retry` -> `template`, at most 2 calls per section, none for `pass` sections) and `explain.explain` (headline, disclaimer and pass sections are template text). Hand-written Robert + NVDA entries in `fixtures/llm_cache/` (`python scripts/handwrite_explainer_cache.py`): horizon `llm`, risque `llm_retry`, contraintes `template`. `tests/test_explain.py` uses its own temporary cache.
 
 - **P0.9:** `pipeline.py` Flow A `refresh` (rules + N3 through the gate, only when `values.notes` changed; no N1/N2) and Flow C `review` (engine -> hard checks + S2/S4 -> verdict -> five sections -> narration loop -> report + audit), `store.py` (local store, ULID run ids, report/audit/profile/portfolio files), `schemas/report.json` (§13 + sections), `coherence/soft.py` S2 and S4, `report.build_review`, `cli review [--portfolio FILE]`, `cli audit`, `cli demo`, `fixtures/robert/portfolio_review.json` (Robert after buying NVDA) + `tests/test_pipeline_offline.py`. `cli review fixtures/robert --portfolio portfolio_review.json` -> `incoherent` (horizon, risque, contraintes `violation`); `cli review fixtures/robert` -> `coherent`, H6/H10 unknown. Flow B (`pipeline.check`) is not wired (P2). One more hand-written N5 entry covers Robert's current-portfolio `contraintes` section (`unknown`, mode `llm`).
+- **P1.4:** `api.py` (FastAPI over the Flow C pipeline): `GET /health`, `GET /profiles`, `GET /profiles/{id}`, `GET /profiles/{id}/intake?locale=`, `POST /profiles/{id}/events`, `POST /profiles/{id}/intake/answer|skip`, `POST /profiles/{id}/parsed-rules/{index}/decision`, `POST /profiles/{id}/review`, `GET /reports/{run_id}`, `GET /audit/{run_id}`, CORS for GET/POST from any origin, and `tests/test_api.py`. Fixtures are copied to `<store>/profiles/<profile_id>/` on first access and never written. `order_intent` events get 501 (Flow B is P2, D7).
 Remaining TODOs:
 - Amira and Mateo have portfolios only; their profiles and events are P1.
 - Robert's `llm:` fields are hand-written (`model_id: fixture:hand-written`) until the Bedrock cache is recorded (P1.11).
+
+## Run the API
+
+```
+pip install -r requirements.txt
+COHERENCE_ANALYZER_LLM=mock uvicorn coherence_analyzer.api:app --reload   # docs at http://127.0.0.1:8000/docs
+```
+
+Working copies live under `COHERENCE_ANALYZER_STORE_DIR` (default: the current directory) in `profiles/<profile_id>/`; `fixtures/` is never written.
 
 ## Data
 
@@ -134,6 +144,13 @@ All persona financial figures beyond the case brief are fictional team assumptio
   - `explain.explain` narrates the non-pass sections on a `ThreadPoolExecutor(max_workers=5)` and collects them in display order; `pass` sections are narrated inline (template, no LLM call). An exception in one lane gives the template for that section only (`llm_error` records it). Narration is the only thing run concurrently, so the report text is identical to a sequential run. The order of the LLM calls across sections (spy / audit order of the writer calls) is now scheduling-dependent; the audit lists the writer calls in display order.
   - `pipeline.review` runs `internal.check_profile(profile, portfolio.as_of)` (the refreshed profile) on a one-worker pool next to the section lanes (the "sixth lane") and adds `report["profile_coherence"] = {status, findings}` (no `llm` key). It never feeds the verdict, a section status, `limits` or the explanation mode. The N6 call goes to the audit `llm_calls` with its gate status (`accepted`, `rejected:*`); a cache miss (`skipped:cache_miss`, no call log) goes to `llm_errors`.
   - `report.json` requires the block; `status` is `pass | info | warning` (stricter than the check status enum: never `violation`, inv. 3). CLI prints one `profile: <status> (<ids>)` line per review (`profile: pass` without findings).
+
+- **API (P1.4):**
+  - The profile id in a URL is `meta.profile_id` (e.g. `persona-robert`). `GET /profiles` lists every fixture dir holding `profile.json` + `events.jsonl` + `portfolio.json`. The display `name` is `identity.name` or `meta.name` if present, otherwise the capitalised fixture dir name (profiles carry no name field today).
+  - New event ids are `ev_<name>_NNNN` with NNNN = highest existing number + 1 (Robert's log has gaps). The server assigns them, and a client-supplied `event_id` is a 422. Events need a non-blank `text` and an ISO 8601 date-time `ts`. `source` defaults to `ui_chat`. `intent_confirmed` is accepted only with an object payload. `order_intent` is refused (501) and nothing is appended.
+  - Intake answer/skip accept only the checklist paths of `intake.REQUIRED` plus the `max_pct` of a parsed theme rule without a number. Anything else (limits, `llm:` fields) is a 422, and bodies reject unknown keys. A result that no longer matches `profile.v2.json` is a 422 and is not saved.
+  - A rule decision takes `approved` (strict bool) and, only for a `max_theme_weight` rule without a number, `max_pct` in (0, 100] (percent; the rules layer converts it to a fraction). A rule that already has a number answers 409.
+  - After a review, the refreshed profile saved by the pipeline (limits recomputed) becomes the working `profile.json`. Intake and decisions edit the working profile without bumping `meta.version`.
 
 ## Disclaimer
 Educational simulation with fictional profiles. This is not personalised financial advice. No transaction is executed.
