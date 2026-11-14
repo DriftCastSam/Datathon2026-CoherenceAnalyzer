@@ -563,6 +563,29 @@
     "README.md"
    ],
    "notes": "SPEC.md was updated by a human and docs/spec-decisions.md D10 ('Describe, never prescribe') is new: read both first; D10 wins. The product is informative only: no recommendation of any kind, never a trade, ticker, funding source or size the user did not state, no ranking of choices, no 'next step'. Run only after P2.SITE and P2.D10A are merged. Dashboard reads `headroom` (null | object) instead of `alternatives`; preview_report.py emits no `option` segments and no 'within your own limits ... would fit up to' text; the headroom line uses the §8 template wording, flow B only; all user-facing strings pass the SPEC §9.3 item 3 blocklist (case/accent-insensitive) apart from the fixed disclaimer and the Recherche refusal message."
+  },
+  {
+   "id": "P2.SITE",
+   "title": "dashboard shows the P2 blocks (stress, goals G1, look-through flag), all three personas, SPEC §12 UI requirements and §19 limitations",
+   "spec": [
+    "§12 UI requirements",
+    "§13",
+    "§19",
+    "§7.3 G1",
+    "§17 steps 13, 14, 16",
+    "docs/spec-factors.md §20.4 §20.9",
+    "docs/spec-decisions.md D3 D7"
+   ],
+   "tests": [
+    "tests/test_site.py"
+   ],
+   "code": [
+    "deploy/build_site.py",
+    "deploy/site/index.html",
+    "deploy/preview_report.py",
+    "README.md"
+   ],
+   "notes": "deploy/build_site.py builds a static dashboard (deploy/site/index.html, vanilla JS reading reports/*.json) from REAL pipeline.review reports in mock mode, into an out dir (default .cache/site/). Extend it: (1) build reports for all three complete personas (Robert current + Robert with NVDA, Amira, Mateo) and list them in reports/index.json; (2) the page renders the report blocks added in P2: `stress` (rate scenarios table, `sourced: false` and its assumptions shown as an assumption badge, status info), `goals` (G1 goal probabilities, always info, with assumption labels), and `metrics.lookthrough` (when false, say ETF sector exposure is not looked through and the H6/H10 ETF parts are unknown); (3) SPEC §12 UI requirements that do not need Flow B: check list with status chips where clicking a check shows its `derived_from` chain; fact / assumption / inference / unknown tag on every explanation segment; an `unknowns` list titled as what we can't verify (D3); approve/reject buttons for parsed values rules may be display-only in the static site (the API makes the decision); (4) SPEC §19 known limitations shown on the page, taken from the report's `assumptions` (no hard-coded numbers). Every number shown must come from the report JSON (no numbers typed into the HTML). The fixed disclaimer from the report is shown verbatim. No buy/sell wording. Keep the existing look and tabs and the French labels the page uses. Oracle tests in tests/test_site.py: run build_site into tmp_path (call a build function or main with an out dir; the implementation may add that parameter), then assert on the written JSON (all persona reports present and schema-valid against coherence_analyzer/schemas/report.json, stress/goals/lookthrough present where the pipeline produces them, index.json entries) and on index.html containing the render hooks (element ids or JS function names) for stress, goals, lookthrough, the derived_from chain, segment tags, unknowns, limitations and the disclaimer. Tests need no browser and no network. Ownership: P2.FB (Flow B) runs IN PARALLEL in another worktree and owns pipeline.py, cli.py, coherence/report.py, soft.py, explain.py: do not edit any file under coherence_analyzer/. Only deploy/, README.md and the new test. The before/after cone overlay and the intent confirmation form need Flow B: leave them for a later task. No network, no pip install, no real AWS calls. Never write the human-only meta tag file."
   }
  ]
 }

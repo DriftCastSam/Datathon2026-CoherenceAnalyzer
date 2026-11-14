@@ -19,6 +19,7 @@
     "tests/test_profile_schema.py": "1e295cd7636b43186e40e4bd3e4bd3d824be8c09dc0d1946850e5d0d799cc790",
     "tests/test_question_rubric.py": "9d2e43b90a49eee6b9479c5ae5b3553eff2b4db31de3618293a1f740775ec49f",
     "tests/test_rules.py": "5f16153a954d571c2a42594add9e8a157315f07c751d85aefccd203e2321f2b8",
+    "tests/test_site.py": "d477693e9a035b7e0c3002343d2360cee60256f6ea4ac89dc7b4b91953b81a25",
     "tests/test_store_s3.py": "8a8edbd3a1db57808b7c36d07991fda57a7cf6c9ce68ce0c7d25b08f22120c8a",
     "tests/test_stress.py": "f9922dba4b857a25972b6a4157dd18b77f9bf383118695e2df7f89090f6cb0cd"
   }
