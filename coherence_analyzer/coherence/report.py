@@ -51,7 +51,8 @@ def sort_checks(checks: list[Check]) -> list[Check]:
 
 def build_review(*, run_id: str, profile_id: str, profile_version: int, portfolio_id: str, checks: list[dict],
                  metrics: dict, sections: list[dict], explanation: dict, assumptions: list[str],
-                 data_window: list[str], disclaimer: str, profile_coherence: dict) -> dict:
+                 data_window: list[str], disclaimer: str, profile_coherence: dict,
+                 goals: dict | None = None) -> dict:
     """The Flow C report (SPEC §13 + §20.4): a baseline for the current portfolio, so no intent, no proposed side, no
     diff and no alternatives (the resizer and the trade diff are P2, D7 point 3). `checks` are the tagged checks;
     `sections` already carry their `narrative`. Pure: the verdict comes from the checks and must equal the one derived
@@ -60,7 +61,7 @@ def build_review(*, run_id: str, profile_id: str, profile_version: int, portfoli
     checks = sort_checks(checks)
     if sections_verdict(sections) != verdict_:
         raise AssertionError(f"section statuses give {sections_verdict(sections)!r}, checks give {verdict_!r}")
-    return {
+    rep = {
         "run_id": run_id, "flow": "C", "profile_id": profile_id, "profile_version": profile_version,
         "portfolio_id": portfolio_id, "intent": None, "verdict": verdict_,
         "checks_current": checks, "checks_proposed": None, "diff": None,
@@ -69,6 +70,9 @@ def build_review(*, run_id: str, profile_id: str, profile_version: int, portfoli
         "explanation": explanation, "disclaimer": disclaimer, "sections": sections,
         "profile_coherence": profile_coherence,      # separate block (§20.9): never enters the verdict
     }
+    if goals is not None:
+        rep["goals"] = goals                          # G1 block (P2.14): info only, never enters the verdict
+    return rep
 
 
 def diff(current: list[Check], proposed: list[Check], m_cur: dict, m_new: dict) -> dict:

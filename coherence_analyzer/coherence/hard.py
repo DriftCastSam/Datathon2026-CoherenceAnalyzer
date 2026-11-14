@@ -1,7 +1,8 @@
 """Hard checks H1-H14 + G1 (SPEC §7.3). Only these may return `violation`.
 
 P0 step 4 implements H1-H10 and H14. H11-H13 read the hand-built meta files (SPEC §3.2, P1.2): a missing file or
-row gives `unknown`, never a guess. G1 needs `engine.goal_probs` (P2) and is not emitted yet.
+row gives `unknown`, never a guess. G1 (P2.14, `g1`) is separate from `run_all`: it is always `info`, has no limit,
+and the pipeline reports it in its own `goals` block (docs/spec-factors.md §20.8, tests/test_goals.py).
 
 Pure functions. Weights are fractions (0-1). Comparisons tolerate float noise from percent/100
 conversion (EPS), so a weight exactly at a limit never flips the status.
@@ -27,7 +28,10 @@ class Check(TypedDict, total=False):
     source: str
     confidence: float
     message_key: str
-    date: str          # H14 only: month of the historical drawdown trough
+    date: str          # H14: month of the historical drawdown trough; G1: the goal's date
+    amount: float      # G1 only: the goal amount (CAD)
+    month: int         # G1 only: months from portfolio.as_of
+    assumptions: list[str]   # G1 only: assumption labels (invariant 9)
 
 
 CHEAP = ("H1", "H2", "H3", "H4", "H5", "H6", "H11", "H12", "H13")  # no engine needed (resizer)
@@ -333,3 +337,39 @@ def run_engine(metrics: dict, profile: dict) -> list[Check]:
 
 def run_all(weights: dict[str, float], metrics: dict, profile: dict, assets, meta: dict) -> list[Check]:
     return run_cheap(weights, profile, assets, meta) + run_engine(metrics, profile)
+
+
+# ---------------------------------------------------------------- G1 (SPEC §7.3): goal probabilities
+
+G1_LABELS = (
+    "Probability = share of simulated bootstrap paths at or above the goal amount at the goal month "
+    "(historical sample, not a forecast).",
+    "The monthly contribution is the amount the user declared in situation.monthly_contribution, added at the end "
+    "of each month; the simulation assumes it is paid every month.",
+    "Planned withdrawals (situation.planned_withdrawals) are not deducted in the simulation.",
+)
+
+
+def g1(m: dict, profile: dict) -> list[Check]:
+    """G1: one `info` check per declared goal (SPEC §7.3), in the profile's order. G1 compares to no limit, never
+    reads `limits` and never changes the verdict. `m` = engine.analyse output computed with the user-declared
+    monthly contribution and goals. A goal outside the simulated horizon has value None (no number is invented)."""
+    goals = list((profile.get("objectives") or {}).get("goals") or [])
+    probs = list(m.get("goal_probs") or [])
+    labels = [*(m.get("assumptions") or []), *G1_LABELS]
+    out: list[Check] = []
+    for g in goals:
+        hit = next((p for p in probs if (p["name"], p["date"], p["amount"]) == (g["name"], g["date"], g["amount"])),
+                   None)
+        if hit is not None:
+            probs.remove(hit)
+        c = _check("G1", "info", g["name"], hit["prob"] if hit else None, None, "probability",
+                   ["objectives.goals", "situation.monthly_contribution"], "rule:goal_probability",
+                   "goal_probability" if hit else "goal_outside_horizon")
+        c["date"] = g["date"]
+        c["amount"] = g["amount"]
+        if hit:
+            c["month"] = hit["month"]
+        c["assumptions"] = list(labels)
+        out.append(c)
+    return out

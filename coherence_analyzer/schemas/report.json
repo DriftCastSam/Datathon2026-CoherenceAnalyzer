@@ -54,6 +54,32 @@
       "minItems": 5,
       "maxItems": 5,
       "items": {"$ref": "#/$defs/section"}
+    },
+    "goals": {
+      "description": "G1 goal probabilities (SPEC 7.3, P2.14): info only, separate from the verdict and from `limits`.",
+      "type": "object",
+      "required": ["monthly_contribution", "horizon_months", "goal_probs", "checks", "assumptions"],
+      "properties": {
+        "monthly_contribution": {"type": "number", "minimum": 0},
+        "horizon_months": {"type": "integer", "minimum": 1},
+        "goal_probs": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["name", "date", "amount", "month", "prob"],
+            "properties": {
+              "name": {"type": "string"}, "date": {"type": "string"}, "amount": {"type": "number"},
+              "month": {"type": "integer", "minimum": 1}, "prob": {"type": "number", "minimum": 0, "maximum": 1}
+            }
+          }
+        },
+        "checks": {
+          "type": "array",
+          "items": {"allOf": [{"$ref": "#/$defs/check"},
+                              {"properties": {"id": {"const": "G1"}, "status": {"const": "info"}}}]}
+        },
+        "assumptions": {"type": "array", "items": {"type": "string", "minLength": 1}}
+      }
     }
   },
   "$defs": {

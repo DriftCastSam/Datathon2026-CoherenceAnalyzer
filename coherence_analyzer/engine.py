@@ -6,6 +6,7 @@ compares against the original script. Don't change the math without updating the
 from __future__ import annotations
 
 import argparse
+import re
 from dataclasses import dataclass
 from functools import lru_cache
 from pathlib import Path
@@ -87,14 +88,43 @@ def assumptions(mk: Market, drift: str, block: int) -> list[str]:
     ]
 
 
+_YM = re.compile(r"^(\d{4})-(\d{2})(?:-\d{2})?$")
+
+
+def _ym(date: str, what: str) -> int:
+    """Month index (year * 12 + month - 1) of a YYYY-MM or YYYY-MM-DD string."""
+    m = _YM.match(str(date))
+    if not m or not 1 <= int(m.group(2)) <= 12:
+        raise ValueError(f"{what}: expected YYYY-MM or YYYY-MM-DD, got {date!r}")
+    return int(m.group(1)) * 12 + int(m.group(2)) - 1
+
+
+def goal_probabilities(paths_cad: np.ndarray, goals: list[dict], as_of: str) -> list[dict]:
+    """SPEC §5: for each goal inside the horizon, the share of paths at or above `amount` at the goal's month.
+    Month m counts from the reference date `as_of` (D1): m = 1 is the first simulated step. Goals dated at or before
+    `as_of`, or after the horizon, are left out. Input order is kept."""
+    horizon = paths_cad.shape[1]
+    ref = _ym(as_of, "as_of")
+    out: list[dict] = []
+    for g in goals:
+        month = _ym(g["date"], f"goal {g.get('name')!r} date") - ref
+        if 1 <= month <= horizon:
+            prob = round(float((paths_cad[:, month - 1] >= g["amount"]).mean()), 4)
+            out.append({"name": g["name"], "date": g["date"], "amount": g["amount"], "month": month, "prob": prob})
+    return out
+
+
 def analyse(market: Market, weights_pct: dict[str, float], horizon_m: int, start_cad: float = 100_000, *,
             n: int = config.ENGINE_N, block: int = config.ENGINE_BLOCK, seed: int = config.ENGINE_SEED,
             drift: str = "assumed", monthly_contribution: float = 0.0, goals: list[dict] | None = None,
-            return_paths: bool = False) -> dict:
-    if monthly_contribution:
-        raise NotImplementedError("monthly_contribution: P2 (SPEC §17 step 14)")
-    if goals:
-        raise NotImplementedError("goal_probs: P2 (SPEC §17 step 14)")
+            as_of: str | None = None, return_paths: bool = False) -> dict:
+    """monthly_contribution (CAD, >= 0) is added to the NAV at the end of each simulated month. `goals` need the
+    reference date `as_of` (D1: portfolio.as_of); the engine never reads the wall clock."""
+    c = float(monthly_contribution or 0.0)
+    if not c >= 0.0:
+        raise ValueError(f"monthly_contribution must be >= 0, got {monthly_contribution!r}")
+    if goals and as_of is None:
+        raise ValueError("goals need `as_of` (the reference date, portfolio.as_of; SPEC D1)")
 
     mk = market
     w = pd.Series(weights_pct, dtype=float)
@@ -124,13 +154,27 @@ def analyse(market: Market, weights_pct: dict[str, float], horizon_m: int, start
     T = len(port)
     pv = port_b.values
     paths = np.empty((n, horizon_m))
+    rets = np.empty((n, horizon_m))
     for i in range(n):
         idx: list[int] = []
         while len(idx) < horizon_m:
             s = rng.integers(T)
             idx += [(s + k) % T for k in range(block)]
-        paths[i] = np.cumprod(1 + pv[idx[:horizon_m]])
-    q = np.percentile(paths, [5, 25, 50, 75, 95], axis=0) * start_cad
+        rets[i] = pv[idx[:horizon_m]]
+        paths[i] = np.cumprod(1 + rets[i])
+    if c:
+        # contributions: NAV_t = NAV_{t-1} (1 + r_t) + c, in CAD (not normalised); the draws do not depend on c
+        nav_cad = np.empty_like(paths)
+        nav = np.full(n, float(start_cad))
+        for t in range(horizon_m):
+            nav = nav * (1 + rets[:, t]) + c
+            nav_cad[:, t] = nav
+        q = np.percentile(nav_cad, [5, 25, 50, 75, 95], axis=0)
+        loss = float((nav_cad[:, -1] < start_cad + c * horizon_m).mean())   # a loss = below the money put in
+    else:
+        nav_cad = paths * start_cad
+        q = np.percentile(paths, [5, 25, 50, 75, 95], axis=0) * start_cad
+        loss = float((paths[:, -1] < 1).mean())
     groups = {}
     for name, fn in [("sector", sector), ("country", country), ("class", klass)]:
         g: dict[str, list[float]] = {}
@@ -147,16 +191,21 @@ def analyse(market: Market, weights_pct: dict[str, float], horizon_m: int, start
                      key=lambda x: -x["risk"])
     out = {"vol": round(vol, 4), "vol_local": round(vol_loc, 4), "mdd": round(mdd, 4), "mdd_date": mdd_date,
            "cone": {p: [round(float(x), 0) for x in q[i]] for i, p in enumerate(["p5", "p25", "p50", "p75", "p95"])},
-           "width": round(float(width), 0), "loss_prob": round(float((paths[:, -1] < 1).mean()), 4),
+           "width": round(float(width), 0), "loss_prob": round(loss, 4),
            "groups": groups, "drivers": drivers,
            "corr_eq_bond": round(float(mk.r_cad[["SPY", "XBB.TO"]].corr().iloc[0, 1]), 3),
            # additions (SPEC §5)
            "p5_T": round(float(q[0, -1]), 0), "p50_T": round(float(q[2, -1]), 0), "p95_T": round(float(q[4, -1]), 0),
            "lookthrough": False,  # TODO P2 step 13: etf_sector_weights.csv -> sector_lookthrough
-           "goal_probs": [],
+           "goal_probs": goal_probabilities(nav_cad, list(goals), as_of) if goals else [],
            "assumptions": assumptions(mk, drift, block)}
+    if c:
+        amt = f"{c:,.2f}".rstrip("0").rstrip(".")
+        out["assumptions"].append(
+            f"Monthly contribution: {amt} CAD, as declared by the user, added to the portfolio at the end of each "
+            "month (not a forecast); loss_prob compares the end value with the start value plus the contributions")
     if return_paths:
-        out["paths"] = paths * start_cad
+        out["paths"] = nav_cad
     return out
 
 

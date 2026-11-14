@@ -5,6 +5,7 @@ from __future__ import annotations
 import sys
 
 from ..intake import REQUIRED as _REQUIRED
+from . import fmt
 from ._common import build_facts
 
 ID = "objectif"
@@ -22,5 +23,15 @@ NOT_COVERED: tuple[str, ...] = ("objective_vs_portfolio",)   # until O1 lands
 
 
 def facts(ctx) -> dict:
-    """Section facts payload (§20.4). Pure."""
-    return build_facts(sys.modules[__name__], ctx)
+    """Section facts payload (§20.4). Pure. G1 rows (goal probabilities, always info) are shown under `goals` with
+    their assumption labels; they never enter `status` or the verdict (§20.8, P2.14)."""
+    out = build_facts(sys.modules[__name__], ctx)
+    goal_checks = [c for c in getattr(ctx, "goal_checks", None) or [] if c.get("id") == "G1"]
+    if goal_checks:
+        loc = fmt.check_locale(ctx.locale)
+        out["goals"] = [
+            {"name": c.get("subject"), "date": c.get("date"), "amount": fmt.amount(c["amount"], loc),
+             "probability": None if c.get("value") is None else fmt.percent(c["value"], loc),
+             "status": c["status"], "check": c["id"]} for c in goal_checks]
+        out["goal_assumptions"] = list(dict.fromkeys(a for c in goal_checks for a in c.get("assumptions", [])))
+    return out
