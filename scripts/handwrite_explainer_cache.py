@@ -37,19 +37,38 @@ CALL_LOG = {"hand_written": True, "tokens_in": 0, "tokens_out": 0, "latency_ms":
 INVENTED = " Le repli pourrait atteindre 77,7 %."      # a number that is in no facts payload: V2
 
 
-def robert_nvda_sections(locale: str = "fr-CA") -> list[dict]:
-    """The five sections of Robert + NVDA 10% (flow C review), built like tests/test_explain.py."""
+def robert_sections(weights_pct: dict, locale: str = "fr-CA") -> list[dict]:
+    """The five sections of Robert on `weights_pct` (flow C review), built like tests/test_explain.py and the pipeline."""
     raw = json.loads((ROOT / "fixtures" / "robert" / "profile.json").read_text(encoding="utf-8"))
     profile = derive.derive_all(copy.deepcopy(raw), portfolio_value_cad=VALUE, as_of=AS_OF)
     lim, trace = limits_mod.build_limits(profile, VALUE)
     profile["limits"], profile["limits_trace"] = lim, trace
     market = engine.load_market(str(ROOT / "data" / "starter"))
-    metrics = engine.analyse(market, engine.ROBERT_NVDA, HORIZON_MONTHS, VALUE)
-    checks = hard.run_all({t: v / 100 for t, v in engine.ROBERT_NVDA.items()}, metrics, profile, data.load_assets(),
+    metrics = engine.analyse(market, weights_pct, HORIZON_MONTHS, VALUE)
+    checks = hard.run_all({t: v / 100 for t, v in weights_pct.items()}, metrics, profile, data.load_assets(),
                           {n: data.load_meta(n) for n in META_NAMES})
     ctx = factors.SectionContext(profile=profile, limits=lim, limits_trace=trace, checks_current=checks,
                                  metrics_current=metrics, locale=locale)
     return factors.build_sections(ctx)
+
+
+def robert_nvda_sections(locale: str = "fr-CA") -> list[dict]:
+    """Robert + NVDA 10% from ZST.TO (`engine.ROBERT_NVDA`)."""
+    return robert_sections(engine.ROBERT_NVDA, locale)
+
+
+def contraintes_unknown_good(facts: dict) -> dict:
+    """Robert's current portfolio (`engine.ROBERT`): contraintes is `unknown` (H6, H10 have no ETF look-through)."""
+    h6 = next(c for c in facts["checks"] if c["id"] == "H6" and c["status"] == "unknown")
+    h10 = next(c for c in facts["checks"] if c["id"] == "H10" and c["status"] == "unknown")
+    return {"segments": [
+        {"kind": "unknown", "refs": ["H6"],
+         "text": f"H6: la part des FNB ({h6['value']}) n'est pas ventilée par secteur; le plafond de {h6['limit']} "
+                 f"pour le secteur de votre employeur ({h6['subject']}) ne peut donc pas être vérifié."},
+        {"kind": "unknown", "refs": ["H10"],
+         "text": f"H10: la part « {h10['subject']} » ({h10['value']} du risque) n'est pas ventilée par secteur; "
+                 f"le plafond de {h10['limit']} ne peut pas être vérifié pour cette part."},
+    ]}
 
 
 def _check(facts: dict, cid: str, status: str = "violation") -> dict:
@@ -112,9 +131,11 @@ def main() -> None:
     version = extractors.prompt_version(NODE)
     hor, ris, con = facts_by["horizon"], facts_by["risque"], facts_by["contraintes"]
     base = contraintes_base(con)
+    cur = {s["factor"]: s["facts"] for s in robert_sections(engine.ROBERT)}["contraintes"]    # current portfolio
     plan = [(hor, horizon_good(hor), None),
             (ris, _with(risque_good(ris), suffix=INVENTED), risque_good(ris)),
-            (con, _with(base, suffix=INVENTED), _with(base, prefix="Je recommande de réduire cette position. "))]
+            (con, _with(base, suffix=INVENTED), _with(base, prefix="Je recommande de réduire cette position. ")),
+            (cur, contraintes_unknown_good(cur), None)]
     for facts, first, second in plan:
         validator.validate(first)
         failures = explain.verify_section(first, facts)
@@ -132,6 +153,9 @@ def main() -> None:
     print(modes)
     assert modes == {"objectif": "template", "horizon": "llm", "risque": "llm_retry", "contraintes": "template",
                      "preferences": "template"}, modes
+    cur_mode = explain.narrate_section(cur)["mode"]
+    print("robert current, contraintes:", cur_mode)
+    assert cur_mode == "llm", cur_mode
 
 
 if __name__ == "__main__":

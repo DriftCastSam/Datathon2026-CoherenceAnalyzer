@@ -7,3 +7,5 @@ __pycache__/
 engine_out.json
 reports/
 audit/
+profiles/
+portfolios/

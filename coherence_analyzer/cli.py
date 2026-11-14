@@ -1,10 +1,50 @@
-"""`python -m coherence_analyzer.cli {refresh,check,review,audit,demo}` (SPEC §12)."""
+"""`python -m coherence_analyzer.cli {refresh,check,review,audit,demo}` (SPEC §12, docs/spec-decisions.md D7).
+
+`review` is the headline command; `check` (Flow B) is P2 and raises NotImplementedError. `demo` reviews every persona
+whose fixtures are complete (profile.json, events.jsonl, portfolio.json) and prints a notice for the others.
+"""
 from __future__ import annotations
 
 import argparse
+import json
 from pathlib import Path
 
-from . import pipeline, store
+from . import config, pipeline, store
+
+PERSONAS = ("robert", "amira", "mateo")
+REQUIRED_FILES = ("profile.json", "events.jsonl", "portfolio.json")
+REVIEW_PORTFOLIO = "portfolio_review.json"      # Robert "already bought NVDA" (D7 point 5)
+
+
+def _print_review(label: str, rep: dict) -> None:
+    unknown = sorted({u["id"] for u in rep["unknowns"]})
+    statuses = ", ".join(f"{s['factor']}={s['status']}" for s in rep["sections"])
+    print(f"{label}: {rep['verdict']}  (explanation: {rep['explanation']['mode']})")
+    print(f"  sections: {statuses}")
+    if unknown:
+        print(f"  cannot verify: {', '.join(unknown)}")
+    print(f"  run_id {rep['run_id']}  report {store.root() / 'reports' / (rep['run_id'] + '.json')}")
+
+
+def demo(fixtures_dir: Path | None = None) -> list[dict]:
+    """Review each persona with complete fixtures (+ the review portfolio if the persona has one); notice otherwise."""
+    fixtures_dir = Path(fixtures_dir or config.FIXTURES_DIR)
+    reports: list[dict] = []
+    for name in PERSONAS:
+        d = fixtures_dir / name
+        missing = [f for f in REQUIRED_FILES if not (d / f).exists()]
+        if missing:
+            print(f"notice: {name}: fixtures incomplete (missing {', '.join(missing)}); no report for {name}")
+            continue
+        portfolios = [(f"{name} (current portfolio)", None)]
+        if (d / REVIEW_PORTFOLIO).exists():
+            portfolios.append((f"{name} (review portfolio)", REVIEW_PORTFOLIO))
+        for label, portfolio in portfolios:
+            rep = pipeline.review(d, portfolio)
+            _print_review(label, rep)
+            reports.append(rep)
+    print(config.DISCLAIMER["fr-CA"])
+    return reports
 
 
 def main(argv: list[str] | None = None) -> None:
@@ -14,20 +54,24 @@ def main(argv: list[str] | None = None) -> None:
     p = sub.add_parser("check"); p.add_argument("fixture", type=Path)
     p.add_argument("--intent", required=True); p.add_argument("--auto-confirm", action="store_true")
     p = sub.add_parser("review"); p.add_argument("fixture", type=Path)
+    p.add_argument("--portfolio", default=None, help="portfolio file inside the fixture dir (default portfolio.json)")
     p = sub.add_parser("audit"); p.add_argument("run_id")
     sub.add_parser("demo")
     a = ap.parse_args(argv)
 
     if a.cmd == "refresh":
-        pipeline.refresh(a.fixture)
+        out = pipeline.refresh(a.fixture)
+        meta = out["profile"]["meta"]
+        print(f"profile {meta['profile_id']} v{meta['version']}: {len(out['profile_diff'])} field(s) changed; "
+              f"run_id {out['run_id']}")
     elif a.cmd == "check":
         pipeline.check(a.fixture, a.intent, auto_confirm=a.auto_confirm)
     elif a.cmd == "review":
-        pipeline.review(a.fixture)
+        _print_review(a.fixture.name, pipeline.review(a.fixture, a.portfolio))
     elif a.cmd == "audit":
-        print(store.load_audit(a.run_id))
+        print(json.dumps(store.load_audit(a.run_id), indent=2, ensure_ascii=False))
     elif a.cmd == "demo":
-        raise NotImplementedError("demo: Robert check + Amira/Mateo review (SPEC §4 matrix)")
+        demo()
 
 
 if __name__ == "__main__":

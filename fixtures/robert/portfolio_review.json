@@ -1,0 +1,4 @@
+{"portfolio_id": "robert-review-nvda", "profile_id": "persona-robert", "as_of": "2026-11-12", "value_cad": 400000,
+ "_note": "Review demo (docs/spec-decisions.md D7 point 5): Robert's portfolio after he already bought NVDA 10% funded from ZST.TO (engine.ROBERT_NVDA). fixtures/robert/portfolio.json stays the current portfolio.",
+ "weights_pct": {"XIU.TO": 18, "RY.TO": 7, "ENB.TO": 6, "FTS.TO": 7, "JNJ": 5, "PG": 5, "SPY": 12,
+                 "XBB.TO": 22, "ZST.TO": 3, "GLD": 5, "NVDA": 10}}
