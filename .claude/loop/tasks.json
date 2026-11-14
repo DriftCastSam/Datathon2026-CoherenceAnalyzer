@@ -607,6 +607,65 @@
     "README.md"
    ],
    "notes": "Flow B is wired in coherence_analyzer/pipeline.py as separate step functions taking and returning JSON-serialisable dicts (see pipeline.check and the step helpers next to it; read them first). Build: (1) deploy/aws/flow_b.asl.json, an Amazon States Language definition of Flow B: B1 parse intent, B2 confirmation as a Choice on an auto_confirm input flag (stop with the draft when not confirmed; a callback with waitForTaskToken is optional and must be documented if added), B3 refresh, B4 apply, B5 analyse current and proposed as a Parallel state, B6 checks + diff, B7 resizer only when the proposed portfolio has violations (Choice), B8 explain, B9 save + audit; Retry on Lambda service errors and a Catch that ends in a Fail state carrying the error; every Task invokes ONE Lambda with a `step` name in its payload. (2) coherence_analyzer/lambda_handler.py: `handler(event, context)` dispatches `event['step']` to the pipeline step function, returns its JSON dict, and raises a clear error on an unknown step; no wall clock in computed values; store backend from env (S3 in AWS). (3) add to deploy/aws/coherence-analyzer.cfn.json (JSON): an AWS::Lambda::Function (python3.11 runtime, code location as parameters, env COHERENCE_ANALYZER_LLM=live, COHERENCE_ANALYZER_STORE=s3, bucket/prefix, guardrail id/version, BEDROCK_MODEL_ID), its execution role reusing the existing least-privilege managed policy plus CloudWatch Logs, an AWS::StepFunctions::StateMachine whose DefinitionString or DefinitionSubstitutions point at the Lambda ARN, a state machine role allowed only lambda:InvokeFunction on that function, and an Output StateMachineArn. No em dashes in resource names or descriptions. The stack is ALREADY DEPLOYED by the team: only add resources, do not rename or change existing logical ids or properties. (4) README 'AWS deploy' section: how to package and update the stack, and a diagram (mermaid) of the state machine. Oracle tests in tests/test_stepfunctions.py: parse the ASL (every state reachable, every Task has Retry and Catch, Parallel branches for B5, Choice on violations for B7, End or Succeed reachable); run the state machine LOCALLY by a small test-only interpreter over the ASL that calls lambda_handler.handler for each Task in mock mode, and assert the final report equals pipeline.check(robert, in_0001, auto_confirm=True) on verdict, flipped checks and resizer output; unknown step raises; CFN JSON has the new resources with least-privilege roles and the unchanged existing logical ids. No network, no pip install, no real AWS calls, nothing deployed. Never write the human-only meta tag file."
+  },
+  {
+   "id": "P2.D10D",
+   "title": "D10 on the Step Functions path: lambda_handler and test_stepfunctions use headroom, not alternatives (after P2.D10A merges)",
+   "spec": [
+    "docs/spec-decisions.md D10 point 2",
+    "§8",
+    "§13",
+    "§17 step 15"
+   ],
+   "tests": [
+    "tests/test_stepfunctions.py"
+   ],
+   "code": [
+    "coherence_analyzer/lambda_handler.py",
+    "deploy/aws/flow_b.asl.json",
+    "deploy/aws/coherence-analyzer.cfn.json",
+    "README.md"
+   ],
+   "notes": "Run only after P2.D10A is merged into loop/p0. D10 point 2 renames the report key `alternatives` to `headroom` (null | object) and drops the resizer options. P2.15 was built before D10A: lambda_handler.py fills `alternatives: []` when the B7 Choice skips the resizer, and tests/test_stepfunctions.py (frozen) asserts `alternatives` in three tests. Those assertions provably contradict D10 point 2, so fixing them is covered by the standing approval for oracle tests that contradict docs/spec-decisions.md: make them assert `headroom` exactly as pipeline.check returns it after D10A (null when B7 is skipped), re-freeze, commit the test fix separately. Then make lambda_handler fill `headroom` the way pipeline.b7_resize does without a violation. If the ASL inline Definition changes, keep tests/test_stepfunctions_sync.py green. The CloudFormation stack is deployed: existing logical ids and properties stay unchanged; cfn-lint must stay clean (uvx cfn-lint --regions us-east-1). No real AWS calls, nothing deployed."
+  },
+  {
+   "id": "P2.CLI19",
+   "title": "cli review prints the fixed disclaimer; README documents every SPEC §19 limitation",
+   "spec": [
+    "§1 inv. 7",
+    "§9.4",
+    "§19",
+    "§12 CLI"
+   ],
+   "tests": [
+    "tests/test_cli_disclaimer.py"
+   ],
+   "code": [
+    "coherence_analyzer/cli.py",
+    "README.md"
+   ],
+   "notes": "Audit gaps: _print_review in cli.py prints no disclaimer (check and demo do); README lacks a 'Known limitations' section covering SPEC §19: 5-year window + block bootstrap + drift ASSUMED; survivorship bias; without ETF look-through sector/employer/activity checks are unknown (say what look-through now covers); behaviour classification noisy, confidence cap 0.8, needs >= 2 events, warning never block; plus the AMF/CIRO KYC out-of-scope note the UI shows (deploy/site/index.html ~372-381). Disclaimer text comes from config.py, never retyped. Touch only _print_review in cli.py (P2.D10A edits other parts of cli.py in parallel). These P2 tasks run IN PARALLEL in separate worktrees: edit only the files your task owns (plus README.md and new test files). No network, no pip install, no real AWS calls in code paths the tests run. Never write the activity-tags meta CSV (humans only, CLAUDE.md). Golden test (tests/test_engine_golden.py) must stay green. D10 (describe, never prescribe) applies to every user-facing string."
+  },
+  {
+   "id": "P2.UI",
+   "title": "Dashboard Flow B UI: B2 intent confirmation form, before/after cone from a Flow B report, N3 approve/reject wired to the API (after P2.D10C and the API Flow B task merge)",
+   "spec": [
+    "§12 UI",
+    "§4 Flow B B2",
+    "§13",
+    "docs/spec-decisions.md D7 D10",
+    "docs/spec-factors.md §20.7"
+   ],
+   "tests": [
+    "tests/test_ui_flow_b.py"
+   ],
+   "code": [
+    "deploy/site/index.html",
+    "deploy/preview_report.py",
+    "deploy/build_site.py",
+    "README.md"
+   ],
+   "notes": "Run only after P2.D10C (and, for live wiring, the API Flow B routes) are merged. Gaps: index.html renders N3 approve/reject buttons disabled ('Affichage seulement'), has no B2 intent confirmation form, and cone() draws only metrics_current. Required: (1) when an API base URL is configured, approve/reject call POST /parsed-rules/{i}/decision and re-render; with no API (static demo) they stay disabled with the current note; (2) B2 form shows the draft intent fields (ticker, target weight, funding) editable by the user, nothing pre-filled that the user did not state (D10), submit -> POST /intents/{id}/confirm; static demo shows Robert in_0001; (3) Flow B report: cone overlays metrics_current and metrics_proposed (before/after), labelled. All strings pass the SPEC §9.3 blocklist apart from the fixed disclaimer. These P2 tasks run IN PARALLEL in separate worktrees: edit only the files your task owns (plus README.md and new test files). No network, no pip install, no real AWS calls in code paths the tests run. Never write the activity-tags meta CSV (humans only, CLAUDE.md). Golden test (tests/test_engine_golden.py) must stay green. D10 (describe, never prescribe) applies to every user-facing string."
   }
  ]
 }
