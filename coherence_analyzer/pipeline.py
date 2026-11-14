@@ -416,14 +416,29 @@ def _horizon_months(profile: dict) -> int:
     return int(round(float(_val(profile["objectives"]["horizon_years"])) * 12))
 
 
-def b5_analyse(state: dict) -> dict:
-    """B5: engine.analyse on the current and the proposed portfolio, same seed, same horizon."""
-    pf, new = state["portfolio"], state["proposed"]
+def _b5_side(state: dict, side: str) -> dict:
+    """One side of B5: only the keys it adds (a delta, not the whole state), so that the two sides can run as the two
+    branches of a Step Functions Parallel state and be merged by key (P2.15). Same seed and horizon on both sides."""
+    pf = state["portfolio"] if side == "current" else state["proposed"]
     horizon_m = _horizon_months(state["profile"])
     market = engine.load_market(str(config.DATA_DIR))
-    return {**state, "horizon_months": horizon_m, "data_window": list(market.window),
-            "metrics_current": store.plain(engine.analyse(market, pf["weights_pct"], horizon_m, pf["value_cad"])),
-            "metrics_proposed": store.plain(engine.analyse(market, new["weights_pct"], horizon_m, new["value_cad"]))}
+    return {"horizon_months": horizon_m, "data_window": list(market.window),
+            f"metrics_{side}": store.plain(engine.analyse(market, pf["weights_pct"], horizon_m, pf["value_cad"]))}
+
+
+def b5_analyse_current(state: dict) -> dict:
+    """B5, current side: `{horizon_months, data_window, metrics_current}` (delta)."""
+    return _b5_side(state, "current")
+
+
+def b5_analyse_proposed(state: dict) -> dict:
+    """B5, proposed side: `{horizon_months, data_window, metrics_proposed}` (delta)."""
+    return _b5_side(state, "proposed")
+
+
+def b5_analyse(state: dict) -> dict:
+    """B5: engine.analyse on the current and the proposed portfolio, same seed, same horizon."""
+    return {**state, **b5_analyse_current(state), **b5_analyse_proposed(state)}
 
 
 # ---------------------------------------------------------------- Flow C
@@ -555,6 +570,7 @@ def b6_checks_and_diff(state: dict) -> dict:
             + soft.run_all(profile, state["intent"], w_new, assets, behaviour=True))
     checks_current, checks_proposed = store.plain(report_mod.tag_checks(cur)), store.plain(report_mod.tag_checks(prop))
     return {**state, "checks_current": checks_current, "checks_proposed": checks_proposed,
+            "has_violations": any(c["status"] == "violation" for c in checks_proposed),     # B7 Choice (P2.15)
             "diff": report_mod.diff(checks_current, checks_proposed, state["metrics_current"],
                                     state["metrics_proposed"])}
 
@@ -600,7 +616,7 @@ def b9_save(state: dict) -> dict:
     """B9: the report and the audit record (model id, as_of, every call with its gate decision) go to the store."""
     profile, pf, refresh_ = state["profile"], state["portfolio"], state["refresh"]
     notes = list(state["metrics_current"]["assumptions"]) + list(FLOW_B_ASSUMPTIONS)
-    res = state.get("resizer")
+    res = state.get("resizer")          # absent when B7 was skipped (Step Functions Choice): no violation, no options
     if res and res.get("none_fit"):
         notes.append("Resizer: no funding mode keeps this trade within your limits at any weight above the current "
                      f"one; binding checks: {', '.join(res['binding_checks'])}.")
@@ -609,7 +625,7 @@ def b9_save(state: dict) -> dict:
         portfolio_id=pf["portfolio_id"], intent=state["intent"], checks_current=state["checks_current"],
         checks_proposed=state["checks_proposed"], metrics_current=state["metrics_current"],
         metrics_proposed=state["metrics_proposed"], sections=state["sections"], explanation=state["explanation"],
-        alternatives=state["alternatives"], assumptions=notes, data_window=state["data_window"],
+        alternatives=state.get("alternatives", []), assumptions=notes, data_window=state["data_window"],
         disclaimer=config.DISCLAIMER[state["locale"]], profile_coherence=state["profile_coherence"])
     store.save_portfolio(pf)
     store.save_report(rep)
