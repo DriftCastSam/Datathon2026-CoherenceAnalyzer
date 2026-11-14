@@ -19,7 +19,7 @@ handler materialises the confirmation (`pipeline.b2_confirm(state, True)`: the f
 data) before B3. A state that was not confirmed never gets past this point.
 
 B7 is skipped by a Choice when the proposed portfolio has no violation. B9 then fills in what `pipeline.b7_resize`
-returns in that case (`alternatives: []`, `resizer: None`), so both paths give `pipeline.check`'s report.
+returns in that case (`headroom: None`, `resizer: None`), so both paths give `pipeline.check`'s report.
 
 The store backend (local files or S3) comes from the environment (`COHERENCE_ANALYZER_STORE`, `..._S3_BUCKET`,
 `..._S3_PREFIX`, read by `store.py`); the Lambda is deployed with `s3`. This module reads no clock: the only clock reads
@@ -65,7 +65,7 @@ def _b6(event: dict) -> dict:
 
 def _b9(event: dict) -> dict:
     state = _state_of(event)
-    state.setdefault("alternatives", [])            # B7 skipped by the Choice: pipeline.b7_resize's no-violation result
+    state.setdefault("headroom", None)              # B7 skipped by the Choice: pipeline.b7_resize's no-violation result (D10)
     state.setdefault("resizer", None)
     return {"report": pipeline.b9_save(state)["report"]}
 
