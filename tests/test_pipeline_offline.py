@@ -48,7 +48,7 @@ CHECK_KEYS = {"id", "kind", "status", "subject", "value", "limit", "unit", "deri
               "message_key"}
 LLM_CALL_KEYS = {"node", "model_id", "prompt_version", "input_hash", "cache_hit", "latency_ms", "tokens_in",
                  "tokens_out"}
-ALLOWED_NODES = {"explainer", "values_parser"}      # D7: no N1 / N2 / N4 in the P0 pipeline
+ALLOWED_NODES = {"explainer", "values_parser", "profile_consistency"}  # D7: no N1 / N2 / N4; D8 adds N6
 FR_DISCLAIMER = ("Simulation éducative avec des profils fictifs. Ceci n'est pas un conseil financier personnalisé. "
                  "Aucune transaction n'est exécutée.")                                    # SPEC §9.4
 ULID = re.compile(r"^[0-9A-HJKMNP-TV-Z]{26}$")                                           # SPEC §4: run_id is a ULID
@@ -400,8 +400,11 @@ def test_review_nvda_audit_record(review_nvda):
     assert AS_OF in json.dumps(audit)                                                    # D1: the reference date used
     # SPEC-AMBIGUITY: "audit has model_id" is read as a top-level key AND on every llm_calls entry (stricter).
     calls = audit["llm_calls"]
-    assert [c["node"] for c in calls] == [c["node"] for c in review_nvda["calls"]]      # every call, in order
-    for c, spy in zip(calls, review_nvda["calls"]):
+    # D8 / §20.10: lanes run concurrently, so each call is matched by input hash, not by global position
+    assert sorted(c["node"] for c in calls) == sorted(c["node"] for c in review_nvda["calls"])  # every call
+    spies = {(s["node"], bedrock.input_hash(s["payload"])): s for s in review_nvda["calls"]}
+    for c in calls:
+        spy = spies[(c["node"], c["input_hash"])]
         assert LLM_CALL_KEYS <= set(c)
         assert c["model_id"] and c["cache_hit"] is True
         assert c["input_hash"] == bedrock.input_hash(spy["payload"])
@@ -467,8 +470,8 @@ def test_review_current_portfolio_is_coherent_with_h6_h10_unknown(review_current
             assert s["narrative"]["mode"] == "template"
     assert rep["explanation"]["disclaimer"] == rep["disclaimer"] == FR_DISCLAIMER
     nodes = {c["node"] for c in review_current["calls"]}
-    assert nodes <= {"explainer"}                                                        # unknown section may be narrated
-    assert all(c["payload"]["factor"] == "contraintes" for c in review_current["calls"])
+    assert nodes <= {"explainer", "profile_consistency"}                                 # unknown section may be narrated; N6 (D8)
+    assert all(c["payload"]["factor"] == "contraintes" for c in review_current["calls"] if c["node"] == "explainer")
     modes = _section_modes({k: v for k, v in audit.items() if k != "llm_calls"})
     assert modes == {s["factor"]: s["narrative"]["mode"] for s in rep["sections"]}
 

@@ -632,11 +632,13 @@ def test_english_locale_runs_the_loop_and_uses_the_english_disclaimer(llm, paylo
 
 
 def test_same_inputs_same_explanation(llm, payload_fr):
-    """§1 inv. 8: the same payload and the same recorded responses give the same explanation, call for call."""
+    """§1 inv. 8: the same payload and the same recorded responses give the same explanation, call for call.
+    D8 / §20.10: sections run concurrently, so calls are compared as a multiset (order across sections is scheduling)."""
     plan = {"horizon": "good", "risque": ("retry", "V2"), "contraintes": "bad2"}
     first = _run(llm, payload_fr, plan)
     first_calls = copy.deepcopy(llm.calls)
     llm.calls.clear()
     second = explain.explain(payload_fr)
     assert second == first
-    assert llm.calls == first_calls
+    _key = lambda c: json.dumps(c, sort_keys=True, default=str)  # noqa: E731
+    assert sorted(map(_key, llm.calls)) == sorted(map(_key, first_calls))
