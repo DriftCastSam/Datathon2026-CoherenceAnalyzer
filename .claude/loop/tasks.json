@@ -1,251 +1,349 @@
 {
-  "_doc": "Ordered build queue for scripts/agent_loop.py. Mirrors SPEC §17 P0. Each task runs two phases: (A) write the oracle tests from the spec, then freeze them; (B) implement until the frozen tests pass. Edit this file by hand only.",
-  "tasks": [
-    {
-      "id": "P0.2",
-      "title": "levels, rule registry, derived fields, limits",
-      "spec": [
-        "§1",
-        "§3.3",
-        "§7.1",
-        "§7.2",
-        "§11",
-        "§15 test_rules / test_limits_no_llm_inputs"
-      ],
-      "tests": [
-        "tests/test_rules.py",
-        "tests/test_limits_no_llm_inputs.py",
-        "tests/test_levels.py"
-      ],
-      "code": [
-        "coherence_analyzer/levels.py",
-        "coherence_analyzer/rules/registry.py",
-        "coherence_analyzer/rules/derive.py",
-        "coherence_analyzer/rules/limits.py"
-      ],
-      "notes": "Robert expectations are spelled out in §15 (life_stage pre_retirement, ef_months 4.6, effective_horizon 3.6, capacity low_moderate, effective low_moderate, knowledge.score 74, limits == the fixture's `limits` block). limits_trace must be generated from the registry, never hand-written. The rules may read the v1 Robert fixture for now: P0.3 converts it."
-    },
-    {
-      "id": "P0.3",
-      "title": "profile v2 JSON Schema + Robert fixture conversion",
-      "spec": [
-        "§3.3",
-        "§3.4",
-        "§3.6",
-        "§16 robert/"
-      ],
-      "tests": [
-        "tests/test_profile_schema.py"
-      ],
-      "code": [
-        "coherence_analyzer/schemas/profile.v2.json",
-        "fixtures/robert/profile.json",
-        "fixtures/robert/events.jsonl",
-        "fixtures/robert/intents.json"
-      ],
-      "notes": "Test: fixtures/robert/profile.json validates against schemas/profile.v2.json (draft 2020-12); meta.schema_version == 2; every llm: object has prompt_version/model_id/updated_at/input_hash; behavioural evidence is [{event_id, signal, note}] and every event_id exists in events.jsonl; values.parsed_notes quotes are exact substrings of values.notes; events match §16 ids/dates/texts; intent in_0001 == NVDA 10% funded from ZST.TO. test_rules.py must still pass after the conversion."
-    },
-    {
-      "id": "P0.4",
-      "title": "hard checks H1-H10, H14 + report verdict",
-      "spec": [
-        "§7.3",
-        "§7.5",
-        "§13",
-        "§15 test_hard (Robert parts only)"
-      ],
-      "tests": [
-        "tests/test_hard.py"
-      ],
-      "code": [
-        "coherence_analyzer/coherence/hard.py",
-        "coherence_analyzer/coherence/report.py"
-      ],
-      "notes": "P0 covers Robert only. Robert baseline: H1-H6 pass (fixed income 0.35, max single stock RY 0.07, foreign ccy 0.27, crypto 0). Robert + NVDA 10% from ZST: H3 violation (0.10 > 0.08), H4 violation (0.25 < 0.30), H5 pass (0.37 <= 0.40), verdict incoherent. Every check result has the §7.3 keys and only hard checks may emit violation. Amira/Mateo cases are P1: do not write them now."
-    },
-    {
-      "id": "P0.5",
-      "title": "intent.apply + resizer",
-      "spec": [
-        "§3.6",
-        "§8",
-        "§15 test_resizer"
-      ],
-      "tests": [
-        "tests/test_intent.py",
-        "tests/test_resizer.py"
-      ],
-      "code": [
-        "coherence_analyzer/intent.py",
-        "coherence_analyzer/resizer.py"
-      ],
-      "notes": "intent.apply for every funding.kind keeps weights summing to 1 and never goes negative. Resizer per docs/spec-decisions.md D2: run §8 as written and assert the values the engine actually produces (Robert NVDA from ZST: expected below 5.0% with H9 binding, p5_T < 360000 at 5%; pro-rata equities: record measured max and binding check). Record them as golden values with the measured numbers in a comment. No skip marks."
-    },
-    {
-      "id": "P0.6",
-      "title": "bedrock wrapper (mock/record/live), N1 + N4 schemas/prompts, gate",
-      "spec": [
-        "§1 inv. 4-5, 8",
-        "§6.1",
-        "§6.2 N1 N4",
-        "§11",
-        "§15 test_gate"
-      ],
-      "tests": [
-        "tests/test_gate.py",
-        "tests/test_bedrock_mock.py"
-      ],
-      "code": [
-        "coherence_analyzer/llm/bedrock.py",
-        "coherence_analyzer/llm/extractors.py",
-        "coherence_analyzer/llm/schemas/",
-        "coherence_analyzer/llm/prompts/",
-        "coherence_analyzer/gate.py",
-        "fixtures/llm_cache/"
-      ],
-      "notes": "No network in tests: COHERENCE_ANALYZER_LLM=mock reads fixtures/llm_cache only and raises LLMCacheMiss on a miss. Cache key = existing cache_key(). Hand-write llm_cache responses for Robert's N1 and N4 calls that pass the schemas (§16), keyed by the real cache_key of the real payload. Gate cases from §15: invented event_id -> rejected:evidence; quote not in notes -> rejected:evidence; behavioural low_moderate -> high is clamped to moderate; abstain keeps the old value. boto3 is imported lazily, only in record/live mode."
-    },
-    {
-      "id": "P0.7",
-      "title": "five factors: mapping, factor modules, report sections, template_section, numcheck",
-      "spec": [
-        "docs/spec-factors.md §20.2-20.4, §20.8 test_factors",
-        "docs/spec-decisions.md D3 D5",
-        "§7.5",
-        "§9.3 numcheck",
-        "§13",
-        "§15 test_numcheck"
-      ],
-      "tests": [
-        "tests/test_factors.py",
-        "tests/test_numcheck.py"
-      ],
-      "code": [
-        "coherence_analyzer/factors/",
-        "coherence_analyzer/coherence/report.py",
-        "coherence_analyzer/explain.py"
-      ],
-      "notes": "Factor modules are views: do not move or change rules/ or coherence/hard.py. CHECK_FACTOR covers H1-H14, S1-S4, G1, O1 exactly once (table in §20.2). Measured on the real code (hard.run_all, engine.analyse(market, engine.ROBERT_NVDA, 48, 400000), profile derived with as_of 2026-11-12): non-pass checks are H3, H4, H7, H8, H9, H10 violation and H6, H10 unknown. So sections: horizon violation, risque violation, contraintes violation, objectif pass, preferences pass; Robert baseline: contraintes unknown (H6, H10), all others pass, verdict coherent. Section facts pre-format numbers in fr-CA ('13,4 %', '360 000 $'). template_section(facts) is deterministic and its text passes numcheck against its own facts. numcheck accepts '7,4 %', '7.4%', '360 000 $', '$360,000'; rejects a number not in the payload; small integer counts <= 10 exempt. No LLM in this task."
-    },
-    {
-      "id": "P0.8",
-      "title": "narration loop: N5 explainer per section, verifier V1-V5, retry once, template fallback",
-      "spec": [
-        "docs/spec-factors.md §20.5, §20.8 test_explain",
-        "§1 inv. 5-7, 9",
-        "§6.1",
-        "§9.3",
-        "§9.4"
-      ],
-      "tests": [
-        "tests/test_explain.py"
-      ],
-      "code": [
-        "coherence_analyzer/explain.py",
-        "coherence_analyzer/llm/schemas/explainer.json",
-        "coherence_analyzer/llm/prompts/explainer.v1.md",
-        "coherence_analyzer/llm/extractors.py",
-        "fixtures/llm_cache/"
-      ],
-      "notes": "Use the P0.6 bedrock.call_tool and cache_key; tests run in mock mode only. Hand-write llm_cache entries for Robert + NVDA's three non-pass sections (horizon, risque, contraintes): one good (mode llm), one bad-then-good (llm_retry; the retry payload carries retry_failures so it has its own cache key), one bad twice (template). Each verifier rule V1-V5 has its own rejecting test case. pass sections must not call the LLM (assert via a call counter, or that no cache lookup happens). explanation.headline is template text; disclaimer is the fixed config text; explanation.mode is the worst section mode."
-    },
-    {
-      "id": "P0.9",
-      "title": "pipeline Flow A (rules + N3) and Flow C review + cli review/demo (Robert review end-to-end offline)",
-      "spec": [
-        "docs/spec-decisions.md D7 (wins over §4, §12, §17)",
-        "docs/spec-factors.md §20.4-20.5",
-        "§4 Flow A, Flow C",
-        "§10",
-        "§12 CLI",
-        "§13",
-        "§15 test_pipeline_offline",
-        "docs/spec-decisions.md D3 D5"
-      ],
-      "tests": [
-        "tests/test_pipeline_offline.py"
-      ],
-      "code": [
-        "coherence_analyzer/pipeline.py",
-        "coherence_analyzer/store.py",
-        "coherence_analyzer/cli.py",
-        "coherence_analyzer/schemas/report.json",
-        "fixtures/robert/portfolio_review.json",
-        "fixtures/llm_cache/"
-      ],
-      "notes": "Per D7: Flow A = rules only plus N3 values_parser through the gate (no N1/N2 in the pipeline; their code stays). Flow C = engine.analyse(current) -> hard checks + S2/S4 -> verdict -> five sections -> narration loop -> report + audit. Add fixtures/robert/portfolio_review.json holding the engine.ROBERT_NVDA weights (do not modify fixtures/robert/portfolio.json, frozen tests read it). Acceptance: `cli review fixtures/robert --portfolio portfolio_review.json` in mock mode writes a schema-valid report: verdict incoherent; 5 sections in display order objectif, horizon, risque, contraintes, preferences; statuses horizon/risque/contraintes violation, objectif/preferences pass; every check has a factor key; narration modes recorded per section; audit record has model_id and per-section modes. `cli review fixtures/robert` (current portfolio) gives verdict coherent with H6/H10 in unknowns. Running twice gives byte-identical reports except run_id/timestamps. `demo` runs personas with complete fixtures and prints a notice for the rest. Flow B is P2: do not wire it."
-    },
-    {
-      "id": "P0.10",
-      "title": "intake form per factor (deterministic) + N3 values_parser schema/prompt + parsed-rule approval",
-      "spec": [
-        "docs/spec-decisions.md D7 points 1 and 4",
-        "docs/spec-factors.md §20.6",
-        "§6.2 N3",
-        "§7.2 excluded_activities / max_theme_weight",
-        "§11",
-        "§1 inv. 2"
-      ],
-      "tests": [
-        "tests/test_intake.py"
-      ],
-      "code": [
-        "coherence_analyzer/intake.py",
-        "coherence_analyzer/llm/schemas/values_parser.json",
-        "coherence_analyzer/llm/prompts/values_parser.v1.md",
-        "coherence_analyzer/llm/extractors.py",
-        "fixtures/llm_cache/"
-      ],
-      "notes": "Runs in parallel with P0.7-P0.9: do NOT edit coherence_analyzer/factors/ (P0.7 owns it); keep the REQUIRED checklist per factor as a dict in intake.py (REQUIRED: dict[str, tuple[str, ...]] keyed by the five factor ids), P0.9 will wire it into the factor modules. intake.missing(profile, factor) and intake.next_question(profile, factor) are pure; questions are fixed fr-CA/en-CA templates per REQUIRED path (no LLM). Robert fixture: missing() is empty for every factor; removing a REQUIRED path makes next_question return that path's question; a skip stores {value: null, by: 'user:skipped'}. N3 in mock mode on Robert's values.notes returns rules whose quote is an exact substring (gate rejects otherwise); parsed rules start approved_by_user false; build_limits ignores unapproved rules and includes an approved max_theme_weight / exclude_activity (invariant 2: test_limits_no_llm_inputs stays green). A parsed max_theme_weight with no number makes next_question ask for the number. Never write data/meta/activity_tags.csv."
-    },
-    {
-      "id": "P0.11",
-      "title": "internal coherence: contradiction rules C1-C5 + N6 profile_consistency (schema/prompt/gate) + check_profile",
-      "spec": [
-        "docs/spec-decisions.md D8",
-        "docs/spec-factors.md §20.9",
-        "§11 (gate)",
-        "§1 inv. 2, 3, 4",
-        "docs/spec-decisions.md D1, D7 point 1"
-      ],
-      "tests": [
-        "tests/test_internal.py"
-      ],
-      "code": [
-        "coherence_analyzer/coherence/internal.py",
-        "coherence_analyzer/gate.py",
-        "coherence_analyzer/llm/extractors.py",
-        "coherence_analyzer/llm/schemas/profile_consistency.json",
-        "coherence_analyzer/llm/prompts/profile_consistency.v1.md",
-        "fixtures/llm_cache/",
-        "scripts/handwrite_llm_cache.py",
-        "README.md"
-      ],
-      "notes": "Runs in parallel with P0.9: do NOT edit pipeline.py, cli.py, store.py, coherence/report.py, explain.py or factors/ (wiring into the report is a later task). Tests must cover: Robert fixture (as_of 2026-11-12) -> rule_findings gives exactly one C1 (goal 'Help children with a down payment', 2032-01 vs horizon 4 years) and no C2-C5; each of C2-C5 fires on a minimal edited copy of Robert and C1-C5 skip silently when their fields are missing; C2 uses LIMITS_TABLE neighbours (Robert -12 at low_moderate is inside [-20, -8]); n6_payload has no {value, by} objects, no limits, no llm: fields, includes values.notes and the rule hits; gate profile_consistency accepts a good output, and rejects (whole output dropped, rejected:evidence) a made-up path, a {value,by} path, a quote that is not the value at its path, a notes quote that is not an exact substring, a single-field finding, and rejects (rejected:schema) a reason with a digit / advisory phrase / > 200 chars, or > 5 findings; abstain -> kept:abstain; statuses: contradiction->warning, tension->info, never violation; an N6 finding with the same path set as a C finding is dropped; check_profile in mock mode on Robert returns status warning with C1 first and the hand-written N6 tension (preferences.interests 'new_opportunities' vs values.notes 'No hype stocks unless I can explain the business.') as info; on LLMCacheMiss it returns the rule findings and llm.gate_status 'skipped:cache_miss'; every finding has fixed fr-CA/en-CA question templates (no LLM text in question); check_profile never mutates the profile and test_limits_no_llm_inputs stays green. Record the mock with scripts/handwrite_llm_cache.py (model id fixture:hand-written), as P0.10 did."
-    },
-    {
-      "id": "P0.12",
-      "title": "parallel factor lanes (thread pool in explain) + profile_coherence block in the Flow C report, audit and cli",
-      "spec": [
-        "docs/spec-decisions.md D8",
-        "docs/spec-factors.md §20.9 (Status and effect)",
-        "docs/spec-factors.md §20.10",
-        "§10",
-        "§13",
-        "docs/spec-decisions.md D3"
-      ],
-      "tests": [
-        "tests/test_lanes.py"
-      ],
-      "code": [
-        "coherence_analyzer/explain.py",
-        "coherence_analyzer/pipeline.py",
-        "coherence_analyzer/cli.py",
-        "coherence_analyzer/store.py",
-        "coherence_analyzer/schemas/report.json",
-        "README.md"
-      ],
-      "notes": "Do NOT change coherence/internal.py, gate.py, factors/ or any recorded llm_cache entry (all their tests stay green). Tests must cover: explain.explain runs the non-pass sections through a concurrent.futures.ThreadPoolExecutor (max_workers 5) and its output (mode, headline, segments, section order) is identical to a sequential run on the Robert review (monkeypatch narrate_section with a recorder / a sleep to prove overlap: total wall time well under the sum of per-section sleeps); an exception in one section's narration does not lose the others (that section falls back to the template, as for LLMCacheMiss); pass sections still make no LLM call. pipeline.review adds report['profile_coherence'] = internal.check_profile(profile, as_of) result's {status, findings} (as_of = portfolio.as_of, D1) for every Flow C report; on Robert it is status warning with C1 then N6.1; it never changes report['verdict'] or any section status (compare with check_profile monkeypatched to return 3 warnings); the audit record gets the N6 call log and gate status (llm_calls entry with node profile_consistency); report.json schema accepts the new block (required); cli review / demo print one line 'profile: warning (C1, N6.1)'. Reports stay deterministic apart from run_id (inv. 8)."
-    }
-  ]
+ "_doc": "Ordered build queue for scripts/agent_loop.py. Mirrors SPEC §17 P0. Each task runs two phases: (A) write the oracle tests from the spec, then freeze them; (B) implement until the frozen tests pass. Edit this file by hand only.",
+ "tasks": [
+  {
+   "id": "P0.2",
+   "title": "levels, rule registry, derived fields, limits",
+   "spec": [
+    "§1",
+    "§3.3",
+    "§7.1",
+    "§7.2",
+    "§11",
+    "§15 test_rules / test_limits_no_llm_inputs"
+   ],
+   "tests": [
+    "tests/test_rules.py",
+    "tests/test_limits_no_llm_inputs.py",
+    "tests/test_levels.py"
+   ],
+   "code": [
+    "coherence_analyzer/levels.py",
+    "coherence_analyzer/rules/registry.py",
+    "coherence_analyzer/rules/derive.py",
+    "coherence_analyzer/rules/limits.py"
+   ],
+   "notes": "Robert expectations are spelled out in §15 (life_stage pre_retirement, ef_months 4.6, effective_horizon 3.6, capacity low_moderate, effective low_moderate, knowledge.score 74, limits == the fixture's `limits` block). limits_trace must be generated from the registry, never hand-written. The rules may read the v1 Robert fixture for now: P0.3 converts it."
+  },
+  {
+   "id": "P0.3",
+   "title": "profile v2 JSON Schema + Robert fixture conversion",
+   "spec": [
+    "§3.3",
+    "§3.4",
+    "§3.6",
+    "§16 robert/"
+   ],
+   "tests": [
+    "tests/test_profile_schema.py"
+   ],
+   "code": [
+    "coherence_analyzer/schemas/profile.v2.json",
+    "fixtures/robert/profile.json",
+    "fixtures/robert/events.jsonl",
+    "fixtures/robert/intents.json"
+   ],
+   "notes": "Test: fixtures/robert/profile.json validates against schemas/profile.v2.json (draft 2020-12); meta.schema_version == 2; every llm: object has prompt_version/model_id/updated_at/input_hash; behavioural evidence is [{event_id, signal, note}] and every event_id exists in events.jsonl; values.parsed_notes quotes are exact substrings of values.notes; events match §16 ids/dates/texts; intent in_0001 == NVDA 10% funded from ZST.TO. test_rules.py must still pass after the conversion."
+  },
+  {
+   "id": "P0.4",
+   "title": "hard checks H1-H10, H14 + report verdict",
+   "spec": [
+    "§7.3",
+    "§7.5",
+    "§13",
+    "§15 test_hard (Robert parts only)"
+   ],
+   "tests": [
+    "tests/test_hard.py"
+   ],
+   "code": [
+    "coherence_analyzer/coherence/hard.py",
+    "coherence_analyzer/coherence/report.py"
+   ],
+   "notes": "P0 covers Robert only. Robert baseline: H1-H6 pass (fixed income 0.35, max single stock RY 0.07, foreign ccy 0.27, crypto 0). Robert + NVDA 10% from ZST: H3 violation (0.10 > 0.08), H4 violation (0.25 < 0.30), H5 pass (0.37 <= 0.40), verdict incoherent. Every check result has the §7.3 keys and only hard checks may emit violation. Amira/Mateo cases are P1: do not write them now."
+  },
+  {
+   "id": "P0.5",
+   "title": "intent.apply + resizer",
+   "spec": [
+    "§3.6",
+    "§8",
+    "§15 test_resizer"
+   ],
+   "tests": [
+    "tests/test_intent.py",
+    "tests/test_resizer.py"
+   ],
+   "code": [
+    "coherence_analyzer/intent.py",
+    "coherence_analyzer/resizer.py"
+   ],
+   "notes": "intent.apply for every funding.kind keeps weights summing to 1 and never goes negative. Resizer per docs/spec-decisions.md D2: run §8 as written and assert the values the engine actually produces (Robert NVDA from ZST: expected below 5.0% with H9 binding, p5_T < 360000 at 5%; pro-rata equities: record measured max and binding check). Record them as golden values with the measured numbers in a comment. No skip marks."
+  },
+  {
+   "id": "P0.6",
+   "title": "bedrock wrapper (mock/record/live), N1 + N4 schemas/prompts, gate",
+   "spec": [
+    "§1 inv. 4-5, 8",
+    "§6.1",
+    "§6.2 N1 N4",
+    "§11",
+    "§15 test_gate"
+   ],
+   "tests": [
+    "tests/test_gate.py",
+    "tests/test_bedrock_mock.py"
+   ],
+   "code": [
+    "coherence_analyzer/llm/bedrock.py",
+    "coherence_analyzer/llm/extractors.py",
+    "coherence_analyzer/llm/schemas/",
+    "coherence_analyzer/llm/prompts/",
+    "coherence_analyzer/gate.py",
+    "fixtures/llm_cache/"
+   ],
+   "notes": "No network in tests: COHERENCE_ANALYZER_LLM=mock reads fixtures/llm_cache only and raises LLMCacheMiss on a miss. Cache key = existing cache_key(). Hand-write llm_cache responses for Robert's N1 and N4 calls that pass the schemas (§16), keyed by the real cache_key of the real payload. Gate cases from §15: invented event_id -> rejected:evidence; quote not in notes -> rejected:evidence; behavioural low_moderate -> high is clamped to moderate; abstain keeps the old value. boto3 is imported lazily, only in record/live mode."
+  },
+  {
+   "id": "P0.7",
+   "title": "five factors: mapping, factor modules, report sections, template_section, numcheck",
+   "spec": [
+    "docs/spec-factors.md §20.2-20.4, §20.8 test_factors",
+    "docs/spec-decisions.md D3 D5",
+    "§7.5",
+    "§9.3 numcheck",
+    "§13",
+    "§15 test_numcheck"
+   ],
+   "tests": [
+    "tests/test_factors.py",
+    "tests/test_numcheck.py"
+   ],
+   "code": [
+    "coherence_analyzer/factors/",
+    "coherence_analyzer/coherence/report.py",
+    "coherence_analyzer/explain.py"
+   ],
+   "notes": "Factor modules are views: do not move or change rules/ or coherence/hard.py. CHECK_FACTOR covers H1-H14, S1-S4, G1, O1 exactly once (table in §20.2). Measured on the real code (hard.run_all, engine.analyse(market, engine.ROBERT_NVDA, 48, 400000), profile derived with as_of 2026-11-12): non-pass checks are H3, H4, H7, H8, H9, H10 violation and H6, H10 unknown. So sections: horizon violation, risque violation, contraintes violation, objectif pass, preferences pass; Robert baseline: contraintes unknown (H6, H10), all others pass, verdict coherent. Section facts pre-format numbers in fr-CA ('13,4 %', '360 000 $'). template_section(facts) is deterministic and its text passes numcheck against its own facts. numcheck accepts '7,4 %', '7.4%', '360 000 $', '$360,000'; rejects a number not in the payload; small integer counts <= 10 exempt. No LLM in this task."
+  },
+  {
+   "id": "P0.8",
+   "title": "narration loop: N5 explainer per section, verifier V1-V5, retry once, template fallback",
+   "spec": [
+    "docs/spec-factors.md §20.5, §20.8 test_explain",
+    "§1 inv. 5-7, 9",
+    "§6.1",
+    "§9.3",
+    "§9.4"
+   ],
+   "tests": [
+    "tests/test_explain.py"
+   ],
+   "code": [
+    "coherence_analyzer/explain.py",
+    "coherence_analyzer/llm/schemas/explainer.json",
+    "coherence_analyzer/llm/prompts/explainer.v1.md",
+    "coherence_analyzer/llm/extractors.py",
+    "fixtures/llm_cache/"
+   ],
+   "notes": "Use the P0.6 bedrock.call_tool and cache_key; tests run in mock mode only. Hand-write llm_cache entries for Robert + NVDA's three non-pass sections (horizon, risque, contraintes): one good (mode llm), one bad-then-good (llm_retry; the retry payload carries retry_failures so it has its own cache key), one bad twice (template). Each verifier rule V1-V5 has its own rejecting test case. pass sections must not call the LLM (assert via a call counter, or that no cache lookup happens). explanation.headline is template text; disclaimer is the fixed config text; explanation.mode is the worst section mode."
+  },
+  {
+   "id": "P0.9",
+   "title": "pipeline Flow A (rules + N3) and Flow C review + cli review/demo (Robert review end-to-end offline)",
+   "spec": [
+    "docs/spec-decisions.md D7 (wins over §4, §12, §17)",
+    "docs/spec-factors.md §20.4-20.5",
+    "§4 Flow A, Flow C",
+    "§10",
+    "§12 CLI",
+    "§13",
+    "§15 test_pipeline_offline",
+    "docs/spec-decisions.md D3 D5"
+   ],
+   "tests": [
+    "tests/test_pipeline_offline.py"
+   ],
+   "code": [
+    "coherence_analyzer/pipeline.py",
+    "coherence_analyzer/store.py",
+    "coherence_analyzer/cli.py",
+    "coherence_analyzer/schemas/report.json",
+    "fixtures/robert/portfolio_review.json",
+    "fixtures/llm_cache/"
+   ],
+   "notes": "Per D7: Flow A = rules only plus N3 values_parser through the gate (no N1/N2 in the pipeline; their code stays). Flow C = engine.analyse(current) -> hard checks + S2/S4 -> verdict -> five sections -> narration loop -> report + audit. Add fixtures/robert/portfolio_review.json holding the engine.ROBERT_NVDA weights (do not modify fixtures/robert/portfolio.json, frozen tests read it). Acceptance: `cli review fixtures/robert --portfolio portfolio_review.json` in mock mode writes a schema-valid report: verdict incoherent; 5 sections in display order objectif, horizon, risque, contraintes, preferences; statuses horizon/risque/contraintes violation, objectif/preferences pass; every check has a factor key; narration modes recorded per section; audit record has model_id and per-section modes. `cli review fixtures/robert` (current portfolio) gives verdict coherent with H6/H10 in unknowns. Running twice gives byte-identical reports except run_id/timestamps. `demo` runs personas with complete fixtures and prints a notice for the rest. Flow B is P2: do not wire it."
+  },
+  {
+   "id": "P0.10",
+   "title": "intake form per factor (deterministic) + N3 values_parser schema/prompt + parsed-rule approval",
+   "spec": [
+    "docs/spec-decisions.md D7 points 1 and 4",
+    "docs/spec-factors.md §20.6",
+    "§6.2 N3",
+    "§7.2 excluded_activities / max_theme_weight",
+    "§11",
+    "§1 inv. 2"
+   ],
+   "tests": [
+    "tests/test_intake.py"
+   ],
+   "code": [
+    "coherence_analyzer/intake.py",
+    "coherence_analyzer/llm/schemas/values_parser.json",
+    "coherence_analyzer/llm/prompts/values_parser.v1.md",
+    "coherence_analyzer/llm/extractors.py",
+    "fixtures/llm_cache/"
+   ],
+   "notes": "Runs in parallel with P0.7-P0.9: do NOT edit coherence_analyzer/factors/ (P0.7 owns it); keep the REQUIRED checklist per factor as a dict in intake.py (REQUIRED: dict[str, tuple[str, ...]] keyed by the five factor ids), P0.9 will wire it into the factor modules. intake.missing(profile, factor) and intake.next_question(profile, factor) are pure; questions are fixed fr-CA/en-CA templates per REQUIRED path (no LLM). Robert fixture: missing() is empty for every factor; removing a REQUIRED path makes next_question return that path's question; a skip stores {value: null, by: 'user:skipped'}. N3 in mock mode on Robert's values.notes returns rules whose quote is an exact substring (gate rejects otherwise); parsed rules start approved_by_user false; build_limits ignores unapproved rules and includes an approved max_theme_weight / exclude_activity (invariant 2: test_limits_no_llm_inputs stays green). A parsed max_theme_weight with no number makes next_question ask for the number. Never write data/meta/activity_tags.csv."
+  },
+  {
+   "id": "P0.11",
+   "title": "internal coherence: contradiction rules C1-C5 + N6 profile_consistency (schema/prompt/gate) + check_profile",
+   "spec": [
+    "docs/spec-decisions.md D8",
+    "docs/spec-factors.md §20.9",
+    "§11 (gate)",
+    "§1 inv. 2, 3, 4",
+    "docs/spec-decisions.md D1, D7 point 1"
+   ],
+   "tests": [
+    "tests/test_internal.py"
+   ],
+   "code": [
+    "coherence_analyzer/coherence/internal.py",
+    "coherence_analyzer/gate.py",
+    "coherence_analyzer/llm/extractors.py",
+    "coherence_analyzer/llm/schemas/profile_consistency.json",
+    "coherence_analyzer/llm/prompts/profile_consistency.v1.md",
+    "fixtures/llm_cache/",
+    "scripts/handwrite_llm_cache.py",
+    "README.md"
+   ],
+   "notes": "Runs in parallel with P0.9: do NOT edit pipeline.py, cli.py, store.py, coherence/report.py, explain.py or factors/ (wiring into the report is a later task). Tests must cover: Robert fixture (as_of 2026-11-12) -> rule_findings gives exactly one C1 (goal 'Help children with a down payment', 2032-01 vs horizon 4 years) and no C2-C5; each of C2-C5 fires on a minimal edited copy of Robert and C1-C5 skip silently when their fields are missing; C2 uses LIMITS_TABLE neighbours (Robert -12 at low_moderate is inside [-20, -8]); n6_payload has no {value, by} objects, no limits, no llm: fields, includes values.notes and the rule hits; gate profile_consistency accepts a good output, and rejects (whole output dropped, rejected:evidence) a made-up path, a {value,by} path, a quote that is not the value at its path, a notes quote that is not an exact substring, a single-field finding, and rejects (rejected:schema) a reason with a digit / advisory phrase / > 200 chars, or > 5 findings; abstain -> kept:abstain; statuses: contradiction->warning, tension->info, never violation; an N6 finding with the same path set as a C finding is dropped; check_profile in mock mode on Robert returns status warning with C1 first and the hand-written N6 tension (preferences.interests 'new_opportunities' vs values.notes 'No hype stocks unless I can explain the business.') as info; on LLMCacheMiss it returns the rule findings and llm.gate_status 'skipped:cache_miss'; every finding has fixed fr-CA/en-CA question templates (no LLM text in question); check_profile never mutates the profile and test_limits_no_llm_inputs stays green. Record the mock with scripts/handwrite_llm_cache.py (model id fixture:hand-written), as P0.10 did."
+  },
+  {
+   "id": "P0.12",
+   "title": "parallel factor lanes (thread pool in explain) + profile_coherence block in the Flow C report, audit and cli",
+   "spec": [
+    "docs/spec-decisions.md D8",
+    "docs/spec-factors.md §20.9 (Status and effect)",
+    "docs/spec-factors.md §20.10",
+    "§10",
+    "§13",
+    "docs/spec-decisions.md D3"
+   ],
+   "tests": [
+    "tests/test_lanes.py"
+   ],
+   "code": [
+    "coherence_analyzer/explain.py",
+    "coherence_analyzer/pipeline.py",
+    "coherence_analyzer/cli.py",
+    "coherence_analyzer/store.py",
+    "coherence_analyzer/schemas/report.json",
+    "README.md"
+   ],
+   "notes": "Do NOT change coherence/internal.py, gate.py, factors/ or any recorded llm_cache entry (all their tests stay green). Tests must cover: explain.explain runs the non-pass sections through a concurrent.futures.ThreadPoolExecutor (max_workers 5) and its output (mode, headline, segments, section order) is identical to a sequential run on the Robert review (monkeypatch narrate_section with a recorder / a sleep to prove overlap: total wall time well under the sum of per-section sleeps); an exception in one section's narration does not lose the others (that section falls back to the template, as for LLMCacheMiss); pass sections still make no LLM call. pipeline.review adds report['profile_coherence'] = internal.check_profile(profile, as_of) result's {status, findings} (as_of = portfolio.as_of, D1) for every Flow C report; on Robert it is status warning with C1 then N6.1; it never changes report['verdict'] or any section status (compare with check_profile monkeypatched to return 3 warnings); the audit record gets the N6 call log and gate status (llm_calls entry with node profile_consistency); report.json schema accepts the new block (required); cli review / demo print one line 'profile: warning (C1, N6.1)'. Reports stay deterministic apart from run_id (inv. 8)."
+  },
+  {
+   "id": "P1.1",
+   "title": "Amira + Mateo fixtures (profile v2, events, N3/N6 mock cache) reviewed end-to-end offline",
+   "spec": [
+    "§16 amira/ and mateo/",
+    "§3.3",
+    "§3.4",
+    "§3.5",
+    "§7.1",
+    "§7.2",
+    "§6.2 N3",
+    "docs/spec-decisions.md D1, D3, D7 points 1 and 4",
+    "docs/spec-factors.md §20.6 (showcase), §20.9"
+   ],
+   "tests": [
+    "tests/test_personas.py"
+   ],
+   "code": [
+    "fixtures/amira/profile.json",
+    "fixtures/amira/events.jsonl",
+    "fixtures/mateo/profile.json",
+    "fixtures/mateo/events.jsonl",
+    "scripts/handwrite_llm_cache.py",
+    "fixtures/llm_cache/",
+    "README.md"
+   ],
+   "notes": "P1.1 owns fixtures/amira, fixtures/mateo, scripts/handwrite_llm_cache.py and new llm_cache entries; P1.2 owns data.py, coherence/hard.py, data/meta/SOURCES.md; P1.3 owns store.py, llm/bedrock.py, config.py, deploy/aws/, .env.example; P1.4 owns api.py. These four tasks run IN PARALLEL in separate worktrees: edit only the files your task owns (plus README.md and new test files). Never write data/meta/activity_tags.csv or data/meta/asset_meta.csv. Do NOT edit coherence_analyzer/**, fixtures/robert/**, fixtures/*/portfolio.json (weights stay as committed) or any existing llm_cache entry. Tests must cover: both profiles validate (pipeline.validate_profile / schemas/profile.v2.json) and their meta.profile_id matches portfolio.json (persona-amira, persona-mateo); rules on each (as_of = portfolio.as_of, D1): Amira age 26, employment salaried software engineer, identity.employer_sector 'Information Technology', single, no dependants, knowledge intermediate, horizon >= 15 y, declared high, ef_months >= 3 -> capacity high, effective high, limits equal to LIMITS_TABLE['high'] applied as §7.2 (max_crypto 0.10, max_single_stock 0.15, min fixed income 0.00, floor 60 000 x 0.60); Mateo age 41, operations manager, partner + 2 children, intermediate, horizon 10 y, declared moderate -> effective moderate (assert the capacity the rules give), values.environment {importance 5, exclusions [significant_environmental_controversy]}, values.social {importance 4, exclusions [significant_social_controversy]} -> limits.excluded_activities contains both; values.notes are the §16 texts verbatim (Amira: 'I love AI and new tech but I don't want everything in tech.'; Mateo: 'Avoid companies with major environmental or social controversies. Open to new tech if it fits, nothing speculative.'); hand-written N3 values_parser mock entries for both notes (via scripts/handwrite_llm_cache.py, model id fixture:hand-written; quotes exact substrings): Amira -> max_theme_weight {theme: tech_heavy} with NO max_pct; Mateo -> exclude_activity for both controversy tags plus avoid_attribute speculative; Amira's fixture holds that parsed rule approved_by_user true with max_pct 50 (she answered the intake question, §20.6) so limits.max_theme_weight == {tech_heavy: 0.50} and limits_trace includes values.parsed_notes[approved_by_user]; Mateo's parsed rules start approved_by_user false except where the user has declared them; events.jsonl (§3.4, ids ev_amira_0001.., ev_mateo_0001.., dates <= 2026-11-12): Amira has a quiz_result, >= 2 long-term-framing questions and one crypto FOMO question; Mateo has a quiz_result and >= 2 questions about ESG / controversies; hand-written N6 profile_consistency entries for both (gate-valid; Amira: a tension between preferences/interests in tech-AI and the 'not everything in tech' note is fine); hard.run_cheap on Amira's weights (meta={}): H2 violation value 0.15 limit 0.10, H6 per the starter sectors (assert what the data gives for NVDA + SHOP.TO vs 0.15); pipeline.review(fixtures/amira) and (fixtures/mateo) in mock mode each return a schema-valid Flow C report with flow C, Amira verdict incoherent, Mateo verdict one of the three (D3), profile_coherence present, no LLMCacheMiss for N3/N6 in the audit (explainer misses fall back to template, that is fine); the demo test in tests/test_pipeline_offline.py now sees three complete personas and stays green. Every fictional figure (income, expenses, emergency fund, goals, withdrawals) goes in README Assumptions."
+  },
+  {
+   "id": "P1.2",
+   "title": "meta files loaders + hard checks H11 (excluded activities), H12 (fees), H13 (theme weight)",
+   "spec": [
+    "§3.2",
+    "§7.2 (excluded_activities, max_fee_mer_pct, max_theme_weight)",
+    "§7.3 H11-H13",
+    "§7.5",
+    "§8 (cheap checks)",
+    "§15 test_hard Mateo bullet",
+    "§1 invariants",
+    "docs/spec-decisions.md D3, D7 point 4",
+    "docs/spec-factors.md §20.2"
+   ],
+   "tests": [
+    "tests/test_meta_checks.py"
+   ],
+   "code": [
+    "coherence_analyzer/data.py",
+    "coherence_analyzer/coherence/hard.py",
+    "data/meta/SOURCES.md",
+    "README.md"
+   ],
+   "notes": "P1.1 owns fixtures/amira, fixtures/mateo, scripts/handwrite_llm_cache.py and new llm_cache entries; P1.2 owns data.py, coherence/hard.py, data/meta/SOURCES.md; P1.3 owns store.py, llm/bedrock.py, config.py, deploy/aws/, .env.example; P1.4 owns api.py. These four tasks run IN PARALLEL in separate worktrees: edit only the files your task owns (plus README.md and new test files). Never write data/meta/activity_tags.csv or data/meta/asset_meta.csv. Do NOT create the real meta CSV files under data/meta/: tests write their own meta files in tmp_path and pass them through the existing `meta` dict / data.load_meta(name, meta_dir). Do not edit fixtures/, store.py, llm/, api.py; pipeline.py only if strictly needed to pass meta (it already loads META_NAMES). Tests must cover: data.load_meta validates columns per §3.2 and rejects (ValueError) an activity_tags row with an empty source_url, as_of or added_by, and an asset_meta ETF row with mer_pct but no mer_source_url; asset_meta themes parse as a semicolon list; a missing file -> None (as today). H11 (§7.3): for each excluded activity in limits.excluded_activities: held equity with a sourced tag row in that category -> violation (subject ticker, value the tag, evidence source_url in the check); held equity with no tag row in an excluded category -> unknown (one per ticker, not per tag); held ETF without look-through (asset_meta has_lookthrough false or no asset_meta) -> unknown; tag rows for non-excluded tags never fire; no excluded activities -> follow the same pass convention as H1. Use Mateo's committed portfolio (fixtures/mateo/portfolio.json) with a minimal edited copy of the Robert profile whose limits.excluded_activities = [significant_environmental_controversy, significant_social_controversy]: no tags file -> XOM and ENB.TO unknown (and every other held equity), never violation; temp activity tags file with a sourced XOM significant_environmental_controversy row -> H11 violation on XOM (§15). H12: per held ETF (etf_equity, etf_bond, etf_commodity): mer_pct > limits.max_fee_mer_pct -> violation, missing file/row/blank mer -> unknown, else pass; stocks and crypto not checked; no max_fee_mer_pct -> no H12 results. H13: per theme in limits.max_theme_weight: sum of weights of holdings whose asset_meta themes contain it (an ETF counts fully, §7.3) > max -> violation else pass; no asset_meta -> unknown; equality is a pass (same _gt tolerance as other checks). All three live in run_cheap in CHEAP order, carry derived_from from limits_trace (_derived), units weight / pct, and map to the contraintes factor (factors/mapping.py already lists them: do not change it). Unknowns never change the verdict (D3). The resizer and every frozen test stay green; if a frozen test pins Robert's current unknown/check lists and H11/H12 now add unknowns for Robert (he excludes tobacco and accounting_fraud_last_5y and declares max_fee_mer_pct 0.5), write the contradiction to .claude/loop/BLOCKED.md rather than weakening H11/H12. Document the meta file formats and their status in data/meta/SOURCES.md."
+  },
+  {
+   "id": "P1.3",
+   "title": "AWS: S3 store backend, Bedrock Guardrail on the explainer, CloudFormation template (no deploy)",
+   "spec": [
+    "§10",
+    "§14",
+    "§6.1 (guardrail on the explainer only)",
+    "§9.3 (optional guardrail)",
+    "docs/spec-decisions.md D6",
+    "docs/spec-factors.md §20.5"
+   ],
+   "tests": [
+    "tests/test_store_s3.py",
+    "tests/test_guardrail.py"
+   ],
+   "code": [
+    "coherence_analyzer/store.py",
+    "coherence_analyzer/llm/bedrock.py",
+    "coherence_analyzer/config.py",
+    "deploy/aws/coherence-analyzer.cfn.json",
+    ".env.example",
+    "README.md"
+   ],
+   "notes": "P1.1 owns fixtures/amira, fixtures/mateo, scripts/handwrite_llm_cache.py and new llm_cache entries; P1.2 owns data.py, coherence/hard.py, data/meta/SOURCES.md; P1.3 owns store.py, llm/bedrock.py, config.py, deploy/aws/, .env.example; P1.4 owns api.py. These four tasks run IN PARALLEL in separate worktrees: edit only the files your task owns (plus README.md and new test files). Never write data/meta/activity_tags.csv or data/meta/asset_meta.csv. No network and no real AWS calls in code paths the tests run: moto is NOT installed and pip install is blocked, so use botocore.stub.Stubber on boto3 clients built with dummy credentials and region us-east-1, or inject a fake client. Do not deploy anything. Store: COHERENCE_ANALYZER_STORE=s3 with COHERENCE_ANALYZER_S3_BUCKET and optional COHERENCE_ANALYZER_S3_PREFIX; same layout keys as §10 (profiles/<id>/profile.v<N>.json, profiles/<id>/events.jsonl, portfolios/<id>.json, reports/<run_id>.json, audit/<run_id>.json); the existing public functions keep their signatures and dispatch on the backend; the local backend stays byte-identical (all existing tests green); s3 writes ContentType application/json and the same JSON bytes as local; load_report/load_audit on a missing key raise FileNotFoundError like local; append_event on s3 = get + put (non-atomic, documented in README Assumptions); an unknown backend or s3 without a bucket raises a clear error. Tests assert exact Bucket/Key/Body/ContentType params through the Stubber. Guardrail: when config BEDROCK_GUARDRAIL_ID and BEDROCK_GUARDRAIL_VERSION are both set, call_tool adds guardrailConfig {guardrailIdentifier, guardrailVersion, trace: 'enabled'} to the Converse request for node 'explainer' ONLY (never N1, N3, N4, N6); stopReason 'guardrail_intervened' raises GuardrailIntervened (subclass of LLMOutputInvalid) so the narration loop ends in the template for that section (explanation mode template, reason recorded); the call log records guardrail id/version and whether it intervened; the cache key does not change (recorded mock entries stay valid) and mock mode never builds a client. Tests run call_tool in live mode against a Stubber'd bedrock-runtime client and check the request params per node and the intervened path. CloudFormation (JSON, not YAML): S3 bucket (versioning, BlockPublicAccess all true, SSE, TLS-only bucket policy), AWS::Bedrock::Guardrail with a denied topic for personalised investment recommendations (definition + fr and en examples) and fixed blocked input/output messaging, AWS::Bedrock::GuardrailVersion, a least-privilege IAM managed policy (bedrock:InvokeModel on a ModelArn parameter, bedrock:ApplyGuardrail on the guardrail, s3:GetObject/PutObject on the bucket prefix, s3:ListBucket with a prefix condition), Outputs BucketName, GuardrailId, GuardrailVersion; no em dashes in resource names or descriptions (use hyphens). Tests parse the JSON and assert these. README: an 'AWS deploy' section with the aws cloudformation deploy command and the .env values to set."
+  },
+  {
+   "id": "P1.4",
+   "title": "FastAPI over the Flow C pipeline: profiles, intake, events, parsed-rule decisions, review, reports, audit",
+   "spec": [
+    "§12 (API)",
+    "§3.4",
+    "§10",
+    "docs/spec-decisions.md D7 (Flow B is P2; product focus)",
+    "docs/spec-factors.md §20.6, §20.7, §20.9",
+    "§1 invariants 2, 6"
+   ],
+   "tests": [
+    "tests/test_api.py"
+   ],
+   "code": [
+    "coherence_analyzer/api.py",
+    "README.md"
+   ],
+   "notes": "P1.1 owns fixtures/amira, fixtures/mateo, scripts/handwrite_llm_cache.py and new llm_cache entries; P1.2 owns data.py, coherence/hard.py, data/meta/SOURCES.md; P1.3 owns store.py, llm/bedrock.py, config.py, deploy/aws/, .env.example; P1.4 owns api.py. These four tasks run IN PARALLEL in separate worktrees: edit only the files your task owns (plus README.md and new test files). Never write data/meta/activity_tags.csv or data/meta/asset_meta.csv. Do NOT edit pipeline.py, store.py, intake.py, gate.py, coherence/, rules/ or fixtures/: build on their current public functions. Use fastapi.testclient.TestClient (httpx is installed). The API never mutates fixtures/: on first access to a profile it copies its fixture dir (profile.json, events.jsonl, portfolio*.json, intents.json if present) into a working dir under store.root()/profiles/<profile_id>/ and works there. Tests point COHERENCE_ANALYZER_STORE_DIR at tmp_path and assert every fixtures/ file hash is unchanged after the whole test module. Endpoints: GET /health; GET /profiles -> [{profile_id, name}] for every fixture dir with profile.json + events.jsonl + portfolio.json (robert today; more appear when fixtures exist, so do not hardcode the count); GET /profiles/{id} -> current working profile (404 unknown id); GET /profiles/{id}/intake?locale=fr-CA|en-CA -> per factor {missing: intake.missing, next_question: intake.next_question}; POST /profiles/{id}/events -> validates §3.4 (type enum, text, ts), assigns the next event_id (ev_<name>_NNNN), appends to the working events.jsonl; type order_intent -> 501 with a message that Flow B is P2 (D7) and nothing is appended; POST /profiles/{id}/intake/answer {path, value} and /intake/skip {path} -> intake.answer / intake.skip on the working profile, saved, returns the profile; POST /profiles/{id}/parsed-rules/{index}/decision {approved: bool, max_pct?: number} -> sets approved_by_user (and max_pct for a theme rule without a number) on values.parsed_notes.value[index], 404 bad index; the request body can never set limits or any llm: field (422 on unknown keys); POST /profiles/{id}/review -> pipeline.review(working_dir) Flow C report; GET /reports/{run_id}, GET /audit/{run_id} -> stored docs, 404 if missing. Limits in returned profiles/reports are always recomputed by the pipeline, never taken from a request. CORS middleware allowing GET/POST from any origin (local demo). Tests: Robert review via the API equals pipeline.review on the fixture apart from run_id/timestamps (verdict, sections, checks); approving then rejecting a parsed rule round-trips; order_intent -> 501; 404/422 cases; no route path contains buy, sell, order or execute. README: how to run uvicorn coherence_analyzer.api:app."
+  }
+ ]
 }
