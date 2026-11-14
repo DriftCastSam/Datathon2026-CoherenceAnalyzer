@@ -1,0 +1,33 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "values_parser (N3) tool input: rules parsed from the user's free-text values notes (SPEC 6.2 N3)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["rules"],
+  "properties": {
+    "rules": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["rule_kind", "params", "applies_to", "quote"],
+        "properties": {
+          "rule_kind": {"type": "string", "enum": ["exclude_activity", "max_theme_weight", "prefer_attribute", "avoid_attribute", "other"]},
+          "params": {
+            "type": "object",
+            "description": "exclude_activity {tag} (activity_tags vocabulary); max_theme_weight {theme, max_pct} (max_pct only when the user gave a number); prefer_attribute / avoid_attribute {attribute}; other {} or a free {note}.",
+            "properties": {
+              "tag": {"type": "string"},
+              "theme": {"type": "string"},
+              "max_pct": {"type": "number", "minimum": 0, "maximum": 100},
+              "attribute": {"type": "string"},
+              "note": {"type": "string"}
+            }
+          },
+          "applies_to": {"type": "string", "enum": ["all", "single_stocks", "etf"]},
+          "quote": {"type": "string", "minLength": 1, "description": "An exact substring of the notes, copied character for character."}
+        }
+      }
+    }
+  }
+}

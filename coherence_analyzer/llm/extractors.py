@@ -13,8 +13,9 @@ from .. import config
 from . import bedrock
 
 N1_NODE = "behaviour_classifier"
+N3_NODE = "values_parser"
 N4_NODE = "intent_parser"
-PROMPT_VERSIONS = {N1_NODE: f"{N1_NODE}.v1", N4_NODE: f"{N4_NODE}.v1"}
+PROMPT_VERSIONS = {N1_NODE: f"{N1_NODE}.v1", N3_NODE: f"{N3_NODE}.v1", N4_NODE: f"{N4_NODE}.v1"}
 N1_EVENT_TYPES = ("question", "order_intent")
 N1_MAX_EVENTS = 20
 N1_WINDOW_DAYS = 30
@@ -62,9 +63,19 @@ def question_rubric(event: dict) -> dict:
     raise NotImplementedError
 
 
+def n3_payload(notes: str) -> dict:
+    """SPEC §6.2 N3 input: `values.notes` only. No other profile field enters the payload."""
+    return {"notes": notes}
+
+
+def values_parser_call(notes: str) -> dict:
+    return bedrock.call_tool(N3_NODE, load_schema(N3_NODE), load_prompt(N3_NODE), n3_payload(notes),
+                             prompt_version(N3_NODE))
+
+
 def values_parser(notes: str) -> dict:
-    """N3. Rules with exact-substring quotes; start unapproved."""
-    raise NotImplementedError
+    """N3. Rules with exact-substring quotes. The gate (§11) checks the quotes and starts every rule unapproved."""
+    return values_parser_call(notes)["output"]
 
 
 def n4_payload(text: str, universe: list[dict], weights_pct: dict[str, float]) -> dict:

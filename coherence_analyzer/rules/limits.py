@@ -111,11 +111,15 @@ def build_limits(profile: dict, portfolio_value_cad: float) -> tuple[dict, dict[
     activities: list[str] = []
     for pillar in PILLARS:
         activities.extend(values.get(pillar, {}).get("exclusions", []))
-    activities.extend(r["params"]["tag"] for r in _approved_parsed_rules(profile, "exclude_activity"))
+    activities.extend(r["params"]["tag"] for r in _approved_parsed_rules(profile, "exclude_activity")
+                      if isinstance(r.get("params", {}).get("tag"), str))
 
     themes: dict[str, float] = {}
     for r in _approved_parsed_rules(profile, "max_theme_weight"):
-        theme, frac = r["params"]["theme"], r["params"]["max_pct"] / 100   # percent -> fraction, once
+        pct = r.get("params", {}).get("max_pct")
+        if isinstance(pct, bool) or not isinstance(pct, (int, float)):
+            continue   # approved but the number is still unanswered (or skipped): nothing to promote yet
+        theme, frac = r["params"]["theme"], pct / 100   # percent -> fraction, once
         themes[theme] = min(frac, themes.get(theme, frac))                # stricter wins
 
     limits: dict[str, Any] = {

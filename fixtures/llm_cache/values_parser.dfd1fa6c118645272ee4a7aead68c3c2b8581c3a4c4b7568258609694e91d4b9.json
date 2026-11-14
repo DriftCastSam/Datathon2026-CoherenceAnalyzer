@@ -1,0 +1,36 @@
+{
+  "cache_key": "dfd1fa6c118645272ee4a7aead68c3c2b8581c3a4c4b7568258609694e91d4b9",
+  "call_log": {
+    "hand_written": true,
+    "latency_ms": 0,
+    "tokens_in": 0,
+    "tokens_out": 0
+  },
+  "input_hash": "sha256:d758af1ccb0dc3d508d8430023ca592c5ee5b39aa4aed01eb9406f3bf5e2cf4b",
+  "model_id": "fixture:hand-written",
+  "node": "values_parser",
+  "output": {
+    "rules": [
+      {
+        "applies_to": "all",
+        "params": {
+          "attribute": "ai_and_new_tech"
+        },
+        "quote": "I love AI and new tech",
+        "rule_kind": "prefer_attribute"
+      },
+      {
+        "applies_to": "all",
+        "params": {
+          "theme": "tech_heavy"
+        },
+        "quote": "I don't want everything in tech.",
+        "rule_kind": "max_theme_weight"
+      }
+    ]
+  },
+  "prompt_version": "values_parser.v1",
+  "user_payload": {
+    "notes": "I love AI and new tech but I don't want everything in tech."
+  }
+}
