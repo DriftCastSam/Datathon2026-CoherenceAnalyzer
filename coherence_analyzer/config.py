@@ -8,9 +8,9 @@ from dotenv import load_dotenv
 
 ROOT = Path(__file__).resolve().parent.parent
 # Load .env before any os.getenv below. Real environment variables win (override=False),
-# so `PORTEE_LLM=record python -m portee.cli demo` still overrides the file.
+# so `COHERENCE_ANALYZER_LLM=record python -m coherence_analyzer.cli demo` still overrides the file.
 load_dotenv(ROOT / ".env", override=False)
-DATA_DIR = Path(os.getenv("PORTEE_DATA", ROOT / "data" / "starter"))
+DATA_DIR = Path(os.getenv("COHERENCE_ANALYZER_DATA", ROOT / "data" / "starter"))
 META_DIR = ROOT / "data" / "meta"
 FIXTURES_DIR = ROOT / "fixtures"
 LLM_CACHE_DIR = FIXTURES_DIR / "llm_cache"   # recorded responses (mock/record)
@@ -20,8 +20,8 @@ LLM_SCHEMAS_DIR = Path(__file__).parent / "llm" / "schemas"
 SCHEMAS_DIR = Path(__file__).parent / "schemas"
 
 # LLM / AWS
-PORTEE_LLM = os.getenv("PORTEE_LLM", "mock")        # mock | record | live
-PORTEE_STORE = os.getenv("PORTEE_STORE", "local")   # local | s3
+COHERENCE_ANALYZER_LLM = os.getenv("COHERENCE_ANALYZER_LLM", "mock")        # mock | record | live
+COHERENCE_ANALYZER_STORE = os.getenv("COHERENCE_ANALYZER_STORE", "local")   # local | s3
 AWS_REGION = os.getenv("AWS_REGION", "us-east-1")
 BEDROCK_MODEL_ID = os.getenv("BEDROCK_MODEL_ID", "")
 BEDROCK_GUARDRAIL_ID = os.getenv("BEDROCK_GUARDRAIL_ID", "")

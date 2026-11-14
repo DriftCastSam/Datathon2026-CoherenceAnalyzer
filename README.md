@@ -1,4 +1,4 @@
-# Portée
+# CoherenceAnalyzer
 
 Checks whether a self-directed investor's portfolio, or a trade they want to make, is coherent with their own profile. Deterministic rules own every limit. Bedrock LLM nodes fill narrow, gated slots. Datathon 2026 / PolyFinances AlphaForge AI.
 
@@ -10,21 +10,21 @@ Checks whether a self-directed investor's portfolio, or a trade they want to mak
 ```
 python -m venv .venv && . .venv/bin/activate
 pip install -r requirements.txt
-cp .env.example .env          # only needed for PORTEE_LLM=record (AWS creds + BEDROCK_MODEL_ID)
-PORTEE_LLM=mock pytest -q
-python -m portee.engine       # engine summary for the fixture portfolios
+cp .env.example .env          # only needed for COHERENCE_ANALYZER_LLM=record (AWS creds + BEDROCK_MODEL_ID)
+COHERENCE_ANALYZER_LLM=mock pytest -q
+python -m coherence_analyzer.engine       # engine summary for the fixture portfolios
 ```
 
 ## Layout
 
 ```
-data/starter/     alphaforge starter pack, unmodified (README.md + build_dataset.py from the organisers)
-data/meta/        hand-built, sourced meta files (see data/meta/SOURCES.md)
-portee/           package: engine, rules, coherence, llm, gate, intent, resizer, explain, pipeline, store, api, cli
-portee/schemas/   profile.v2.json, report.json (JSON Schema)
-fixtures/         personas (robert, amira, mateo) + llm_cache for mock mode
-scripts/          engine_v0.py: original engine script, kept as the golden-test reference
-tests/            pytest, all offline (PORTEE_LLM=mock)
+data/starter/                alphaforge starter pack, unmodified (README.md + build_dataset.py from the organisers)
+data/meta/                   hand-built, sourced meta files (see data/meta/SOURCES.md)
+coherence_analyzer/          package: engine, rules, coherence, llm, gate, intent, resizer, explain, pipeline, store, api, cli
+coherence_analyzer/schemas/  profile.v2.json, report.json (JSON Schema)
+fixtures/                    personas (robert, amira, mateo) + llm_cache for mock mode
+scripts/                     engine_v0.py: original engine script, kept as the golden-test reference
+tests/                       pytest, all offline (COHERENCE_ANALYZER_LLM=mock)
 ```
 
 ## Status

@@ -6,7 +6,7 @@ import sys
 import numpy as np
 import pytest
 
-from portee import engine
+from coherence_analyzer import engine
 
 CASES = {"robert": (engine.ROBERT, 48, 400_000), "robert_nvda": (engine.ROBERT_NVDA, 48, 400_000),
          "amira": (engine.AMIRA, 180, 60_000)}

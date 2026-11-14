@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Scripted Claude Code build loop for Portée (SPEC §17).
+"""Scripted Claude Code build loop for CoherenceAnalyzer (SPEC §17).
 
 For each pending task in .claude/loop/tasks.json:
   Phase A  `claude -p` writes the oracle tests from SPEC.md  -> verify (only tests/ changed, collected,
@@ -10,7 +10,7 @@ For each pending task in .claude/loop/tasks.json:
 
 Determinism comes from the deterministic parts: a fixed task order, oracle tests frozen before any
 implementation, a verifier that is pure pytest + git + sha256, one commit per phase (every state is
-reproducible from git), and a pinned environment (PORTEE_LLM=mock, PYTHONHASHSEED=0, TZ=UTC).
+reproducible from git), and a pinned environment (COHERENCE_ANALYZER_LLM=mock, PYTHONHASHSEED=0, TZ=UTC).
 The LLM only proposes diffs. It never decides whether a step is done.
 
 Usage:
@@ -39,13 +39,13 @@ BLOCKED = LOOP / "BLOCKED.md"
 PROTECTED = ("SPEC.md", "data/starter/", "data/meta/activity_tags.csv", "scripts/engine_v0.py")
 BRANCH = "loop/p0"
 
-ENV = {**os.environ, "PORTEE_LLM": "mock", "PYTHONHASHSEED": "0", "TZ": "UTC",
+ENV = {**os.environ, "COHERENCE_ANALYZER_LLM": "mock", "PYTHONHASHSEED": "0", "TZ": "UTC",
        "PATH": f"{ROOT / '.venv' / 'bin'}{os.pathsep}{os.environ.get('PATH', '')}"}
 PY = str(ROOT / ".venv" / "bin" / "python") if (ROOT / ".venv" / "bin" / "python").exists() else sys.executable
 
 ALLOWED = ["Read", "Edit", "Write", "Glob", "Grep",
-           "Bash(python -m pytest:*)", "Bash(PORTEE_LLM=mock python -m pytest:*)", "Bash(pytest:*)",
-           "Bash(python -m portee.cli:*)", "Bash(PORTEE_LLM=mock python -m portee.cli:*)",
+           "Bash(python -m pytest:*)", "Bash(COHERENCE_ANALYZER_LLM=mock python -m pytest:*)", "Bash(pytest:*)",
+           "Bash(python -m coherence_analyzer.cli:*)", "Bash(COHERENCE_ANALYZER_LLM=mock python -m coherence_analyzer.cli:*)",
            "Bash(python -c:*)", "Bash(git status:*)", "Bash(git diff:*)", "Bash(git log:*)", "Bash(ls:*)"]
 DISALLOWED = ["Bash(git commit:*)", "Bash(git reset:*)", "Bash(git checkout:*)", "Bash(git stash:*)",
               "Bash(git push:*)", "Bash(pip install:*)", "Bash(curl:*)", "Bash(wget:*)", "WebFetch", "WebSearch"]

@@ -1,4 +1,4 @@
-"""`python -m portee.cli {refresh,check,review,audit,demo}` (SPEC §12)."""
+"""`python -m coherence_analyzer.cli {refresh,check,review,audit,demo}` (SPEC §12)."""
 from __future__ import annotations
 
 import argparse
@@ -8,7 +8,7 @@ from . import pipeline, store
 
 
 def main(argv: list[str] | None = None) -> None:
-    ap = argparse.ArgumentParser(prog="portee")
+    ap = argparse.ArgumentParser(prog="coherence_analyzer")
     sub = ap.add_subparsers(dest="cmd", required=True)
     p = sub.add_parser("refresh"); p.add_argument("fixture", type=Path)
     p = sub.add_parser("check"); p.add_argument("fixture", type=Path)

@@ -6,7 +6,7 @@
       "title": "levels, rule registry, derived fields, limits",
       "spec": ["§1", "§3.3", "§7.1", "§7.2", "§11", "§15 test_rules / test_limits_no_llm_inputs"],
       "tests": ["tests/test_rules.py", "tests/test_limits_no_llm_inputs.py", "tests/test_levels.py"],
-      "code": ["portee/levels.py", "portee/rules/registry.py", "portee/rules/derive.py", "portee/rules/limits.py"],
+      "code": ["coherence_analyzer/levels.py", "coherence_analyzer/rules/registry.py", "coherence_analyzer/rules/derive.py", "coherence_analyzer/rules/limits.py"],
       "notes": "Robert expectations are spelled out in §15 (life_stage pre_retirement, ef_months 4.6, effective_horizon 3.6, capacity low_moderate, effective low_moderate, knowledge.score 74, limits == the fixture's `limits` block). limits_trace must be generated from the registry, never hand-written. The rules may read the v1 Robert fixture for now: P0.3 converts it."
     },
     {
@@ -14,7 +14,7 @@
       "title": "profile v2 JSON Schema + Robert fixture conversion",
       "spec": ["§3.3", "§3.4", "§3.6", "§16 robert/"],
       "tests": ["tests/test_profile_schema.py"],
-      "code": ["portee/schemas/profile.v2.json", "fixtures/robert/profile.json", "fixtures/robert/events.jsonl", "fixtures/robert/intents.json"],
+      "code": ["coherence_analyzer/schemas/profile.v2.json", "fixtures/robert/profile.json", "fixtures/robert/events.jsonl", "fixtures/robert/intents.json"],
       "notes": "Test: fixtures/robert/profile.json validates against schemas/profile.v2.json (draft 2020-12); meta.schema_version == 2; every llm: object has prompt_version/model_id/updated_at/input_hash; behavioural evidence is [{event_id, signal, note}] and every event_id exists in events.jsonl; values.parsed_notes quotes are exact substrings of values.notes; events match §16 ids/dates/texts; intent in_0001 == NVDA 10% funded from ZST.TO. test_rules.py must still pass after the conversion."
     },
     {
@@ -22,7 +22,7 @@
       "title": "hard checks H1-H10, H14 + report verdict",
       "spec": ["§7.3", "§7.5", "§13", "§15 test_hard (Robert parts only)"],
       "tests": ["tests/test_hard.py"],
-      "code": ["portee/coherence/hard.py", "portee/coherence/report.py"],
+      "code": ["coherence_analyzer/coherence/hard.py", "coherence_analyzer/coherence/report.py"],
       "notes": "P0 covers Robert only. Robert baseline: H1-H6 pass (fixed income 0.35, max single stock RY 0.07, foreign ccy 0.27, crypto 0). Robert + NVDA 10% from ZST: H3 violation (0.10 > 0.08), H4 violation (0.25 < 0.30), H5 pass (0.37 <= 0.40), verdict incoherent. Every check result has the §7.3 keys and only hard checks may emit violation. Amira/Mateo cases are P1: do not write them now."
     },
     {
@@ -30,7 +30,7 @@
       "title": "intent.apply + resizer",
       "spec": ["§3.6", "§8", "§15 test_resizer"],
       "tests": ["tests/test_intent.py", "tests/test_resizer.py"],
-      "code": ["portee/intent.py", "portee/resizer.py"],
+      "code": ["coherence_analyzer/intent.py", "coherence_analyzer/resizer.py"],
       "notes": "intent.apply for every funding.kind keeps weights summing to 1 and never goes negative. Resizer, Robert NVDA from ZST: max 5.0% binding H4; pro-rata equities: 8.0% binding H3. §15 allows a skip ONLY if engine checks (H7-H10) bind earlier on real data: in that case the test must skip with the measured value in the reason, never silently pass.",
       "allow_skips": true
     },
@@ -39,15 +39,15 @@
       "title": "bedrock wrapper (mock/record/live), N1 + N4 schemas/prompts, gate",
       "spec": ["§1 inv. 4-5, 8", "§6.1", "§6.2 N1 N4", "§11", "§15 test_gate"],
       "tests": ["tests/test_gate.py", "tests/test_bedrock_mock.py"],
-      "code": ["portee/llm/bedrock.py", "portee/llm/extractors.py", "portee/llm/schemas/", "portee/llm/prompts/", "portee/gate.py", "fixtures/llm_cache/"],
-      "notes": "No network in tests: PORTEE_LLM=mock reads fixtures/llm_cache only and raises LLMCacheMiss on a miss. Cache key = existing cache_key(). Hand-write llm_cache responses for Robert's N1 and N4 calls that pass the schemas (§16), keyed by the real cache_key of the real payload. Gate cases from §15: invented event_id -> rejected:evidence; quote not in notes -> rejected:evidence; behavioural low_moderate -> high is clamped to moderate; abstain keeps the old value. boto3 is imported lazily, only in record/live mode."
+      "code": ["coherence_analyzer/llm/bedrock.py", "coherence_analyzer/llm/extractors.py", "coherence_analyzer/llm/schemas/", "coherence_analyzer/llm/prompts/", "coherence_analyzer/gate.py", "fixtures/llm_cache/"],
+      "notes": "No network in tests: COHERENCE_ANALYZER_LLM=mock reads fixtures/llm_cache only and raises LLMCacheMiss on a miss. Cache key = existing cache_key(). Hand-write llm_cache responses for Robert's N1 and N4 calls that pass the schemas (§16), keyed by the real cache_key of the real payload. Gate cases from §15: invented event_id -> rejected:evidence; quote not in notes -> rejected:evidence; behavioural low_moderate -> high is clamped to moderate; abstain keeps the old value. boto3 is imported lazily, only in record/live mode."
     },
     {
       "id": "P0.7",
       "title": "explain: payload, template fallback, numcheck, N5",
       "spec": ["§1 inv. 6-7, 9", "§9", "§15 test_numcheck"],
       "tests": ["tests/test_numcheck.py", "tests/test_explain.py"],
-      "code": ["portee/explain.py", "portee/llm/schemas/explainer.json", "portee/llm/prompts/explainer.v1.md", "fixtures/llm_cache/"],
+      "code": ["coherence_analyzer/explain.py", "coherence_analyzer/llm/schemas/explainer.json", "coherence_analyzer/llm/prompts/explainer.v1.md", "fixtures/llm_cache/"],
       "notes": "numcheck accepts '7,4 %', '7.4%', '360 000 $', '$360,000'; rejects a number not in the payload; advisory blocklist (FR+EN) rejects. template_explain is deterministic (same payload -> byte-identical output) and always passes its own numcheck. explain() mode is llm | llm_retry | template; a cached LLM output containing an invented number must end in mode=template. Disclaimer is the fixed text from config, never LLM text."
     },
     {
@@ -55,7 +55,7 @@
       "title": "pipeline flows B and C + cli demo (Robert end-to-end offline)",
       "spec": ["§4", "§10", "§12", "§13", "§15 test_pipeline_offline"],
       "tests": ["tests/test_pipeline_offline.py"],
-      "code": ["portee/pipeline.py", "portee/store.py", "portee/cli.py", "portee/schemas/report.json"],
+      "code": ["coherence_analyzer/pipeline.py", "coherence_analyzer/store.py", "coherence_analyzer/cli.py", "coherence_analyzer/schemas/report.json"],
       "notes": "P0 acceptance = Robert: `cli check fixtures/robert --intent in_0001 --auto-confirm` in mock mode writes a schema-valid report (verdict incoherent) and an audit record; running it twice gives byte-identical reports except run_id/timestamps (determinism test). `demo` runs whatever personas have complete fixtures and skips the rest with a printed notice (Amira/Mateo profiles are P1)."
     }
   ]

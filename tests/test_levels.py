@@ -1,4 +1,4 @@
-from portee import levels
+from coherence_analyzer import levels
 
 
 def test_order_and_clamp():

@@ -1,4 +1,4 @@
-# Portée: profile ↔ portfolio coherence pipeline
+# CoherenceAnalyzer: profile ↔ portfolio coherence pipeline
 
 Spec for implementation. Target reader: Claude Code working in this repo.
 Status: v1, 2026-11-14. Owner: Sam's team (Datathon 2026 / PolyFinances AlphaForge AI).
@@ -7,7 +7,7 @@ Status: v1, 2026-11-14. Owner: Sam's team (Datathon 2026 / PolyFinances AlphaFor
 
 ## 0. One-paragraph summary
 
-Portée checks whether a self-directed investor's **portfolio** (or a **trade they want to make**) is coherent with their **own profile**: age, horizon, goals, risk tolerance and capacity, knowledge, values. The pipeline is a scripted DAG, not a free-roaming agent. Deterministic rules own everything that can block or limit. LLM nodes (AWS Bedrock) fill narrow, schema-constrained slots: behaviour reading, question quality, values parsing, intent parsing, explanation. Every LLM output passes through a deterministic **gate** before it touches the profile, and LLM-derived fields can only raise **warnings**, never violations. Output: a coherence report with a verdict, per-check results traced back to profile fields, risk metrics from `engine.py`, options that fit within the user's own limits, and a plain-language explanation whose numbers are machine-verified.
+CoherenceAnalyzer checks whether a self-directed investor's **portfolio** (or a **trade they want to make**) is coherent with their **own profile**: age, horizon, goals, risk tolerance and capacity, knowledge, values. The pipeline is a scripted DAG, not a free-roaming agent. Deterministic rules own everything that can block or limit. LLM nodes (AWS Bedrock) fill narrow, schema-constrained slots: behaviour reading, question quality, values parsing, intent parsing, explanation. Every LLM output passes through a deterministic **gate** before it touches the profile, and LLM-derived fields can only raise **warnings**, never violations. Output: a coherence report with a verdict, per-check results traced back to profile fields, risk metrics from `engine.py`, options that fit within the user's own limits, and a plain-language explanation whose numbers are machine-verified.
 
 The persona the case highlights is **Robert asking for 10% NVDA**. The system must flag the incoherence, explain the risk, and put the request back in context. It must not just say yes or no.
 
@@ -22,7 +22,7 @@ The persona the case highlights is **Robert asking for 10% NVDA**. The system mu
 5. **Every LLM evidence item must reference something that exists**: an `event_id` in the event log, or a substring of the user's own notes. Invented evidence means the whole output is rejected.
 6. **Every number in the explanation must appear in the facts payload** (within rounding tolerance). Otherwise regenerate once, then fall back to a template.
 7. **Simulation only.** No order execution and no buy/sell recommendations. The alternatives shown are "what fits within *your own* stated limits", computed by code. Every user-facing output carries the disclaimer (§9.4).
-8. **Reproducible.** Same inputs + same `prompt_version` + same model give the same report (LLM responses are cached by input hash, temperature 0, fixed bootstrap seed). `PORTEE_LLM=mock` runs the whole pipeline offline from recorded responses.
+8. **Reproducible.** Same inputs + same `prompt_version` + same model give the same report (LLM responses are cached by input hash, temperature 0, fixed bootstrap seed). `COHERENCE_ANALYZER_LLM=mock` runs the whole pipeline offline from recorded responses.
 9. **Facts, assumptions and inferences are labelled** everywhere they appear: report, explanation and UI. This is a jury requirement.
 
 ---
@@ -30,7 +30,7 @@ The persona the case highlights is **Robert asking for 10% NVDA**. The system mu
 ## 2. Repo layout
 
 ```
-portee/
+coherence_analyzer/
 ├── CLAUDE.md                  # short working rules, points here
 ├── SPEC.md                    # this file
 ├── README.md                  # deps, data, config, reproduction (jury deliverable)
@@ -42,7 +42,7 @@ portee/
 │   │   ├── etf_sector_weights.csv   # ETF look-through by sector (issuer pages, dated)
 │   │   ├── activity_tags.csv  # ticker -> activity/controversy tags, each with source URL + date
 │   │   └── SOURCES.md         # source, date, processing, limits for every meta file
-├── portee/
+├── coherence_analyzer/
 │   ├── __init__.py
 │   ├── config.py              # env + constants (thresholds, seeds, paths)
 │   ├── data.py                # loaders + adapter from starter filenames
@@ -68,7 +68,7 @@ portee/
 │   ├── pipeline.py            # flows A/B/C (§4)
 │   ├── store.py               # profiles, events, portfolios, audit (local FS or S3)
 │   ├── api.py                 # FastAPI (thin)
-│   └── cli.py                 # `python -m portee.cli ...`
+│   └── cli.py                 # `python -m coherence_analyzer.cli ...`
 ├── fixtures/
 │   ├── robert/  {profile.json, events.jsonl, portfolio.json, intents.json}
 │   ├── amira/   {...}
@@ -192,7 +192,7 @@ Three flows, all in `pipeline.py`. Each run gets a `run_id` (ULID) and writes on
 
 ### Flow A: profile refresh
 
-Trigger: a new `question`, `quiz_result`, `profile_edit` or `note` event, or `portee refresh <profile>`.
+Trigger: a new `question`, `quiz_result`, `profile_edit` or `note` event, or `coherence_analyzer refresh <profile>`.
 
 ```
 load profile + events
@@ -228,7 +228,7 @@ In CLI/mock mode, B2 auto-confirms when `--auto-confirm` is passed (for tests an
 
 ### Flow C: portfolio review
 
-Trigger: `portee review <profile>`. It's B5–B9 without an intent: a baseline coherence report for the current portfolio. This is used for Amira and Mateo, who aren't making a specific trade.
+Trigger: `coherence_analyzer review <profile>`. It's B5–B9 without an intent: a baseline coherence report for the current portfolio. This is used for Amira and Mateo, who aren't making a specific trade.
 
 Persona demo matrix (the case asks for ≥ 2 contrasting situations):
 
@@ -240,7 +240,7 @@ Persona demo matrix (the case asks for ≥ 2 contrasting situations):
 
 ---
 
-## 5. Engine (`portee/engine.py`)
+## 5. Engine (`coherence_analyzer/engine.py`)
 
 Refactor the current script into a module **without changing the math**:
 
@@ -253,7 +253,7 @@ Refactor the current script into a module **without changing the math**:
   - `p5_T`, `p50_T`, `p95_T`: terminal values in CAD.
   - `sector_lookthrough`: when `etf_sector_weights.csv` exists, split ETF weight and risk contribution across sectors by weight. Otherwise keep `Broad market` and set `lookthrough: false`.
   - `assumptions`: list of strings, always including the drift table (`ASSUMED`, labelled as a team assumption), the data window, block bootstrap with block 12, survivorship bias, and the 2022 joint stock-bond drawdown being in the sample.
-- Remove the hardcoded `/home/claude/...` paths. The CLI keeps a `python -m portee.engine --data data/starter` entry that prints what the current script prints.
+- Remove the hardcoded `/home/claude/...` paths. The CLI keeps a `python -m coherence_analyzer.engine --data data/starter` entry that prints what the current script prints.
 - Golden test: on the starter data, `analyse(ROBERT, 48, 400000)` produces the same `vol`, `mdd`, cone as the current script (record once, compare to 1e-9).
 
 ---
@@ -271,7 +271,7 @@ def call_tool(node: str, schema: dict, system: str, user_payload: dict,
 - Extracts the `toolUse.input` block and validates it with `jsonschema` (draft 2020-12).
 - On a validation error, it retries once with the validator message appended as a user turn. On a second failure it raises `LLMOutputInvalid`.
 - Cache key = sha256(node, prompt_version, model_id, canonical-json(user_payload)), stored as files in `.cache/llm/`. Cache hit → no call.
-- `PORTEE_LLM=mock` reads only from `fixtures/llm_cache/` and raises on a miss. `PORTEE_LLM=record` calls Bedrock and writes to `fixtures/llm_cache/`.
+- `COHERENCE_ANALYZER_LLM=mock` reads only from `fixtures/llm_cache/` and raises on a miss. `COHERENCE_ANALYZER_LLM=record` calls Bedrock and writes to `fixtures/llm_cache/`.
 - Config: `AWS_REGION`, `BEDROCK_MODEL_ID` (team picks a Claude model enabled in their account), optional `BEDROCK_GUARDRAIL_ID` + version applied to the explainer call only.
 - Logs per call: node, model_id, prompt_version, latency, input/output tokens, cache hit. All of it goes to the audit record.
 
@@ -484,7 +484,7 @@ EN: "Educational simulation with fictional profiles. This is not personalised fi
 
 ## 10. Persistence and audit (`store.py`)
 
-Backend `local` (default) or `s3` via `PORTEE_STORE`. Same layout:
+Backend `local` (default) or `s3` via `COHERENCE_ANALYZER_STORE`. Same layout:
 
 ```
 profiles/<profile_id>/profile.v<N>.json
@@ -505,7 +505,7 @@ Audit record:
  "verdict", "explanation_mode"}
 ```
 
-`portee audit <run_id>` pretty-prints this. It's the "show your work" screen for the jury.
+`coherence_analyzer audit <run_id>` pretty-prints this. It's the "show your work" screen for the jury.
 
 ---
 
@@ -539,11 +539,11 @@ Status ∈ `accepted | clamped | kept:abstain | rejected:evidence | rejected:sch
 
 CLI:
 ```
-python -m portee.cli refresh fixtures/robert
-python -m portee.cli check fixtures/robert --intent in_0001 --auto-confirm
-python -m portee.cli review fixtures/amira
-python -m portee.cli audit <run_id>
-python -m portee.cli demo            # runs the 3-persona matrix, writes reports/, prints verdicts
+python -m coherence_analyzer.cli refresh fixtures/robert
+python -m coherence_analyzer.cli check fixtures/robert --intent in_0001 --auto-confirm
+python -m coherence_analyzer.cli review fixtures/amira
+python -m coherence_analyzer.cli audit <run_id>
+python -m coherence_analyzer.cli demo            # runs the 3-persona matrix, writes reports/, prints verdicts
 ```
 
 The UI (existing design: cone, risk decomposition, drivers) consumes `reports/<run_id>.json`. UI requirements for this feature:
@@ -580,7 +580,7 @@ The case demands "real and demonstrable" AWS use without multiplying services. E
 |---|---|---|
 | **Bedrock (Converse, tool use)** | N1–N5. The core GenAI integration | P0 |
 | **Bedrock Guardrails** | Denied topic "personalised investment advice" on the explainer | P1 |
-| **S3** | Profiles, events, reports, audit (`PORTEE_STORE=s3`); data files | P1 |
+| **S3** | Profiles, events, reports, audit (`COHERENCE_ANALYZER_STORE=s3`); data files | P1 |
 | **Step Functions** | Flow B as a state machine (parallel LLM branch, gate, engine, explain). The diagram goes straight into the video and the docs | P2 |
 | Lambda | Hosts the steps if Step Functions is used | P2 |
 
@@ -588,7 +588,7 @@ IAM: one role, least privilege (`bedrock:InvokeModel` on the chosen model ARN, t
 
 ---
 
-## 15. Tests (`tests/`, all run with `PORTEE_LLM=mock`)
+## 15. Tests (`tests/`, all run with `COHERENCE_ANALYZER_LLM=mock`)
 
 - `test_engine_golden.py`: refactored engine == original script output on starter data (Robert, Robert-NVDA, Amira).
 - `test_rules.py`: Robert fixture gives life_stage `pre_retirement`, ef_months 4.6, effective_horizon 3.6, capacity `low_moderate`, effective `low_moderate`, knowledge.score 74, limits equal to the example JSON's `limits` block.
@@ -610,7 +610,7 @@ IAM: one role, least privilege (`bedrock:InvokeModel` on the chosen model ARN, t
 - **robert/**: profile from the example JSON (schema v2 conversion). Events: ev_0001 quiz 0.8 (2026-11-01); ev_0004 question "Which AI stock is the next big one?" (2026-11-10); ev_0005 question "What does XBB's duration mean for my bonds if rates drop?" (2026-11-12); ev_0007 order_intent "I want to put 10% in NVDA, everyone's talking about it" (2026-11-14). Portfolio ROBERT. Intent in_0001 = NVDA 10% from ZST.TO.
 - **amira/**: 26, software engineer (`employer_sector: Information Technology` → H6 matters with NVDA/SHOP), single, no dependants, intermediate, horizon 15+, declared `high`, notes "I love AI and new tech but I don't want everything in tech." → N3 should parse `max_theme_weight {theme: tech_heavy}` with no number. The UI asks her for one; the fixture approves 50%. Fictional figures for income, expenses and emergency fund (keep ef_months ≥ 3 so capacity stays `high`). Portfolio AMIRA, value 60 000. A few events showing long-term framing plus one crypto FOMO question.
 - **mateo/**: 41, operations manager, partner + 2 children, intermediate, horizon 10, declared `moderate`; values `environment.importance 5, exclusions [significant_environmental_controversy]`, `social.importance 4, exclusions [significant_social_controversy]`. Notes: "Avoid companies with major environmental or social controversies. Open to new tech if it fits, nothing speculative." Portfolio MATEO (§3.5).
-- **llm_cache/**: record with `PORTEE_LLM=record` once Bedrock access works. Until then, hand-write plausible responses that pass the schemas, so the pipeline and tests run.
+- **llm_cache/**: record with `COHERENCE_ANALYZER_LLM=record` once Bedrock access works. Until then, hand-write plausible responses that pass the schemas, so the pipeline and tests run.
 
 All persona financial figures beyond the case brief are **fictional team assumptions**. List them in README.
 

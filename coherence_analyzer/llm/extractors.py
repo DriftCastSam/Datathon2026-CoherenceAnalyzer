@@ -1,4 +1,4 @@
-"""One function per LLM node (SPEC §6.2). Each returns raw validated output; gating happens in portee.gate."""
+"""One function per LLM node (SPEC §6.2). Each returns raw validated output; gating happens in coherence_analyzer.gate."""
 from __future__ import annotations
 
 
@@ -23,5 +23,5 @@ def intent_parser(text: str, universe: list[dict], weights_pct: dict[str, float]
 
 
 def explainer(payload: dict) -> dict:
-    """N5. See portee.explain."""
+    """N5. See coherence_analyzer.explain."""
     raise NotImplementedError

@@ -1,11 +1,11 @@
-# CLAUDE.md: Portée
+# CLAUDE.md: CoherenceAnalyzer
 
 Read `SPEC.md` before any change. It is the source of truth. If code and spec disagree, raise it; don't silently pick one.
 
 ## Invariants (never break)
 - `limits` is computed from `rule:` fields and user-declared values only. No `llm:` field may feed it (test: `tests/test_limits_no_llm_inputs.py`).
 - LLM-derived checks produce `warning | info | unknown` only. Only hard checks produce `violation`.
-- Every LLM output goes through `portee/gate.py`. Evidence must reference real `event_id`s or exact substrings of the user's notes.
+- Every LLM output goes through `coherence_analyzer/gate.py`. Evidence must reference real `event_id`s or exact substrings of the user's notes.
 - Every number in an explanation must exist in the facts payload (`explain.numcheck`). Otherwise retry once, then use the template.
 - No buy/sell recommendations, no execution. Disclaimer text is fixed (SPEC §9.4).
 - Never write rows to `data/meta/activity_tags.csv` from code or an LLM. Humans only, with a source URL.
@@ -14,9 +14,9 @@ Read `SPEC.md` before any change. It is the source of truth. If code and spec di
 ## Commands
 ```
 pip install -r requirements.txt
-PORTEE_LLM=mock pytest -q
-PORTEE_LLM=mock python -m portee.cli demo
-PORTEE_LLM=record python -m portee.cli demo   # needs AWS creds + BEDROCK_MODEL_ID
+COHERENCE_ANALYZER_LLM=mock pytest -q
+COHERENCE_ANALYZER_LLM=mock python -m coherence_analyzer.cli demo
+COHERENCE_ANALYZER_LLM=record python -m coherence_analyzer.cli demo   # needs AWS creds + BEDROCK_MODEL_ID
 ```
 
 ## Conventions

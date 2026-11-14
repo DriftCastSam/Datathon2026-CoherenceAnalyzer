@@ -1,4 +1,4 @@
-<title>Portée on Bedrock</title>
+<title>CoherenceAnalyzer on Bedrock</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -98,8 +98,8 @@ pre { margin: 0; overflow-x: auto; background: var(--surface); border: 1px solid
 <div class="wrap">
 
 <header style="display:grid; gap:14px">
-  <div class="eyebrow">Portée · Datathon 2026 · architecture proposal v1</div>
-  <h1>Portée on Amazon Bedrock</h1>
+  <div class="eyebrow">CoherenceAnalyzer · Datathon 2026 · architecture proposal v1</div>
+  <h1>CoherenceAnalyzer on Amazon Bedrock</h1>
   <p class="lede">Two features, coherence analysis and auto-explanation, run as one scripted AWS Step Functions state machine. Bedrock is called at five fixed points, each with a forced tool schema. The model never chooses the next step, never sets a limit and never writes a number we did not compute.</p>
   <div class="legend">
     <span><i class="sw code"></i>Deterministic Python (Lambda, same package as local)</span>
@@ -113,7 +113,7 @@ pre { margin: 0; overflow-x: auto; background: var(--surface); border: 1px solid
 <section>
   <div class="eyebrow">Flow B · trade check (SPEC §4)</div>
   <h2>The whole state machine</h2>
-  <p class="sub">Flow C (portfolio review) is the same machine with the intent states skipped. Every box is one Step Functions state. Each Lambda imports <code>portee</code>, so the cloud runs the exact code the tests cover.</p>
+  <p class="sub">Flow C (portfolio review) is the same machine with the intent states skipped. Every box is one Step Functions state. Each Lambda imports <code>coherence_analyzer</code>, so the cloud runs the exact code the tests cover.</p>
   <div class="diagram"><div class="flow">
     <div class="n store"><span class="id">B2 · UI</span><b>User confirms the intent</b><small>NVDA 10 %, funded from ZST.TO. The confirmed intent is user-declared data.</small></div>
     <div class="arr" data-l="StartExecution"></div>
@@ -189,7 +189,7 @@ pre { margin: 0; overflow-x: auto; background: var(--surface); border: 1px solid
   <h2>Auto-explanation: worst case is a deterministic template</h2>
   <p>The explainer sees only the facts payload, never the raw profile. Numbers arrive pre-formatted (<code>"vol_pct": "7.4 %"</code>), so the model copies them and never computes. Post-checks are code. If they fail twice, the template writes the explanation from the same checks. Each report records which path it took in <code>explanation.mode</code>.</p>
   <pre><span class="c">// Step Functions ASL fragment: the explanation retry is a state, not a model decision</span>
-<span class="k">"PostCheck"</span>: { <span class="k">"Type"</span>: <span class="s">"Task"</span>, <span class="k">"Resource"</span>: <span class="s">"arn:aws:lambda:…:portee-postcheck"</span>, <span class="k">"Next"</span>: <span class="s">"ExplainOk?"</span> },
+<span class="k">"PostCheck"</span>: { <span class="k">"Type"</span>: <span class="s">"Task"</span>, <span class="k">"Resource"</span>: <span class="s">"arn:aws:lambda:…:coherence-analyzer-postcheck"</span>, <span class="k">"Next"</span>: <span class="s">"ExplainOk?"</span> },
 <span class="k">"ExplainOk?"</span>: { <span class="k">"Type"</span>: <span class="s">"Choice"</span>, <span class="k">"Choices"</span>: [
   { <span class="k">"Variable"</span>: <span class="s">"$.post.ok"</span>, <span class="k">"BooleanEquals"</span>: true, <span class="k">"Next"</span>: <span class="s">"Save"</span> },
   { <span class="k">"Variable"</span>: <span class="s">"$.post.attempt"</span>, <span class="k">"NumericLessThan"</span>: 2, <span class="k">"Next"</span>: <span class="s">"Explain"</span> } ],
@@ -217,7 +217,7 @@ pre { margin: 0; overflow-x: auto; background: var(--surface); border: 1px solid
 <section>
   <div class="eyebrow">Where variance can enter and what pins it</div>
   <h2>Determinism, layer by layer</h2>
-  <p>Temperature 0 makes Bedrock output stable, not bit-exact. Reproducibility comes from the cache: a recorded response is replayed exactly, and <code>PORTEE_LLM=mock</code> runs the full pipeline from <code>fixtures/llm_cache/</code> with no network.</p>
+  <p>Temperature 0 makes Bedrock output stable, not bit-exact. Reproducibility comes from the cache: a recorded response is replayed exactly, and <code>COHERENCE_ANALYZER_LLM=mock</code> runs the full pipeline from <code>fixtures/llm_cache/</code> with no network.</p>
   <div class="tbl"><table>
     <thead><tr><th>Layer</th><th>Source of variance</th><th>Pinned by</th></tr></thead>
     <tbody>
@@ -239,7 +239,7 @@ pre { margin: 0; overflow-x: auto; background: var(--surface); border: 1px solid
   <div class="eyebrow">Which Bedrock product</div>
   <h2>Why Step Functions + Converse instead of Bedrock Agents</h2>
   <div class="tbl"><table>
-    <thead><tr><th>Option</th><th>Who decides the next step</th><th>Fit for Portée</th></tr></thead>
+    <thead><tr><th>Option</th><th>Who decides the next step</th><th>Fit for CoherenceAnalyzer</th></tr></thead>
     <tbody>
       <tr><td>Step Functions + Converse <span class="pill ok">recommended</span></td><td>Our ASL</td><td>Matches SPEC "scripted DAG". The local pipeline and the cloud share one Python package, and mock mode works unchanged. The diagram is already planned for the video (SPEC §17 step 15).</td></tr>
       <tr><td>Bedrock Flows <span class="pill warn">alternative</span></td><td>Our flow graph (prompt, Lambda, condition, iterator/collector, inline-code nodes)</td><td>Also a fixed DAG, so it would work for the explanation subgraph. Keep the gate and numcheck in Lambda nodes. Before choosing it, check that a prompt node can force a tool schema on our model. If it can't, call Converse from a Lambda node, which gives the Step Functions design again.</td></tr>
@@ -264,7 +264,7 @@ pre { margin: 0; overflow-x: auto; background: var(--surface); border: 1px solid
     <div class="arr"></div>
     <div class="n gate"><span class="id">verify B</span><b>hashes intact · protected paths clean · acceptance green, 0 skips · full suite green</b></div>
     <div class="arr" data-l="pass → commit · fail → retry ≤ 2, then stop"></div>
-    <div class="n code"><span class="id">env</span><b>PORTEE_LLM=mock · PYTHONHASHSEED=0 · TZ=UTC · branch loop/p0</b></div>
+    <div class="n code"><span class="id">env</span><b>COHERENCE_ANALYZER_LLM=mock · PYTHONHASHSEED=0 · TZ=UTC · branch loop/p0</b></div>
   </div></div>
 </section>
 
