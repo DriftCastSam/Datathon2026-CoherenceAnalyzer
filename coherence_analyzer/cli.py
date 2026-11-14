@@ -26,6 +26,7 @@ def _print_review(label: str, rep: dict) -> None:
         print(f"  cannot verify: {', '.join(unknown)}")
     print(f"  run_id {rep['run_id']}  report {store.root() / 'reports' / (rep['run_id'] + '.json')}")
     print(profile_line(rep["profile_coherence"]))
+    print(rep["disclaimer"])  # SPEC §9.4: the report carries config.DISCLAIMER in its own locale
 
 
 def _intent_line(intent: dict) -> str:
