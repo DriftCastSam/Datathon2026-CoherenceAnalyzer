@@ -198,7 +198,7 @@ def test_mock_miss_never_falls_back_to_the_live_cache(monkeypatch, dirs):
 
 # ---------------------------------------------------------------- record / live request shape (§6.1)
 
-def test_converse_request_forces_the_single_tool_at_temperature_zero(monkeypatch, dirs):
+def test_converse_request_forces_the_single_tool_without_temperature(monkeypatch, dirs):
     fx, rt = dirs
     fake = FakeBedrock([tool_response("toy", {"answer": 1})]).install(monkeypatch)
     _set_mode(monkeypatch, "record", fx, rt)
@@ -210,7 +210,8 @@ def test_converse_request_forces_the_single_tool_at_temperature_zero(monkeypatch
     assert tools[0]["toolSpec"]["name"] == "toy"
     assert tools[0]["toolSpec"]["inputSchema"] == {"json": TOY_SCHEMA}
     assert req["toolConfig"]["toolChoice"] == {"tool": {"name": "toy"}}
-    assert req["inferenceConfig"]["temperature"] == 0
+    # docs/spec-decisions.md D6: the model rejects `temperature`; reproducibility comes from the cache
+    assert "temperature" not in req["inferenceConfig"]
     assert isinstance(req["inferenceConfig"]["maxTokens"], int) and req["inferenceConfig"]["maxTokens"] > 0
     assert "You answer." in json.dumps(req["system"])
     assert req["messages"][0]["role"] == "user"

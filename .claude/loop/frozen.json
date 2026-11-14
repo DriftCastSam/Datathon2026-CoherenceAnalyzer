@@ -1,6 +1,6 @@
 {
   "files": {
-    "tests/test_bedrock_mock.py": "efd0298a476db16f397f9355371add230438c81e1bbc6caac2473c26f131a321",
+    "tests/test_bedrock_mock.py": "c50886ec514024cdc27d14c5e8bac9fbfb9f375d5e6ac1237f963f83b5c7ffd8",
     "tests/test_gate.py": "bda0a80906c40a42d1c96360ea5544934341a83919ba5afbfa1f68d4cfc849a7",
     "tests/test_hard.py": "805877c7a41277a429c9c78de59e71aced68ece3ba6c6803cd6bff981a0cce69",
     "tests/test_intent.py": "7f215b5c521a8fdfb0073deeea766204633a2b75d8e8740c5cb4c693ea811795",

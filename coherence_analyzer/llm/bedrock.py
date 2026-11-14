@@ -106,13 +106,15 @@ def _converse(client: Any, model_id: str, node: str, schema: dict, system: str, 
         messages=messages,
         toolConfig={"tools": [{"toolSpec": {"name": node, "inputSchema": {"json": schema}}}],
                     "toolChoice": {"tool": {"name": node}}},
-        inferenceConfig={"temperature": 0, "maxTokens": MAX_TOKENS.get(node, DEFAULT_MAX_TOKENS)},
+        # No temperature (docs/spec-decisions.md D6): the model rejects it. Reproducibility comes from
+        # the input-hash cache (record/live) and the recorded mock cache.
+        inferenceConfig={"maxTokens": MAX_TOKENS.get(node, DEFAULT_MAX_TOKENS)},
     )   # no guardrailConfig: the guardrail applies to the explainer call only (SPEC §6.1)
 
 
 def call_tool(node: str, schema: dict, system: str, user_payload: dict, prompt_version: str) -> dict:
     """mock: read fixtures/llm_cache only (raise LLMCacheMiss). record: call + write fixtures/llm_cache.
-    live: call with .cache/llm. Temperature 0, toolChoice forced to `node`, jsonschema-validate,
+    live: call with .cache/llm. No temperature (D6), toolChoice forced to `node`, jsonschema-validate,
     retry once with validator message, then raise LLMOutputInvalid. Returns {output, call_log}."""
     mode = _mode()
     model_id = BEDROCK_MODEL_ID
