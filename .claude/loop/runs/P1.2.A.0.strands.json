@@ -1,0 +1,47 @@
+{
+  "duration_s": 203.3,
+  "guard_cancellations": [
+    {
+      "reason": "'META\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'p=json.load(open(fixtures/robert/profile.json))' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'H11\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'H11' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'unknown' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'run_all\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'run_all\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "command substitution is not allowed; run the inner command on its own",
+      "tool": "shell"
+    }
+  ],
+  "is_error": false,
+  "model_id": "us.anthropic.claude-sonnet-5-5",
+  "num_turns": 28,
+  "result": "`activity_tags` row with empty `source_url`, `as_of` or `added_by` raises `ValueError` (\u00a73.2, \u00a71).\n- `test_load_meta_rejects_etf_mer_without_source_url`: an ETF row with `mer_pct` but no `mer_source_url` raises `ValueError` (\u00a73.2).\n- `test_load_meta_accepts_unfilled_etf_mer_and_unsourced_stock_zero`: a stock or crypto row with `mer_pct` 0 and no source loads, and so does an ETF row with a blank MER (\u00a73.2).\n- `test_load_meta_asset_meta_themes_are_a_semicolon_list`: `ai;semis` loads as `[\"ai\",\"semis\"]`, a single theme as a one-item list, and a blank cell as an empty list (\u00a73.2). I read \"parse\" strictly, so the loaded cell must already be a list.\n- `test_h11_no_tags_file_every_held_equity_and_etf_is_unknown_never_violation`: with no tags file, every held Mateo equity and ETF gets exactly one H11 `unknown`, with weight units and `derived_from` from `limits_trace` (\u00a77.3, \u00a715).\n- `test_h11_sourced_tag_row_is_a_violation_on_that_ticker`: a sourced XOM environmental-controversy row gives one violation with subject XOM, value the tag, the `source_url` in the check, and other equities still `unknown` (\u00a715, \u00a77.3).\n- `test_h11_one_violation_per_excluded_tag_and_one_unknown_per_ticker`: two sourced tags on XOM give two violations, and unknowns stay one per ticker (\u00a77.3).\n- `test_h11_tag_outside_the_excluded_categories_never_fires`: tags that aren't excluded never produce a violation or a pass (\u00a77.3).\n- `test_h11_tag_on_a_ticker_that_is_not_held_never_fires`: a tag on a ticker that isn't held produces no check (\u00a77.3).\n- `test_h11_etf_without_lookthrough_is_unknown_even_with_asset_meta`: an ETF with `has_lookthrough` false gives one `unknown` (\u00a77.3).\n- `test_h11_no_excluded_activities_follows_the_h1_pass_convention`: no excluded activities gives a single pass with subject `None`, value 0.0 and limit `None`, the same shape as H1 (\u00a77.3).\n- `test_h12_per_etf_pass_violation_unknown`: one H12 result per held ETF, with a violation over the limit, `unknown` for a blank MER or missing row, unit `pct`, and `derived_from` from the trace (\u00a77.3, \u00a73.2).\n- `test_h12_no_asset_meta_file_every_held_etf_is_unknown`: with no `asset_meta` file, every held ETF is `unknown` (\u00a73.2, \u00a77.3).\n- `test_h12_equality_with_the_limit_is_a_pass`: an MER equal to the limit, or within 1e-10, passes; 1e-6 over fails (\u00a77.3, `_gt` tolerance).\n- `test_h12_checks_commodity_and_bond_etfs_but_not_stocks_or_crypto`: GLD and TLT are checked, MSFT and BTC-USD are not (\u00a77.3).\n- `test_h12_unheld_etf_is_not_checked`: only held ETFs are checked (\u00a77.3).\n- `test_h12_without_max_fee_limit_emits_no_results`: no `max_fee_mer_pct` means no H12 results (\u00a77.3).\n- `test_h13_sums_weights_per_theme_and_compares_with_the_max`: per-theme sums with an ETF counted fully, so `tech_heavy` = QQQ 0.20 + MSFT 0.07 = 0.27 over a 0.25 max is a violation, and `semis` 0.08 under 0.10 passes (\u00a77.3, \u00a73.2).\n- `test_h13_equality_is_a_pass_and_float_noise_does_not_flip_it`: 0.08 + 0.07 against a 0.15 max passes, and fails against 0.1499 (\u00a77.3).\n- `test_h13_theme_nobody_holds_passes_with_zero`: a limited theme no holding carries passes with value 0 (\u00a77.3).\n- `test_h13_no_asset_meta_is_unknown_per_theme`: with no `asset_meta`, each limited theme is `unknown` (\u00a77.3, \u00a73.2).\n- `test_h13_without_max_theme_weight_emits_no_results`: no `max_theme_weight` means no H13 results (\u00a77.3).\n- `test_run_cheap_emits_h11_h12_h13_in_cheap_order`: `run_cheap` emits H11, H12 and H13, grouped in `CHEAP` order (\u00a78).\n- `test_h11_h12_h13_belong_to_contraintes` (3 cases): the factor mapping puts H11, H12 and H13 in `contraintes` (\u00a720.2).\n- `test_meta_unknowns_never_change_the_verdict_but_a_violation_does`: Mateo with only H11\u2013H13 unknowns is `coherent` and lists them, while one sourced tag makes it `incoherent` (D3, \u00a77.5).\n\nWhere the spec was ambiguous I took the stricter reading and marked it with a `# SPEC-AMBIGUITY:` comment: H13's subject is the theme name, bond ETFs count as \"held ETF\" for H11 unknowns, and loaded themes are already lists.\n",
+  "stop_reason": "end_turn",
+  "usage": {
+    "inputTokens": 930714,
+    "outputTokens": 30913,
+    "totalTokens": 961627
+  }
+}

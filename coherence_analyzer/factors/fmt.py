@@ -63,8 +63,12 @@ def check_value(x, unit: str | None, locale: str) -> str:
     """Format a check `value` / `limit` by its `unit` (hard.py units: weight, annual_vol, drawdown, risk_share, cad, ...)."""
     if x is None:
         return DASH
+    if isinstance(x, str):          # H11 violation: the value is the matched activity tag
+        return x
     if unit in _FRACTION_UNITS:
         return percent(x, locale)
+    if unit == "pct":               # H12: MER already in percent points
+        return percent_points(x, locale)
     if unit == "cad":
         return amount(x, locale)
     return number(x, locale)
