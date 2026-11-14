@@ -32,8 +32,28 @@ class LLMOutputInvalid(Exception):
     pass
 
 
+class GuardrailIntervened(LLMOutputInvalid):
+    """The Bedrock Guardrail blocked the explainer answer (stopReason 'guardrail_intervened'; SPEC §6.1, §9.3).
+    Not retried and never cached. `call_log` carries the log of the blocked call (guardrail id / version,
+    guardrail_intervened True), since call_tool returns nothing in that case."""
+
+    def __init__(self, message: str, call_log: dict | None = None) -> None:
+        super().__init__(message)
+        self.call_log = call_log or {}
+
+
 class LLMCacheMiss(Exception):
     pass
+
+
+GUARDRAIL_NODES = ("explainer",)   # SPEC §6.1: the guardrail applies to the explainer call only
+
+
+def _guardrail(node: str) -> tuple[str, str] | None:
+    """(id, version) when the node is guarded and both settings are present, else None."""
+    if node in GUARDRAIL_NODES and BEDROCK_GUARDRAIL_ID and BEDROCK_GUARDRAIL_VERSION:
+        return BEDROCK_GUARDRAIL_ID, BEDROCK_GUARDRAIL_VERSION
+    return None
 
 
 def _canon(payload: Any) -> str:
@@ -99,7 +119,12 @@ def _tool_input(response: dict, node: str) -> dict | None:
     return None
 
 
-def _converse(client: Any, model_id: str, node: str, schema: dict, system: str, messages: list[dict]) -> dict:
+def _converse(client: Any, model_id: str, node: str, schema: dict, system: str, messages: list[dict],
+              guardrail: tuple[str, str] | None = None) -> dict:
+    extra: dict[str, Any] = {}
+    if guardrail:
+        extra["guardrailConfig"] = {"guardrailIdentifier": guardrail[0], "guardrailVersion": guardrail[1],
+                                    "trace": "enabled"}
     return client.converse(
         modelId=model_id,
         system=[{"text": system}],
@@ -109,7 +134,8 @@ def _converse(client: Any, model_id: str, node: str, schema: dict, system: str, 
         # No temperature (docs/spec-decisions.md D6): the model rejects it. Reproducibility comes from
         # the input-hash cache (record/live) and the recorded mock cache.
         inferenceConfig={"maxTokens": MAX_TOKENS.get(node, DEFAULT_MAX_TOKENS)},
-    )   # no guardrailConfig: the guardrail applies to the explainer call only (SPEC §6.1)
+        **extra,   # guardrailConfig: explainer only, and only when id and version are both set (SPEC §6.1)
+    )
 
 
 def call_tool(node: str, schema: dict, system: str, user_payload: dict, prompt_version: str) -> dict:
@@ -138,16 +164,27 @@ def call_tool(node: str, schema: dict, system: str, user_payload: dict, prompt_v
     import boto3   # lazy: only record/live reach Bedrock
 
     client = boto3.client("bedrock-runtime", region_name=AWS_REGION)
+    guardrail = _guardrail(node)
+    guard_log: dict[str, Any] = ({"guardrail_id": guardrail[0], "guardrail_version": guardrail[1],
+                                  "guardrail_intervened": False} if guardrail else {})
     validator = Draft202012Validator(schema)
     messages: list[dict] = [{"role": "user", "content": [{"text": _canon(user_payload)}]}]
     tokens_in = tokens_out = 0
     started = time.perf_counter()
     output: dict | None = None
     for attempt in (1, 2):
-        response = _converse(client, model_id, node, schema, system, messages)
+        response = _converse(client, model_id, node, schema, system, messages, guardrail)
         usage = response.get("usage", {})
         tokens_in += int(usage.get("inputTokens", 0))
         tokens_out += int(usage.get("outputTokens", 0))
+        if guardrail and response.get("stopReason") == "guardrail_intervened":
+            blocked = {"node": node, "model_id": model_id, "prompt_version": prompt_version,
+                       "input_hash": input_hash(user_payload), "cache_hit": False,
+                       "latency_ms": round((time.perf_counter() - started) * 1000, 1),
+                       "tokens_in": tokens_in, "tokens_out": tokens_out,
+                       **{**guard_log, "guardrail_intervened": True}}
+            raise GuardrailIntervened(f"{node}: blocked by Bedrock guardrail {guardrail[0]} "
+                                      f"(version {guardrail[1]})", blocked)
         candidate = _tool_input(response, node)
         if candidate is None:
             problem = f"no toolUse block named {node!r} in the response"
@@ -174,6 +211,6 @@ def call_tool(node: str, schema: dict, system: str, user_payload: dict, prompt_v
     log = {"node": node, "model_id": model_id, "prompt_version": prompt_version,
            "input_hash": input_hash(user_payload), "cache_hit": False,
            "latency_ms": round((time.perf_counter() - started) * 1000, 1),
-           "tokens_in": tokens_in, "tokens_out": tokens_out}
+           "tokens_in": tokens_in, "tokens_out": tokens_out, **guard_log}
     write_entry(cache_dir, node, prompt_version, model_id, user_payload, output, log)
     return _result(output, log)

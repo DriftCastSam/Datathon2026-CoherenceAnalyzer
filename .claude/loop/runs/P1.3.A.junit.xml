@@ -1,0 +1,966 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="45" skipped="0" tests="61" time="2.936" timestamp="2026-11-14T22:42:18.234471+00:00" hostname="bomboclat-laptop"><testcase classname="tests.test_store_s3" name="test_importing_store_does_not_import_boto3" time="0.039" /><testcase classname="tests.test_store_s3" name="test_local_backend_is_byte_identical_and_never_touches_boto3" time="0.001" /><testcase classname="tests.test_store_s3" name="test_s3_save_puts_exact_bucket_key_body_contenttype[save_profile--]" time="0.053"><failure message="NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists">s3 = &lt;test_store_s3.S3Env object at 0x7f422fd5be00&gt;, fn = 'save_profile'
+doc = {'meta': {'profile_id': 'amira', 'version': 3, 'name': 'Amira Côté'}, 'values': {'notes': 'Pas tout en tech – équilibré'}, 'risk': {'declared': 'low_moderate'}}
+key = 'profiles/amira/profile.v3.json'
+stored = {'meta': {'profile_id': 'amira', 'version': 3, 'name': 'Amira Côté'}, 'values': {'notes': 'Pas tout en tech – équilibré'}, 'risk': {'declared': 'low_moderate'}}
+prefix = '', key_prefix = ''
+
+    @pytest.mark.parametrize("prefix,key_prefix", [("", ""), ("ca/dev", "ca/dev/"), ("ca/dev/", "ca/dev/")])
+    @pytest.mark.parametrize("fn,doc,key,stored", SAVES, ids=[s[0] for s in SAVES])
+    def test_s3_save_puts_exact_bucket_key_body_contenttype(s3, fn, doc, key, stored, prefix, key_prefix):
+        # SPEC §10 same layout keys under COHERENCE_ANALYZER_S3_PREFIX (a trailing slash must not double up);
+        # task: ContentType application/json, body = the same JSON bytes as local.
+        s3.configure("s3", BUCKET, prefix)
+        s3.put(key_prefix + key, json_bytes(stored))
+&gt;       getattr(store, fn)(doc)
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/tests/test_store_s3.py:173: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:81: in save_profile
+    return _write(root() / "profiles" / meta["profile_id"] / f"profile.v{meta['version']}.json", profile)
+                  ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def root() -&gt; Path:
+        if config.COHERENCE_ANALYZER_STORE != "local":
+&gt;           raise NotImplementedError("COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists")
+E           NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:30: NotImplementedError</failure></testcase><testcase classname="tests.test_store_s3" name="test_s3_save_puts_exact_bucket_key_body_contenttype[save_profile-ca/dev-ca/dev/]" time="0.047"><failure message="NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists">s3 = &lt;test_store_s3.S3Env object at 0x7f422f1f4190&gt;, fn = 'save_profile'
+doc = {'meta': {'profile_id': 'amira', 'version': 3, 'name': 'Amira Côté'}, 'values': {'notes': 'Pas tout en tech – équilibré'}, 'risk': {'declared': 'low_moderate'}}
+key = 'profiles/amira/profile.v3.json'
+stored = {'meta': {'profile_id': 'amira', 'version': 3, 'name': 'Amira Côté'}, 'values': {'notes': 'Pas tout en tech – équilibré'}, 'risk': {'declared': 'low_moderate'}}
+prefix = 'ca/dev', key_prefix = 'ca/dev/'
+
+    @pytest.mark.parametrize("prefix,key_prefix", [("", ""), ("ca/dev", "ca/dev/"), ("ca/dev/", "ca/dev/")])
+    @pytest.mark.parametrize("fn,doc,key,stored", SAVES, ids=[s[0] for s in SAVES])
+    def test_s3_save_puts_exact_bucket_key_body_contenttype(s3, fn, doc, key, stored, prefix, key_prefix):
+        # SPEC §10 same layout keys under COHERENCE_ANALYZER_S3_PREFIX (a trailing slash must not double up);
+        # task: ContentType application/json, body = the same JSON bytes as local.
+        s3.configure("s3", BUCKET, prefix)
+        s3.put(key_prefix + key, json_bytes(stored))
+&gt;       getattr(store, fn)(doc)
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/tests/test_store_s3.py:173: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:81: in save_profile
+    return _write(root() / "profiles" / meta["profile_id"] / f"profile.v{meta['version']}.json", profile)
+                  ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def root() -&gt; Path:
+        if config.COHERENCE_ANALYZER_STORE != "local":
+&gt;           raise NotImplementedError("COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists")
+E           NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:30: NotImplementedError</failure></testcase><testcase classname="tests.test_store_s3" name="test_s3_save_puts_exact_bucket_key_body_contenttype[save_profile-ca/dev/-ca/dev/]" time="0.071"><failure message="NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists">s3 = &lt;test_store_s3.S3Env object at 0x7f422e488050&gt;, fn = 'save_profile'
+doc = {'meta': {'profile_id': 'amira', 'version': 3, 'name': 'Amira Côté'}, 'values': {'notes': 'Pas tout en tech – équilibré'}, 'risk': {'declared': 'low_moderate'}}
+key = 'profiles/amira/profile.v3.json'
+stored = {'meta': {'profile_id': 'amira', 'version': 3, 'name': 'Amira Côté'}, 'values': {'notes': 'Pas tout en tech – équilibré'}, 'risk': {'declared': 'low_moderate'}}
+prefix = 'ca/dev/', key_prefix = 'ca/dev/'
+
+    @pytest.mark.parametrize("prefix,key_prefix", [("", ""), ("ca/dev", "ca/dev/"), ("ca/dev/", "ca/dev/")])
+    @pytest.mark.parametrize("fn,doc,key,stored", SAVES, ids=[s[0] for s in SAVES])
+    def test_s3_save_puts_exact_bucket_key_body_contenttype(s3, fn, doc, key, stored, prefix, key_prefix):
+        # SPEC §10 same layout keys under COHERENCE_ANALYZER_S3_PREFIX (a trailing slash must not double up);
+        # task: ContentType application/json, body = the same JSON bytes as local.
+        s3.configure("s3", BUCKET, prefix)
+        s3.put(key_prefix + key, json_bytes(stored))
+&gt;       getattr(store, fn)(doc)
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/tests/test_store_s3.py:173: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:81: in save_profile
+    return _write(root() / "profiles" / meta["profile_id"] / f"profile.v{meta['version']}.json", profile)
+                  ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def root() -&gt; Path:
+        if config.COHERENCE_ANALYZER_STORE != "local":
+&gt;           raise NotImplementedError("COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists")
+E           NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:30: NotImplementedError</failure></testcase><testcase classname="tests.test_store_s3" name="test_s3_save_puts_exact_bucket_key_body_contenttype[save_portfolio--]" time="0.045"><failure message="NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists">s3 = &lt;test_store_s3.S3Env object at 0x7f422f111e00&gt;, fn = 'save_portfolio'
+doc = {'portfolio_id': 'pf_robert', 'as_of': '2026-11-12', 'currency': 'CAD', 'weights_pct': {'XBB.TO': 60.0, 'ZST.TO': 40.0}, ...}
+key = 'portfolios/pf_robert.json'
+stored = {'portfolio_id': 'pf_robert', 'as_of': '2026-11-12', 'currency': 'CAD', 'weights_pct': {'XBB.TO': 60.0, 'ZST.TO': 40.0}}
+prefix = '', key_prefix = ''
+
+    @pytest.mark.parametrize("prefix,key_prefix", [("", ""), ("ca/dev", "ca/dev/"), ("ca/dev/", "ca/dev/")])
+    @pytest.mark.parametrize("fn,doc,key,stored", SAVES, ids=[s[0] for s in SAVES])
+    def test_s3_save_puts_exact_bucket_key_body_contenttype(s3, fn, doc, key, stored, prefix, key_prefix):
+        # SPEC §10 same layout keys under COHERENCE_ANALYZER_S3_PREFIX (a trailing slash must not double up);
+        # task: ContentType application/json, body = the same JSON bytes as local.
+        s3.configure("s3", BUCKET, prefix)
+        s3.put(key_prefix + key, json_bytes(stored))
+&gt;       getattr(store, fn)(doc)
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/tests/test_store_s3.py:173: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:87: in save_portfolio
+    return _write(root() / "portfolios" / f"{doc['portfolio_id']}.json", doc)
+                  ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def root() -&gt; Path:
+        if config.COHERENCE_ANALYZER_STORE != "local":
+&gt;           raise NotImplementedError("COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists")
+E           NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:30: NotImplementedError</failure></testcase><testcase classname="tests.test_store_s3" name="test_s3_save_puts_exact_bucket_key_body_contenttype[save_portfolio-ca/dev-ca/dev/]" time="0.056"><failure message="NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists">s3 = &lt;test_store_s3.S3Env object at 0x7f422cee4180&gt;, fn = 'save_portfolio'
+doc = {'portfolio_id': 'pf_robert', 'as_of': '2026-11-12', 'currency': 'CAD', 'weights_pct': {'XBB.TO': 60.0, 'ZST.TO': 40.0}, ...}
+key = 'portfolios/pf_robert.json'
+stored = {'portfolio_id': 'pf_robert', 'as_of': '2026-11-12', 'currency': 'CAD', 'weights_pct': {'XBB.TO': 60.0, 'ZST.TO': 40.0}}
+prefix = 'ca/dev', key_prefix = 'ca/dev/'
+
+    @pytest.mark.parametrize("prefix,key_prefix", [("", ""), ("ca/dev", "ca/dev/"), ("ca/dev/", "ca/dev/")])
+    @pytest.mark.parametrize("fn,doc,key,stored", SAVES, ids=[s[0] for s in SAVES])
+    def test_s3_save_puts_exact_bucket_key_body_contenttype(s3, fn, doc, key, stored, prefix, key_prefix):
+        # SPEC §10 same layout keys under COHERENCE_ANALYZER_S3_PREFIX (a trailing slash must not double up);
+        # task: ContentType application/json, body = the same JSON bytes as local.
+        s3.configure("s3", BUCKET, prefix)
+        s3.put(key_prefix + key, json_bytes(stored))
+&gt;       getattr(store, fn)(doc)
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/tests/test_store_s3.py:173: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:87: in save_portfolio
+    return _write(root() / "portfolios" / f"{doc['portfolio_id']}.json", doc)
+                  ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def root() -&gt; Path:
+        if config.COHERENCE_ANALYZER_STORE != "local":
+&gt;           raise NotImplementedError("COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists")
+E           NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:30: NotImplementedError</failure></testcase><testcase classname="tests.test_store_s3" name="test_s3_save_puts_exact_bucket_key_body_contenttype[save_portfolio-ca/dev/-ca/dev/]" time="0.051"><failure message="NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists">s3 = &lt;test_store_s3.S3Env object at 0x7f422c714b90&gt;, fn = 'save_portfolio'
+doc = {'portfolio_id': 'pf_robert', 'as_of': '2026-11-12', 'currency': 'CAD', 'weights_pct': {'XBB.TO': 60.0, 'ZST.TO': 40.0}, ...}
+key = 'portfolios/pf_robert.json'
+stored = {'portfolio_id': 'pf_robert', 'as_of': '2026-11-12', 'currency': 'CAD', 'weights_pct': {'XBB.TO': 60.0, 'ZST.TO': 40.0}}
+prefix = 'ca/dev/', key_prefix = 'ca/dev/'
+
+    @pytest.mark.parametrize("prefix,key_prefix", [("", ""), ("ca/dev", "ca/dev/"), ("ca/dev/", "ca/dev/")])
+    @pytest.mark.parametrize("fn,doc,key,stored", SAVES, ids=[s[0] for s in SAVES])
+    def test_s3_save_puts_exact_bucket_key_body_contenttype(s3, fn, doc, key, stored, prefix, key_prefix):
+        # SPEC §10 same layout keys under COHERENCE_ANALYZER_S3_PREFIX (a trailing slash must not double up);
+        # task: ContentType application/json, body = the same JSON bytes as local.
+        s3.configure("s3", BUCKET, prefix)
+        s3.put(key_prefix + key, json_bytes(stored))
+&gt;       getattr(store, fn)(doc)
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/tests/test_store_s3.py:173: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:87: in save_portfolio
+    return _write(root() / "portfolios" / f"{doc['portfolio_id']}.json", doc)
+                  ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def root() -&gt; Path:
+        if config.COHERENCE_ANALYZER_STORE != "local":
+&gt;           raise NotImplementedError("COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists")
+E           NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:30: NotImplementedError</failure></testcase><testcase classname="tests.test_store_s3" name="test_s3_save_puts_exact_bucket_key_body_contenttype[save_report--]" time="0.046"><failure message="NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists">s3 = &lt;test_store_s3.S3Env object at 0x7f422bb9bac0&gt;, fn = 'save_report'
+doc = {'run_id': '01HX0000000000000000000001', 'verdict': 'coherent', 'unknowns': ['H6'], 'explanation': {'mode': 'template', 'headline': 'Portefeuille cohérent avec votre profil.'}}
+key = 'reports/01HX0000000000000000000001.json'
+stored = {'run_id': '01HX0000000000000000000001', 'verdict': 'coherent', 'unknowns': ['H6'], 'explanation': {'mode': 'template', 'headline': 'Portefeuille cohérent avec votre profil.'}}
+prefix = '', key_prefix = ''
+
+    @pytest.mark.parametrize("prefix,key_prefix", [("", ""), ("ca/dev", "ca/dev/"), ("ca/dev/", "ca/dev/")])
+    @pytest.mark.parametrize("fn,doc,key,stored", SAVES, ids=[s[0] for s in SAVES])
+    def test_s3_save_puts_exact_bucket_key_body_contenttype(s3, fn, doc, key, stored, prefix, key_prefix):
+        # SPEC §10 same layout keys under COHERENCE_ANALYZER_S3_PREFIX (a trailing slash must not double up);
+        # task: ContentType application/json, body = the same JSON bytes as local.
+        s3.configure("s3", BUCKET, prefix)
+        s3.put(key_prefix + key, json_bytes(stored))
+&gt;       getattr(store, fn)(doc)
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/tests/test_store_s3.py:173: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:91: in save_report
+    return _write(root() / "reports" / f"{report['run_id']}.json", report)
+                  ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def root() -&gt; Path:
+        if config.COHERENCE_ANALYZER_STORE != "local":
+&gt;           raise NotImplementedError("COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists")
+E           NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:30: NotImplementedError</failure></testcase><testcase classname="tests.test_store_s3" name="test_s3_save_puts_exact_bucket_key_body_contenttype[save_report-ca/dev-ca/dev/]" time="0.047"><failure message="NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists">s3 = &lt;test_store_s3.S3Env object at 0x7f422af8abe0&gt;, fn = 'save_report'
+doc = {'run_id': '01HX0000000000000000000001', 'verdict': 'coherent', 'unknowns': ['H6'], 'explanation': {'mode': 'template', 'headline': 'Portefeuille cohérent avec votre profil.'}}
+key = 'reports/01HX0000000000000000000001.json'
+stored = {'run_id': '01HX0000000000000000000001', 'verdict': 'coherent', 'unknowns': ['H6'], 'explanation': {'mode': 'template', 'headline': 'Portefeuille cohérent avec votre profil.'}}
+prefix = 'ca/dev', key_prefix = 'ca/dev/'
+
+    @pytest.mark.parametrize("prefix,key_prefix", [("", ""), ("ca/dev", "ca/dev/"), ("ca/dev/", "ca/dev/")])
+    @pytest.mark.parametrize("fn,doc,key,stored", SAVES, ids=[s[0] for s in SAVES])
+    def test_s3_save_puts_exact_bucket_key_body_contenttype(s3, fn, doc, key, stored, prefix, key_prefix):
+        # SPEC §10 same layout keys under COHERENCE_ANALYZER_S3_PREFIX (a trailing slash must not double up);
+        # task: ContentType application/json, body = the same JSON bytes as local.
+        s3.configure("s3", BUCKET, prefix)
+        s3.put(key_prefix + key, json_bytes(stored))
+&gt;       getattr(store, fn)(doc)
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/tests/test_store_s3.py:173: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:91: in save_report
+    return _write(root() / "reports" / f"{report['run_id']}.json", report)
+                  ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def root() -&gt; Path:
+        if config.COHERENCE_ANALYZER_STORE != "local":
+&gt;           raise NotImplementedError("COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists")
+E           NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:30: NotImplementedError</failure></testcase><testcase classname="tests.test_store_s3" name="test_s3_save_puts_exact_bucket_key_body_contenttype[save_report-ca/dev/-ca/dev/]" time="0.064"><failure message="NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists">s3 = &lt;test_store_s3.S3Env object at 0x7f422a5c7450&gt;, fn = 'save_report'
+doc = {'run_id': '01HX0000000000000000000001', 'verdict': 'coherent', 'unknowns': ['H6'], 'explanation': {'mode': 'template', 'headline': 'Portefeuille cohérent avec votre profil.'}}
+key = 'reports/01HX0000000000000000000001.json'
+stored = {'run_id': '01HX0000000000000000000001', 'verdict': 'coherent', 'unknowns': ['H6'], 'explanation': {'mode': 'template', 'headline': 'Portefeuille cohérent avec votre profil.'}}
+prefix = 'ca/dev/', key_prefix = 'ca/dev/'
+
+    @pytest.mark.parametrize("prefix,key_prefix", [("", ""), ("ca/dev", "ca/dev/"), ("ca/dev/", "ca/dev/")])
+    @pytest.mark.parametrize("fn,doc,key,stored", SAVES, ids=[s[0] for s in SAVES])
+    def test_s3_save_puts_exact_bucket_key_body_contenttype(s3, fn, doc, key, stored, prefix, key_prefix):
+        # SPEC §10 same layout keys under COHERENCE_ANALYZER_S3_PREFIX (a trailing slash must not double up);
+        # task: ContentType application/json, body = the same JSON bytes as local.
+        s3.configure("s3", BUCKET, prefix)
+        s3.put(key_prefix + key, json_bytes(stored))
+&gt;       getattr(store, fn)(doc)
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/tests/test_store_s3.py:173: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:91: in save_report
+    return _write(root() / "reports" / f"{report['run_id']}.json", report)
+                  ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def root() -&gt; Path:
+        if config.COHERENCE_ANALYZER_STORE != "local":
+&gt;           raise NotImplementedError("COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists")
+E           NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:30: NotImplementedError</failure></testcase><testcase classname="tests.test_store_s3" name="test_s3_save_puts_exact_bucket_key_body_contenttype[save_audit--]" time="0.047"><failure message="NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists">s3 = &lt;test_store_s3.S3Env object at 0x7f4229987b50&gt;, fn = 'save_audit'
+doc = {'run_id': '01HX0000000000000000000001', 'flow': 'C', 'verdict': 'coherent', 'llm_calls': [], ...}
+key = 'audit/01HX0000000000000000000001.json'
+stored = {'run_id': '01HX0000000000000000000001', 'flow': 'C', 'verdict': 'coherent', 'llm_calls': [], ...}
+prefix = '', key_prefix = ''
+
+    @pytest.mark.parametrize("prefix,key_prefix", [("", ""), ("ca/dev", "ca/dev/"), ("ca/dev/", "ca/dev/")])
+    @pytest.mark.parametrize("fn,doc,key,stored", SAVES, ids=[s[0] for s in SAVES])
+    def test_s3_save_puts_exact_bucket_key_body_contenttype(s3, fn, doc, key, stored, prefix, key_prefix):
+        # SPEC §10 same layout keys under COHERENCE_ANALYZER_S3_PREFIX (a trailing slash must not double up);
+        # task: ContentType application/json, body = the same JSON bytes as local.
+        s3.configure("s3", BUCKET, prefix)
+        s3.put(key_prefix + key, json_bytes(stored))
+&gt;       getattr(store, fn)(doc)
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/tests/test_store_s3.py:173: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:95: in save_audit
+    return _write(root() / "audit" / f"{audit['run_id']}.json", audit)
+                  ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def root() -&gt; Path:
+        if config.COHERENCE_ANALYZER_STORE != "local":
+&gt;           raise NotImplementedError("COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists")
+E           NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:30: NotImplementedError</failure></testcase><testcase classname="tests.test_store_s3" name="test_s3_save_puts_exact_bucket_key_body_contenttype[save_audit-ca/dev-ca/dev/]" time="0.047"><failure message="NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists">s3 = &lt;test_store_s3.S3Env object at 0x7f4228c90d70&gt;, fn = 'save_audit'
+doc = {'run_id': '01HX0000000000000000000001', 'flow': 'C', 'verdict': 'coherent', 'llm_calls': [], ...}
+key = 'audit/01HX0000000000000000000001.json'
+stored = {'run_id': '01HX0000000000000000000001', 'flow': 'C', 'verdict': 'coherent', 'llm_calls': [], ...}
+prefix = 'ca/dev', key_prefix = 'ca/dev/'
+
+    @pytest.mark.parametrize("prefix,key_prefix", [("", ""), ("ca/dev", "ca/dev/"), ("ca/dev/", "ca/dev/")])
+    @pytest.mark.parametrize("fn,doc,key,stored", SAVES, ids=[s[0] for s in SAVES])
+    def test_s3_save_puts_exact_bucket_key_body_contenttype(s3, fn, doc, key, stored, prefix, key_prefix):
+        # SPEC §10 same layout keys under COHERENCE_ANALYZER_S3_PREFIX (a trailing slash must not double up);
+        # task: ContentType application/json, body = the same JSON bytes as local.
+        s3.configure("s3", BUCKET, prefix)
+        s3.put(key_prefix + key, json_bytes(stored))
+&gt;       getattr(store, fn)(doc)
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/tests/test_store_s3.py:173: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:95: in save_audit
+    return _write(root() / "audit" / f"{audit['run_id']}.json", audit)
+                  ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def root() -&gt; Path:
+        if config.COHERENCE_ANALYZER_STORE != "local":
+&gt;           raise NotImplementedError("COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists")
+E           NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:30: NotImplementedError</failure></testcase><testcase classname="tests.test_store_s3" name="test_s3_save_puts_exact_bucket_key_body_contenttype[save_audit-ca/dev/-ca/dev/]" time="0.046"><failure message="NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists">s3 = &lt;test_store_s3.S3Env object at 0x7f42283d3020&gt;, fn = 'save_audit'
+doc = {'run_id': '01HX0000000000000000000001', 'flow': 'C', 'verdict': 'coherent', 'llm_calls': [], ...}
+key = 'audit/01HX0000000000000000000001.json'
+stored = {'run_id': '01HX0000000000000000000001', 'flow': 'C', 'verdict': 'coherent', 'llm_calls': [], ...}
+prefix = 'ca/dev/', key_prefix = 'ca/dev/'
+
+    @pytest.mark.parametrize("prefix,key_prefix", [("", ""), ("ca/dev", "ca/dev/"), ("ca/dev/", "ca/dev/")])
+    @pytest.mark.parametrize("fn,doc,key,stored", SAVES, ids=[s[0] for s in SAVES])
+    def test_s3_save_puts_exact_bucket_key_body_contenttype(s3, fn, doc, key, stored, prefix, key_prefix):
+        # SPEC §10 same layout keys under COHERENCE_ANALYZER_S3_PREFIX (a trailing slash must not double up);
+        # task: ContentType application/json, body = the same JSON bytes as local.
+        s3.configure("s3", BUCKET, prefix)
+        s3.put(key_prefix + key, json_bytes(stored))
+&gt;       getattr(store, fn)(doc)
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/tests/test_store_s3.py:173: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:95: in save_audit
+    return _write(root() / "audit" / f"{audit['run_id']}.json", audit)
+                  ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def root() -&gt; Path:
+        if config.COHERENCE_ANALYZER_STORE != "local":
+&gt;           raise NotImplementedError("COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists")
+E           NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:30: NotImplementedError</failure></testcase><testcase classname="tests.test_store_s3" name="test_s3_body_equals_the_bytes_the_local_backend_writes" time="0.101"><failure message="NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists">s3 = &lt;test_store_s3.S3Env object at 0x7f42284cbbd0&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7f42276c0050&gt;
+tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-119/test_s3_body_equals_the_bytes_0')
+
+    def test_s3_body_equals_the_bytes_the_local_backend_writes(s3, monkeypatch, tmp_path):
+        # Cross-check with the real local writer, not with a re-implementation (non-ASCII text included).
+        s3.configure("local", None, None)
+        store.save_profile(PROFILE)
+        local_bytes = (tmp_path / "local_store/profiles/amira/profile.v3.json").read_bytes()
+        assert "Côté".encode("utf-8") in local_bytes
+        s3.configure("s3", BUCKET, "")
+        s3.put("profiles/amira/profile.v3.json", local_bytes)
+&gt;       store.save_profile(PROFILE)
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/tests/test_store_s3.py:185: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:81: in save_profile
+    return _write(root() / "profiles" / meta["profile_id"] / f"profile.v{meta['version']}.json", profile)
+                  ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def root() -&gt; Path:
+        if config.COHERENCE_ANALYZER_STORE != "local":
+&gt;           raise NotImplementedError("COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists")
+E           NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:30: NotImplementedError</failure></testcase><testcase classname="tests.test_store_s3" name="test_s3_save_portfolio_stores_percent_weights_only" time="0.046"><failure message="NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists">s3 = &lt;test_store_s3.S3Env object at 0x7f4226b50670&gt;
+
+    def test_s3_save_portfolio_stores_percent_weights_only(s3):
+        # store.py docstring: the fraction view `weights` is a loader convenience, never stored.
+        s3.put("portfolios/pf_robert.json", json_bytes({k: v for k, v in PORTFOLIO.items() if k != "weights"}))
+&gt;       store.save_portfolio(PORTFOLIO)
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/tests/test_store_s3.py:192: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:87: in save_portfolio
+    return _write(root() / "portfolios" / f"{doc['portfolio_id']}.json", doc)
+                  ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def root() -&gt; Path:
+        if config.COHERENCE_ANALYZER_STORE != "local":
+&gt;           raise NotImplementedError("COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists")
+E           NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:30: NotImplementedError</failure></testcase><testcase classname="tests.test_store_s3" name="test_s3_save_never_writes_to_the_local_disk" time="0.063"><failure message="NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists">s3 = &lt;test_store_s3.S3Env object at 0x7f4226215a50&gt;
+tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-119/test_s3_save_never_writes_to_t0')
+
+    def test_s3_save_never_writes_to_the_local_disk(s3, tmp_path):
+        s3.put("profiles/amira/profile.v3.json", json_bytes(PROFILE))
+        s3.put(f"reports/{REPORT['run_id']}.json", json_bytes(REPORT))
+&gt;       store.save_profile(PROFILE)
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/tests/test_store_s3.py:199: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:81: in save_profile
+    return _write(root() / "profiles" / meta["profile_id"] / f"profile.v{meta['version']}.json", profile)
+                  ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def root() -&gt; Path:
+        if config.COHERENCE_ANALYZER_STORE != "local":
+&gt;           raise NotImplementedError("COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists")
+E           NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:30: NotImplementedError</failure></testcase><testcase classname="tests.test_store_s3" name="test_s3_load_report_and_audit_get_the_exact_key" time="0.049"><failure message="NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists">s3 = &lt;test_store_s3.S3Env object at 0x7f4226273650&gt;
+
+    def test_s3_load_report_and_audit_get_the_exact_key(s3):
+        s3.configure("s3", BUCKET, "ca/dev")
+        s3.get(f"ca/dev/reports/{REPORT['run_id']}.json", json_bytes(REPORT))
+        s3.get(f"ca/dev/audit/{AUDIT['run_id']}.json", json_bytes(AUDIT))
+&gt;       assert store.load_report(REPORT["run_id"]) == REPORT
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/tests/test_store_s3.py:211: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:99: in load_report
+    return json.loads((root() / "reports" / f"{run_id}.json").read_text(encoding="utf-8"))
+                       ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def root() -&gt; Path:
+        if config.COHERENCE_ANALYZER_STORE != "local":
+&gt;           raise NotImplementedError("COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists")
+E           NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:30: NotImplementedError</failure></testcase><testcase classname="tests.test_store_s3" name="test_s3_load_missing_key_raises_filenotfounderror_like_local[load_report-reports]" time="0.056"><failure message="NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists">s3 = &lt;test_store_s3.S3Env object at 0x7f4224a3c650&gt;, fn = 'load_report'
+folder = 'reports'
+
+    @pytest.mark.parametrize("fn,folder", [("load_report", "reports"), ("load_audit", "audit")])
+    def test_s3_load_missing_key_raises_filenotfounderror_like_local(s3, fn, folder):
+        # Task: load_report/load_audit on a missing key raise FileNotFoundError, as the local backend does.
+        s3.missing(f"{folder}/01HX0000000000000000009999.json")
+        with pytest.raises(FileNotFoundError):
+&gt;           getattr(store, fn)("01HX0000000000000000009999")
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/tests/test_store_s3.py:221: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:99: in load_report
+    return json.loads((root() / "reports" / f"{run_id}.json").read_text(encoding="utf-8"))
+                       ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def root() -&gt; Path:
+        if config.COHERENCE_ANALYZER_STORE != "local":
+&gt;           raise NotImplementedError("COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists")
+E           NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:30: NotImplementedError</failure></testcase><testcase classname="tests.test_store_s3" name="test_s3_load_missing_key_raises_filenotfounderror_like_local[load_audit-audit]" time="0.053"><failure message="NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists">s3 = &lt;test_store_s3.S3Env object at 0x7f4223e8c310&gt;, fn = 'load_audit'
+folder = 'audit'
+
+    @pytest.mark.parametrize("fn,folder", [("load_report", "reports"), ("load_audit", "audit")])
+    def test_s3_load_missing_key_raises_filenotfounderror_like_local(s3, fn, folder):
+        # Task: load_report/load_audit on a missing key raise FileNotFoundError, as the local backend does.
+        s3.missing(f"{folder}/01HX0000000000000000009999.json")
+        with pytest.raises(FileNotFoundError):
+&gt;           getattr(store, fn)("01HX0000000000000000009999")
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/tests/test_store_s3.py:221: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:103: in load_audit
+    p = root() / "audit" / f"{run_id}.json"
+        ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def root() -&gt; Path:
+        if config.COHERENCE_ANALYZER_STORE != "local":
+&gt;           raise NotImplementedError("COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists")
+E           NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:30: NotImplementedError</failure></testcase><testcase classname="tests.test_store_s3" name="test_s3_access_denied_is_not_reported_as_missing[load_report-reports]" time="0.053"><failure message="NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists">s3 = &lt;test_store_s3.S3Env object at 0x7f422342e8e0&gt;, fn = 'load_report'
+folder = 'reports'
+
+    @pytest.mark.parametrize("fn,folder", [("load_report", "reports"), ("load_audit", "audit")])
+    def test_s3_access_denied_is_not_reported_as_missing(s3, fn, folder):
+        # SPEC-AMBIGUITY: only a missing key maps to FileNotFoundError; a permissions error must stay visible.
+        s3.stub.add_client_error("get_object", service_error_code="AccessDenied", service_message="Access Denied",
+                                 http_status_code=403,
+                                 expected_params={"Bucket": BUCKET, "Key": f"{folder}/01HX0000000000000000000002.json"})
+        with pytest.raises(ClientError) as ei:
+&gt;           getattr(store, fn)("01HX0000000000000000000002")
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/tests/test_store_s3.py:232: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:99: in load_report
+    return json.loads((root() / "reports" / f"{run_id}.json").read_text(encoding="utf-8"))
+                       ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def root() -&gt; Path:
+        if config.COHERENCE_ANALYZER_STORE != "local":
+&gt;           raise NotImplementedError("COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists")
+E           NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:30: NotImplementedError</failure></testcase><testcase classname="tests.test_store_s3" name="test_s3_access_denied_is_not_reported_as_missing[load_audit-audit]" time="0.055"><failure message="NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists">s3 = &lt;test_store_s3.S3Env object at 0x7f4222b4b570&gt;, fn = 'load_audit'
+folder = 'audit'
+
+    @pytest.mark.parametrize("fn,folder", [("load_report", "reports"), ("load_audit", "audit")])
+    def test_s3_access_denied_is_not_reported_as_missing(s3, fn, folder):
+        # SPEC-AMBIGUITY: only a missing key maps to FileNotFoundError; a permissions error must stay visible.
+        s3.stub.add_client_error("get_object", service_error_code="AccessDenied", service_message="Access Denied",
+                                 http_status_code=403,
+                                 expected_params={"Bucket": BUCKET, "Key": f"{folder}/01HX0000000000000000000002.json"})
+        with pytest.raises(ClientError) as ei:
+&gt;           getattr(store, fn)("01HX0000000000000000000002")
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/tests/test_store_s3.py:232: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:103: in load_audit
+    p = root() / "audit" / f"{run_id}.json"
+        ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def root() -&gt; Path:
+        if config.COHERENCE_ANALYZER_STORE != "local":
+&gt;           raise NotImplementedError("COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists")
+E           NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:30: NotImplementedError</failure></testcase><testcase classname="tests.test_store_s3" name="test_s3_append_event_is_get_then_put_of_the_whole_object" time="0.054"><failure message="FileNotFoundError: [Errno 2] No such file or directory: 'profiles/robert/events.jsonl'">s3 = &lt;test_store_s3.S3Env object at 0x7f4221e7d450&gt;
+
+    def test_s3_append_event_is_get_then_put_of_the_whole_object(s3):
+        # Task: append_event on s3 = get + put (non-atomic). Stubber enforces the order get -&gt; put.
+        s3.get(EVENTS_KEY, _line(EV1))
+        s3.put(EVENTS_KEY, _line(EV1) + _line(EV2))
+&gt;       store.append_event(EVENTS_PATH, EV2)
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/tests/test_store_s3.py:256: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('profiles/robert/events.jsonl')
+event = {'event_id': 'ev_robert_0002', 'type': 'order_intent', 'text': "J'aimerais 10 % de NVDA"}
+
+    def append_event(path: Path, event: dict) -&gt; None:
+&gt;       with open(path, "a", encoding="utf-8") as f:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: 'profiles/robert/events.jsonl'
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:75: FileNotFoundError</failure></testcase><testcase classname="tests.test_store_s3" name="test_s3_append_event_creates_the_object_when_missing" time="0.053"><failure message="FileNotFoundError: [Errno 2] No such file or directory: 'profiles/robert/events.jsonl'">s3 = &lt;test_store_s3.S3Env object at 0x7f4221345130&gt;
+
+    def test_s3_append_event_creates_the_object_when_missing(s3):
+        s3.missing(EVENTS_KEY)
+        s3.put(EVENTS_KEY, _line(EV1))
+&gt;       store.append_event(EVENTS_PATH, EV1)
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/tests/test_store_s3.py:263: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+path = PosixPath('profiles/robert/events.jsonl')
+event = {'event_id': 'ev_robert_0001', 'type': 'question', 'text': 'Quelle est la durée de XBB?'}
+
+    def append_event(path: Path, event: dict) -&gt; None:
+&gt;       with open(path, "a", encoding="utf-8") as f:
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: 'profiles/robert/events.jsonl'
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:75: FileNotFoundError</failure></testcase><testcase classname="tests.test_store_s3" name="test_s3_read_events_parses_jsonl_and_missing_means_empty" time="0.056"><failure message="assert [] == [{'event_id':...0 % de NVDA&quot;}]&#10;  &#10;  Right contains 2 more items, first extra item: {'event_id': 'ev_robert_0001', 'type': 'question', 'text': 'Quelle est la durée de XBB?'}&#10;  Use -v to get more diff">s3 = &lt;test_store_s3.S3Env object at 0x7f4220873850&gt;
+
+    def test_s3_read_events_parses_jsonl_and_missing_means_empty(s3):
+        s3.get(EVENTS_KEY, _line(EV1) + _line(EV2))
+&gt;       assert store.read_events(EVENTS_PATH) == [EV1, EV2]
+E       assert [] == [{'event_id':...0 % de NVDA"}]
+E         
+E         Right contains 2 more items, first extra item: {'event_id': 'ev_robert_0001', 'type': 'question', 'text': 'Quelle est la durée de XBB?'}
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/tests/test_store_s3.py:269: AssertionError</failure></testcase><testcase classname="tests.test_store_s3" name="test_s3_without_a_bucket_raises_a_clear_error_before_any_call[None-save_report-arg0]" time="0.064"><failure message="AssertionError: assert not True&#10; +  where True = isinstance(NotImplementedError('COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists'), NotImplementedError)&#10; +    where NotImplementedError('COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists') = &lt;ExceptionInfo NotImplementedError('COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists') tblen=3&gt;.value">s3 = &lt;test_store_s3.S3Env object at 0x7f4220904350&gt;, fn = 'save_report'
+arg = {'run_id': '01HX0000000000000000000001', 'verdict': 'coherent', 'unknowns': ['H6'], 'explanation': {'mode': 'template', 'headline': 'Portefeuille cohérent avec votre profil.'}}
+bucket = None
+
+    @pytest.mark.parametrize("fn,arg", [("save_report", REPORT), ("load_report", REPORT["run_id"])])
+    @pytest.mark.parametrize("bucket", [None, ""])
+    def test_s3_without_a_bucket_raises_a_clear_error_before_any_call(s3, fn, arg, bucket):
+        # SPEC-AMBIGUITY: the error type is not specified; ValueError or RuntimeError, but not the old
+        # NotImplementedError stub, and the message must name the env var to set.
+        s3.configure("s3", bucket, "")
+        with pytest.raises((ValueError, RuntimeError)) as ei:
+            getattr(store, fn)(arg)
+&gt;       assert not isinstance(ei.value, NotImplementedError)
+E       AssertionError: assert not True
+E        +  where True = isinstance(NotImplementedError('COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists'), NotImplementedError)
+E        +    where NotImplementedError('COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists') = &lt;ExceptionInfo NotImplementedError('COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists') tblen=3&gt;.value
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/tests/test_store_s3.py:285: AssertionError</failure></testcase><testcase classname="tests.test_store_s3" name="test_s3_without_a_bucket_raises_a_clear_error_before_any_call[None-load_report-01HX0000000000000000000001]" time="0.045"><failure message="AssertionError: assert not True&#10; +  where True = isinstance(NotImplementedError('COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists'), NotImplementedError)&#10; +    where NotImplementedError('COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists') = &lt;ExceptionInfo NotImplementedError('COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists') tblen=3&gt;.value">s3 = &lt;test_store_s3.S3Env object at 0x7f422f10a820&gt;, fn = 'load_report'
+arg = '01HX0000000000000000000001', bucket = None
+
+    @pytest.mark.parametrize("fn,arg", [("save_report", REPORT), ("load_report", REPORT["run_id"])])
+    @pytest.mark.parametrize("bucket", [None, ""])
+    def test_s3_without_a_bucket_raises_a_clear_error_before_any_call(s3, fn, arg, bucket):
+        # SPEC-AMBIGUITY: the error type is not specified; ValueError or RuntimeError, but not the old
+        # NotImplementedError stub, and the message must name the env var to set.
+        s3.configure("s3", bucket, "")
+        with pytest.raises((ValueError, RuntimeError)) as ei:
+            getattr(store, fn)(arg)
+&gt;       assert not isinstance(ei.value, NotImplementedError)
+E       AssertionError: assert not True
+E        +  where True = isinstance(NotImplementedError('COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists'), NotImplementedError)
+E        +    where NotImplementedError('COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists') = &lt;ExceptionInfo NotImplementedError('COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists') tblen=3&gt;.value
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/tests/test_store_s3.py:285: AssertionError</failure></testcase><testcase classname="tests.test_store_s3" name="test_s3_without_a_bucket_raises_a_clear_error_before_any_call[-save_report-arg0]" time="0.045"><failure message="AssertionError: assert not True&#10; +  where True = isinstance(NotImplementedError('COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists'), NotImplementedError)&#10; +    where NotImplementedError('COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists') = &lt;ExceptionInfo NotImplementedError('COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists') tblen=3&gt;.value">s3 = &lt;test_store_s3.S3Env object at 0x7f421ff774d0&gt;, fn = 'save_report'
+arg = {'run_id': '01HX0000000000000000000001', 'verdict': 'coherent', 'unknowns': ['H6'], 'explanation': {'mode': 'template', 'headline': 'Portefeuille cohérent avec votre profil.'}}
+bucket = ''
+
+    @pytest.mark.parametrize("fn,arg", [("save_report", REPORT), ("load_report", REPORT["run_id"])])
+    @pytest.mark.parametrize("bucket", [None, ""])
+    def test_s3_without_a_bucket_raises_a_clear_error_before_any_call(s3, fn, arg, bucket):
+        # SPEC-AMBIGUITY: the error type is not specified; ValueError or RuntimeError, but not the old
+        # NotImplementedError stub, and the message must name the env var to set.
+        s3.configure("s3", bucket, "")
+        with pytest.raises((ValueError, RuntimeError)) as ei:
+            getattr(store, fn)(arg)
+&gt;       assert not isinstance(ei.value, NotImplementedError)
+E       AssertionError: assert not True
+E        +  where True = isinstance(NotImplementedError('COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists'), NotImplementedError)
+E        +    where NotImplementedError('COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists') = &lt;ExceptionInfo NotImplementedError('COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists') tblen=3&gt;.value
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/tests/test_store_s3.py:285: AssertionError</failure></testcase><testcase classname="tests.test_store_s3" name="test_s3_without_a_bucket_raises_a_clear_error_before_any_call[-load_report-01HX0000000000000000000001]" time="0.083"><failure message="AssertionError: assert not True&#10; +  where True = isinstance(NotImplementedError('COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists'), NotImplementedError)&#10; +    where NotImplementedError('COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists') = &lt;ExceptionInfo NotImplementedError('COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists') tblen=3&gt;.value">s3 = &lt;test_store_s3.S3Env object at 0x7f421f4cab30&gt;, fn = 'load_report'
+arg = '01HX0000000000000000000001', bucket = ''
+
+    @pytest.mark.parametrize("fn,arg", [("save_report", REPORT), ("load_report", REPORT["run_id"])])
+    @pytest.mark.parametrize("bucket", [None, ""])
+    def test_s3_without_a_bucket_raises_a_clear_error_before_any_call(s3, fn, arg, bucket):
+        # SPEC-AMBIGUITY: the error type is not specified; ValueError or RuntimeError, but not the old
+        # NotImplementedError stub, and the message must name the env var to set.
+        s3.configure("s3", bucket, "")
+        with pytest.raises((ValueError, RuntimeError)) as ei:
+            getattr(store, fn)(arg)
+&gt;       assert not isinstance(ei.value, NotImplementedError)
+E       AssertionError: assert not True
+E        +  where True = isinstance(NotImplementedError('COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists'), NotImplementedError)
+E        +    where NotImplementedError('COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists') = &lt;ExceptionInfo NotImplementedError('COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists') tblen=3&gt;.value
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/tests/test_store_s3.py:285: AssertionError</failure></testcase><testcase classname="tests.test_store_s3" name="test_unknown_backend_raises_a_clear_error_naming_it" time="0.045"><failure message="AssertionError: assert not True&#10; +  where True = isinstance(NotImplementedError('COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists'), NotImplementedError)&#10; +    where NotImplementedError('COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists') = &lt;ExceptionInfo NotImplementedError('COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists') tblen=3&gt;.value">s3 = &lt;test_store_s3.S3Env object at 0x7f421ff76740&gt;
+
+    def test_unknown_backend_raises_a_clear_error_naming_it(s3):
+        s3.configure("gcs", BUCKET, "")
+        with pytest.raises((ValueError, RuntimeError)) as ei:
+            store.save_report(REPORT)
+&gt;       assert not isinstance(ei.value, NotImplementedError)
+E       AssertionError: assert not True
+E        +  where True = isinstance(NotImplementedError('COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists'), NotImplementedError)
+E        +    where NotImplementedError('COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists') = &lt;ExceptionInfo NotImplementedError('COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists') tblen=3&gt;.value
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/tests/test_store_s3.py:294: AssertionError</failure></testcase><testcase classname="tests.test_store_s3" name="test_backend_is_chosen_per_call_so_local_still_works_after_s3" time="0.057"><failure message="NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists">s3 = &lt;test_store_s3.S3Env object at 0x7f421de7a430&gt;
+tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-119/test_backend_is_chosen_per_cal0')
+
+    def test_backend_is_chosen_per_call_so_local_still_works_after_s3(s3, tmp_path):
+        s3.put(f"reports/{REPORT['run_id']}.json", json_bytes(REPORT))
+&gt;       store.save_report(REPORT)
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/tests/test_store_s3.py:301: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:91: in save_report
+    return _write(root() / "reports" / f"{report['run_id']}.json", report)
+                  ^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def root() -&gt; Path:
+        if config.COHERENCE_ANALYZER_STORE != "local":
+&gt;           raise NotImplementedError("COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists")
+E           NotImplementedError: COHERENCE_ANALYZER_STORE=s3 is P1; only the local store exists
+
+/home/safraa/Downloads/Datathon2026/ca-p1-3/coherence_analyzer/store.py:30: NotImplementedError</failure></testcase><testcase classname="tests.test_store_s3" name="test_template_is_json_with_no_em_dash_anywhere" time="0.001"><failure message="AssertionError: expected exactly one CloudFormation JSON template in deploy/aws/, got 0&#10;assert 0 == 1&#10; +  where 0 = len([])">def test_template_is_json_with_no_em_dash_anywhere():
+        # Task: JSON, not YAML; no em dashes in resource names or descriptions (stricter: nowhere in the file).
+&gt;       doc, raw = _load_template()
+                   ^^^^^^^^^^^^^^^^
+
+tests/test_store_s3.py:344: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _load_template() -&gt; tuple[dict, str]:
+        # SPEC-AMBIGUITY: the file name is not specified; the template is the one JSON file under deploy/aws/ that
+        # has an AWSTemplateFormatVersion key.
+        found = []
+        for p in sorted((ROOT / "deploy" / "aws").glob("*.json")):
+            doc = json.loads(p.read_text(encoding="utf-8"))
+            if isinstance(doc, dict) and "AWSTemplateFormatVersion" in doc:
+                found.append((doc, p.read_text(encoding="utf-8")))
+&gt;       assert len(found) == 1, f"expected exactly one CloudFormation JSON template in deploy/aws/, got {len(found)}"
+E       AssertionError: expected exactly one CloudFormation JSON template in deploy/aws/, got 0
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests/test_store_s3.py:318: AssertionError</failure></testcase><testcase classname="tests.test_store_s3" name="test_template_bucket_is_versioned_private_and_encrypted" time="0.000"><failure message="AssertionError: expected exactly one CloudFormation JSON template in deploy/aws/, got 0&#10;assert 0 == 1&#10; +  where 0 = len([])">def test_template_bucket_is_versioned_private_and_encrypted():
+&gt;       doc, _ = _load_template()
+                 ^^^^^^^^^^^^^^^^
+
+tests/test_store_s3.py:351: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _load_template() -&gt; tuple[dict, str]:
+        # SPEC-AMBIGUITY: the file name is not specified; the template is the one JSON file under deploy/aws/ that
+        # has an AWSTemplateFormatVersion key.
+        found = []
+        for p in sorted((ROOT / "deploy" / "aws").glob("*.json")):
+            doc = json.loads(p.read_text(encoding="utf-8"))
+            if isinstance(doc, dict) and "AWSTemplateFormatVersion" in doc:
+                found.append((doc, p.read_text(encoding="utf-8")))
+&gt;       assert len(found) == 1, f"expected exactly one CloudFormation JSON template in deploy/aws/, got {len(found)}"
+E       AssertionError: expected exactly one CloudFormation JSON template in deploy/aws/, got 0
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests/test_store_s3.py:318: AssertionError</failure></testcase><testcase classname="tests.test_store_s3" name="test_template_bucket_policy_denies_non_tls_requests_on_bucket_and_objects" time="0.000"><failure message="AssertionError: expected exactly one CloudFormation JSON template in deploy/aws/, got 0&#10;assert 0 == 1&#10; +  where 0 = len([])">def test_template_bucket_policy_denies_non_tls_requests_on_bucket_and_objects():
+&gt;       doc, _ = _load_template()
+                 ^^^^^^^^^^^^^^^^
+
+tests/test_store_s3.py:363: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _load_template() -&gt; tuple[dict, str]:
+        # SPEC-AMBIGUITY: the file name is not specified; the template is the one JSON file under deploy/aws/ that
+        # has an AWSTemplateFormatVersion key.
+        found = []
+        for p in sorted((ROOT / "deploy" / "aws").glob("*.json")):
+            doc = json.loads(p.read_text(encoding="utf-8"))
+            if isinstance(doc, dict) and "AWSTemplateFormatVersion" in doc:
+                found.append((doc, p.read_text(encoding="utf-8")))
+&gt;       assert len(found) == 1, f"expected exactly one CloudFormation JSON template in deploy/aws/, got {len(found)}"
+E       AssertionError: expected exactly one CloudFormation JSON template in deploy/aws/, got 0
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests/test_store_s3.py:318: AssertionError</failure></testcase><testcase classname="tests.test_store_s3" name="test_template_declares_the_model_arn_parameter" time="0.000"><failure message="AssertionError: expected exactly one CloudFormation JSON template in deploy/aws/, got 0&#10;assert 0 == 1&#10; +  where 0 = len([])">def test_template_declares_the_model_arn_parameter():
+&gt;       doc, _ = _load_template()
+                 ^^^^^^^^^^^^^^^^
+
+tests/test_store_s3.py:379: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _load_template() -&gt; tuple[dict, str]:
+        # SPEC-AMBIGUITY: the file name is not specified; the template is the one JSON file under deploy/aws/ that
+        # has an AWSTemplateFormatVersion key.
+        found = []
+        for p in sorted((ROOT / "deploy" / "aws").glob("*.json")):
+            doc = json.loads(p.read_text(encoding="utf-8"))
+            if isinstance(doc, dict) and "AWSTemplateFormatVersion" in doc:
+                found.append((doc, p.read_text(encoding="utf-8")))
+&gt;       assert len(found) == 1, f"expected exactly one CloudFormation JSON template in deploy/aws/, got {len(found)}"
+E       AssertionError: expected exactly one CloudFormation JSON template in deploy/aws/, got 0
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests/test_store_s3.py:318: AssertionError</failure></testcase><testcase classname="tests.test_store_s3" name="test_template_iam_policy_is_least_privilege" time="0.000"><failure message="AssertionError: expected exactly one CloudFormation JSON template in deploy/aws/, got 0&#10;assert 0 == 1&#10; +  where 0 = len([])">def test_template_iam_policy_is_least_privilege():
+        # SPEC §14: one role/policy, least privilege (bedrock:InvokeModel on the model ARN, the S3 prefix only).
+&gt;       doc, _ = _load_template()
+                 ^^^^^^^^^^^^^^^^
+
+tests/test_store_s3.py:385: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _load_template() -&gt; tuple[dict, str]:
+        # SPEC-AMBIGUITY: the file name is not specified; the template is the one JSON file under deploy/aws/ that
+        # has an AWSTemplateFormatVersion key.
+        found = []
+        for p in sorted((ROOT / "deploy" / "aws").glob("*.json")):
+            doc = json.loads(p.read_text(encoding="utf-8"))
+            if isinstance(doc, dict) and "AWSTemplateFormatVersion" in doc:
+                found.append((doc, p.read_text(encoding="utf-8")))
+&gt;       assert len(found) == 1, f"expected exactly one CloudFormation JSON template in deploy/aws/, got {len(found)}"
+E       AssertionError: expected exactly one CloudFormation JSON template in deploy/aws/, got 0
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests/test_store_s3.py:318: AssertionError</failure></testcase><testcase classname="tests.test_store_s3" name="test_template_outputs_bucket_name_guardrail_id_and_version" time="0.000"><failure message="AssertionError: expected exactly one CloudFormation JSON template in deploy/aws/, got 0&#10;assert 0 == 1&#10; +  where 0 = len([])">def test_template_outputs_bucket_name_guardrail_id_and_version():
+&gt;       doc, _ = _load_template()
+                 ^^^^^^^^^^^^^^^^
+
+tests/test_store_s3.py:416: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _load_template() -&gt; tuple[dict, str]:
+        # SPEC-AMBIGUITY: the file name is not specified; the template is the one JSON file under deploy/aws/ that
+        # has an AWSTemplateFormatVersion key.
+        found = []
+        for p in sorted((ROOT / "deploy" / "aws").glob("*.json")):
+            doc = json.loads(p.read_text(encoding="utf-8"))
+            if isinstance(doc, dict) and "AWSTemplateFormatVersion" in doc:
+                found.append((doc, p.read_text(encoding="utf-8")))
+&gt;       assert len(found) == 1, f"expected exactly one CloudFormation JSON template in deploy/aws/, got {len(found)}"
+E       AssertionError: expected exactly one CloudFormation JSON template in deploy/aws/, got 0
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests/test_store_s3.py:318: AssertionError</failure></testcase><testcase classname="tests.test_store_s3" name="test_readme_has_an_aws_deploy_section_with_the_command_and_env_values" time="0.000"><failure message="AssertionError: README has no 'AWS deploy' heading&#10;assert None">def test_readme_has_an_aws_deploy_section_with_the_command_and_env_values():
+&gt;       section = _section((ROOT / "README.md").read_text(encoding="utf-8"), "AWS deploy")
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_store_s3.py:439: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+text = "# CoherenceAnalyzer\n\nChecks whether a self-directed investor's portfolio, or a trade they want to make, is coherent...ucational simulation with fictional profiles. This is not personalised financial advice. No transaction is executed.\n"
+title = 'AWS deploy'
+
+    def _section(text: str, title: str) -&gt; str:
+        m = re.search(rf"^(#+)\s*{re.escape(title)}\s*$", text, flags=re.M)
+&gt;       assert m, f"README has no '{title}' heading"
+E       AssertionError: README has no 'AWS deploy' heading
+E       assert None
+
+tests/test_store_s3.py:431: AssertionError</failure></testcase><testcase classname="tests.test_store_s3" name="test_readme_assumptions_document_the_non_atomic_event_append" time="0.001"><failure message="AssertionError: assert ('append_event' in '\nall persona financial figures beyond the case brief are fictional team assumptions.\n\n- **engine drift (annual, ca...iolation`, inv. 3). cli prints one `profile: &lt;status&gt; (&lt;ids&gt;)` line per review (`profile: pass` without findings).\n\n')">def test_readme_assumptions_document_the_non_atomic_event_append():
+        section = _section((ROOT / "README.md").read_text(encoding="utf-8"), "Assumptions").lower()
+&gt;       assert "append_event" in section and "non-atomic" in section and "s3" in section
+E       AssertionError: assert ('append_event' in '\nall persona financial figures beyond the case brief are fictional team assumptions.\n\n- **engine drift (annual, ca...iolation`, inv. 3). cli prints one `profile: &lt;status&gt; (&lt;ids&gt;)` line per review (`profile: pass` without findings).\n\n')
+
+tests/test_store_s3.py:449: AssertionError</failure></testcase><testcase classname="tests.test_store_s3" name="test_env_example_lists_the_s3_settings_without_secrets" time="0.000"><failure message="AssertionError: assert {'BEDROCK_GUA...ALYZER_STORE'} &lt;= {'AWS_REGION'...ALYZER_STORE'}&#10;  &#10;  Extra items in the left set:&#10;  'COHERENCE_ANALYZER_S3_BUCKET'&#10;  'COHERENCE_ANALYZER_S3_PREFIX'">def test_env_example_lists_the_s3_settings_without_secrets():
+        keys = {}
+        for line in (ROOT / ".env.example").read_text(encoding="utf-8").splitlines():
+            if "=" in line and not line.lstrip().startswith("#"):
+                k, v = line.split("=", 1)
+                keys[k.strip()] = v.strip()
+&gt;       assert {"COHERENCE_ANALYZER_S3_BUCKET", "COHERENCE_ANALYZER_S3_PREFIX", "COHERENCE_ANALYZER_STORE",
+                "BEDROCK_GUARDRAIL_ID", "BEDROCK_GUARDRAIL_VERSION"} &lt;= set(keys)
+E       AssertionError: assert {'BEDROCK_GUA...ALYZER_STORE'} &lt;= {'AWS_REGION'...ALYZER_STORE'}
+E         
+E         Extra items in the left set:
+E         'COHERENCE_ANALYZER_S3_BUCKET'
+E         'COHERENCE_ANALYZER_S3_PREFIX'
+
+tests/test_store_s3.py:458: AssertionError</failure></testcase><testcase classname="tests.test_guardrail" name="test_explainer_request_carries_the_guardrail_config" time="0.037"><failure message="KeyError: 'guardrailConfig'">bd = &lt;test_guardrail.BedrockEnv object at 0x7f422a6cdd30&gt;
+
+    def test_explainer_request_carries_the_guardrail_config(bd):
+        bd.queue(tool_response("explainer", {"answer": 1}))
+        res = bd.call("explainer")
+        assert res["output"] == {"answer": 1}
+        (req,) = bd.requests
+&gt;       assert req["guardrailConfig"] == {"guardrailIdentifier": GR_ID, "guardrailVersion": GR_VERSION,
+               ^^^^^^^^^^^^^^^^^^^^^^
+                                          "trace": "enabled"}
+E       KeyError: 'guardrailConfig'
+
+tests/test_guardrail.py:127: KeyError</failure></testcase><testcase classname="tests.test_guardrail" name="test_other_nodes_never_get_a_guardrail_config[behaviour_classifier]" time="0.045" /><testcase classname="tests.test_guardrail" name="test_other_nodes_never_get_a_guardrail_config[values_parser]" time="0.039" /><testcase classname="tests.test_guardrail" name="test_other_nodes_never_get_a_guardrail_config[intent_parser]" time="0.045" /><testcase classname="tests.test_guardrail" name="test_other_nodes_never_get_a_guardrail_config[profile_consistency]" time="0.039" /><testcase classname="tests.test_guardrail" name="test_other_nodes_never_get_a_guardrail_config[toy]" time="0.046" /><testcase classname="tests.test_guardrail" name="test_explainer_needs_both_id_and_version[gr0abc123def-]" time="0.039" /><testcase classname="tests.test_guardrail" name="test_explainer_needs_both_id_and_version[-3]" time="0.045" /><testcase classname="tests.test_guardrail" name="test_explainer_needs_both_id_and_version[-]" time="0.046" /><testcase classname="tests.test_guardrail" name="test_guardrail_changes_nothing_else_in_the_request" time="0.039" /><testcase classname="tests.test_guardrail" name="test_guardrail_log_records_id_version_and_not_intervened" time="0.046"><failure message="AssertionError: {'node': 'explainer', 'model_id': 'test-model-id', 'prompt_version': 'explainer.v1', 'input_hash': 'sha256:8df0dc2a1a0ddad22335ba39c9e0877cd96052593aabc2948a828a903bc7a226', ...}&#10;assert False&#10; +  where False = any(&lt;generator object test_guardrail_log_records_id_version_and_not_intervened.&lt;locals&gt;.&lt;genexpr&gt; at 0x7f421ac874c0&gt;)">bd = &lt;test_guardrail.BedrockEnv object at 0x7f4219deb110&gt;
+
+    def test_guardrail_log_records_id_version_and_not_intervened(bd):
+        # SPEC-AMBIGUITY: key names are not specified; some key under the log must carry "guardrail" and the id / the
+        # version, and some key containing "intervened" must be False. Values are what is pinned, not the spelling.
+        bd.queue(tool_response("explainer", {"answer": 1}))
+        log = bd.call("explainer")["call_log"]
+        flat = list(_flatten(log))
+&gt;       assert any("guardrail" in p.lower() and v == GR_ID for p, v in flat), log
+E       AssertionError: {'node': 'explainer', 'model_id': 'test-model-id', 'prompt_version': 'explainer.v1', 'input_hash': 'sha256:8df0dc2a1a0ddad22335ba39c9e0877cd96052593aabc2948a828a903bc7a226', ...}
+E       assert False
+E        +  where False = any(&lt;generator object test_guardrail_log_records_id_version_and_not_intervened.&lt;locals&gt;.&lt;genexpr&gt; at 0x7f421ac874c0&gt;)
+
+tests/test_guardrail.py:174: AssertionError</failure></testcase><testcase classname="tests.test_guardrail" name="test_cache_key_is_independent_of_the_guardrail" time="0.045" /><testcase classname="tests.test_guardrail" name="test_live_cache_hit_makes_no_call_even_with_a_guardrail" time="0.039" /><testcase classname="tests.test_guardrail" name="test_mock_mode_with_a_guardrail_reads_the_recorded_entry_and_builds_no_client" time="0.043" /><testcase classname="tests.test_guardrail" name="test_guardrail_intervened_raises_guardrailintervened_once_and_caches_nothing" time="0.047"><failure message="AssertionError: bedrock.GuardrailIntervened is missing&#10;assert None is not None">bd = &lt;test_guardrail.BedrockEnv object at 0x7f42174ea1a0&gt;
+
+    def test_guardrail_intervened_raises_guardrailintervened_once_and_caches_nothing(bd):
+        exc_cls = getattr(bedrock, "GuardrailIntervened", None)
+&gt;       assert exc_cls is not None, "bedrock.GuardrailIntervened is missing"
+E       AssertionError: bedrock.GuardrailIntervened is missing
+E       assert None is not None
+
+tests/test_guardrail.py:223: AssertionError</failure></testcase><testcase classname="tests.test_guardrail" name="test_narration_ends_in_the_template_when_the_guardrail_intervenes" time="0.049"><failure message="botocore.exceptions.UnStubbedResponseError: Error getting response stub for operation Converse: Unexpected API Call: A call was made but no additional calls expected. Either the API Call was not stubbed or it was called multiple times.">bd = &lt;test_guardrail.BedrockEnv object at 0x7f4229b201d0&gt;
+
+    def test_narration_ends_in_the_template_when_the_guardrail_intervenes(bd):
+        # §20.5: a section whose writer is blocked ends in template_section(facts), mode template, never LLM text.
+        facts = _facts()
+        bd.queue(intervened_response(), intervened_response())
+&gt;       narr = explain.narrate_section(facts)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_guardrail.py:255: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+coherence_analyzer/explain.py:297: in narrate_section
+    result = extractors.explainer_call(facts, retry_failures)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+coherence_analyzer/llm/extractors.py:119: in explainer_call
+    return bedrock.call_tool(N5_NODE, load_schema(N5_NODE), load_prompt(N5_NODE), payload, prompt_version(N5_NODE))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+coherence_analyzer/llm/bedrock.py:147: in call_tool
+    response = _converse(client, model_id, node, schema, system, messages)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+coherence_analyzer/llm/bedrock.py:103: in _converse
+    return client.converse(
+.venv/lib/python3.14/site-packages/botocore/client.py:606: in _api_call
+    return self._make_api_call(operation_name, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/botocore/context.py:123: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/botocore/client.py:1035: in _make_api_call
+    api_params = self._emit_api_params(
+.venv/lib/python3.14/site-packages/botocore/client.py:1154: in _emit_api_params
+    self.meta.events.emit(
+.venv/lib/python3.14/site-packages/botocore/hooks.py:412: in emit
+    return self._emitter.emit(aliased_event_name, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/botocore/hooks.py:256: in emit
+    return self._emit(event_name, kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/botocore/hooks.py:239: in _emit
+    response = handler(**kwargs)
+               ^^^^^^^^^^^^^^^^^
+.venv/lib/python3.14/site-packages/botocore/stub.py:395: in _assert_expected_params
+    self._assert_expected_call_order(model, params)
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = &lt;botocore.stub.Stubber object at 0x7f42283dec80&gt;
+model = OperationModel(name=Converse)
+params = {'modelId': 'test-model-id', 'system': [{'text': 'You write the narrative of ONE section of a portfolio-versus-profile...oolSpec': {'name': 'explainer', 'inputSchema': {'json': {...}}}}], 'toolChoice': {'tool': {'name': 'explainer'}}}, ...}
+
+    def _assert_expected_call_order(self, model, params):
+        if not self._queue:
+&gt;           raise UnStubbedResponseError(
+                operation_name=model.name,
+                reason=(
+                    'Unexpected API Call: A call was made but no additional '
+                    'calls expected. Either the API Call was not stubbed or '
+                    'it was called multiple times.'
+                ),
+            )
+E           botocore.exceptions.UnStubbedResponseError: Error getting response stub for operation Converse: Unexpected API Call: A call was made but no additional calls expected. Either the API Call was not stubbed or it was called multiple times.
+
+.venv/lib/python3.14/site-packages/botocore/stub.py:363: UnStubbedResponseError</failure></testcase><testcase classname="tests.test_guardrail" name="test_explain_reports_mode_template_and_keeps_the_fixed_text" time="0.053" /><testcase classname="tests.test_guardrail" name="test_without_a_guardrail_the_same_loop_reaches_mode_llm" time="0.039" /><testcase classname="tests.test_guardrail" name="test_guardrail_denies_the_personalised_recommendation_topic_with_fr_and_en_examples" time="0.000"><failure message="AssertionError: expected exactly one CloudFormation JSON template in deploy/aws/, got 0&#10;assert 0 == 1&#10; +  where 0 = len([])">def test_guardrail_denies_the_personalised_recommendation_topic_with_fr_and_en_examples():
+&gt;       _, props = _guardrail()
+                   ^^^^^^^^^^^^
+
+tests/test_guardrail.py:321: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_guardrail.py:308: in _guardrail
+    found = {k: v for k, v in _template()["Resources"].items() if v["Type"] == "AWS::Bedrock::Guardrail"}
+                              ^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _template() -&gt; dict:
+        # SPEC-AMBIGUITY: file name not specified; the one JSON file under deploy/aws/ with AWSTemplateFormatVersion.
+        found = []
+        for p in sorted((ROOT / "deploy" / "aws").glob("*.json")):
+            doc = json.loads(p.read_text(encoding="utf-8"))
+            if isinstance(doc, dict) and "AWSTemplateFormatVersion" in doc:
+                found.append(doc)
+&gt;       assert len(found) == 1, f"expected exactly one CloudFormation JSON template in deploy/aws/, got {len(found)}"
+E       AssertionError: expected exactly one CloudFormation JSON template in deploy/aws/, got 0
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests/test_guardrail.py:303: AssertionError</failure></testcase><testcase classname="tests.test_guardrail" name="test_guardrail_blocked_messaging_is_fixed_plain_text" time="0.000"><failure message="AssertionError: expected exactly one CloudFormation JSON template in deploy/aws/, got 0&#10;assert 0 == 1&#10; +  where 0 = len([])">def test_guardrail_blocked_messaging_is_fixed_plain_text():
+&gt;       _, props = _guardrail()
+                   ^^^^^^^^^^^^
+
+tests/test_guardrail.py:338: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_guardrail.py:308: in _guardrail
+    found = {k: v for k, v in _template()["Resources"].items() if v["Type"] == "AWS::Bedrock::Guardrail"}
+                              ^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _template() -&gt; dict:
+        # SPEC-AMBIGUITY: file name not specified; the one JSON file under deploy/aws/ with AWSTemplateFormatVersion.
+        found = []
+        for p in sorted((ROOT / "deploy" / "aws").glob("*.json")):
+            doc = json.loads(p.read_text(encoding="utf-8"))
+            if isinstance(doc, dict) and "AWSTemplateFormatVersion" in doc:
+                found.append(doc)
+&gt;       assert len(found) == 1, f"expected exactly one CloudFormation JSON template in deploy/aws/, got {len(found)}"
+E       AssertionError: expected exactly one CloudFormation JSON template in deploy/aws/, got 0
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests/test_guardrail.py:303: AssertionError</failure></testcase><testcase classname="tests.test_guardrail" name="test_guardrail_version_resource_points_at_the_guardrail" time="0.000"><failure message="AssertionError: expected exactly one CloudFormation JSON template in deploy/aws/, got 0&#10;assert 0 == 1&#10; +  where 0 = len([])">def test_guardrail_version_resource_points_at_the_guardrail():
+&gt;       name, _ = _guardrail()
+                  ^^^^^^^^^^^^
+
+tests/test_guardrail.py:347: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_guardrail.py:308: in _guardrail
+    found = {k: v for k, v in _template()["Resources"].items() if v["Type"] == "AWS::Bedrock::Guardrail"}
+                              ^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _template() -&gt; dict:
+        # SPEC-AMBIGUITY: file name not specified; the one JSON file under deploy/aws/ with AWSTemplateFormatVersion.
+        found = []
+        for p in sorted((ROOT / "deploy" / "aws").glob("*.json")):
+            doc = json.loads(p.read_text(encoding="utf-8"))
+            if isinstance(doc, dict) and "AWSTemplateFormatVersion" in doc:
+                found.append(doc)
+&gt;       assert len(found) == 1, f"expected exactly one CloudFormation JSON template in deploy/aws/, got {len(found)}"
+E       AssertionError: expected exactly one CloudFormation JSON template in deploy/aws/, got 0
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+tests/test_guardrail.py:303: AssertionError</failure></testcase></testsuite></testsuites>
