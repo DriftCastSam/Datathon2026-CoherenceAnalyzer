@@ -34,11 +34,12 @@ Adopted 2026-11-14. Full text: `docs/spec-factors.md` (paste-ready as SPEC.md §
 (N5 + verifier V1-V5 + one retry + template), P0.9 pipeline flows B/C + cli demo. Intake loop is P1.
 The analysis layer (§7, §8) is unchanged: no LLM decides a status, a verdict or a number.
 
-## D6. PROPOSED, NOT YET APPROVED: no `temperature` in Bedrock calls (SPEC §6.1, inv. 8)
-Do not implement until the team approves; P0.6 code and its frozen test still send temperature 0.
-The team's Claude model on Bedrock rejects `temperature` ("deprecated for this model"), so record
-mode fails as built. Proposal: `call_tool` does not send it. Reproducibility rests on the input-hash cache (record/live) and the recorded mock
-cache, which is what the tests run on. Record the model id in every audit record.
+## D6. No `temperature` in Bedrock calls (SPEC §6.1, inv. 8). Approved 2026-11-14
+The team's Claude model on Bedrock rejects `temperature` ("deprecated for this model"), so
+`call_tool` does not send it. Invariant 8 now reads: reproducibility rests on the input-hash cache
+(record/live) and the recorded mock cache, which is what the tests and the demo run on, plus the fixed
+bootstrap seed. Record the model id in every audit record. Verdicts and numbers never come from the
+model, so wording variation cannot change a result.
 
 ## D7. Product focus: profile in, portfolio divergences out (Flow C is the headline)
 Adopted 2026-11-14. Wins over SPEC §4 (Flow B as "the main demo"), §6.2 N1/N2/N4 priority, §12 UI list,
