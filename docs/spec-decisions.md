@@ -87,3 +87,15 @@ intake form (per factor, deterministic) + free-text notes
 **Build order (replaces P0.9, adds P0.10):** P0.7 and P0.8 unchanged. P0.9 = pipeline Flow A (rules + N3) and
 Flow C + `cli review` / `cli demo` (Robert review end-to-end offline, five sections, narration). P0.10 = intake
 form + N3 schema/prompt + rule approval. Flow B wiring moves to P2.
+
+## D8. Internal coherence check + parallel factor lanes (spec-factors §20.9, §20.10)
+Requested by the team 2026-11-14 (whiteboard: isolate objectifs / risques / contraintes / préférences to
+reduce context and run them in parallel, combine at the end, and add an LLM check for contradictions inside
+a profile). Rule list C1-C5, N6 schema and gate details are a first proposal; change them here.
+
+1. **Internal coherence** = contradiction rules C1-C5 (code) + N6 `profile_consistency` (LLM, gated). Profile
+   only; never `violation`; never feeds `limits`; does not change the portfolio verdict. Shown as its own block
+   with fixed clarification questions that feed the intake form.
+2. **Parallel lanes.** Narration of the non-pass sections runs concurrently; output identical to sequential.
+3. **Five factors kept.** Horizon stays its own lane (it owns H9); folding it into Objectif is a UI choice.
+
