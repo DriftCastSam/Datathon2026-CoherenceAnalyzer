@@ -162,6 +162,41 @@ dl.facts dd{margin:0;font-weight:600;overflow-wrap:anywhere} dl.facts dd .by{dis
 .src{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
 @media (max-width:860px){.src{grid-template-columns:1fr}}
 .src ul{margin:8px 0 0;padding-left:18px;font-size:14px;color:var(--muted)} .src li{margin:5px 0}
+
+/* search and ask */
+.ask{display:grid;grid-template-columns:minmax(0,380px) minmax(0,1fr);gap:20px;align-items:start}
+@media (max-width:980px){.ask{grid-template-columns:1fr}}
+.chat{display:flex;flex-direction:column;gap:14px}
+.msgs{display:flex;flex-direction:column;gap:10px;max-height:460px;overflow-y:auto}
+.msg{border-radius:6px;padding:10px 14px;font-size:14.5px;max-width:92%}
+.msg.user{background:var(--navy);color:var(--surface);align-self:flex-end}
+.msg.agent{background:var(--tint);align-self:flex-start}
+.msg.agent.refuse{background:var(--warn-bg);border:1px solid var(--warn)}
+.msg .who{display:block;font-size:11px;font-weight:800;letter-spacing:.07em;text-transform:uppercase;color:var(--soft);margin-bottom:3px}
+.msg.refuse .who{color:var(--warn)}
+.sugg{display:flex;flex-wrap:wrap;gap:8px}
+.sugg button{background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:6px 12px;font-size:13px;font-weight:600;color:var(--navy);cursor:pointer}
+.askf{border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:6px}
+.askf label{font-size:13px;font-weight:700}
+.askf div{display:flex;gap:8px}
+.askf input{flex:1;min-width:0;border:1px solid var(--muted);border-radius:4px;padding:9px 12px;font:inherit;font-size:14px;background:var(--surface);color:var(--ink)}
+.send,.cta{background:var(--red);color:#fff;border:0;border-radius:4px;padding:9px 16px;font-weight:700;cursor:pointer;min-height:40px}
+.cta[disabled]{opacity:.45;cursor:not-allowed}
+.fchips{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px;align-items:center}
+.fchip{display:inline-flex;align-items:center;gap:6px;background:var(--tint);border:1px solid var(--line);border-radius:4px;padding:5px 8px 5px 10px;font-size:13px;font-weight:600}
+.fchip button{background:none;border:0;cursor:pointer;color:var(--muted);font-weight:800;padding:0 2px}
+#addf{border:1px dashed var(--muted);min-height:32px;padding:4px 8px;font-size:13px}
+table.assets td{vertical-align:middle} table.assets tr.on td{background:var(--info-bg)}
+table.assets input{width:18px;height:18px;accent-color:var(--navy)}
+.selbar{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap;background:var(--tint);border-radius:6px;padding:12px 14px;margin-top:14px}
+/* what-if */
+.atabs{display:flex;gap:4px;flex-wrap:wrap;border-bottom:1px solid var(--line)}
+.atabs button{background:none;border:0;border-bottom:3px solid transparent;padding:10px 14px;font-weight:600;color:var(--muted);cursor:pointer;margin-bottom:-1px}
+.atabs button[aria-selected="true"]{color:var(--navy);border-color:var(--red);background:var(--surface)}
+.scen-bar{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:16px;align-items:end}
+@media (max-width:920px){.scen-bar{grid-template-columns:1fr 1fr}} @media (max-width:520px){.scen-bar{grid-template-columns:1fr}}
+.scen-bar label{display:block;font-size:11.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--soft);margin-bottom:4px}
+.scen-bar select{width:100%}
 footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;color:var(--muted)}
 </style>
 </head>
@@ -226,7 +261,7 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
   const show = v => v == null ? "—" : Array.isArray(v) ? v.map(show).join(" · ")
     : typeof v === "object" ? Object.entries(v).map(([k, x]) => `${k}: ${show(x)}`).join(", ") : (LVL[v] || STAGE[v] || OBJ[v] || String(v));
   const KIND = {fact: "fait", assumption: "hypothèse", inference: "inférence", unknown: "inconnu"};
-  const PAGES = [["synthese", "Synthèse"], ["facteurs", "Facteurs"], ["profil", "Profil"], ["portefeuille", "Portefeuille"], ["sources", "Sources"]];
+  const PAGES = [["synthese", "Synthèse"], ["facteurs", "Facteurs"], ["profil", "Profil"], ["portefeuille", "Portefeuille"], ["recherche", "Recherche"], ["simulation", "Simulation"], ["sources", "Sources"]];
   const state = {rep: null, page: "synthese", factor: null};
 
   const checksOf = (rep, f) => rep.checks_current.filter(c => c.factor === f).sort((a, b) => RANK[b.status] - RANK[a.status]);
@@ -431,17 +466,196 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
       </div></div>`;
   }
 
+  /* ---------- Recherche (search and ask) ---------- */
+  const CLS = {etf: "FNB (tous)", equity: "Action", etf_equity: "FNB d'actions", etf_bond: "FNB d'obligations", etf_commodity: "FNB or", crypto: "Crypto"};
+  const MKT = {us: ["États-Unis", a => ["NASDAQ", "NYSE", "NYSE Arca", "Cboe BZX"].includes(a.market)],
+               ca: ["Canada", a => a.market === "TSX"], cx: ["Crypto (24/7)", a => a.market.startsWith("Crypto")]};
+  const SEC = {tech: ["Technologie", a => a.sector === "Information Technology" || /tech/i.test(a.sector)],
+               fin: ["Finance", a => a.sector === "Financials"], nrg: ["Énergie", a => a.sector === "Energy"],
+               hea: ["Santé", a => a.sector === "Health Care"], con: ["Consommation", a => a.sector.startsWith("Consumer")],
+               utl: ["Services publics", a => a.sector === "Utilities"], ind: ["Industrie", a => a.sector === "Industrials"],
+               com: ["Communication", a => a.sector === "Communication Services"], bnd: ["Obligations", a => a.sector.startsWith("Bonds")],
+               brd: ["Marché large", a => a.sector.startsWith("Broad")], gld: ["Or", a => a.sector === "Gold"], cry: ["Crypto", a => a.sector === "Crypto asset"]};
+  const KW = [
+    [/\b(fnb|etf)s?\b/, "cls", ["etf"]], [/\b(actions?|stocks?|titres?|entreprises?|compan)/, "cls", ["equity"]],
+    [/obligation|\bbonds?\b|revenu fixe/, "cls", ["etf_bond"]], [/crypto|bitcoin|ether/, "cls", ["crypto"]], [/\bgold\b|\bl'or\b|metaux|métaux/, "cls", ["etf_commodity"]],
+    [/americ|améric|etats-unis|états-unis|\bus\b|\busa\b|nasdaq|nyse/, "mkt", ["us"]], [/canad|\btsx\b/, "mkt", ["ca"]],
+    [/tech|logiciel|software|semi/, "sec", ["tech"]], [/banque|bank|financ|assur/, "sec", ["fin"]], [/energ|énerg|petrol|pétrol|\boil\b|pipeline/, "sec", ["nrg"]],
+    [/sante|santé|health|pharma/, "sec", ["hea"]], [/consomm|consumer|detail|détail/, "sec", ["con"]], [/services publics|utilit|électri|electri/, "sec", ["utl"]],
+    [/industri|rail|transport/, "sec", ["ind"]], [/communication|media|média/, "sec", ["com"]], [/marche large|marché large|indice|index|broad/, "sec", ["brd"]],
+    [/\busd\b|dollars? americ|dollars? améric/, "ccy", ["USD"]], [/\bcad\b|dollars? canad/, "ccy", ["CAD"]],
+  ];
+  const REFUSE = /meilleur|\bbest\b|recommand|recommend|conseill|devrais|should i|lequel (choisir|prendre|acheter)|which (one|is)|\btop\b|acheter|vendre|\bbuy\b|\bsell\b/;
+  const FIT = /convien|cadre|fit|compatible|coh[eé]ren|simul|what.?if|analys/;
+  const deacc = s => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase();
+  const askState = {filters: {cls: new Set(), mkt: new Set(), sec: new Set(), ccy: new Set()}, sel: new Set(),
+    chat: [{who: "agent", text: "Décrivez ce que vous cherchez (par exemple « actions technologiques américaines » ou « seulement les FNB canadiens ») et j'applique les filtres. Je peux aussi tester un actif que vous choisissez contre le profil. Je ne classe ni ne recommande d'actifs."}]};
+  let universe = null;
+  async function loadUniverse() { if (!universe) universe = await (await fetch("reports/universe.json")).json(); return universe; }
+  const match = a => { const f = askState.filters;
+    return (!f.cls.size || f.cls.has(a.asset_class) || (f.cls.has("etf") && a.asset_class.startsWith("etf"))) && (!f.mkt.size || [...f.mkt].some(k => MKT[k][1](a)))
+      && (!f.sec.size || [...f.sec].some(k => SEC[k][1](a))) && (!f.ccy.size || f.ccy.has(a.currency)); };
+  const findTickers = (q, assets) => assets.filter(a => { const t = a.ticker.toLowerCase(), b = t.replace(/\.to$|-usd$/, "");
+    return new RegExp(`(^|[^a-z0-9.])(${b.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")})(\\.to|-usd)?($|[^a-z0-9])`).test(q) || (a.name.length > 4 && q.includes(deacc(a.name).split(/[ ,]/)[0]) && deacc(a.name).split(/[ ,]/)[0].length > 4); });
+  function respond(text) {
+    const q = deacc(text), assets = universe.assets, f = askState.filters;
+    if (REFUSE.test(q)) return {kind: "refuse", text: "Je ne peux pas classer ni recommander d'actifs. Je peux ajouter des filtres pour réduire la liste, ou analyser la cohérence des actifs que vous choisissez vous-même."};
+    if (/efface|reinitialis|clear|tout enlever|recommence/.test(q)) { Object.values(f).forEach(s => s.clear()); return {text: `Filtres effacés. Les ${assets.length} actifs de l'univers sont affichés.`}; }
+    const named = findTickers(q, assets);
+    if (named.length && FIT.test(q)) { named.forEach(a => askState.sel.add(a.ticker)); return {text: `Je lance l'analyse de cohérence pour ${named.map(a => a.ticker).join(", ")}. Le profil sert seulement à vérifier, pas à choisir.`, go: named.map(a => a.ticker)}; }
+    const only = /seulement|uniquement|only|juste/.test(q), add = /ajoute|aussi|\badd\b|inclu/.test(q);
+    const hits = {};
+    for (const [re, dim, vals] of KW) if (re.test(q)) (hits[dim] = hits[dim] || new Set()), vals.forEach(v => hits[dim].add(v));
+    if (hits.cls && hits.cls.has("etf_bond") && hits.cls.has("etf")) hits.cls.delete("etf");
+    if (!Object.keys(hits).length) {
+      if (named.length) { named.forEach(a => askState.sel.add(a.ticker)); return {text: `J'ai coché ${named.map(a => a.ticker).join(", ")} dans la liste. Cliquez « Analyser la cohérence » pour voir l'effet sur le portefeuille.`}; }
+      return {text: "Je n'ai pas reconnu de filtre. Essayez une catégorie (actions, FNB, obligations, crypto), un marché (canadien, américain), un secteur (technologie, énergie, finance…) ou un symbole."};
+    }
+    for (const [dim, vals] of Object.entries(hits)) { if (!add || only) f[dim].clear(); vals.forEach(v => f[dim].add(v)); }
+    const n = assets.filter(match).length, nf = Object.values(f).reduce((s, x) => s + x.size, 0);
+    return {text: `J'ai appliqué ${nf} filtre${nf > 1 ? "s" : ""} à l'univers de ${assets.length} actifs. ${n} actif${n > 1 ? "s" : ""} correspond${n > 1 ? "ent" : ""}. La liste est triée de A à Z et n'est pas une recommandation.`};
+  }
+  function chips() {
+    const f = askState.filters, out = [];
+    f.cls.forEach(v => out.push(["cls", v, "Catégorie : " + CLS[v]])); f.mkt.forEach(v => out.push(["mkt", v, "Marché : " + MKT[v][0]]));
+    f.sec.forEach(v => out.push(["sec", v, "Secteur : " + SEC[v][0]])); f.ccy.forEach(v => out.push(["ccy", v, "Devise : " + v]));
+    return out;
+  }
+  function pageRecherche() {
+    if (!universe) { loadUniverse().then(render); return `<p class="sub">Chargement de l'univers…</p>`; }
+    const list = universe.assets.filter(match), sel = askState.sel;
+    const opt = (dim, map) => Object.entries(map).map(([k, v]) => `<option value="${dim}:${k}">${esc(Array.isArray(v) ? v[0] : v)}</option>`).join("");
+    return `<div class="page">
+      <div><p class="eyebrow">Recherche et questions</p><h1 style="margin-top:6px">Trouver des actifs, ou en tester un contre le profil de ${esc(state.rep.site.profile_card.name)}</h1>
+        <p class="sub" style="margin-top:6px;max-width:70ch">Décrivez ce que vous cherchez et les filtres s'appliquent. Choisissez ensuite des actifs dans la liste pour voir comment ils changeraient le portefeuille et sa cohérence.</p></div>
+      <div class="ask">
+        <section class="card chat" aria-label="Conversation">
+          <div class="msgs" id="msgs" aria-live="polite">${askState.chat.map(m => m.who === "user" ? `<div class="msg user">${esc(m.text)}</div>`
+            : `<div class="msg agent ${m.kind === "refuse" ? "refuse" : ""}"><span class="who">${m.kind === "refuse" ? "Agent · hors de ce que je peux faire" : "Agent"}</span>${esc(m.text)}</div>`).join("")}</div>
+          <div class="sugg">${["Actions technologiques américaines", "Seulement les FNB", "Ajoute les titres canadiens", "Lequel est le meilleur pour moi?", "NVDA convient-il à mon profil?"].map(s => `<button type="button" data-ask="${esc(s)}">${esc(s)}</button>`).join("")}</div>
+          <form id="askf" class="askf"><label for="askq">Posez une question sur un actif, ou décrivez votre recherche</label>
+            <div><input id="askq" autocomplete="off" placeholder="ex. : XOM convient-il à mon profil?"><button class="send" type="submit">Envoyer</button></div>
+            <p class="small">L'agent filtre et analyse. Il ne suggère jamais quel actif choisir. Version hors ligne : règles de mots-clés, aucun appel d'IA.</p></form>
+        </section>
+        <section class="card">
+          <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline"><h3>Filtres tirés de votre demande</h3><button class="link" type="button" id="clearf">Tout effacer</button></div>
+          <div class="fchips">${chips().map(([d, v, l]) => `<span class="fchip">${esc(l)}<button type="button" aria-label="Retirer ${esc(l)}" data-rm="${d}:${esc(v)}">✕</button></span>`).join("")}
+            <select id="addf" aria-label="Ajouter un filtre"><option value="">+ Ajouter un filtre</option><optgroup label="Catégorie">${opt("cls", CLS)}</optgroup><optgroup label="Marché">${opt("mkt", MKT)}</optgroup><optgroup label="Secteur">${opt("sec", SEC)}</optgroup><optgroup label="Devise"><option value="ccy:CAD">CAD</option><option value="ccy:USD">USD</option></optgroup></select></div>
+          <div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin:14px 0 6px"><span class="small"><b style="color:var(--ink)">${list.length} sur ${universe.assets.length} actifs</b> correspondent</span><span class="small">Triés de A à Z. L'ordre n'est pas un classement.</span></div>
+          <div class="tbl"><table class="assets"><thead><tr><th>Choisir</th><th>Nom</th><th>Symbole</th><th>Catégorie</th><th>Secteur</th><th>Devise</th><th class="r">Détenu</th></tr></thead><tbody>
+            ${list.map(a => `<tr class="${sel.has(a.ticker) ? "on" : ""}"><td><input type="checkbox" data-sel="${esc(a.ticker)}" aria-label="Choisir ${esc(a.name)}" ${sel.has(a.ticker) ? "checked" : ""}></td><td>${esc(a.name)}</td><td class="mono">${esc(a.ticker)}</td><td>${esc(CLS[a.asset_class] || a.asset_class)}</td><td>${esc(a.sector)}</td><td>${esc(a.currency)}</td><td class="r">${a.held_pct ? pct(a.held_pct / 100, 0) : "—"}</td></tr>`).join("")
+            || `<tr><td colspan="7" class="small">Aucun actif ne correspond. Retirez un filtre.</td></tr>`}</tbody></table></div>
+          <div class="selbar"><b>${sel.size} actif${sel.size > 1 ? "s" : ""} choisi${sel.size > 1 ? "s" : ""}</b><button class="cta" type="button" id="analyse" ${sel.size ? "" : "disabled"}>Analyser la cohérence</button></div>
+          <p class="small" style="margin-top:12px">ⓘ Cette liste est le résultat de vos filtres seulement. Le profil ne sert pas à choisir ni à ordonner les actifs.</p>
+        </section></div></div>`;
+  }
+  function bindRecherche() {
+    const send = text => { if (!text.trim() || !universe) return; askState.chat.push({who: "user", text}); const r = respond(text); askState.chat.push({who: "agent", ...r});
+      if (r.go) { wi.tickers = r.go; wi.cur = r.go[0]; go("simulation"); } else { render(); const m = $("#msgs"); if (m) m.scrollTop = m.scrollHeight; $("#askq")?.focus(); } };
+    $("#askf")?.addEventListener("submit", e => { e.preventDefault(); send($("#askq").value); });
+    document.querySelectorAll("[data-ask]").forEach(b => b.addEventListener("click", () => send(b.dataset.ask)));
+    document.querySelectorAll("[data-sel]").forEach(c => c.addEventListener("change", () => { c.checked ? askState.sel.add(c.dataset.sel) : askState.sel.delete(c.dataset.sel); render(); }));
+    document.querySelectorAll("[data-rm]").forEach(b => b.addEventListener("click", () => { const [d, v] = b.dataset.rm.split(/:(.*)/); askState.filters[d].delete(v); render(); }));
+    $("#addf")?.addEventListener("change", e => { const [d, v] = e.target.value.split(/:(.*)/); if (d) askState.filters[d].add(v); render(); });
+    $("#clearf")?.addEventListener("click", () => { Object.values(askState.filters).forEach(s => s.clear()); render(); });
+    $("#analyse")?.addEventListener("click", () => { wi.tickers = [...askState.sel].sort(); wi.cur = wi.tickers[0]; go("simulation"); });
+    const m = $("#msgs"); if (m) m.scrollTop = m.scrollHeight;
+  }
+
+  /* ---------- Simulation (what-if) ---------- */
+  const wi = {tickers: [], cur: null, target: 10, funding: null, cache: {}};
+  let wiAll = null;
+  async function loadWhatif(t) { if (!wiAll) wiAll = await (await fetch("reports/whatif.json")).json(); wi.cache[t] = wiAll[t] || {asset: {ticker: t, name: t, held_pct: 0}, scenarios: {}}; return wi.cache[t]; }
+  const ORDER = ["violation", "warning", "unknown", "info", "pass"];
+  function wiCone(base, sc, floor, v0) {
+    const n = sc.cone.p50.length, W = 720, H = 300, L = 54, R = 150, T = 16, B = 30;
+    const all = [...sc.cone.p5, ...sc.cone.p95, ...base.cone.p50, floor, v0];
+    const lo = Math.floor(Math.min(...all) / 50000) * 50000, hi = Math.ceil(Math.max(...all) / 50000) * 50000;
+    const x = i => L + (i / n) * (W - L - R), y = v => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
+    const line = a => [`${x(0)},${y(v0)}`, ...a.map((v, i) => `${x(i + 1).toFixed(1)},${y(v).toFixed(1)}`)];
+    const band = (a, b) => `M${line(a).join(" L")} L${line(b).reverse().join(" L")} Z`;
+    let g = "";
+    for (let v = lo; v <= hi; v += 50000) g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line-2)"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${kcad(v)}</text>`;
+    for (let k = 0; k <= Math.round(n / 12); k++) g += `<text x="${x(Math.min(k * 12, n))}" y="${H - 8}" text-anchor="middle">${k ? "An " + k : "Auj."}</text>`;
+    g += `<path d="${band(sc.cone.p95, sc.cone.p5)}" fill="var(--band)"/><path d="${band(sc.cone.p75, sc.cone.p25)}" fill="var(--band-2)"/>`;
+    g += `<line x1="${L}" x2="${W - R}" y1="${y(floor)}" y2="${y(floor)}" stroke="var(--red)" stroke-width="1.5" stroke-dasharray="6 5"/><text x="${L + 6}" y="${y(floor) - 7}" style="fill:var(--red-ink);font-weight:700">Plancher ${kcad(floor)}</text>`;
+    g += `<polyline points="${line(base.cone.p50).join(" ")}" fill="none" stroke="var(--muted)" stroke-width="2" stroke-dasharray="5 4"/>`;
+    g += `<polyline points="${line(sc.cone.p50).join(" ")}" fill="none" stroke="var(--navy)" stroke-width="2.5"/><polyline points="${line(sc.cone.p5).join(" ")}" fill="none" stroke="var(--red)" stroke-width="1.5"/>`;
+    const e = (v, lab, col, dy = 4) => `<circle cx="${x(n)}" cy="${y(v)}" r="4" fill="${col}"/><text x="${x(n) + 10}" y="${y(v) + dy}" style="fill:${col};font-weight:700">${lab} ${kcad(v)}</text>`;
+    const bm = base.cone.p50[n - 1], am = sc.cone.p50[n - 1], close = Math.abs(y(bm) - y(am)) < 14;
+    g += e(sc.cone.p95[n - 1], "Optimiste", "var(--muted)") + e(am, "Médiane ajustée", "var(--navy)", close && am >= bm ? -4 : 4) + e(bm, "Médiane actuelle", "var(--muted)", close ? (am >= bm ? 14 : -6) : 4) + e(sc.cone.p5[n - 1], "Pessimiste", "var(--red-ink)");
+    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Projection ajustée">${g}</svg>`;
+  }
+  function pageSimulation() {
+    if (!universe) { loadUniverse().then(render); return `<p class="sub">Chargement…</p>`; }
+    const base = universe.base;
+    if (!wi.tickers.length) { wi.tickers = ["NVDA"]; wi.cur = "NVDA"; }
+    if (!wi.funding) wi.funding = base.fundings[base.fundings.length - 1].id;
+    const d = wi.cache[wi.cur];
+    if (!d) { loadWhatif(wi.cur).then(render); return `<p class="sub">Chargement du scénario…</p>`; }
+    const a = d.asset, sc = d.scenarios[`${wi.target}|${wi.funding}`], L = state.rep.site.limits, v0 = base.value_cad;
+    const fundLabel = (base.fundings.find(f => f.id === wi.funding) || {}).label;
+    const head = `<div><button class="link" type="button" data-go="recherche">‹ Retour aux résultats de recherche</button>
+        <p class="eyebrow" style="margin-top:14px">Simulation</p><h1 style="margin-top:6px">Cet actif cadrerait-il avec le profil de ${esc(state.rep.site.profile_card.name)}?</h1></div>
+      ${wi.tickers.length > 1 ? `<div class="atabs" role="tablist">${wi.tickers.map(t => `<button type="button" role="tab" aria-selected="${t === wi.cur}" data-wi="${esc(t)}">${esc((universe.assets.find(x => x.ticker === t) || {}).name || t)} <span class="mono">${esc(t)}</span></button>`).join("")}</div>` : ""}
+      <section class="card scen-bar"><div class="kv"><span>Actif</span><b>${esc(a.name)} <span class="mono">${esc(a.ticker)}</span></b></div>
+        <div class="kv"><span>Scénario</span><b>Porter à une part du portefeuille actuel${a.held_pct ? ` (détenu : ${pct(a.held_pct / 100, 0)})` : ""}</b></div>
+        <div class="kv"><label for="wit">Part visée</label><select id="wit">${base.targets.map(t => `<option value="${t}" ${t === wi.target ? "selected" : ""}>${t} % · ${cad(t / 100 * v0)}</option>`).join("")}</select></div>
+        <div class="kv"><label for="wif">Financé par</label><select id="wif">${base.fundings.map(f => `<option value="${esc(f.id)}" ${f.id === wi.funding ? "selected" : ""}>${esc(f.label)}</option>`).join("")}</select></div></section>`;
+    if (!sc || sc.error) return `<div class="page">${head}<section class="card"><h3>Scénario impossible</h3><p class="sub" style="margin-top:6px">${esc(sc ? sc.error : "Aucun scénario précalculé.")} Changez la part visée ou le financement.</p></section></div>`;
+    const bm = base.metrics, m = sc.metrics;
+    const V = {coherent: ["pass", "Cadre avec le profil"], coherent_with_warnings: ["warning", "Cadre, avec avertissements"], incoherent: ["violation", "Ne cadre pas avec le profil"]};
+    const worse = sc.sections.filter(s => ORDER.indexOf(s.after) < ORDER.indexOf(s.before)), better = sc.sections.filter(s => ORDER.indexOf(s.after) > ORDER.indexOf(s.before));
+    const lead = `Porter ${esc(a.name)} à ${wi.target} % du portefeuille fait passer la valeur pessimiste de ${cad(bm.p5_T)} à ${cad(m.p5_T)} (plancher ${cad(L.floor_at_horizon)}) et la volatilité de ${pct(bm.vol)} à ${pct(m.vol)} (bande ${pct(L.vol_band_annual[0], 0)} à ${pct(L.vol_band_annual[1], 0)}).`
+      + (worse.length ? ` Facteur${worse.length > 1 ? "s" : ""} qui se dégrade${worse.length > 1 ? "nt" : ""} : ${worse.map(s => s.title.toLowerCase()).join(", ")}.` : " Aucun facteur ne se dégrade.")
+      + (better.length ? ` S'améliore : ${better.map(s => s.title.toLowerCase()).join(", ")}.` : "");
+    const cnt = st => { const c = {}; st.forEach(s => c[s] = (c[s] || 0) + 1); return [`${c.pass || 0} aligné${(c.pass || 0) > 1 ? "s" : ""}`, c.violation ? `${c.violation} hors limites` : "", c.warning ? `${c.warning} avertissement${c.warning > 1 ? "s" : ""}` : "", c.unknown ? `${c.unknown} à vérifier` : ""].filter(Boolean).join(", "); };
+    const vb = V[base.verdict], va = V[sc.verdict];
+    const row = (lab, b, x, bad, fmt) => `<tr><td>${lab}</td><td class="r">${fmt(b)}</td><td class="r"><b class="${bad ? "tx-violation" : ""}">${fmt(x)}</b></td></tr>`;
+    const arrow = s => `<span class="small">${PILLAR[s.before]}</span> → ${st(s.after, PILLAR[s.after] + (s.after === s.before ? (s.after === "pass" ? "" : ", inchangé") : ""))}`;
+    return `<div class="page">${head}
+      <section class="card exec"><div><h2 class="tx-${va[0]}" style="display:flex;gap:10px;align-items:center">${ICON[va[0]]} ${va[1]}</h2>
+          <p class="lead" style="margin-top:10px">${lead}</p>
+          <p class="sub" style="margin-top:10px">Ceci est une analyse de l'actif que vous avez choisi. Ce n'est pas une suggestion de l'acheter ou de l'éviter.</p></div>
+        <div style="display:flex;flex-direction:column;gap:12px">
+          <div class="qbox"><span class="q">Portefeuille aujourd'hui</span><span class="a tx-${vb[0]}">${vb[1]}</span><span class="small">${cnt(sc.sections.map(s => s.before))}</span></div>
+          <div class="qbox"><span class="q">Avec cet actif</span><span class="a tx-${va[0]}">${va[1]}</span><span class="small">${cnt(sc.sections.map(s => s.after))}</span></div></div></section>
+      <div class="grid2">
+        <section class="card chart"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline"><h3>Projection ajustée</h3><span class="small">${Math.round(sc.cone.p50.length / 12)} ans, CAD</span></div>
+          <div style="margin-top:10px">${wiCone(base, sc, L.floor_at_horizon, v0)}</div>
+          <div class="legend"><span><i style="background:var(--band)"></i>P5 à P95</span><span><i style="background:var(--band-2)"></i>P25 à P75</span><span><i style="background:var(--navy);height:3px"></i>Médiane avec l'actif</span><span><i style="border-top:2px dashed var(--muted);height:0"></i>Médiane actuelle</span><span><i style="background:var(--red);height:3px"></i>Pessimiste (P5)</span></div>
+          <p class="small" style="margin-top:10px">Trait plein : portefeuille avec l'actif. Pointillé : portefeuille actuel. Même moteur, même graine, mêmes données que le rapport.</p></section>
+        <section class="card"><h3>Avant et après</h3><div class="tbl" style="margin-top:8px"><table><thead><tr><th>Mesure</th><th class="r">Aujourd'hui</th><th class="r">Avec l'actif</th></tr></thead><tbody>
+          ${row("Valeur médiane à l'horizon", bm.p50_T, m.p50_T, false, cad)}${row("Valeur pessimiste (P5)", bm.p5_T, m.p5_T, m.p5_T < L.floor_at_horizon, cad)}
+          ${row("Volatilité annuelle", bm.vol, m.vol, m.vol > L.vol_band_annual[1], pct)}${row("Pire repli historique", bm.mdd, m.mdd, m.mdd < L.max_drawdown_pct / 100, pct)}
+          ${row("Probabilité de perte", bm.loss_prob, m.loss_prob, false, pct)}${row("Part en actions individuelles", base.shares.single_stocks, sc.shares.single_stocks, false, x => pct(x, 0))}
+          ${row("Part en obligations", base.shares.bonds, sc.shares.bonds, sc.shares.bonds < L.min_fixed_income_weight, x => pct(x, 0))}</tbody></table></div>
+          <p class="small" style="margin-top:10px">Financement : ${esc(fundLabel)}.</p></section></div>
+      <h2>Cohérence avec cet actif</h2>
+      <div class="half">${sc.sections.map(s => `<section class="card"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap"><h3>${esc(s.title)}</h3><span>${arrow(s)}</span></div>
+        ${s.after === "pass" ? `<p class="sub" style="margin-top:10px">Aucun écart pour ce facteur avec cet actif.</p>` : `<ul class="segs" style="margin-top:12px">${s.segments.map(g => `<li><span class="kind k-${g.kind}">${KIND[g.kind] || g.kind}</span><div>${esc(g.text)}<span class="refs">${(g.refs || []).map(esc).join(", ")}</span></div></li>`).join("")}</ul>`}</section>`).join("")}</div>
+      <div class="actions"><button class="primary" type="button" data-go="recherche">Tester un autre actif</button></div>
+      <p class="small">Méthode : le portefeuille est recalculé avec les nouveaux poids (intent.apply), puis les mêmes vérifications et les cinq facteurs sont relancés. Chiffres calculés par le code; texte gabarit déterministe. Valeurs précalculées pour ${base.targets.join(" % et ")} % et ${base.fundings.length} modes de financement.</p></div>`;
+  }
+  function bindSimulation() {
+    $("#wit")?.addEventListener("change", e => { wi.target = Number(e.target.value); render(); });
+    $("#wif")?.addEventListener("change", e => { wi.funding = e.target.value; render(); });
+    document.querySelectorAll("[data-wi]").forEach(b => b.addEventListener("click", () => { wi.cur = b.dataset.wi; render(); }));
+  }
+
   /* ---------- shell ---------- */
   function render() {
     const rep = state.rep;
     if (!rep) return;
     const bad = rep.sections.some(s => s.status === "violation"), pcBad = rep.profile_coherence && rep.profile_coherence.findings.length;
     $("#pages").innerHTML = PAGES.map(([id, t]) => `<a href="#${id}" ${state.page === id ? 'aria-current="page"' : ""}>${t}${(id === "facteurs" && bad) || (id === "profil" && pcBad) ? '<span class="dot" aria-hidden="true"></span>' : ""}</a>`).join("");
-    const body = {synthese: pageSynthese, facteurs: factorPage, profil: pageProfil, portefeuille: pagePortefeuille, sources: pageSources}[state.page](rep);
+    const body = {synthese: pageSynthese, facteurs: factorPage, profil: pageProfil, portefeuille: pagePortefeuille, recherche: pageRecherche, simulation: pageSimulation, sources: pageSources}[state.page](rep);
     $("#app").innerHTML = body;
     $("#foot").innerHTML = `<div class="wrap" style="display:flex;flex-direction:column;gap:4px"><b style="color:var(--navy)">${esc(rep.disclaimer)}</b><span>Aucune recommandation d'achat ou de vente. Rapport produit par <span class="mono">pipeline.review</span>, hors ligne, sorties d'IA enregistrées.</span></div>`;
     document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => go(b.dataset.go)));
     document.querySelectorAll("[data-factor]").forEach(b => b.addEventListener("click", () => { state.factor = b.dataset.factor; go("facteurs", true); }));
+    if (state.page === "recherche") bindRecherche();
+    if (state.page === "simulation") bindSimulation();
   }
   function go(page, keepFocus) {
     if (location.hash !== "#" + page) location.hash = page; else { state.page = page; render(); }

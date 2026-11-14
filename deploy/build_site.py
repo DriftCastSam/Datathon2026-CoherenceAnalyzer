@@ -4,6 +4,8 @@
 Output (<out>, default .cache/site/):
   index.html, design.html   deploy/site/ (the dashboard and the static design board)
   reports/index.json        the reports the dashboard can open
+  reports/universe.json     starter universe + base metrics (Search and ask)
+  reports/whatif.json       precomputed What-if scenarios (deploy/whatif.py)
   reports/<name>.json       `pipeline.review(...)` reports (SPEC §13 + §20.4 sections + §20.9 profile_coherence)
                             plus `site`: display extras computed by the same rules code (profile card, limits)
 
@@ -82,6 +84,8 @@ def build(out: Path) -> Path:
         shutil.rmtree(out)
     shutil.copytree(ROOT / "deploy" / "site", out)
     build_reports(out / "reports")
+    import whatif  # deploy/whatif.py: Search-and-ask universe + What-if scenarios (real engine, no LLM)
+    whatif.build(out / "reports")
     return out
 
 
