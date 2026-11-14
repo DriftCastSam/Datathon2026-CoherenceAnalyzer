@@ -26,10 +26,21 @@ def _val(node):
     return node["value"] if isinstance(node, dict) and "value" in node else node
 
 
+class _AttrCheck(dict):
+    """A `Check` dict that also reads as attributes (`c.status`): the N2 tests (P2.N2) read S2 checks that way.
+    Still a plain dict for JSON, equality and every existing `c["status"]` caller."""
+
+    def __getattr__(self, name: str):
+        try:
+            return self[name]
+        except KeyError:
+            raise AttributeError(name) from None
+
+
 def _check(cid: str, status: str, subject: str | None, value, limit, unit: str, derived_from: list[str],
            source: str, confidence: float, message_key: str) -> Check:
-    return Check(id=cid, kind="soft", status=status, subject=subject, value=value, limit=limit, unit=unit,
-                 derived_from=derived_from, source=source, confidence=confidence, message_key=message_key)
+    return _AttrCheck(id=cid, kind="soft", status=status, subject=subject, value=value, limit=limit, unit=unit,
+                      derived_from=derived_from, source=source, confidence=confidence, message_key=message_key)
 
 
 def complex_holdings(weights: dict[str, float], assets) -> list[str]:

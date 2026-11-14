@@ -30,6 +30,7 @@ META_NAMES = ("asset_meta", "etf_sector_weights", "activity_tags")
 DEFAULT_PORTFOLIO = "portfolio.json"
 DEFAULT_LOCALE = "fr-CA"
 N3_NODE = extractors.N3_NODE
+N2_NODE = extractors.N2_NODE
 N6_NODE = extractors.N6_NODE
 
 # Flow C assumptions on top of the engine's own list (README -> Assumptions).
@@ -152,6 +153,33 @@ def _run_n3(profile: dict, events: list[dict]) -> tuple[dict, list[dict], list[d
     return out, [_call_entry(log, status)], []
 
 
+def _run_n2(profile: dict, events: list[dict]) -> tuple[dict, list[dict], list[dict]]:
+    """A2/A3 for N2 (opt-in, config.N2_QUESTION_RUBRIC, D7): one call per question event, oldest first, each output
+    gated into knowledge.question_quality. A failed call or a rejected output keeps the previous value; the other
+    questions still apply. Returns (profile, llm_call entries, errors)."""
+    if not config.N2_QUESTION_RUBRIC:
+        return profile, [], []
+    out = copy.deepcopy(profile)
+    calls: list[dict] = []
+    errors: list[dict] = []
+    ids = {e["event_id"] for e in events}
+    by_id = {e["event_id"]: e for e in events}
+    for ev in extractors.n2_events(events):
+        try:
+            result = extractors.question_rubric_call(ev)
+        except (bedrock.LLMCacheMiss, bedrock.LLMOutputInvalid) as exc:
+            errors.append({"node": N2_NODE, "event_id": ev["event_id"], "error": f"{type(exc).__name__}: {exc}"})
+            continue
+        log = result["call_log"]
+        context = {"event_ids": ids, "events_by_id": by_id, "event_id": ev["event_id"], "model_id": log["model_id"],
+                   "prompt_version": log["prompt_version"], "input_hash": log["input_hash"], "updated_at": _now()}
+        new_field, status = gate.gate(N2_NODE, out["knowledge"].get("question_quality"), result["output"], context)
+        if status in ("accepted", "clamped") and new_field is not None:
+            out["knowledge"]["question_quality"] = new_field
+        calls.append(_call_entry(log, status))
+    return out, calls, errors
+
+
 _SKIP_KEYS = ("_note", "_conventions", "by", "history", "updated_at")
 
 
@@ -185,10 +213,14 @@ def profile_diff(old: dict, new: dict) -> list[dict]:
 
 
 def _refresh(profile_in: dict, pf: dict, events: list[dict]) -> dict:
-    """A1-A6 on an in-memory profile: N3 if the notes changed (gated), derive, limits + trace, validate, version.
-    Saves the new profile version only when a value changed. Rules and N3 only: no N1/N2 (D7)."""
+    """A1-A6 on an in-memory profile: N3 if the notes changed (gated), N2 per question when its flag is on (gated),
+    derive, limits + trace, validate, version. Saves the new profile version only when a value changed.
+    Rules and N3 only by default: no N1 (D7); N2 is opt-in (config.N2_QUESTION_RUBRIC)."""
     p, calls, errors = _run_n3(profile_in, events)
-    # N3's output is not an input of any rule, so deriving once after it equals A1 + A4 of SPEC §4.
+    p, n2_calls, n2_errors = _run_n2(p, events)
+    calls, errors = calls + n2_calls, errors + n2_errors
+    # N3's output is not an input of any rule, and N2's only feeds knowledge.score (never limits), so deriving once
+    # after them equals A1 + A4 of SPEC §4.
     p = derive.derive_all(p, portfolio_value_cad=pf["value_cad"], as_of=pf["as_of"])
     lim, trace = limits_mod.build_limits(p, pf["value_cad"])
     p["limits"], p["limits_trace"] = lim, trace

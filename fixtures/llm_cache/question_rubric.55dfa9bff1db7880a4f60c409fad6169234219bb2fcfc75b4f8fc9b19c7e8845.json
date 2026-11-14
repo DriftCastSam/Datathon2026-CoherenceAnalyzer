@@ -1,0 +1,27 @@
+{
+  "cache_key": "55dfa9bff1db7880a4f60c409fad6169234219bb2fcfc75b4f8fc9b19c7e8845",
+  "call_log": {
+    "hand_written": true,
+    "latency_ms": 0,
+    "tokens_in": 0,
+    "tokens_out": 0
+  },
+  "input_hash": "sha256:730fa726ed5f07e846fda539d429dba06c6e0559da2c6a32a7bde76fdb014804",
+  "model_id": "fixture:hand-written",
+  "node": "question_rubric",
+  "output": {
+    "correct_concepts": 0,
+    "event_id": "ev_robert_0004",
+    "horizon_awareness": 0,
+    "is_investing_question": true,
+    "quote": "Which AI stock is the next big one?",
+    "rationale": "Asks for the next winning stock: names a theme only, no concept, risk or time frame.",
+    "risk_awareness": 0,
+    "specificity": 1
+  },
+  "prompt_version": "question_rubric.v1",
+  "user_payload": {
+    "event_id": "ev_robert_0004",
+    "text": "Which AI stock is the next big one?"
+  }
+}

@@ -13,11 +13,12 @@ from .. import config
 from . import bedrock
 
 N1_NODE = "behaviour_classifier"
+N2_NODE = "question_rubric"
 N3_NODE = "values_parser"
 N4_NODE = "intent_parser"
 N5_NODE = "explainer"
 N6_NODE = "profile_consistency"
-PROMPT_VERSIONS = {N1_NODE: f"{N1_NODE}.v1", N3_NODE: f"{N3_NODE}.v1", N4_NODE: f"{N4_NODE}.v1",
+PROMPT_VERSIONS = {N1_NODE: f"{N1_NODE}.v1", N2_NODE: f"{N2_NODE}.v1", N3_NODE: f"{N3_NODE}.v1", N4_NODE: f"{N4_NODE}.v1",
                    N5_NODE: f"{N5_NODE}.v1", N6_NODE: f"{N6_NODE}.v1"}
 N1_EVENT_TYPES = ("question", "order_intent")
 N1_MAX_EVENTS = 20
@@ -61,9 +62,26 @@ def behaviour_classifier(events: list[dict], as_of: date | None = None) -> dict:
     return behaviour_classifier_call(events, as_of)["output"]
 
 
+def n2_events(events: list[dict]) -> list[dict]:
+    """SPEC §6.2 N2: the question events that carry text, oldest first (ties broken by event_id)."""
+    keep = [e for e in events if e.get("type") == "question" and e.get("text")]
+    return sorted(keep, key=lambda e: (datetime.fromisoformat(e["ts"]), e["event_id"]))
+
+
+def n2_payload(event: dict) -> dict:
+    """SPEC §6.2 N2 input: one question event as {event_id, text}. No profile field ever enters this payload."""
+    return {"event_id": event["event_id"], "text": event["text"]}
+
+
+def question_rubric_call(event: dict) -> dict:
+    """N2 `{output, call_log}` for one question event."""
+    return bedrock.call_tool(N2_NODE, load_schema(N2_NODE), load_prompt(N2_NODE), n2_payload(event),
+                             prompt_version(N2_NODE))
+
+
 def question_rubric(event: dict) -> dict:
-    """N2. Sub-scores only; code computes score = sum/12."""
-    raise NotImplementedError
+    """N2. Sub-scores only; code computes score = sum/12 (`derive.question_score`). Gated by `gate.gate`."""
+    return question_rubric_call(event)["output"]
 
 
 def n3_payload(notes: str) -> dict:

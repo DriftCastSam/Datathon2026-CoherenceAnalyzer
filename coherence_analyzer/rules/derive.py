@@ -8,6 +8,7 @@ from __future__ import annotations
 import copy
 from typing import Any
 
+from .. import config
 from ..levels import LEVELS, idx, lower, step
 from .registry import REGISTRY, rule
 
@@ -139,6 +140,29 @@ def capacity(effective_horizon_years: float, ef_months: float, income_stability:
 @rule("effective_risk", "risk.effective", ["risk.declared", "risk.capacity"])
 def effective_risk(declared: str, capacity_level: str) -> str:
     return lower(declared, capacity_level)
+
+
+N2_SUBSCORES = ("specificity", "correct_concepts", "risk_awareness", "horizon_awareness")
+
+
+def question_score(output: dict) -> float:
+    """N2 (SPEC §6.2): code computes score = sum of the four 0-3 sub-scores / 12, in 0..1 (4 decimals)."""
+    return round(sum(int(output[k]) for k in N2_SUBSCORES) / (3 * len(N2_SUBSCORES)), 4)
+
+
+def question_quality_ewma(scores: list[float]) -> float | None:
+    """EWMA (alpha = config.QUESTION_EWMA_ALPHA) over the question scores, oldest first; the first score seeds it."""
+    if not scores:
+        return None
+    value = float(scores[0])
+    for s in scores[1:]:
+        value = config.QUESTION_EWMA_ALPHA * float(s) + (1 - config.QUESTION_EWMA_ALPHA) * value
+    return value
+
+
+def question_quality_confidence(n_questions: int) -> float:
+    """Code-computed confidence of question_quality: 0.3 + 0.15 per scored question, capped (README Assumptions)."""
+    return round(min(config.QUESTION_QUALITY_MAX_CONF, 0.3 + 0.15 * max(0, n_questions)), 4)
 
 
 def _deterministic_knowledge_points(quiz: float, declared_level: str) -> float:
