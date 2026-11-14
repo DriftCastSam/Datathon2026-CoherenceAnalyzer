@@ -46,7 +46,7 @@ os.environ["COHERENCE_ANALYZER_LLM"] = "mock"
 
 from coherence_analyzer import config, pipeline, store  # noqa: E402
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 FIX = ROOT / "fixtures" / "robert"
 ASL_PATH = ROOT / "deploy" / "aws" / "flow_b.asl.json"
 CFN_PATH = ROOT / "deploy" / "aws" / "coherence-analyzer.cfn.json"
@@ -739,14 +739,15 @@ def test_asl_b7_resizer_is_behind_a_choice_on_violations():
 def test_state_machine_run_equals_pipeline_check_on_verdict_flipped_checks_and_resizer(sfn_run, pipeline_run):
     """SPEC §4 B1-B9, §7.5, §8: executing the ASL with the Lambda handler gives the same Flow B outcome as
     `pipeline.check(robert, in_0001, auto_confirm=True)`: verdict incoherent, the same flipped checks, the same resizer
-    options (`alternatives`), and the same metric deltas."""
+    headroom (`headroom`, D10), and the same metric deltas."""
     rep, exp = sfn_run["report"], pipeline_run
     assert rep["flow"] == "B" and ULID.match(rep["run_id"])
     assert rep["verdict"] == exp["verdict"] == "incoherent"
     assert rep["diff"]["flipped"] == exp["diff"]["flipped"] and rep["diff"]["flipped"]
     flipped = {(f["id"], f["to"]) for f in rep["diff"]["flipped"]}
     assert {("H3", "violation"), ("H4", "violation")} <= flipped                    # §15 test_hard: NVDA 10 % from ZST
-    assert rep["alternatives"] == exp["alternatives"] and rep["alternatives"]
+    assert rep["headroom"] == exp["headroom"] and rep["headroom"]                 # D10: the user's own funding only
+    assert rep["headroom"]["funding"] == exp["intent"]["funding"]
     for k, v in exp["diff"]["metrics_delta"].items():
         if k != "drivers":
             assert rep["diff"]["metrics_delta"][k] == pytest.approx(v, abs=1e-9)
@@ -822,13 +823,13 @@ def test_state_machine_stops_with_the_draft_when_not_auto_confirmed(tmp_path):
 
 
 def test_state_machine_skips_the_resizer_when_the_proposed_portfolio_has_no_violation(variant, sfn_run):
-    """SPEC §4 B7: Robert + XBB.TO 24 % (from ZST.TO) has no hard violation: the Choice skips B7, `alternatives` is empty,
+    """SPEC §4 B7: Robert + XBB.TO 24 % (from ZST.TO) has no hard violation: the Choice skips B7, `headroom` is null (D10),
     the report equals the pipeline's; the NVDA run (violations) did call B7."""
     steps = variant["machine"].steps
     assert not any(_step_no(s) == 7 for s in steps), steps
     assert {_step_no(s) for s in steps} == FLOW_B_STEP_NUMBERS - {7}
     assert not any(c["status"] == "violation" for c in variant["report"]["checks_proposed"])
-    assert variant["report"]["alternatives"] == [] == variant["expected"]["alternatives"]
+    assert variant["report"]["headroom"] is None and variant["expected"]["headroom"] is None
     assert variant["report"]["verdict"] == variant["expected"]["verdict"] != "incoherent"
     assert _normalise(variant["report"]) == _normalise(variant["expected"])
     assert any(_step_no(s) == 7 for s in sfn_run["machine"].steps)
