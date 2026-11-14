@@ -1,0 +1,67 @@
+{
+  "duration_s": 287.1,
+  "guard_cancellations": [
+    {
+      "reason": "'^###' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'p=json.load(open(fixtures/robert/profile.json))' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'cut' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'p=json.load(open(fixtures/robert/profile.json))' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'Event\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'Amira\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'display\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'prefers_dividends\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'prefers_dividends' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "command substitution is not allowed; run the inner command on its own",
+      "tool": "shell"
+    },
+    {
+      "reason": "'profile_coherence\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'\u00a710:' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'PASSED)\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    }
+  ],
+  "is_error": false,
+  "model_id": "us.anthropic.claude-sonnet-5-5",
+  "num_turns": 41,
+  "result": "es (\u00a720.6).\n- `test_intake_locale_changes_the_question_text_only`: the locale changes the question text and not the checklist (\u00a720.6).\n- `test_intake_rejects_unknown_locale`: an unknown locale gives 400 or 422, not 500 (\u00a720.6).\n- `test_intake_answer_stores_value_and_clears_missing`: `intake/answer` is saved, returns the profile and clears the path from `missing` (\u00a720.6).\n- `test_intake_skip_marks_path_skipped`: `intake/skip` stores `{value: null, by: \"user:skipped\"}` and clears the path from `missing` (\u00a720.6).\n- `test_intake_answer_and_skip_validate_the_body`: a missing `path` or `value`, or a bad path string, is rejected (task).\n- `test_intake_cannot_write_limits_or_llm_fields[6 paths]`: answer and skip on `limits*`, `risk.behavioural`, `knowledge.question_quality` or `values.parsed_notes.by` are refused and leave the profile unchanged (\u00a71 inv. 2).\n- `test_post_event_assigns_next_id_and_appends`: the server assigns the next id, the log is append-only, and the stored fields match the request (\u00a73.4).\n- `test_post_event_accepts_the_non_order_types[4 types]`: question, note, quiz_result and profile_edit are accepted with their payloads (\u00a73.4). I left out `intent_confirmed` because it needs a full Flow B intent.\n- `test_order_intent_is_501_and_nothing_is_appended`: `order_intent` returns 501 with a message naming Flow B and P2, and the log is untouched (D7).\n- `test_invalid_events_are_422_and_not_appended[6 bodies]`: a bad or missing type, missing or empty text, or a bad ts gives 422 and no append (\u00a73.4).\n- `test_client_cannot_choose_the_event_id`: a client-supplied `event_id` is rejected or ignored, never stored (task).\n- `test_decision_reject_then_approve_round_trips`: reject then approve restores the rule exactly and leaves the other rule untouched (task).\n- `test_decision_does_not_touch_the_llm_stamp_or_other_fields`: a decision flips only `approved_by_user` and keeps the `by`, `confidence` and prompt stamp (\u00a71 inv. 1).\n- `test_decision_bad_index_is_404[2, 999]`: an out-of-range rule index gives 404 (task).\n- `test_decision_non_integer_index_is_422`: a non-integer index gives 422 (task).\n- `test_decision_body_is_strict_422_and_state_unchanged[10 bodies]`: a missing or non-bool `approved`, or any extra key (`limits`, `by`, `confidence`, `rule_kind`, `params`, `values`), gives 422 and no state change (\u00a71 inv. 2).\n- `test_decision_max_pct_out_of_range_is_422[-5, 150, 100.01]`: an out-of-range `max_pct` gives 422 and stores nothing (task).\n- `test_theme_rule_number_comes_from_the_user_and_reaches_limits_only_after_approval`: a theme rule with no number shows up in contraintes intake. After approval with `max_pct` 15, a review makes the limit 0.15 (fraction, `by` starts with `rule:`). A rejection plus review removes it (D7 point 1, \u00a71 inv. 2).\n- `test_review_equals_pipeline_review_apart_from_run_id_and_timestamps`: the API review equals `pipeline.review` on the fixture for verdict, sections, checks and the rest of the report, and the disclaimer is the fixed fr-CA text (\u00a79.4, \u00a713, D3).\n- `test_review_is_stored_and_served_by_run_id`: `GET /reports/{run_id}` returns the stored report (\u00a712, \u00a710).\n- `test_audit_record_for_the_review_run`: the audit has flow C, profile id, verdict, events considered and `as_of` 2026-11-12, and only the allowed LLM nodes (\u00a710, D1).\n- `test_review_considers_events_appended_through_the_api`: an event posted before the review appears in the audit's events considered (task).\n- `test_review_limits_are_recomputed_not_taken_from_the_request`: a tampered `limits` block in the working file is recomputed from rules, and a request body cannot carry limits (\u00a71 inv. 2).\n- `test_unknown_run_id_is_404[reports, audit \u00d7 2 ids]`: an unknown report or audit id gives 404 (\u00a712).\n- `test_run_id_cannot_reach_other_store_files`: a path-like run id cannot reach other store files (\u00a710).\n- `test_zz_fixtures_are_unchanged_after_the_whole_module`: every file under `fixtures/` keeps its sha256 and none appeared or disappeared (task).\n",
+  "stop_reason": "end_turn",
+  "usage": {
+    "inputTokens": 2209204,
+    "outputTokens": 41238,
+    "totalTokens": 2250442
+  }
+}
