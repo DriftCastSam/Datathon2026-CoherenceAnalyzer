@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "question_rubric (N2) tool input: rubric sub-scores for one user question (SPEC 6.2 N2). Code computes score = sum / 12.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["event_id", "quote", "specificity", "correct_concepts", "risk_awareness", "horizon_awareness", "is_investing_question", "rationale"],
+  "properties": {
+    "event_id": {"type": "string", "minLength": 1, "description": "The event_id of the input question, copied exactly."},
+    "quote": {"type": "string", "minLength": 1, "description": "The words of the question the grading rests on: an exact substring of the question text, copied character for character."},
+    "specificity": {"type": "integer", "minimum": 0, "maximum": 3},
+    "correct_concepts": {"type": "integer", "minimum": 0, "maximum": 3},
+    "risk_awareness": {"type": "integer", "minimum": 0, "maximum": 3},
+    "horizon_awareness": {"type": "integer", "minimum": 0, "maximum": 3},
+    "is_investing_question": {"type": "boolean"},
+    "rationale": {"type": "string", "maxLength": 150}
+  }
+}
