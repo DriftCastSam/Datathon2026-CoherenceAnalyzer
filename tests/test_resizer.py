@@ -1,12 +1,17 @@
-"""Resizer on Robert + NVDA (SPEC §8, §15 test_resizer; docs/spec-decisions.md D2).
+"""Resizer on Robert + NVDA (SPEC §8, §15 test_resizer; docs/spec-decisions.md D2 and D10).
 
 D2: the resizer runs §8 exactly as written (cheap scan H1-H6 in 0.5 pp steps, then engine checks H7-H10 with
 n=1000 + binary search, confirmed with n=5000) and we assert what the engine actually produces. This REPLACES the
 §8/§15 expectation "5.0% binding H4 / 8.0% binding H3": on the starter data H9 (p5_T floor 360 000) binds first.
 
+D10 (SPEC §8, §15): the resizer evaluates the user's OWN funding only. It never tries a funding source of its own
+(no pro_rata_all / pro_rata_class candidates, no ranking, no top-3) and returns ONE result
+`{funding, max_weight_pct, binding_check, metrics}` or `{none_fit: True, binding_checks}`. `pro_rata_*` stay valid
+funding when the user states them in the intent; the golden values below are what the engine measures for each.
+
 Measured on the starter data (Robert 400 000 CAD, horizon 48 months, seed 7, limits `low_moderate`):
 
-    NVDA from            cheap scan stops   p5_T@5000 at 5.0%   golden max   p5_T@5000 at max / at max+0.5pp   binding
+    NVDA funded by       cheap scan stops   p5_T@5000 at 5.0%   golden max   p5_T@5000 at max / at max+0.5pp   binding
     ZST.TO (specific)    5.0 (H4 at 5.5)    345 618             1.5          360 503 / 358 818                 H9
     pro_rata_all         8.0 (H3 at 8.5)    348 463             2.0          360 101 / 357 698                 H9
     pro_rata_class etf   8.0 (H3 at 8.5)    349 941             2.0          360 630 / 358 531                 H9
@@ -35,6 +40,7 @@ SPECIFIC = {"kind": "specific", "ticker": "ZST.TO"}
 PRO_RATA_ALL = {"kind": "pro_rata_all"}
 CLASS_ETF = {"kind": "pro_rata_class", "asset_class": "etf_equity"}
 CLASS_EQUITY = {"kind": "pro_rata_class", "asset_class": "equity"}
+RESULT_KEYS = {"funding", "max_weight_pct", "binding_check", "metrics"}          # SPEC §8 step 4
 
 # funding -> (golden max_weight_pct, p5_T at max (n=5000), p5_T at max + 0.5pp (n=5000)); measured, see module docstring
 GOLDEN = {
@@ -43,11 +49,6 @@ GOLDEN = {
     "pro_rata_class_etf_equity": (CLASS_ETF, 2.0, 360_630.0, 358_531.0),
     "pro_rata_class_equity": (CLASS_EQUITY, 1.5, 361_047.0, 359_322.0),
 }
-GOLDEN_BY_FUNDING = {json.dumps(f, sort_keys=True): (name, mx) for name, (f, mx, _, _) in GOLDEN.items()}
-
-
-def _key(funding: dict) -> str:
-    return json.dumps(funding, sort_keys=True)
 
 
 def _intent(target: float = TARGET, funding: dict = SPECIFIC) -> dict:
@@ -89,10 +90,6 @@ def portfolio(root, assets) -> dict:
 @pytest.fixture(scope="module")
 def result(portfolio, profile, market, meta) -> dict:
     return resizer.resize(portfolio, _intent(), profile, market, meta)
-
-
-def _options_by_name(result: dict) -> dict:
-    return {GOLDEN_BY_FUNDING[_key(o["funding"])][0]: o for o in result["options"]}
 
 
 def _engine(market, weights_pct: dict, n: int) -> dict:
@@ -144,71 +141,69 @@ def test_golden_boundary_is_one_step_wide(name, market, profile):
         assert _violations(hard.run_engine(m, profile)) == (set() if ok else {"H9"})
 
 
-# ---------------------------------------------------------------- resize()
+# ---------------------------------------------------------------- resize(): one result, the user's own funding
 
 def test_robert_nvda_from_zst_is_below_5pct_and_binds_h9(result):
     # D2: expected below 5.0% with H9 binding (replaces SPEC §8's "5.0%, H4").
-    assert "options" in result and not result.get("none_fit")
-    zst = _options_by_name(result)["specific"]
-    assert zst["max_weight_pct"] < 5.0
-    assert zst["binding_check"] == "H9"
+    assert not result.get("none_fit")
+    assert result["max_weight_pct"] < 5.0
+    assert result["binding_check"] == "H9"
     # golden (measured): 1.5%
-    assert zst["max_weight_pct"] == pytest.approx(1.5, abs=1e-9)
-    assert zst["metrics"]["p5_T"] < FLOOR + 1_000      # confirmed at n=5000: 360 503, just above the floor
-    assert zst["metrics"]["p5_T"] >= FLOOR
+    assert result["max_weight_pct"] == pytest.approx(1.5, abs=1e-9)
+    assert result["metrics"]["p5_T"] < FLOOR + 1_000      # confirmed at n=5000: 360 503, just above the floor
+    assert result["metrics"]["p5_T"] >= FLOOR
 
 
-def test_resize_returns_at_most_three_distinct_options_incl_users_funding(result):
-    # SPEC §8: modes = [user's funding, pro_rata_all, class etf_equity, class equity], de-duplicated; return <= 3.
-    # All four modes have max > 0 here, so exactly 3 are returned (which 3 is not pinned by the spec).
-    opts = result["options"]
-    assert len(opts) == 3
-    assert len({_key(o["funding"]) for o in opts}) == 3
-    assert all(_key(o["funding"]) in GOLDEN_BY_FUNDING for o in opts)
-    assert _key(SPECIFIC) in {_key(o["funding"]) for o in opts}
+def test_result_is_one_object_with_exactly_the_section_8_keys_and_the_users_funding(result):
+    # D10.2 + SPEC §8 step 4: ONE result {funding, max_weight_pct, binding_check, metrics}; `funding` is the
+    # user's funding unchanged. No list of options / alternatives, no ranking, no extra key.
+    # SPEC-AMBIGUITY: §8 lists exactly four keys; stricter reading: no other key (the old `binding_checks` list is gone).
+    assert set(result) == RESULT_KEYS
+    assert result["funding"] == SPECIFIC
+    for gone in ("options", "alternatives", "candidates"):
+        assert gone not in result
 
 
-def test_every_option_matches_golden_value_and_binds_h9(result):
-    for o in result["options"]:
-        name, mx = GOLDEN_BY_FUNDING[_key(o["funding"])]
-        # SPEC-AMBIGUITY: §8 says "binary-search downward on w" without a resolution; stricter reading is the
-        # 0.5 pp grid of the scan (config.RESIZER_STEP_PP), so goldens are grid values.
-        assert o["max_weight_pct"] == pytest.approx(mx, abs=1e-9), name
-        assert o["binding_check"] == "H9", name
-        assert o["max_weight_pct"] < 5.0, name
+def test_the_resizer_evaluates_the_users_funding_only(portfolio, profile, market, meta, monkeypatch):
+    # D10.2 / §15: "no other funding source is ever evaluated". Every funding that reaches intent.apply (the only
+    # way a funding turns into weights) is the user's own: no pro_rata_all, no pro_rata_class of the resizer's own.
+    # SPEC-AMBIGUITY: the spec names no hook; intent.apply is the one funding-to-weights function (resizer imports
+    # the module), so spying on it sees every funding the resizer tries.
+    seen: list[str] = []
+    real = intent_mod.apply
+
+    def spy(weights_pct, it, value):
+        seen.append(json.dumps(it["funding"], sort_keys=True))
+        return real(weights_pct, it, value)
+
+    monkeypatch.setattr(intent_mod, "apply", spy)
+    res = resizer.resize(portfolio, _intent(), profile, market, meta)
+    assert seen and set(seen) == {json.dumps(SPECIFIC, sort_keys=True)}
+    assert res["funding"] == SPECIFIC
 
 
-def test_option_metrics_are_the_n5000_engine_output_at_max_weight(result, market, profile):
-    # SPEC §8 step 1: "Confirm the final w with full n=5000"; metrics carry the engine numbers for H7-H9.
-    for o in result["options"]:
-        weights, value = intent_mod.apply(engine.ROBERT, _intent(o["max_weight_pct"], o["funding"]), VALUE)
-        assert value == VALUE
-        m = _engine(market, weights, config.ENGINE_N)
-        for k in ("vol", "mdd", "p5_T"):
-            assert o["metrics"][k] == pytest.approx(m[k], abs=1e-9), k
-        assert _violations(hard.run_engine(m, profile)) == set()
+@pytest.mark.parametrize("name", GOLDEN)
+def test_a_funding_the_user_states_is_evaluated_as_given_and_returned_unchanged(name, portfolio, profile, market, meta):
+    # D10.2: pro_rata_* stay valid when the intent states them; the result carries that funding, one result, golden.
+    funding, mx, _, _ = GOLDEN[name]
+    res = resizer.resize(portfolio, _intent(funding=funding), profile, market, meta)
+    assert set(res) == RESULT_KEYS
+    assert res["funding"] == funding
+    assert res["max_weight_pct"] == pytest.approx(mx, abs=1e-9)
+    # SPEC-AMBIGUITY: §8 says "binary-search downward on w" without a resolution; stricter reading is the
+    # 0.5 pp grid of the scan (config.RESIZER_STEP_PP), so goldens are grid values.
+    assert res["binding_check"] == "H9"
+    assert res["max_weight_pct"] < 5.0
 
 
-def test_pro_rata_equities_golden(result):
-    # SPEC §8 expected 8.0% (H3) for equities pro-rata; D2: record the measured max and binding check instead.
-    # Measured: the cheap scan does reach 8.0% (H3 fails at 8.5) but H9 breaks at 2.0% -> max 1.5%, binding H9.
-    # (The spec's pro_rata_class=equity mode is in the candidate list; it may be dropped from the top-3 output.)
-    opts = _options_by_name(result)
-    if "pro_rata_class_equity" in opts:
-        assert opts["pro_rata_class_equity"]["max_weight_pct"] == pytest.approx(1.5, abs=1e-9)
-        assert opts["pro_rata_class_equity"]["binding_check"] == "H9"
-    # pro_rata_all (also equity-led here) is always returned: measured 2.0%, binding H9
-    assert opts["pro_rata_all"]["max_weight_pct"] == pytest.approx(2.0, abs=1e-9)
-    assert opts["pro_rata_all"]["binding_check"] == "H9"
-
-
-def test_resize_for_pro_rata_equity_intent_returns_its_own_funding_first_class_option(portfolio, profile, market, meta):
-    # when the user's own funding is pro_rata_class=equity the modes de-duplicate; golden is the measured 1.5%
-    res = resizer.resize(portfolio, _intent(funding=CLASS_EQUITY), profile, market, meta)
-    by = _options_by_name(res)
-    assert by["pro_rata_class_equity"]["max_weight_pct"] == pytest.approx(1.5, abs=1e-9)
-    assert by["pro_rata_class_equity"]["binding_check"] == "H9"
-    assert len({_key(o["funding"]) for o in res["options"]}) == len(res["options"]) <= 3
+def test_result_metrics_are_the_n5000_engine_output_at_max_weight(result, market, profile):
+    # SPEC §8 step 3: "Confirm the final w with full n=5000"; metrics carry the engine numbers for H7-H9.
+    weights, value = intent_mod.apply(engine.ROBERT, _intent(result["max_weight_pct"], result["funding"]), VALUE)
+    assert value == VALUE
+    m = _engine(market, weights, config.ENGINE_N)
+    for k in ("vol", "mdd", "p5_T"):
+        assert result["metrics"][k] == pytest.approx(m[k], abs=1e-9), k
+    assert _violations(hard.run_engine(m, profile)) == set()
 
 
 def test_resize_is_deterministic(portfolio, profile, market, meta, result):
@@ -224,31 +219,31 @@ def test_resize_does_not_mutate_inputs(portfolio, profile, market, meta):
 
 
 def test_intent_that_already_fits_is_capped_at_its_target(portfolio, profile, market, meta):
-    # SPEC §8: the scan runs "from 0 to w*"; 1.0% passes every check under every mode (p5_T >= 363 150 at n=5000),
-    # so every option's max is the target itself.
+    # SPEC §8: the scan runs "from 0 to w*"; 1.0% passes every check (p5_T >= 363 150 at n=5000), so the max is
+    # the target itself.
     res = resizer.resize(portfolio, _intent(target=1.0), profile, market, meta)
-    assert res.get("options") and not res.get("none_fit")
-    for o in res["options"]:
-        assert o["max_weight_pct"] == pytest.approx(1.0, abs=1e-9)
+    assert not res.get("none_fit")
+    assert res["max_weight_pct"] == pytest.approx(1.0, abs=1e-9)
+    assert res["funding"] == SPECIFIC
 
 
 # ---------------------------------------------------------------- none_fit
 
 def test_none_fit_when_engine_floor_fails_even_at_zero(portfolio, profile, market, meta):
-    # SPEC §8 step 3: baseline Robert has p5_T = 366 719; a floor of 370 000 is breached at w = 0 under every mode.
+    # SPEC §8 step 4: baseline Robert has p5_T = 366 719; a floor of 370 000 is breached at w = 0.
     p = copy.deepcopy(profile)
     p["limits"]["floor_at_horizon"] = 370_000.0
     res = resizer.resize(portfolio, _intent(), p, market, meta)
     assert res["none_fit"] is True
-    assert not res.get("options")
+    assert set(res) == {"none_fit", "binding_checks"}
     assert set(res["binding_checks"]) == {"H9"}
 
 
 def test_none_fit_when_cheap_check_fails_even_at_zero(portfolio, profile, market, meta):
-    # baseline fixed income is 35%; a 40% minimum fails H4 at w = 0 for every funding mode.
+    # baseline fixed income is 35%; a 40% minimum fails H4 at w = 0.
     p = copy.deepcopy(profile)
     p["limits"]["min_fixed_income_weight"] = 0.40
     res = resizer.resize(portfolio, _intent(), p, market, meta)
     assert res["none_fit"] is True
-    assert not res.get("options")
+    assert set(res) == {"none_fit", "binding_checks"}
     assert set(res["binding_checks"]) == {"H4"}

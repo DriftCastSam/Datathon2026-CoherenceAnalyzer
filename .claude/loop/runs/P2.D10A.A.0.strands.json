@@ -1,0 +1,63 @@
+{
+  "duration_s": 472.3,
+  "guard_cancellations": [
+    {
+      "reason": "'20.7\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'skip\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'skip\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "command substitution is not allowed; run the inner command on its own",
+      "tool": "shell"
+    },
+    {
+      "reason": "'casefold\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'print(f[-12:],' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'@tsv'' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'^[A-Z_]*' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'CACHE\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'headroom\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'time' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'COHERENCE_ANALYZER_LLM=mock' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    }
+  ],
+  "is_error": false,
+  "model_id": "us.anthropic.claude-sonnet-5-5",
+  "num_turns": 76,
+  "result": "est_advisory_blocklist_covers_fr_and_en: the \u00a79.3 examples are covered and entries are lowercase.\n- test_blocklist_holds_every_phrase_of_spec_9_3_item_3[28 phrases]: each \u00a79.3 item 3 phrase is in `ADVISORY_BLOCKLIST` once folded (D10.4).\n- test_blocklist_is_not_weakened_to_the_old_narrow_list: the list has at least as many entries as the spec list and includes `you could`, `vous pourriez`, `consider` and `next step` (D10.4).\n\n**tests/test_explain.py**\n- test_explainer_prompt_is_versioned_and_has_one_block_per_factor: the prompt version is `explainer.v2` and its file has one block per factor (CLAUDE.md, D10.4).\n- test_verify_v4_advisory_wording_is_rejected[5]: buy/sell orders are still rejected (V4, inv. 7).\n- test_verify_v4_rejects_suggestions_not_only_orders[23]: suggestions in FR and EN are rejected, e.g. `vous pourriez`, `consider`, `envisage`, `rebalance`, `next step` (D10.4).\n- test_verify_v4_is_case_and_accent_insensitive[24]: upper case, title case, NFD form and accent-stripped variants of the phrases are all rejected (\u00a79.3 item 3).\n- test_verify_v4_allows_stating_a_measured_effect_of_the_users_own_trade[3]: factual sentences about the user's own trade raise no V4 failure (D10.4, \u00a79.2).\n- test_verify_v4_each_blocklist_entry_is_rejected: each entry is rejected as written, in upper case and without accents.\n- test_explanation_covers_every_failing_check_and_passes_numcheck[2]: the advisory check is folded on both sides.\n- test_verify_v5_shape_is_rejected and test_explainer_schema_matches_the_spec: kept; they already reject the `option` kind (D10.2).\n\n**tests/test_d10.py** (new)\n- test_every_check_template_text_passes_v4_under_the_wide_blocklist[H1\u2013H14, S1\u2013S4, G1, O1, X9 \u00d7 4 statuses \u00d7 2 locales]: every template text passes V4 under the wide list (D10.4, \u00a79.3).\n- test_section_template_extras_pass_v4_why_segment_and_no_gap_text[2]: the \"why this limit\" and \"no gap\" sentences pass V4 (D10.4).\n- test_headline_template_passes_v4_under_the_wide_blocklist[3 verdicts \u00d7 2 locales]: the headline passes V4 with and without check ids (D10.4).\n- test_disclaimer_is_fixed_and_passes_v4[2]: the disclaimer is the fixed \u00a79.4 text and passes V4.\n- test_h7_below_band_info_states_value_and_bound_only[2]: the FR and EN H7 info text has the value and bound and no judgement wording such as \"prudent\" or \"conservative\" (D10.3, \u00a77.3 H7).\n- test_h7_violation_template_is_unchanged_in_substance[2]: the H7 violation still states value and bound.\n- test_segment_kind_enum_has_no_option_in_schemas_verifier_and_templates: the kind enum has no `option` in the explainer schema, the report schema and the verifier (D10.2, \u00a79.2, \u00a720.5).\n- test_report_schema_has_headroom_null_or_object_and_no_alternatives: `headroom` is required and accepts null, the result object and none_fit; it rejects lists and strings; `alternatives` is gone (D10.2, \u00a713).\n- test_report_schema_text_has_no_options_or_alternatives_wording: no such wording in the schema file (\u00a78, \u00a718).\n- test_english_headroom_line_is_the_fixed_factual_sentence: Flow B with locale en-CA states \"With the funding you gave (ZST.TO), this trade crosses your limit H9 above 1.5 %.\" with max 1.5 and binding H9 (\u00a78, D10.2).\n- test_explainer_prompt_v2_carries_the_describe_never_prescribe_rule: `explainer.v2.md` exists with \"describe, never prescribe\", mood/person, ranking, \"measured effect\", and the per-factor blocks (D10.4, \u00a79.2, CLAUDE.md).\n- test_extractor_points_at_explainer_v2_and_other_prompts_stay_v1: only the explainer prompt version moves to v2; `load_prompt` reads that file.\n- test_hand_written_explainer_entries_are_keyed_to_prompt_v2: every `fixture:hand-written` explainer cache entry is keyed `explainer.v2`, schema-valid, and covers horizon, risque and contraintes (CLAUDE.md).\n- test_mock_cache_holds_no_hand_written_v1_explainer_entry: no stale hand-written v1 explainer entry remains.\n- test_readme_assumptions_record_d10: README \"Assumptions\" mentions D10, headroom and \"describe, never prescribe\" (CLAUDE.md).\n",
+  "stop_reason": "end_turn",
+  "usage": {
+    "inputTokens": 6109565,
+    "outputTokens": 55323,
+    "totalTokens": 6164888
+  }
+}

@@ -6,6 +6,7 @@ amounts, exactly for dates and years. Small integers <= 10 used as counts are ex
 `numcheck(text, payload)` returns the offending numbers (empty list = pass).
 """
 import copy
+import unicodedata
 
 import pytest
 
@@ -173,7 +174,36 @@ def test_advisory_blocklist_covers_fr_and_en():
     """§15 'rejects advisory phrases': the blocklist the verifier (V4) uses holds the §9.3 examples, FR + EN."""
     bl = {p.lower() for p in explain.ADVISORY_BLOCKLIST}
     for phrase in ("tu devrais acheter", "je recommande", "you should buy", "we recommend"):
-        assert phrase in bl, phrase
+        assert phrase in bl or any(b in phrase for b in bl), phrase      # D10.4: shorter stems cover the old long forms
     assert any(p.startswith(("tu devrais", "je recommande", "nous recommandons")) for p in bl)
     assert any(p.startswith(("you should", "we recommend", "i recommend")) for p in bl)
     assert all(p == p.lower() for p in explain.ADVISORY_BLOCKLIST)
+
+
+def _fold(text: str) -> str:
+    return "".join(ch for ch in unicodedata.normalize("NFKD", text) if not unicodedata.combining(ch)).casefold()
+
+
+# SPEC §9.3 item 3, verbatim ("at least"): suggestions as well as orders, FR + EN.
+SPEC_ADVISORY_PHRASES = (
+    "tu devrais", "vous devriez", "tu pourrais", "vous pourriez", "envisage", "il serait judicieux",
+    "il serait préférable", "je recommande", "nous recommandons", "je conseille", "nous conseillons", "je suggère",
+    "rééquilibr", "you should", "you could", "you may want to", "you might want to", "consider", "it would be wise",
+    "it would be better", "we recommend", "i recommend", "we suggest", "i suggest", "we advise", "rebalanc",
+    "next step", "prochaine étape")
+
+
+@pytest.mark.parametrize("phrase", SPEC_ADVISORY_PHRASES)
+def test_blocklist_holds_every_phrase_of_spec_9_3_item_3(phrase):
+    """D10.4 / §9.3 item 3: the blocklist holds at least every listed phrase (compared in the folded form, so the
+    entry may be stored with or without accents)."""
+    folded = {_fold(p) for p in explain.ADVISORY_BLOCKLIST}
+    assert _fold(phrase) in folded, phrase
+
+
+def test_blocklist_is_not_weakened_to_the_old_narrow_list():
+    """D10.4: the old list only had buy/sell imperatives; the new one has the suggestion forms too."""
+    folded = {_fold(p) for p in explain.ADVISORY_BLOCKLIST}
+    assert len(folded) >= len(SPEC_ADVISORY_PHRASES)
+    assert {"you could", "vous pourriez", "consider", "next step"} <= folded
+
