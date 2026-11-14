@@ -1,38 +1,21 @@
-"""What fits within the user's own limits (SPEC §8). Facts about the profile, not advice. P0 step 5.
+"""Headroom of the user's own trade before it crosses one of their limits (SPEC §8, docs/spec-decisions.md D10).
 
-Runs SPEC §8 as written (docs/spec-decisions.md D2: trust the engine): for each funding mode a cheap scan
+A measurement, not a suggestion: only the funding the user gave is evaluated (D10 point 2). Nothing here picks a
+funding source, ticker or size, compares variants, or phrases the result as something to do.
+
+Runs SPEC §8 as written (docs/spec-decisions.md D2: trust the engine): a cheap scan
 (H1-H6, H11-H13) in `config.RESIZER_STEP_PP` steps, then the engine checks (H7-H10) with n=1000 and a
 binary search downward, then confirmation with the full n=5000. The result is a grid value (multiple of the
 step). Pure and deterministic: the engine is seeded, nothing reads the clock.
 """
 from __future__ import annotations
 
-import json
 from . import config, engine, intent as intent_mod
 from .coherence import hard
 
-MAX_OPTIONS = 3
 FUNDING_BINDING = "FUNDING"        # the funding source cannot cover the weight (no hard check involved)
 _EPS = 1e-9
 _METRIC_KEYS = ("vol", "mdd", "p5_T", "p50_T", "p95_T", "width", "loss_prob")
-
-
-def _key(funding: dict) -> str:
-    return json.dumps(funding, sort_keys=True)
-
-
-def _modes(user_funding: dict) -> list[dict]:
-    """[user's funding, pro_rata_all, pro_rata_class=etf_equity, pro_rata_class=equity], de-duplicated."""
-    cands = [dict(user_funding), {"kind": "pro_rata_all"},
-             {"kind": "pro_rata_class", "asset_class": "etf_equity"},
-             {"kind": "pro_rata_class", "asset_class": "equity"}]
-    seen: set[str] = set()
-    out = []
-    for f in cands:
-        if _key(f) not in seen:
-            seen.add(_key(f))
-            out.append(f)
-    return out
 
 
 def _grid(w0: float, target: float, step: float) -> list[float]:
@@ -56,7 +39,7 @@ def _violations(checks: list, ids: tuple[str, ...] | None = None) -> list[str]:
 
 
 class _Evaluator:
-    """Memoised cheap / engine evaluation of one (funding mode, weight) point."""
+    """Memoised cheap / engine evaluation of one weight point, with the user's funding."""
 
     def __init__(self, portfolio: dict, intent: dict, profile: dict, market, meta: dict, funding: dict):
         self.pf, self.intent, self.profile, self.market, self.meta = portfolio, intent, profile, market, meta
@@ -140,35 +123,76 @@ def _solve_mode(ev: _Evaluator, grid: list[float]) -> dict:
 
 
 def resize(portfolio: dict, intent: dict, profile: dict, market, meta: dict) -> dict:
-    """Return {"options": [{funding, max_weight_pct, binding_check, metrics}, ...<=3]}
-    or {"none_fit": True, "binding_checks": [...]}.
+    """Return the headroom of the user's own trade, `{funding, max_weight_pct, binding_check, binding_checks,
+    metrics}`, or `{"none_fit": True, "funding", "binding_checks": [...]}` when even the first step above the current
+    weight crosses a limit.
 
-    `portfolio` needs `weights_pct`, `value_cad` and `horizon_months` (SPEC §3.5 fixture horizon; passed
-    explicitly because §8 gives the resizer no horizon argument). `binding_check` is None when the whole
-    requested weight fits. Inputs are never mutated.
+    `funding` is the intent's funding, unchanged. `portfolio` needs `weights_pct`, `value_cad` and `horizon_months`
+    (SPEC §3.5 fixture horizon; passed explicitly because §8 gives the resizer no horizon argument).
+    `binding_check` is the first limit crossed just above `max_weight_pct` (None when the whole requested weight
+    stays within the limits, FUNDING when the funding source cannot cover more). Inputs are never mutated.
     """
     if "horizon_months" not in portfolio:
         raise ValueError("portfolio['horizon_months'] is required (SPEC §3.5)")
     ticker, target = intent["ticker"], float(intent["target_weight_pct"])
     w0 = float(portfolio["weights_pct"].get(ticker, 0.0))
     grid = _grid(w0, target, config.RESIZER_STEP_PP)
+    funding = dict(intent["funding"])
+    s = _solve_mode(_Evaluator(portfolio, intent, profile, market, meta, funding), grid)
+    if s["idx"] == 0:
+        return {"none_fit": True, "funding": funding, "binding_checks": sorted(set(s["binding"]))}
+    return {"funding": funding, "max_weight_pct": float(grid[s["idx"]]),
+            "binding_check": s["binding"][0] if s["binding"] else None,
+            "binding_checks": list(s["binding"]), "metrics": dict(s["metrics"])}
 
-    modes = _modes(intent["funding"])
-    solved: list[tuple[int, dict, dict]] = []
-    for order, funding in enumerate(modes):
-        ev = _Evaluator(portfolio, intent, profile, market, meta, funding)
-        solved.append((order, funding, _solve_mode(ev, grid)))
 
-    fitting = [(o, f, s) for o, f, s in solved if s["idx"] > 0]
-    if not fitting:
-        ids = sorted({b for _, _, s in solved for b in s["binding"]})
-        return {"none_fit": True, "binding_checks": ids}
+# ---------------------------------------------------------------- template text (SPEC §8 presentation)
 
-    fitting.sort(key=lambda x: (-grid[x[2]["idx"]], x[0]))
-    chosen = fitting[:MAX_OPTIONS]
-    if all(o != 0 for o, _, _ in chosen) and any(o == 0 for o, _, _ in fitting):
-        chosen = chosen[:MAX_OPTIONS - 1] + [next(x for x in fitting if x[0] == 0)]   # keep the user's own funding
-    return {"options": [{"funding": dict(f), "max_weight_pct": float(grid[s["idx"]]),
-                         "binding_check": s["binding"][0] if s["binding"] else None,
-                         "binding_checks": list(s["binding"]), "metrics": dict(s["metrics"])}
-                        for _, f, s in chosen]}
+_CLASS = {"fr-CA": {"etf_equity": "vos FNB d'actions", "equity": "vos actions", "etf_bond": "vos FNB d'obligations"},
+          "en-CA": {"etf_equity": "your equity ETFs", "equity": "your stocks", "etf_bond": "your bond ETFs"}}
+
+
+def _funding_label(funding: dict, locale: str) -> str:
+    fr = locale == "fr-CA"
+    kind = funding.get("kind")
+    if kind == "specific":
+        return str(funding.get("ticker"))
+    if kind == "pro_rata_all":
+        return "au prorata de tout le portefeuille" if fr else "pro rata across the whole portfolio"
+    if kind == "pro_rata_class":
+        cls = funding.get("asset_class")
+        name = _CLASS["fr-CA" if fr else "en-CA"].get(cls, cls)
+        return f"au prorata de {name}" if fr else f"pro rata from {name}"
+    if kind == "cash_contribution":
+        return "nouvel apport en espèces" if fr else "new cash contribution"
+    return str(kind)
+
+
+def _pct(x: float, locale: str) -> str:
+    s = f"{x:.1f}"
+    return (s.replace(".", ",") + " %") if locale == "fr-CA" else (s + " %")
+
+
+def headroom_text(headroom: dict | None, ticker: str, target_pct: float, locale: str = "fr-CA") -> str | None:
+    """One factual sentence about the user's own trade (D10: describes, never prescribes). None when no headroom."""
+    if not headroom:
+        return None
+    fr = locale == "fr-CA"
+    src = _funding_label(headroom["funding"], locale)
+    if headroom.get("none_fit"):
+        ids = ", ".join(headroom["binding_checks"])
+        return (f"Avec le financement indiqué ({src}), la transaction sur {ticker} franchit votre limite {ids} "
+                f"dès le premier palier." if fr else
+                f"With the funding you gave ({src}), the {ticker} trade crosses your limit {ids} from the first step.")
+    w, b = _pct(headroom["max_weight_pct"], locale), headroom["binding_check"]
+    if b is None:
+        return (f"Avec le financement indiqué ({src}), la transaction sur {ticker} reste dans vos limites jusqu'à "
+                f"{_pct(target_pct, locale)}." if fr else
+                f"With the funding you gave ({src}), the {ticker} trade stays within your limits up to "
+                f"{_pct(target_pct, locale)}.")
+    if b == FUNDING_BINDING:
+        return (f"Le financement indiqué ({src}) ne couvre pas la transaction sur {ticker} au-delà de {w}." if fr else
+                f"The funding you gave ({src}) does not cover the {ticker} trade above {w}.")
+    return (f"Avec le financement indiqué ({src}), la transaction sur {ticker} franchit votre limite {b} "
+            f"au-delà de {w}." if fr else
+            f"With the funding you gave ({src}), the {ticker} trade crosses your limit {b} above {w}.")

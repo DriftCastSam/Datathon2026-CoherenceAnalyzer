@@ -165,7 +165,7 @@ def _n6_shape_ok(findings: object) -> bool:
 
 
 def _profile_consistency(old_field: dict | None, out: dict, context: dict) -> tuple[dict | None, GateStatus]:
-    from .explain import ADVISORY_BLOCKLIST     # lazy: explain imports the llm layer
+    from .explain import advisory_hits          # lazy: explain imports the llm layer
 
     findings = out.get("findings")
     if not _n6_shape_ok(findings) or len(findings) > N6_MAX_FINDINGS:
@@ -182,11 +182,11 @@ def _profile_consistency(old_field: dict | None, out: dict, context: dict) -> tu
             if value is _MISSING or not _quote_ok(path, quote, value):
                 return _kept(old_field, "rejected:evidence")
 
-    # 3. reason: <= 200 chars, no digit, no advisory phrase (matched case-insensitively, as explain V4)
+    # 3. reason: <= 200 chars, no digit, no advisory phrase (case- and accent-insensitive, as explain V4)
     for f in findings:
         reason = f["reason"]
         if (not reason or len(reason) > N6_MAX_REASON_CHARS or any(c.isdigit() for c in reason)
-                or any(p in reason.casefold() for p in ADVISORY_BLOCKLIST)):
+                or advisory_hits(reason)):
             return _kept(old_field, "rejected:schema")
 
     return {"value": copy.deepcopy(findings), **_stamp("profile_consistency", context)}, "accepted"
