@@ -6,7 +6,7 @@ exist yet loads as `None`, and the checks that need it report `unknown` (never a
 
 | File | Columns | Status |
 |---|---|---|
-| `asset_meta.csv` | `ticker, mer_pct, mer_source_url, mer_as_of, has_lookthrough, themes` | Built 2026-11-14 (see below). 5 of 9 ETF MERs sourced; XIU.TO, XBB.TO, ZST.TO, ESGV blank -> H12 `unknown` |
+| `asset_meta.csv` | `ticker, mer_pct, mer_source_url, mer_as_of, has_lookthrough, themes` | Built 2026-11-14 (see below). All 9 ETF MERs sourced from issuer documents |
 | `etf_sector_weights.csv` | `etf, sector, weight, source_url, as_of` | Loader + engine look-through + H6/H10 built (P2.13). File not built yet (human task): look-through off, H6/H10 report `unknown` for ETFs |
 | `activity_tags.csv` | `ticker, tag, evidence_summary, source_url, as_of, added_by` | Loader + H11 built (P1.2). File not built yet (P1 step 10): H11 reports `unknown` |
 
@@ -47,16 +47,20 @@ For each file, record here when it is built: source, retrieval date, processing,
 
 ### `asset_meta.csv`: built 2026-11-14
 
-- **MERs** were read from the issuer product pages on 2026-11-14. `mer_as_of` is that retrieval date, because none of
-  the pages prints an as-of date next to the fee.
+- **MERs (US ETFs)** were read from the issuer product pages on 2026-11-14. For these, `mer_as_of` is the retrieval date,
+  because none of the pages prints an as-of date next to the fee.
   - SPY 0.0945 %: SSGA, "Gross Expense Ratio".
   - QQQ 0.18 %: Invesco, "total expense ratio", from a footnote on the QQQ home page.
   - AGG 0.03 % and TLT 0.15 %: iShares, "Expense Ratio" (the page does not say net or gross).
   - GLD 0.40 %: spdrgoldshares.com, "Expense Ratio".
-- **Not sourced yet:** XIU.TO and XBB.TO (BlackRock Canada pages load the fees block by script), ZST.TO (the BMO page
-  timed out) and ESGV (the Vanguard page is script-rendered). Their `mer_pct` is blank, so H12 reports `unknown`. A team
-  member should read each MER (not the management fee) from the issuer page or Fund Facts PDF, then fill in `mer_pct`,
-  `mer_source_url` and `mer_as_of`.
+- **MERs (from issuer PDFs)** were retrieved 2026-11-14 and the text extracted with `pdftotext`. The product pages load
+  their fee blocks by script, so the PDFs were used instead. `mer_as_of` is the date printed for the figure.
+  - XIU.TO 0.17 % and XBB.TO 0.10 %: BlackRock fund fact sheets, "Management Expense Ratio (MER)", data as at
+    31-Oct-2026. MER, not the management fee (0.15 % and 0.09 %).
+  - ZST.TO 0.17 %: BMO ETF Facts (CAD units) dated January 23, 2026, "Management expense ratio (MER)", "As of June 30,
+    2025". This is the latest MER the issuer has published.
+  - ESGV 0.09 %: Vanguard fact sheet as of September 30, 2026, "Expense ratio" ("as reported in the most recent
+    prospectus").
 - `mer_pct` is `0` for single stocks and crypto (no fund fee).
 - `has_lookthrough` is `false` everywhere, because `etf_sector_weights.csv` is P2.
 - **`themes` are a team assumption, not sourced data:**

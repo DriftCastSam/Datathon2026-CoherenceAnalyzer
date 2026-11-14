@@ -19,12 +19,12 @@ JPM,0,,,false,
 JNJ,0,,,false,
 PG,0,,,false,
 XOM,0,,,false,oil_gas
-XIU.TO,,,,false,
+XIU.TO,0.17,https://www.blackrock.com/ca/investors/en/literature/fact-sheet/xiu-ishares-s-p-tsx-60-index-etf-fund-fact-sheet-en-ca.pdf,2026-10-31,false,
 SPY,0.0945,https://www.ssga.com/us/en/intermediary/etfs/spdr-sp-500-etf-trust-spy,2026-11-14,false,
 QQQ,0.18,https://www.invesco.com/qqq-etf/en/home.html,2026-11-14,false,tech_heavy
-ESGV,,,,false,esg_screened
-XBB.TO,,,,false,
-ZST.TO,,,,false,
+ESGV,0.09,https://workplace.vanguard.com/assets/corp/fund_communications/pdf_publish/us-products/fact-sheet/F4393.pdf,2026-09-30,false,esg_screened
+XBB.TO,0.10,https://www.blackrock.com/ca/investors/en/literature/fact-sheet/xbb-ishares-core-canadian-universe-bond-index-etf-fund-fact-sheet-en-ca.pdf,2026-10-31,false,
+ZST.TO,0.17,https://fundfacts.bmo.com/EtfEnglish/BMO_Ultra_Short-Term_Bond_ETF-EN-CAD_Units.pdf,2025-06-30,false,
 AGG,0.03,https://www.ishares.com/us/products/239458/ishares-core-total-us-bond-market-etf,2026-11-14,false,
 TLT,0.15,https://www.ishares.com/us/products/239454/ishares-20-year-treasury-bond-etf,2026-11-14,false,long_duration
 GLD,0.40,https://www.spdrgoldshares.com/usa/gld/,2026-11-14,false,
