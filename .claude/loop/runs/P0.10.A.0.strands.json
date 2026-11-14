@@ -1,0 +1,39 @@
+{
+  "duration_s": 153.2,
+  "guard_cancellations": [
+    {
+      "reason": "'values_parser\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'values_parser\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'max_theme_weight\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'N3' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'Error\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'failed\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    }
+  ],
+  "is_error": false,
+  "model_id": "us.anthropic.claude-sonnet-5-5",
+  "num_turns": 23,
+  "result": "ll_value_by_user_skipped_without_mutating_the_input`: `skip` returns a new profile with exactly `{\"value\": None, \"by\": \"user:skipped\"}` at the path (\u00a720.6).\n- `test_skipped_path_is_no_longer_missing_and_intake_moves_on`: after a skip, `missing()` drops that path and `next_question` moves to the next one, then `None` (\u00a720.6, \"stops when the user skips\").\n- `test_skip_touches_only_the_skipped_path`: the skip changes only that path and nothing else in the profile.\n- `test_parsed_max_theme_weight_without_a_number_makes_contraintes_ask_for_it`: a parsed `max_theme_weight` with no `max_pct` makes `missing(contraintes)` return one path under `values.parsed_notes` containing `max_pct`. `next_question` returns a question for it in both locales (D7 point 1, \u00a720.6 showcase). The path syntax is a flagged ambiguity.\n- `test_theme_rule_with_a_number_or_other_kinds_ask_nothing`: a theme rule that has a number, or other rule kinds, ask no question.\n- `test_n3_prompt_version_and_files_exist`: `prompt_version(\"values_parser\")` is `values_parser.v1`, and the prompt file and schema file exist. The prompt must mention `quote` and `substring` (\u00a76.2 N3, CLAUDE.md conventions).\n- `test_n3_schema_accepts_every_rule_kind_and_applies_to_of_the_spec`: the schema is valid and accepts every `gate.RULE_KINDS` and `APPLIES_TO` value, plus empty `rules` (\u00a76.2 N3).\n- `test_n3_schema_accepts_a_theme_rule_with_no_number`: `{theme: tech_heavy}` with no `max_pct` validates (\u00a76.2 N3, Amira).\n- `test_n3_schema_rejects_unknown_enum_values_and_missing_fields`: unknown `rule_kind` or `applies_to` and a missing required field are rejected.\n- `test_n3_mock_on_roberts_notes_returns_rules_with_exact_substring_quotes`: mock N3 on Robert's `values.notes` returns at least one schema-valid rule. Every quote is an exact substring of the notes, and replay is deterministic (\u00a76.2 N3, \u00a711).\n- `test_n3_output_passes_the_gate_and_rules_start_unapproved`: the gate returns `accepted`, with `by` set to `llm:values_parser` and every rule `approved_by_user` false (\u00a76.2 N3, \u00a711).\n- `test_n3_output_with_an_invented_quote_is_rejected_by_the_gate`: a quote not in the notes gives `rejected:evidence` and the old value is kept (\u00a711 step 2, \u00a71 inv. 5).\n- `test_unapproved_parsed_rules_are_ignored_by_build_limits`: unapproved `exclude_activity` and `max_theme_weight` rules leave limits and trace unchanged (\u00a77.2, \u00a71 inv. 2).\n- `test_approved_exclude_activity_reaches_excluded_activities`: an approved rule is added to the union with Robert's `values.*.exclusions` (\u00a77.2).\n- `test_approved_max_theme_weight_reaches_limits_as_a_fraction`: approved `tech_heavy` at 50 gives `max_theme_weight == {\"tech_heavy\": 0.5}` (\u00a77.2, fractions inside the code).\n- `test_only_the_approved_rule_of_a_mixed_batch_is_promoted`: only the approved rule of a mixed batch reaches limits.\n- `test_approved_soft_rules_never_change_limits`: Robert's N3 prefer/avoid rules, all approved, change neither limits nor trace (\u00a76.2 N3, soft reminders).\n- `test_invariant_2_trace_names_only_approved_rules_never_the_llm_field`: the limits trace names `values.parsed_notes[approved_by_user]` and never `values.parsed_notes` itself (\u00a71 inv. 2).\n- `test_approving_the_number_answers_the_intake_question`: once the number is given and approved, `missing(contraintes)` is empty and the limit is `{\"tech_heavy\": 0.5}` (D7 point 1, \u00a77.2).\n- `test_intake_and_n3_never_write_activity_tags_csv`: the bytes of `data/meta/activity_tags.csv`, or its absence, are identical before and after running N3, the gate and the intake functions (CLAUDE.md invariant).\n\nNo intake stub or name exists for the approval action itself, so I tested approval through `build_limits` and the profile data. If P0.10 adds an `intake.approve_rule`-style function, it needs its own test.\n\nThe mock cache has no `values_parser` entry for Robert's notes yet. The implementer must hand-write or record it, for example in `scripts/handwrite_llm_cache.py`, and add `values_parser` to `PROMPT_VERSIONS`.\n",
+  "stop_reason": "end_turn",
+  "usage": {
+    "inputTokens": 817379,
+    "outputTokens": 23369,
+    "totalTokens": 840748
+  }
+}

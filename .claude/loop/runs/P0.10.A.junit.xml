@@ -1,0 +1,966 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="51" skipped="0" tests="56" time="0.394" timestamp="2026-11-14T21:17:09.512770+00:00" hostname="bomboclat-laptop"><testcase classname="tests.test_intake" name="test_required_has_the_five_factor_ids_with_dotted_profile_paths" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">def test_required_has_the_five_factor_ids_with_dotted_profile_paths():
+        # §20.6: "Each factor has REQUIRED profile paths"; task notes: dict keyed by the five factor ids.
+&gt;       req = _required()
+              ^^^^^^^^^^^
+
+tests/test_intake.py:116: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_required_paths_are_questions_for_the_user_never_llm_fields" time="0.001"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_required_paths_are_questions_for_the_user_never_llm_fields(robert):
+        # §20.6 + invariant 2 spirit: the form asks the user; it never asks about an llm: field.
+&gt;       for factor, path in _all_required():
+                            ^^^^^^^^^^^^^^^
+
+tests/test_intake.py:127: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_intake.py:85: in _all_required
+    return [(f, path) for f in FACTORS for path in _required()[f]]
+                                                   ^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_robert_has_nothing_missing_and_no_next_question[objectif]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'objectif'
+
+    @pytest.mark.parametrize("factor", FACTORS)
+    def test_robert_has_nothing_missing_and_no_next_question(robert, factor):
+        # Task notes: Robert fixture, missing() is empty for every factor.
+&gt;       assert intake.missing(robert, factor) == []
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_intake.py:139: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'objectif'
+
+    def missing(profile: dict, factor: str) -&gt; list[str]:
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/intake.py:6: NotImplementedError</failure></testcase><testcase classname="tests.test_intake" name="test_robert_has_nothing_missing_and_no_next_question[horizon]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'horizon'
+
+    @pytest.mark.parametrize("factor", FACTORS)
+    def test_robert_has_nothing_missing_and_no_next_question(robert, factor):
+        # Task notes: Robert fixture, missing() is empty for every factor.
+&gt;       assert intake.missing(robert, factor) == []
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_intake.py:139: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'horizon'
+
+    def missing(profile: dict, factor: str) -&gt; list[str]:
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/intake.py:6: NotImplementedError</failure></testcase><testcase classname="tests.test_intake" name="test_robert_has_nothing_missing_and_no_next_question[risque]" time="0.000"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'risque'
+
+    @pytest.mark.parametrize("factor", FACTORS)
+    def test_robert_has_nothing_missing_and_no_next_question(robert, factor):
+        # Task notes: Robert fixture, missing() is empty for every factor.
+&gt;       assert intake.missing(robert, factor) == []
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_intake.py:139: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'risque'
+
+    def missing(profile: dict, factor: str) -&gt; list[str]:
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/intake.py:6: NotImplementedError</failure></testcase><testcase classname="tests.test_intake" name="test_robert_has_nothing_missing_and_no_next_question[contraintes]" time="0.000"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'contraintes'
+
+    @pytest.mark.parametrize("factor", FACTORS)
+    def test_robert_has_nothing_missing_and_no_next_question(robert, factor):
+        # Task notes: Robert fixture, missing() is empty for every factor.
+&gt;       assert intake.missing(robert, factor) == []
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_intake.py:139: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'contraintes'
+
+    def missing(profile: dict, factor: str) -&gt; list[str]:
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/intake.py:6: NotImplementedError</failure></testcase><testcase classname="tests.test_intake" name="test_robert_has_nothing_missing_and_no_next_question[preferences]" time="0.000"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'preferences'
+
+    @pytest.mark.parametrize("factor", FACTORS)
+    def test_robert_has_nothing_missing_and_no_next_question(robert, factor):
+        # Task notes: Robert fixture, missing() is empty for every factor.
+&gt;       assert intake.missing(robert, factor) == []
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_intake.py:139: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'preferences'
+
+    def missing(profile: dict, factor: str) -&gt; list[str]:
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/intake.py:6: NotImplementedError</failure></testcase><testcase classname="tests.test_intake" name="test_removing_a_required_path_makes_exactly_that_path_missing[objectif]" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'objectif'
+
+    @pytest.mark.parametrize("factor", FACTORS)
+    def test_removing_a_required_path_makes_exactly_that_path_missing(robert, factor):
+&gt;       for path in _required()[factor]:
+                    ^^^^^^^^^^^
+
+tests/test_intake.py:145: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_removing_a_required_path_makes_exactly_that_path_missing[horizon]" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'horizon'
+
+    @pytest.mark.parametrize("factor", FACTORS)
+    def test_removing_a_required_path_makes_exactly_that_path_missing(robert, factor):
+&gt;       for path in _required()[factor]:
+                    ^^^^^^^^^^^
+
+tests/test_intake.py:145: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_removing_a_required_path_makes_exactly_that_path_missing[risque]" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'risque'
+
+    @pytest.mark.parametrize("factor", FACTORS)
+    def test_removing_a_required_path_makes_exactly_that_path_missing(robert, factor):
+&gt;       for path in _required()[factor]:
+                    ^^^^^^^^^^^
+
+tests/test_intake.py:145: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_removing_a_required_path_makes_exactly_that_path_missing[contraintes]" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'contraintes'
+
+    @pytest.mark.parametrize("factor", FACTORS)
+    def test_removing_a_required_path_makes_exactly_that_path_missing(robert, factor):
+&gt;       for path in _required()[factor]:
+                    ^^^^^^^^^^^
+
+tests/test_intake.py:145: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_removing_a_required_path_makes_exactly_that_path_missing[preferences]" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'preferences'
+
+    @pytest.mark.parametrize("factor", FACTORS)
+    def test_removing_a_required_path_makes_exactly_that_path_missing(robert, factor):
+&gt;       for path in _required()[factor]:
+                    ^^^^^^^^^^^
+
+tests/test_intake.py:145: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_a_null_answer_counts_as_missing" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_a_null_answer_counts_as_missing(robert):
+        # SPEC-AMBIGUITY: a bare null (unanswered) is missing, only the explicit skip marker is not.
+&gt;       factor, path = _all_required()[0]
+                       ^^^^^^^^^^^^^^^
+
+tests/test_intake.py:151: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_intake.py:85: in _all_required
+    return [(f, path) for f in FACTORS for path in _required()[f]]
+                                                   ^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_missing_follows_required_order[objectif]" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'objectif'
+
+    @pytest.mark.parametrize("factor", FACTORS)
+    def test_missing_follows_required_order(robert, factor):
+&gt;       paths = _required()[factor]
+                ^^^^^^^^^^^
+
+tests/test_intake.py:157: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_missing_follows_required_order[horizon]" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'horizon'
+
+    @pytest.mark.parametrize("factor", FACTORS)
+    def test_missing_follows_required_order(robert, factor):
+&gt;       paths = _required()[factor]
+                ^^^^^^^^^^^
+
+tests/test_intake.py:157: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_missing_follows_required_order[risque]" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'risque'
+
+    @pytest.mark.parametrize("factor", FACTORS)
+    def test_missing_follows_required_order(robert, factor):
+&gt;       paths = _required()[factor]
+                ^^^^^^^^^^^
+
+tests/test_intake.py:157: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_missing_follows_required_order[contraintes]" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'contraintes'
+
+    @pytest.mark.parametrize("factor", FACTORS)
+    def test_missing_follows_required_order(robert, factor):
+&gt;       paths = _required()[factor]
+                ^^^^^^^^^^^
+
+tests/test_intake.py:157: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_missing_follows_required_order[preferences]" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'preferences'
+
+    @pytest.mark.parametrize("factor", FACTORS)
+    def test_missing_follows_required_order(robert, factor):
+&gt;       paths = _required()[factor]
+                ^^^^^^^^^^^
+
+tests/test_intake.py:157: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_missing_and_next_question_are_pure" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_missing_and_next_question_are_pure(robert):
+&gt;       factor, path = _all_required()[0]
+                       ^^^^^^^^^^^^^^^
+
+tests/test_intake.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_intake.py:85: in _all_required
+    return [(f, path) for f in FACTORS for path in _required()[f]]
+                                                   ^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_next_question_returns_the_fixed_question_of_the_removed_path[objectif-fr-CA]" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'objectif', locale = 'fr-CA'
+
+    @pytest.mark.parametrize("locale", LOCALES)
+    @pytest.mark.parametrize("factor", FACTORS)
+    def test_next_question_returns_the_fixed_question_of_the_removed_path(robert, factor, locale):
+        # §20.6: fixed template question for the first missing path, per locale.
+        # SPEC-AMBIGUITY: the spec names no keys; the question dict carries `path` and `text`.
+&gt;       for path in _required()[factor]:
+                    ^^^^^^^^^^^
+
+tests/test_intake.py:180: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_next_question_returns_the_fixed_question_of_the_removed_path[objectif-en-CA]" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'objectif', locale = 'en-CA'
+
+    @pytest.mark.parametrize("locale", LOCALES)
+    @pytest.mark.parametrize("factor", FACTORS)
+    def test_next_question_returns_the_fixed_question_of_the_removed_path(robert, factor, locale):
+        # §20.6: fixed template question for the first missing path, per locale.
+        # SPEC-AMBIGUITY: the spec names no keys; the question dict carries `path` and `text`.
+&gt;       for path in _required()[factor]:
+                    ^^^^^^^^^^^
+
+tests/test_intake.py:180: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_next_question_returns_the_fixed_question_of_the_removed_path[horizon-fr-CA]" time="0.001"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'horizon', locale = 'fr-CA'
+
+    @pytest.mark.parametrize("locale", LOCALES)
+    @pytest.mark.parametrize("factor", FACTORS)
+    def test_next_question_returns_the_fixed_question_of_the_removed_path(robert, factor, locale):
+        # §20.6: fixed template question for the first missing path, per locale.
+        # SPEC-AMBIGUITY: the spec names no keys; the question dict carries `path` and `text`.
+&gt;       for path in _required()[factor]:
+                    ^^^^^^^^^^^
+
+tests/test_intake.py:180: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_next_question_returns_the_fixed_question_of_the_removed_path[horizon-en-CA]" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'horizon', locale = 'en-CA'
+
+    @pytest.mark.parametrize("locale", LOCALES)
+    @pytest.mark.parametrize("factor", FACTORS)
+    def test_next_question_returns_the_fixed_question_of_the_removed_path(robert, factor, locale):
+        # §20.6: fixed template question for the first missing path, per locale.
+        # SPEC-AMBIGUITY: the spec names no keys; the question dict carries `path` and `text`.
+&gt;       for path in _required()[factor]:
+                    ^^^^^^^^^^^
+
+tests/test_intake.py:180: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_next_question_returns_the_fixed_question_of_the_removed_path[risque-fr-CA]" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'risque', locale = 'fr-CA'
+
+    @pytest.mark.parametrize("locale", LOCALES)
+    @pytest.mark.parametrize("factor", FACTORS)
+    def test_next_question_returns_the_fixed_question_of_the_removed_path(robert, factor, locale):
+        # §20.6: fixed template question for the first missing path, per locale.
+        # SPEC-AMBIGUITY: the spec names no keys; the question dict carries `path` and `text`.
+&gt;       for path in _required()[factor]:
+                    ^^^^^^^^^^^
+
+tests/test_intake.py:180: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_next_question_returns_the_fixed_question_of_the_removed_path[risque-en-CA]" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'risque', locale = 'en-CA'
+
+    @pytest.mark.parametrize("locale", LOCALES)
+    @pytest.mark.parametrize("factor", FACTORS)
+    def test_next_question_returns_the_fixed_question_of_the_removed_path(robert, factor, locale):
+        # §20.6: fixed template question for the first missing path, per locale.
+        # SPEC-AMBIGUITY: the spec names no keys; the question dict carries `path` and `text`.
+&gt;       for path in _required()[factor]:
+                    ^^^^^^^^^^^
+
+tests/test_intake.py:180: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_next_question_returns_the_fixed_question_of_the_removed_path[contraintes-fr-CA]" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'contraintes', locale = 'fr-CA'
+
+    @pytest.mark.parametrize("locale", LOCALES)
+    @pytest.mark.parametrize("factor", FACTORS)
+    def test_next_question_returns_the_fixed_question_of_the_removed_path(robert, factor, locale):
+        # §20.6: fixed template question for the first missing path, per locale.
+        # SPEC-AMBIGUITY: the spec names no keys; the question dict carries `path` and `text`.
+&gt;       for path in _required()[factor]:
+                    ^^^^^^^^^^^
+
+tests/test_intake.py:180: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_next_question_returns_the_fixed_question_of_the_removed_path[contraintes-en-CA]" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'contraintes', locale = 'en-CA'
+
+    @pytest.mark.parametrize("locale", LOCALES)
+    @pytest.mark.parametrize("factor", FACTORS)
+    def test_next_question_returns_the_fixed_question_of_the_removed_path(robert, factor, locale):
+        # §20.6: fixed template question for the first missing path, per locale.
+        # SPEC-AMBIGUITY: the spec names no keys; the question dict carries `path` and `text`.
+&gt;       for path in _required()[factor]:
+                    ^^^^^^^^^^^
+
+tests/test_intake.py:180: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_next_question_returns_the_fixed_question_of_the_removed_path[preferences-fr-CA]" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'preferences', locale = 'fr-CA'
+
+    @pytest.mark.parametrize("locale", LOCALES)
+    @pytest.mark.parametrize("factor", FACTORS)
+    def test_next_question_returns_the_fixed_question_of_the_removed_path(robert, factor, locale):
+        # §20.6: fixed template question for the first missing path, per locale.
+        # SPEC-AMBIGUITY: the spec names no keys; the question dict carries `path` and `text`.
+&gt;       for path in _required()[factor]:
+                    ^^^^^^^^^^^
+
+tests/test_intake.py:180: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_next_question_returns_the_fixed_question_of_the_removed_path[preferences-en-CA]" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'preferences', locale = 'en-CA'
+
+    @pytest.mark.parametrize("locale", LOCALES)
+    @pytest.mark.parametrize("factor", FACTORS)
+    def test_next_question_returns_the_fixed_question_of_the_removed_path(robert, factor, locale):
+        # §20.6: fixed template question for the first missing path, per locale.
+        # SPEC-AMBIGUITY: the spec names no keys; the question dict carries `path` and `text`.
+&gt;       for path in _required()[factor]:
+                    ^^^^^^^^^^^
+
+tests/test_intake.py:180: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_next_question_asks_the_first_missing_path_in_required_order[objectif]" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'objectif'
+
+    @pytest.mark.parametrize("factor", FACTORS)
+    def test_next_question_asks_the_first_missing_path_in_required_order(robert, factor):
+&gt;       paths = _required()[factor]
+                ^^^^^^^^^^^
+
+tests/test_intake.py:189: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_next_question_asks_the_first_missing_path_in_required_order[horizon]" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'horizon'
+
+    @pytest.mark.parametrize("factor", FACTORS)
+    def test_next_question_asks_the_first_missing_path_in_required_order(robert, factor):
+&gt;       paths = _required()[factor]
+                ^^^^^^^^^^^
+
+tests/test_intake.py:189: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_next_question_asks_the_first_missing_path_in_required_order[risque]" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'risque'
+
+    @pytest.mark.parametrize("factor", FACTORS)
+    def test_next_question_asks_the_first_missing_path_in_required_order(robert, factor):
+&gt;       paths = _required()[factor]
+                ^^^^^^^^^^^
+
+tests/test_intake.py:189: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_next_question_asks_the_first_missing_path_in_required_order[contraintes]" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'contraintes'
+
+    @pytest.mark.parametrize("factor", FACTORS)
+    def test_next_question_asks_the_first_missing_path_in_required_order(robert, factor):
+&gt;       paths = _required()[factor]
+                ^^^^^^^^^^^
+
+tests/test_intake.py:189: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_next_question_asks_the_first_missing_path_in_required_order[preferences]" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'preferences'
+
+    @pytest.mark.parametrize("factor", FACTORS)
+    def test_next_question_asks_the_first_missing_path_in_required_order(robert, factor):
+&gt;       paths = _required()[factor]
+                ^^^^^^^^^^^
+
+tests/test_intake.py:189: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_questions_are_fixed_templates_distinct_per_path_and_per_locale" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_questions_are_fixed_templates_distinct_per_path_and_per_locale(robert):
+        # §20.6: no LLM writes questions: same input -&gt; identical question; fr-CA and en-CA differ.
+        texts: dict[str, dict[str, str]] = {loc: {} for loc in LOCALES}
+&gt;       for factor, path in _all_required():
+                            ^^^^^^^^^^^^^^^
+
+tests/test_intake.py:197: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_intake.py:85: in _all_required
+    return [(f, path) for f in FACTORS for path in _required()[f]]
+                                                   ^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_default_locale_is_fr_ca" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_default_locale_is_fr_ca(robert):
+&gt;       factor, path = _all_required()[0]
+                       ^^^^^^^^^^^^^^^
+
+tests/test_intake.py:209: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_intake.py:85: in _all_required
+    return [(f, path) for f in FACTORS for path in _required()[f]]
+                                                   ^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_skip_stores_null_value_by_user_skipped_without_mutating_the_input" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_skip_stores_null_value_by_user_skipped_without_mutating_the_input(robert):
+&gt;       for factor, path in _all_required():
+                            ^^^^^^^^^^^^^^^
+
+tests/test_intake.py:217: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_intake.py:85: in _all_required
+    return [(f, path) for f in FACTORS for path in _required()[f]]
+                                                   ^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_skipped_path_is_no_longer_missing_and_intake_moves_on" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_skipped_path_is_no_longer_missing_and_intake_moves_on(robert):
+        # §20.6: "Stops when missing is empty or the user skips".
+        for factor in FACTORS:
+&gt;           paths = _required()[factor]
+                    ^^^^^^^^^^^
+
+tests/test_intake.py:228: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_skip_touches_only_the_skipped_path" time="0.000"><failure message="AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_skip_touches_only_the_skipped_path(robert):
+&gt;       factor, path = _all_required()[0]
+                       ^^^^^^^^^^^^^^^
+
+tests/test_intake.py:238: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_intake.py:85: in _all_required
+    return [(f, path) for f in FACTORS for path in _required()[f]]
+                                                   ^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+    def _required() -&gt; dict:
+&gt;       return getattr(intake, "REQUIRED")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AttributeError: module 'coherence_analyzer.intake' has no attribute 'REQUIRED'
+
+tests/test_intake.py:47: AttributeError</failure></testcase><testcase classname="tests.test_intake" name="test_parsed_max_theme_weight_without_a_number_makes_contraintes_ask_for_it" time="0.000"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_parsed_max_theme_weight_without_a_number_makes_contraintes_ask_for_it(robert):
+        # D7 point 1 / §20.6 showcase: Amira's "pas tout en tech" with no number -&gt; contraintes asks for the number.
+        p = _amira_like(robert)
+&gt;       miss = intake.missing(p, "contraintes")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_intake.py:259: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'contraintes'
+
+    def missing(profile: dict, factor: str) -&gt; list[str]:
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/intake.py:6: NotImplementedError</failure></testcase><testcase classname="tests.test_intake" name="test_theme_rule_with_a_number_or_other_kinds_ask_nothing" time="0.000"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_theme_rule_with_a_number_or_other_kinds_ask_nothing(robert):
+        p = _with_parsed(robert, [
+            _rule("max_theme_weight", {"theme": "tech_heavy", "max_pct": 50}, NO_NUMBER_QUOTE, approved=False),
+            _rule("prefer_attribute", {"attribute": "dividends"}, "I love AI", approved=False),
+            _rule("exclude_activity", {"tag": "tobacco"}, "x", approved=False),
+        ])
+&gt;       assert intake.missing(p, "contraintes") == []
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_intake.py:276: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'contraintes'
+
+    def missing(profile: dict, factor: str) -&gt; list[str]:
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/intake.py:6: NotImplementedError</failure></testcase><testcase classname="tests.test_intake" name="test_n3_prompt_version_and_files_exist" time="0.000"><failure message="KeyError: 'values_parser'">def test_n3_prompt_version_and_files_exist():
+        # CLAUDE.md: prompts/&lt;node&gt;.v&lt;N&gt;.md; the fixture profile already stamps values_parser.v1.
+&gt;       assert extractors.prompt_version("values_parser") == "values_parser.v1"
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_intake.py:284: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+node = 'values_parser'
+
+    def prompt_version(node: str) -&gt; str:
+&gt;       return PROMPT_VERSIONS[node]
+               ^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'values_parser'
+
+coherence_analyzer/llm/extractors.py:24: KeyError</failure></testcase><testcase classname="tests.test_intake" name="test_n3_schema_accepts_every_rule_kind_and_applies_to_of_the_spec" time="0.000"><failure message="FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p010/coherence_analyzer/llm/schemas/values_parser.json'">def test_n3_schema_accepts_every_rule_kind_and_applies_to_of_the_spec():
+&gt;       v = _validator()
+            ^^^^^^^^^^^^
+
+tests/test_intake.py:306: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_intake.py:293: in _validator
+    schema = extractors.load_schema("values_parser")
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+coherence_analyzer/llm/extractors.py:28: in load_schema
+    return json.loads((config.LLM_SCHEMAS_DIR / f"{node}.json").read_text(encoding="utf-8"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p010/coherence_analyzer/llm/schemas/values_parser.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p010/coherence_analyzer/llm/schemas/values_parser.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</failure></testcase><testcase classname="tests.test_intake" name="test_n3_schema_accepts_a_theme_rule_with_no_number" time="0.000"><failure message="FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p010/coherence_analyzer/llm/schemas/values_parser.json'">def test_n3_schema_accepts_a_theme_rule_with_no_number():
+        # §6.2 N3 / Amira: "should parse max_theme_weight {theme: tech_heavy} with no number".
+        inst = _n3_instance(rule_kind="max_theme_weight", params={"theme": "tech_heavy"}, applies_to="all",
+                            quote=NO_NUMBER_QUOTE)
+&gt;       assert _validator().is_valid(inst)
+               ^^^^^^^^^^^^
+
+tests/test_intake.py:318: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_intake.py:293: in _validator
+    schema = extractors.load_schema("values_parser")
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+coherence_analyzer/llm/extractors.py:28: in load_schema
+    return json.loads((config.LLM_SCHEMAS_DIR / f"{node}.json").read_text(encoding="utf-8"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p010/coherence_analyzer/llm/schemas/values_parser.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p010/coherence_analyzer/llm/schemas/values_parser.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</failure></testcase><testcase classname="tests.test_intake" name="test_n3_schema_rejects_unknown_enum_values_and_missing_fields" time="0.000"><failure message="FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p010/coherence_analyzer/llm/schemas/values_parser.json'">def test_n3_schema_rejects_unknown_enum_values_and_missing_fields():
+&gt;       v = _validator()
+            ^^^^^^^^^^^^
+
+tests/test_intake.py:322: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_intake.py:293: in _validator
+    schema = extractors.load_schema("values_parser")
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+coherence_analyzer/llm/extractors.py:28: in load_schema
+    return json.loads((config.LLM_SCHEMAS_DIR / f"{node}.json").read_text(encoding="utf-8"))
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/usr/lib/python3.14/pathlib/__init__.py:788: in read_text
+    with self.open(mode='r', encoding=encoding, errors=errors, newline=newline) as f:
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = PosixPath('/home/safraa/Downloads/Datathon2026/ca-p010/coherence_analyzer/llm/schemas/values_parser.json')
+mode = 'r', buffering = -1, encoding = 'utf-8', errors = None, newline = None
+
+    def open(self, mode='r', buffering=-1, encoding=None,
+             errors=None, newline=None):
+        """
+        Open the file pointed to by this path and return a file object, as
+        the built-in open() function does.
+        """
+        if "b" not in mode:
+            encoding = io.text_encoding(encoding)
+&gt;       return io.open(self, mode, buffering, encoding, errors, newline)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       FileNotFoundError: [Errno 2] No such file or directory: '/home/safraa/Downloads/Datathon2026/ca-p010/coherence_analyzer/llm/schemas/values_parser.json'
+
+/usr/lib/python3.14/pathlib/__init__.py:772: FileNotFoundError</failure></testcase><testcase classname="tests.test_intake" name="test_n3_mock_on_roberts_notes_returns_rules_with_exact_substring_quotes" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_n3_mock_on_roberts_notes_returns_rules_with_exact_substring_quotes(robert):
+        notes = _n3_notes(robert)
+&gt;       out = _n3_output(notes)
+              ^^^^^^^^^^^^^^^^^
+
+tests/test_intake.py:336: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_intake.py:93: in _n3_output
+    return extractors.values_parser(notes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+notes = 'I prefer companies I understand. No hype stocks unless I can explain the business.'
+
+    def values_parser(notes: str) -&gt; dict:
+        """N3. Rules with exact-substring quotes; start unapproved."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/llm/extractors.py:67: NotImplementedError</failure></testcase><testcase classname="tests.test_intake" name="test_n3_output_passes_the_gate_and_rules_start_unapproved" time="0.000"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_n3_output_passes_the_gate_and_rules_start_unapproved(robert):
+        notes = _n3_notes(robert)
+&gt;       out = _n3_output(notes)
+              ^^^^^^^^^^^^^^^^^
+
+tests/test_intake.py:348: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_intake.py:93: in _n3_output
+    return extractors.values_parser(notes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+notes = 'I prefer companies I understand. No hype stocks unless I can explain the business.'
+
+    def values_parser(notes: str) -&gt; dict:
+        """N3. Rules with exact-substring quotes; start unapproved."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/llm/extractors.py:67: NotImplementedError</failure></testcase><testcase classname="tests.test_intake" name="test_n3_output_with_an_invented_quote_is_rejected_by_the_gate" time="0.000"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_n3_output_with_an_invented_quote_is_rejected_by_the_gate(robert):
+        # §1 inv. 5 / §11 step 2: a quote that is not in the notes rejects the whole output; old value kept.
+        notes = _n3_notes(robert)
+&gt;       out = copy.deepcopy(_n3_output(notes))
+                            ^^^^^^^^^^^^^^^^^
+
+tests/test_intake.py:359: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_intake.py:93: in _n3_output
+    return extractors.values_parser(notes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+notes = 'I prefer companies I understand. No hype stocks unless I can explain the business.'
+
+    def values_parser(notes: str) -&gt; dict:
+        """N3. Rules with exact-substring quotes; start unapproved."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/llm/extractors.py:67: NotImplementedError</failure></testcase><testcase classname="tests.test_intake" name="test_unapproved_parsed_rules_are_ignored_by_build_limits" time="0.001" /><testcase classname="tests.test_intake" name="test_approved_exclude_activity_reaches_excluded_activities" time="0.000" /><testcase classname="tests.test_intake" name="test_approved_max_theme_weight_reaches_limits_as_a_fraction" time="0.000" /><testcase classname="tests.test_intake" name="test_only_the_approved_rule_of_a_mixed_batch_is_promoted" time="0.000" /><testcase classname="tests.test_intake" name="test_approved_soft_rules_never_change_limits" time="0.000"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_approved_soft_rules_never_change_limits(robert):
+        # §6.2 N3: "Other kinds stay soft reminders (S4)". Robert's N3 rules (prefer/avoid), all approved, change nothing.
+        base, base_trace = _build(robert)
+        notes = _n3_notes(robert)
+&gt;       new, status = gate_mod.gate("values_parser", None, _n3_output(notes), {**N3_CONTEXT, "notes": notes})
+                                                           ^^^^^^^^^^^^^^^^^
+
+tests/test_intake.py:412: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_intake.py:93: in _n3_output
+    return extractors.values_parser(notes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+notes = 'I prefer companies I understand. No hype stocks unless I can explain the business.'
+
+    def values_parser(notes: str) -&gt; dict:
+        """N3. Rules with exact-substring quotes; start unapproved."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/llm/extractors.py:67: NotImplementedError</failure></testcase><testcase classname="tests.test_intake" name="test_invariant_2_trace_names_only_approved_rules_never_the_llm_field" time="0.000" /><testcase classname="tests.test_intake" name="test_approving_the_number_answers_the_intake_question" time="0.000"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_approving_the_number_answers_the_intake_question(robert):
+        # D7 point 1: once the user gives the number and approves, contraintes has nothing left to ask,
+        # and the approved rule is what limits use.
+        p = _amira_like(robert)
+&gt;       assert intake.next_question(p, "contraintes") is not None
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_intake.py:441: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+factor = 'contraintes', locale = 'fr-CA'
+
+    def next_question(profile: dict, factor: str, locale: str = "fr-CA") -&gt; dict | None:
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/intake.py:10: NotImplementedError</failure></testcase><testcase classname="tests.test_intake" name="test_intake_and_n3_never_write_activity_tags_csv" time="0.000"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_intake_and_n3_never_write_activity_tags_csv(robert):
+        before = _csv_state()
+        notes = _n3_notes(robert)
+&gt;       out = _n3_output(notes)
+              ^^^^^^^^^^^^^^^^^
+
+tests/test_intake.py:457: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_intake.py:93: in _n3_output
+    return extractors.values_parser(notes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+notes = 'I prefer companies I understand. No hype stocks unless I can explain the business.'
+
+    def values_parser(notes: str) -&gt; dict:
+        """N3. Rules with exact-substring quotes; start unapproved."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/llm/extractors.py:67: NotImplementedError</failure></testcase></testsuite></testsuites>
