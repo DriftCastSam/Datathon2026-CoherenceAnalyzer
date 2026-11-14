@@ -10,7 +10,7 @@ import pytest
 
 from coherence_analyzer.rules import derive, limits as limits_mod, registry
 
-AS_OF = "2026-11-14"          # Robert's profile meta.updated_at / order_intent date; fixed, no clock reads
+AS_OF = "2026-11-12"          # portfolio.as_of (docs/spec-decisions.md D1); fixed, no clock reads
 ROBERT_VALUE = 400000         # fixtures/robert/portfolio.json value_cad
 META_KEYS = {"_note", "by"}   # descriptive keys of the example limits block, not limits themselves
 
@@ -217,7 +217,8 @@ def test_capacity_near_withdrawals_are_summed():
 
 def test_capacity_notches_stack():
     near_big = [{"date": "2027-11", "amount": 50000}]
-    assert _cap(20, ef=1.0, income="low", withdrawals=near_big) == "moderate"
+    # high(4) minus three notches (ef < 3, income low, near withdrawal > 10%) -> low_moderate(1)
+    assert _cap(20, ef=1.0, income="low", withdrawals=near_big) == "low_moderate"
 
 
 def test_capacity_floor_is_low():
@@ -322,7 +323,7 @@ def test_floor_scales_with_portfolio_value(robert):
 def test_crypto_excluded_when_cap_is_zero_even_if_not_refused(robert):
     p = copy.deepcopy(robert)
     p["preferences"]["asset_types_refused"] = ["options"]
-    lim = _limits(p)   # effective low_moderate -> max_crypto 0
+    lim, _ = _limits(p)   # effective low_moderate -> max_crypto 0
     assert sorted(lim["excluded_asset_types"]) == ["crypto", "options"]
 
 

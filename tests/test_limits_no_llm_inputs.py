@@ -9,7 +9,7 @@ import pytest
 
 from coherence_analyzer.rules import derive, limits as limits_mod, registry
 
-AS_OF = "2026-11-14"
+AS_OF = "2026-11-12"  # portfolio.as_of (docs/spec-decisions.md D1)
 ROBERT_VALUE = 400000
 META_KEYS = {"_note", "by"}
 _MISSING = object()
