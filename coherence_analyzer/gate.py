@@ -15,6 +15,7 @@ from typing import Literal
 
 from .config import BEHAVIOUR_MAX_CONF, BEHAVIOUR_MAX_STEP
 from .levels import LEVELS, clamp_move
+from .rules.derive import N2_SUBSCORES, question_quality_confidence, question_quality_ewma, question_score
 
 GateStatus = Literal["accepted", "clamped", "kept:abstain", "rejected:evidence", "rejected:schema"]
 
@@ -193,14 +194,76 @@ def _profile_consistency(old_field: dict | None, out: dict, context: dict) -> tu
 
 def gate(node: str, old_field: dict | None, llm_output: dict, context: dict) -> tuple[dict | None, GateStatus]:
     """context: {"event_ids": set[str], "notes": str, "model_id", "prompt_version", "input_hash"};
+    N2 needs "events_by_id" and "event_id" (the input event) instead of "notes";
     N6 also needs "profile" (the declared profile the finding paths resolve in)."""
     # 1. abstain (before anything else: an abstaining output is never "rejected")
     if llm_output.get("abstain") is True:
         return _kept(old_field, "kept:abstain")
     if node == "behaviour_classifier":
         return _behaviour(old_field, llm_output, context)
+    if node == "question_rubric":
+        return _question_rubric(old_field, llm_output, context)
     if node == "values_parser":
         return _values(old_field, llm_output, context)
     if node == "profile_consistency":
         return _profile_consistency(old_field, llm_output, context)
-    return _kept(old_field, "rejected:schema")   # nodes gated in later build steps (N2 question_rubric)
+    return _kept(old_field, "rejected:schema")   # unknown node
+
+
+# ---------------------------------------------------------------- N2 question_rubric (SPEC §6.2 N2, §11)
+
+N2_KEYS = frozenset(("event_id", "quote", "is_investing_question", "rationale", *N2_SUBSCORES))
+N2_MAX_RATIONALE = 150
+
+
+def _event_ts(event: dict | None) -> datetime | None:
+    try:
+        return datetime.fromisoformat(event["ts"]) if event else None
+    except (KeyError, TypeError, ValueError):
+        return None
+
+
+def _question_rubric(old_field: dict | None, out: dict, context: dict) -> tuple[dict | None, GateStatus]:
+    node = "question_rubric"
+    eid, quote = out.get("event_id"), out.get("quote")
+
+    # 2. evidence: the output cites the input event, a real question event; the quote is an exact substring of its text.
+    events = context.get("events_by_id", {})
+    event = events.get(eid) if isinstance(eid, str) else None
+    if (not isinstance(eid, str) or not eid or eid != context.get("event_id") or eid not in context["event_ids"]
+            or not isinstance(event, dict) or event.get("type") != "question" or not isinstance(event.get("text"), str)
+            or not isinstance(quote, str) or not quote or quote not in event["text"]):
+        return _kept(old_field, "rejected:evidence")
+
+    # 3. enum / range (re-asserted): closed key set (no model-set score or confidence), integers 0-3, a real boolean
+    rationale = out.get("rationale")
+    ok = (set(out) - {"abstain"} == N2_KEYS
+          and all(isinstance(out[k], int) and not isinstance(out[k], bool) and 0 <= out[k] <= 3 for k in N2_SUBSCORES)
+          and isinstance(out["is_investing_question"], bool)
+          and isinstance(rationale, str) and len(rationale) <= N2_MAX_RATIONALE)
+    if not ok:
+        return _kept(old_field, "rejected:schema")
+
+    # Not an investing question: ignored (nothing to score, the previous value stays).
+    if out["is_investing_question"] is False:
+        return _kept(old_field, "kept:abstain")
+
+    # 4-5. code computes the score; question_quality = EWMA over the scored questions, oldest first; the confidence is
+    # computed from the number of scored questions and capped (the model sets neither).
+    score = question_score(out)
+    items = [{"event_id": i["event_id"], "score": i["score"]}
+             for i in ((old_field or {}).get("evidence") or [])
+             if isinstance(i, dict) and isinstance(i.get("event_id"), str) and _is_num(i.get("score"))
+             and i["event_id"] != eid]
+    items.append({"event_id": eid, "score": score})
+
+    def order(i: dict) -> tuple:
+        ts = _event_ts(events.get(i["event_id"]))
+        return (0, datetime.min, i["event_id"]) if ts is None else (1, ts.replace(tzinfo=None), i["event_id"])
+
+    items.sort(key=order)
+    value = question_quality_ewma([i["score"] for i in items])
+
+    # 6. stamp. The quote is checked, not stored: evidence items are exactly {event_id, score} (§3.3 item 3).
+    return {"value": round(value, 4), "confidence": question_quality_confidence(len(items)), **_stamp(node, context),
+            "evidence": items}, "accepted"

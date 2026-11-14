@@ -1,0 +1,27 @@
+{
+  "cache_key": "623af2e3d679b25cd51f2694f6caa50651e93e041ed7c5c7b24f428fdb7dc027",
+  "call_log": {
+    "hand_written": true,
+    "latency_ms": 0,
+    "tokens_in": 0,
+    "tokens_out": 0
+  },
+  "input_hash": "sha256:0aefd4cfe48581ddf1af9e9f1e29e4da602c392a4f6e16ba0e41728d767410dd",
+  "model_id": "fixture:hand-written",
+  "node": "question_rubric",
+  "output": {
+    "correct_concepts": 3,
+    "event_id": "ev_robert_0005",
+    "horizon_awareness": 2,
+    "is_investing_question": true,
+    "quote": "XBB's duration",
+    "rationale": "Names a fund and a precise concept (duration) and ties it to a rate scenario.",
+    "risk_awareness": 2,
+    "specificity": 3
+  },
+  "prompt_version": "question_rubric.v1",
+  "user_payload": {
+    "event_id": "ev_robert_0005",
+    "text": "What does XBB's duration mean for my bonds if rates drop?"
+  }
+}

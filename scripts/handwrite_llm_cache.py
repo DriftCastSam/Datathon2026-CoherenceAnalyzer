@@ -38,6 +38,19 @@ N1_OUTPUT = {
     ],
 }
 
+# N2 (SPEC §6.2 N2 sanity checks): the XBB-duration question scores 10/12 = 0.83 (>= 0.75), "next big AI stock" 1/12 = 0.08
+# (<= 0.35). Quotes are exact substrings of the question text.
+N2_OUTPUTS = {
+    "ev_robert_0004": {"event_id": "ev_robert_0004", "quote": "Which AI stock is the next big one?",
+                       "specificity": 1, "correct_concepts": 0, "risk_awareness": 0, "horizon_awareness": 0,
+                       "is_investing_question": True,
+                       "rationale": "Asks for the next winning stock: names a theme only, no concept, risk or time frame."},
+    "ev_robert_0005": {"event_id": "ev_robert_0005", "quote": "XBB's duration",
+                       "specificity": 3, "correct_concepts": 3, "risk_awareness": 2, "horizon_awareness": 2,
+                       "is_investing_question": True,
+                       "rationale": "Names a fund and a precise concept (duration) and ties it to a rate scenario."},
+}
+
 N4_OUTPUT = {
     "action": "buy",
     "ticker": "NVDA",
@@ -112,7 +125,26 @@ def _write_n6(fixture: Path, output: dict) -> None:
     print(p.relative_to(ROOT))
 
 
+def _write_n2(events: list[dict]) -> None:
+    """N2 (SPEC §6.2 N2): one entry per Robert question event; each passes the schema and the gate."""
+    schema = Draft202012Validator(extractors.load_schema("question_rubric"))
+    by_id = {e["event_id"]: e for e in events}
+    for ev in extractors.n2_events(events):
+        output = N2_OUTPUTS[ev["event_id"]]
+        schema.validate(output)
+        payload = extractors.n2_payload(ev)
+        context = {"event_ids": set(by_id), "events_by_id": by_id, "event_id": ev["event_id"],
+                   "model_id": bedrock.MOCK_MODEL_ID, "prompt_version": extractors.prompt_version("question_rubric"),
+                   "input_hash": bedrock.input_hash(payload)}
+        assert gate.gate("question_rubric", None, output, context)[1] == "accepted"
+        p = bedrock.write_entry(config.LLM_CACHE_DIR, "question_rubric", extractors.prompt_version("question_rubric"),
+                                bedrock.MOCK_MODEL_ID, payload, output, CALL_LOG)
+        print(p.relative_to(ROOT))
+
+
 def main() -> None:
+    events = [json.loads(line) for line in (ROBERT / "events.jsonl").read_text().splitlines() if line.strip()]
+    _write_n2(events)
     profile = json.loads((ROBERT / "profile.json").read_text(encoding="utf-8"))
     n3_cases = [(profile["values"]["notes"], N3_ROBERT_OUTPUT), (N3_AMIRA_NOTES, N3_AMIRA_OUTPUT),
                 (N3_MATEO_NOTES, N3_MATEO_OUTPUT)]

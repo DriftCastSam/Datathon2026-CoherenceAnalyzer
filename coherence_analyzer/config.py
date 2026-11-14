@@ -41,6 +41,11 @@ BEHAVIOUR_MAX_CONF = 0.8
 BEHAVIOUR_MAX_STEP = 1          # levels per run
 KNOWLEDGE_LLM_MAX_DELTA = 5     # points per update
 QUESTION_EWMA_ALPHA = 0.3
+QUESTION_QUALITY_MAX_CONF = 0.8     # cap on the code-computed question_quality confidence (README Assumptions)
+
+# N2 question_rubric is opt-in (docs/spec-decisions.md D7 point 3: deferred to P2). Off: Flow A calls no N2 and
+# knowledge.score uses the declared/quiz fields plus whatever question_quality is already stored.
+N2_QUESTION_RUBRIC = os.getenv("COHERENCE_ANALYZER_N2", "").strip().lower() in ("1", "true", "on", "yes")
 
 # Resizer (SPEC §8)
 RESIZER_STEP_PP = 0.5

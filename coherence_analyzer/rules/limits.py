@@ -25,6 +25,7 @@ LIMITS_TABLE: dict[str, dict] = {
 }
 
 MAX_EMPLOYER_SECTOR_WEIGHT = 0.15
+LIMITS_NOTE = "Derived from the profile only. This is what the portfolio struct gets compared against."
 
 # Trace path for user-approved parsed rules. The llm: field `values.parsed_notes` itself is never a
 # limits input: only items the user explicitly approved (a user declaration) are promoted (§6.2 N3, §7.2).
@@ -123,6 +124,7 @@ def build_limits(profile: dict, portfolio_value_cad: float) -> tuple[dict, dict[
         themes[theme] = min(frac, themes.get(theme, frac))                # stricter wins
 
     limits: dict[str, Any] = {
+        "_note": LIMITS_NOTE,
         "by": "rule:limits_table[risk.effective] + goals + preferences",
         "vol_band_annual": list(row["vol_band"]),
         "floor_at_horizon": round(portfolio_value_cad * row["floor_ratio"], 2),
