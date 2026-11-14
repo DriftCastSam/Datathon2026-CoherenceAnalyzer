@@ -1,15 +1,23 @@
-"""Explanation: facts payload -> N5 explainer -> post-checks -> template fallback (SPEC §9, docs/spec-factors.md §20.5).
+"""Explanation: facts payload -> N5 explainer -> verifier V1-V5 -> retry once -> template (docs/spec-factors.md §20.5).
 
-P0.7 here: `numcheck` (V2) and `template_section` (the deterministic fallback that always passes V1-V5). The narration
-loop (`verify_section`, `explain`) is P0.8. No LLM is called in this module yet.
+P0.7: `numcheck` (V2) and `template_section` (the deterministic fallback that always passes V1-V5).
+P0.8: `verify_section` (V1-V5), `narrate_section` (llm -> llm_retry -> template, at most 2 N5 calls per section, none for
+`pass` sections) and `explain` (headline, segments and disclaimer are template text; only section segments may be LLM
+text, and only after the verifier passed). Every LLM call goes through `bedrock.call_tool` (see `extractors`).
 """
 from __future__ import annotations
 
+import copy
+
 from .config import DISCLAIMER
+from .llm import bedrock, extractors
 from .numfacts import numcheck as _numcheck
 
+# Lower case (matched against the casefolded text). §9.3 examples first, then close variants (FR + EN).
 ADVISORY_BLOCKLIST = ("tu devrais acheter", "tu devrais vendre", "je recommande", "nous recommandons",
-                      "you should buy", "you should sell", "we recommend", "i recommend")
+                      "you should buy", "you should sell", "we recommend", "i recommend",
+                      "vous devriez acheter", "vous devriez vendre", "je conseille", "nous conseillons",
+                      "i suggest you", "we advise")
 
 MAX_SEGMENTS = 4          # V5
 MAX_SEGMENT_CHARS = 300   # V5
@@ -143,8 +151,7 @@ def template_section(facts: dict) -> dict:
     at most 300 characters (V5), no advisory wording (V4), `inference` only where V5 allows it."""
     loc = facts["locale"]
     entries = facts["checks"]
-    allow_inference = bool(facts["evidence_events"]) or any(
-        str(d.get("by", "")).startswith("llm:") for d in facts["derived"].values())
+    allow_inference = _allow_inference(facts)
     vw = [e for e in entries if e["status"] in ("violation", "warning")]
     info = [e for e in entries if e["status"] == "info"]
     unk = [e for e in entries if e["status"] == "unknown"]
@@ -178,14 +185,175 @@ def template_section(facts: dict) -> dict:
     return {"mode": "template", "segments": segments}
 
 
+# ---------------------------------------------------------------- verifier V1-V5 (§20.5)
+
+KINDS = ("fact", "assumption", "inference", "unknown")
+MODE_RANK = {"llm": 0, "llm_retry": 1, "template": 2}      # explanation.mode = the worst section mode
+
+
+def _allow_inference(facts: dict) -> bool:
+    """V5: `inference` segments only when the section has an `llm:`-derived field or evidence events."""
+    return bool(facts.get("evidence_events")) or any(
+        str(d.get("by", "")).startswith("llm:") for d in facts.get("derived", {}).values() if isinstance(d, dict))
+
+
+def _path_exists(node: object, path: str) -> bool:
+    """Dotted key path into `facts`. Keys may themselves contain dots (`declared.objectives.horizon_years`), so every
+    key that prefixes the remaining path is tried. List items are addressed by index."""
+    if isinstance(node, dict):
+        for key in node:
+            k = str(key)
+            if path == k or (k and path.startswith(k + ".") and _path_exists(node[key], path[len(k) + 1:])):
+                return True
+        return False
+    if isinstance(node, list):
+        head, _, rest = path.partition(".")
+        if head.isdigit() and int(head) < len(node):
+            return rest == "" or _path_exists(node[int(head)], rest)
+    return False
+
+
+def _ref_resolves(ref: object, facts: dict, check_ids: set[str], event_ids: set[str]) -> bool:
+    return isinstance(ref, str) and bool(ref) and (ref in check_ids or ref in event_ids or _path_exists(facts, ref))
+
+
 def verify_section(output: dict, facts: dict) -> list[str]:
-    """Verifier V1-V5 (§20.5). Empty list = pass."""
-    raise NotImplementedError
+    """Verifier V1-V5 (§20.5), deterministic and pure. Empty list = pass. Every failure string starts with its rule id
+    (`V1`..`V5`); all rules are evaluated, so a bad answer lists every rule it breaks."""
+    check_ids = {c["id"] for c in facts.get("checks", [])}
+    event_ids = {e["event_id"] for e in facts.get("evidence_events", []) if isinstance(e, dict) and "event_id" in e}
+    raw = output.get("segments") if isinstance(output, dict) else None
+    segments = raw if isinstance(raw, list) else []
+    v1: list[str] = []
+    v2: list[str] = []
+    v4: list[str] = []
+    v5: list[str] = []
+    cited: set[str] = set()
+
+    if not isinstance(raw, list) or not 1 <= len(raw) <= MAX_SEGMENTS:
+        v5.append(f"V5: {len(segments)} segment(s), expected 1 to {MAX_SEGMENTS}")
+    allow_inference = _allow_inference(facts)
+    for i, seg in enumerate(segments, 1):
+        if not isinstance(seg, dict):
+            v5.append(f"V5: segment {i} is not an object")
+            continue
+        text, kind, refs = seg.get("text"), seg.get("kind"), seg.get("refs")
+        if kind not in KINDS:
+            v5.append(f"V5: segment {i} has kind {kind!r}, expected one of {', '.join(KINDS)}")
+        elif kind == "inference" and not allow_inference:
+            v5.append(f"V5: segment {i} is an inference but the section has no llm-derived field or evidence event")
+        if not isinstance(text, str) or not text.strip():
+            v5.append(f"V5: segment {i} has no text")
+            text = ""
+        elif len(text) > MAX_SEGMENT_CHARS:
+            v5.append(f"V5: segment {i} has {len(text)} characters, maximum {MAX_SEGMENT_CHARS}")
+        if not isinstance(refs, list) or not refs:
+            v1.append(f"V1: segment {i} has no ref")
+        else:
+            for ref in refs:
+                if _ref_resolves(ref, facts, check_ids, event_ids):
+                    cited.add(ref)
+                else:
+                    v1.append(f"V1: segment {i} ref {ref!r} is no check id, key path or event_id of the facts")
+        bad = _numcheck(text, facts)
+        if bad:
+            v2.append(f"V2: segment {i} has number(s) not in the facts: {', '.join(bad)}")
+        low = text.casefold()
+        v4 += [f"V4: segment {i} has advisory wording {p!r}" for p in ADVISORY_BLOCKLIST if p in low]
+
+    v3 = [f"V3: check {cid} ({status}) is not referenced by any segment"
+          for cid, status in dict.fromkeys((c["id"], c["status"]) for c in facts.get("checks", [])
+                                           if c["status"] in ("violation", "warning"))
+          if cid not in cited]
+    return v1 + v2 + v3 + v4 + v5
+
+
+# ---------------------------------------------------------------- narration loop (§20.5)
+
+def _narrative(mode: str, segments: list[dict], facts: dict, attempts: list[dict], error: str | None = None) -> dict:
+    failures = verify_section({"segments": segments}, facts)
+    narrative = {"mode": mode, "segments": segments, "verify": {"passed": not failures, "failures": failures},
+                 "attempts": attempts}
+    if error:
+        narrative["llm_error"] = error
+    return narrative
+
+
+def _template_narrative(facts: dict, attempts: list[dict], error: str | None = None) -> dict:
+    return _narrative("template", template_section(facts)["segments"], facts, attempts, error)
+
+
+def narrate_section(facts: dict) -> dict:
+    """One section: N5 -> verify -> pass `llm`; else N5 again with `retry_failures` -> pass `llm_retry`; else the
+    template. Never more than 2 LLM calls. `pass` sections never reach the writer. Output that failed verification is
+    never returned. A missing recording (mock) or an output that stays schema-invalid ends in the template."""
+    attempts: list[dict] = []
+    if facts["status"] == "pass":
+        return _template_narrative(facts, attempts)
+    retry_failures: list[str] | None = None
+    for attempt in (1, 2):
+        try:
+            result = extractors.explainer_call(facts, retry_failures)
+        except bedrock.LLMCacheMiss as exc:                   # nothing recorded for this input: no point in retrying
+            return _template_narrative(facts, attempts, f"LLMCacheMiss: {exc}")
+        except bedrock.LLMOutputInvalid as exc:
+            failures = [f"V5: the output did not match the explainer schema: {exc}"]
+            attempts.append({"failures": failures, "call_log": None})
+        else:
+            output = result["output"]
+            failures = verify_section(output, facts)
+            attempts.append({"failures": failures, "call_log": result["call_log"]})
+            if not failures:
+                segments = copy.deepcopy(output["segments"])
+                return _narrative("llm" if attempt == 1 else "llm_retry", segments, facts, attempts)
+        retry_failures = failures
+    return _template_narrative(facts, attempts)
+
+
+_HEAD = {"fr-CA": {"coherent": "Portefeuille cohérent avec votre profil",
+                   "coherent_with_warnings": "Portefeuille cohérent avec votre profil, avec avertissements",
+                   "incoherent": "Portefeuille incohérent avec votre profil"},
+         "en-CA": {"coherent": "Portfolio consistent with your profile",
+                   "coherent_with_warnings": "Portfolio consistent with your profile, with warnings",
+                   "incoherent": "Portfolio inconsistent with your profile"}}
+_HEAD_IDS = {"fr-CA": "écarts", "en-CA": "gaps"}
+MAX_HEADLINE_CHARS = 140       # SPEC §9.2
+
+
+def headline(verdict: str, sections: list[dict], locale: str) -> str:
+    """Template headline from the verdict and the failing (violation / warning) check ids, in display order."""
+    ids = list(dict.fromkeys(c["id"] for s in sections for c in s["facts"]["checks"]
+                             if c["status"] in ("violation", "warning")))
+    base = _HEAD[locale][verdict]
+    if not ids:
+        return base + "."
+    while ids:
+        text = f"{base}: {_HEAD_IDS[locale]} {', '.join(ids)}."
+        if len(text) <= MAX_HEADLINE_CHARS:
+            return text
+        ids.pop()
+    return base + "."
 
 
 def explain(payload: dict) -> dict:
-    """llm -> llm_retry -> template. Returns {mode, headline, segments, disclaimer}."""
-    raise NotImplementedError
+    """The report's explanation (§20.5): `{mode, headline, segments, disclaimer, sections}`.
+
+    `payload` = `{verdict, locale, sections}` with `sections` from `factors.build_sections`. Each section is narrated
+    on its own facts; `segments` concatenates the section segments in the order given (display order), each with a
+    `factor` key; the headline and the disclaimer are template text. `mode` = worst mode among the non-pass sections
+    (`template > llm_retry > llm`); with none, `template`."""
+    sections = payload["sections"]
+    out_sections = [{"factor": s["factor"], "narrative": narrate_section(s["facts"])} for s in sections]
+    modes = [n["narrative"]["mode"] for s, n in zip(sections, out_sections) if s["status"] != "pass"]
+    locale = payload["locale"]
+    return {
+        "mode": max(modes, key=MODE_RANK.__getitem__) if modes else "template",
+        "headline": headline(payload["verdict"], sections, locale),
+        "segments": [{"factor": n["factor"], **copy.deepcopy(seg)} for n in out_sections
+                     for seg in n["narrative"]["segments"]],
+        "disclaimer": disclaimer(locale),
+        "sections": out_sections,
+    }
 
 
 def disclaimer(locale: str = "fr-CA") -> str:

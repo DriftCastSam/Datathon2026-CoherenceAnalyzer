@@ -1,0 +1,29 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "explainer (N5) tool input: the narrative of one report section (docs/spec-factors.md 20.5)",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["segments"],
+  "properties": {
+    "segments": {
+      "type": "array",
+      "minItems": 1,
+      "maxItems": 4,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["kind", "text", "refs"],
+        "properties": {
+          "kind": {"type": "string", "enum": ["fact", "assumption", "inference", "unknown"]},
+          "text": {"type": "string", "minLength": 1, "maxLength": 300},
+          "refs": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"type": "string", "minLength": 1},
+            "description": "Check ids of the input (H8), dotted key paths of the input (metrics.current.vol), or event_ids listed in evidence_events."
+          }
+        }
+      }
+    }
+  }
+}

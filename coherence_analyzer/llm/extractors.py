@@ -15,7 +15,9 @@ from . import bedrock
 N1_NODE = "behaviour_classifier"
 N3_NODE = "values_parser"
 N4_NODE = "intent_parser"
-PROMPT_VERSIONS = {N1_NODE: f"{N1_NODE}.v1", N3_NODE: f"{N3_NODE}.v1", N4_NODE: f"{N4_NODE}.v1"}
+N5_NODE = "explainer"
+PROMPT_VERSIONS = {N1_NODE: f"{N1_NODE}.v1", N3_NODE: f"{N3_NODE}.v1", N4_NODE: f"{N4_NODE}.v1",
+                   N5_NODE: f"{N5_NODE}.v1"}
 N1_EVENT_TYPES = ("question", "order_intent")
 N1_MAX_EVENTS = 20
 N1_WINDOW_DAYS = 30
@@ -107,6 +109,15 @@ def intent_parser(text: str, universe: list[dict], weights_pct: dict[str, float]
     return intent_parser_call(text, universe, weights_pct)["output"]
 
 
-def explainer(payload: dict) -> dict:
-    """N5. See coherence_analyzer.explain."""
-    raise NotImplementedError
+def explainer_call(facts: dict, retry_failures: list[str] | None = None) -> dict:
+    """N5, one call per section (docs/spec-factors.md §20.5). The user payload is the section facts, unchanged; the
+    retry adds `retry_failures` (the verifier's failure list), which gives it its own cache key. Returns {output, call_log}."""
+    payload = copy.deepcopy(facts)
+    if retry_failures is not None:
+        payload["retry_failures"] = list(retry_failures)
+    return bedrock.call_tool(N5_NODE, load_schema(N5_NODE), load_prompt(N5_NODE), payload, prompt_version(N5_NODE))
+
+
+def explainer(facts: dict, retry_failures: list[str] | None = None) -> dict:
+    """N5. Raw output {segments}; verification and the retry loop live in `coherence_analyzer.explain`."""
+    return explainer_call(facts, retry_failures)["output"]

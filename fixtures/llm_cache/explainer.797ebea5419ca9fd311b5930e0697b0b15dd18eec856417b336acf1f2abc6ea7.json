@@ -1,0 +1,99 @@
+{
+  "cache_key": "797ebea5419ca9fd311b5930e0697b0b15dd18eec856417b336acf1f2abc6ea7",
+  "call_log": {
+    "hand_written": true,
+    "latency_ms": 0,
+    "tokens_in": 0,
+    "tokens_out": 0
+  },
+  "input_hash": "sha256:a331ba431d955c6d1dfb8ae19355f83af4c4395ce2ee09f06f51854eca534164",
+  "model_id": "fixture:hand-written",
+  "node": "explainer",
+  "output": {
+    "segments": [
+      {
+        "kind": "fact",
+        "refs": [
+          "H9",
+          "metrics.current.p5_T"
+        ],
+        "text": "H9: le scénario bas (centile 5) à l'horizon est de 316 971 $, sous le plancher de 360 000 $."
+      },
+      {
+        "kind": "fact",
+        "refs": [
+          "derived.objectives.effective_horizon_years",
+          "declared.situation.planned_withdrawals"
+        ],
+        "text": "Ce plancher découle d'un horizon effectif de 3,6 ans: le premier retrait prévu, 60 000 $, est en 2030-06."
+      }
+    ]
+  },
+  "prompt_version": "explainer.v1",
+  "user_payload": {
+    "checks": [
+      {
+        "derived_from": [
+          "limits.floor_at_horizon",
+          "risk.effective",
+          "risk.declared",
+          "risk.capacity",
+          "objectives.effective_horizon_years",
+          "objectives.horizon_years",
+          "situation.planned_withdrawals",
+          "situation.emergency_fund_months",
+          "situation.emergency_fund",
+          "situation.monthly_expenses",
+          "situation.income_stability",
+          "identity.employment_type"
+        ],
+        "id": "H9",
+        "limit": "360 000 $",
+        "message_key": "floor_breached",
+        "source": "rule:floor_at_horizon",
+        "status": "violation",
+        "subject": null,
+        "value": "316 971 $"
+      }
+    ],
+    "declared": {
+      "identity.retirement_target_age": "63",
+      "objectives.horizon_years": "4",
+      "situation.planned_withdrawals": [
+        {
+          "amount": "60 000 $",
+          "date": "2030-06",
+          "purpose": "retirement income, year 1"
+        }
+      ]
+    },
+    "derived": {
+      "objectives.effective_horizon_years": {
+        "because": [
+          "objectives.horizon_years = 4",
+          "situation.planned_withdrawals = date: 2030-06, amount: 60 000 $, purpose: retirement income, year 1"
+        ],
+        "by": "rule:effective_horizon",
+        "confidence": "1",
+        "value": "3,6"
+      }
+    },
+    "evidence_events": [],
+    "factor": "horizon",
+    "intent": null,
+    "locale": "fr-CA",
+    "metrics": {
+      "current": {
+        "p50_T": "487 578 $",
+        "p5_T": "316 971 $",
+        "p95_T": "670 173 $",
+        "width": "353 202 $"
+      },
+      "proposed": {}
+    },
+    "question": "Quand l'argent sera-t-il requis?",
+    "status": "violation",
+    "unknowns": [],
+    "verdict": "incoherent"
+  }
+}
