@@ -1,0 +1,2330 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="110" skipped="0" tests="111" time="1.424" timestamp="2026-11-14T21:56:40.287222+00:00" hostname="bomboclat-laptop"><testcase classname="tests.test_internal" name="test_module_constants" time="0.000" /><testcase classname="tests.test_internal" name="test_robert_yields_exactly_one_c1_and_no_c2_to_c5" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_robert_yields_exactly_one_c1_and_no_c2_to_c5(robert):
+        # §20.9: horizon 4 years from 2026-11 ends 2030-11; the goal dated 2032-01 is later.
+&gt;       found = internal.rule_findings(robert, AS_OF)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_internal.py:170: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c1_month_precision_boundary" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_c1_month_precision_boundary(robert):
+        # §20.9 C1: "later than as_of + horizon_years (month precision)": equal month does not fire, one month later does.
+        p = copy.deepcopy(robert)
+        p["objectives"]["goals"][1]["date"] = "2030-11"      # == 2026-11 + 4 years
+&gt;       assert _ids(p) == []
+               ^^^^^^^
+
+tests/test_internal.py:187: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c1_one_finding_per_late_goal_and_fields_name_the_goal" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_c1_one_finding_per_late_goal_and_fields_name_the_goal(robert):
+        p = copy.deepcopy(robert)
+        p["objectives"]["goals"][0]["date"] = "2033-01"
+&gt;       found = internal.rule_findings(p, AS_OF)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_internal.py:195: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c1_uses_the_given_as_of_not_the_clock" time="0.000"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_c1_uses_the_given_as_of_not_the_clock(robert):
+        # D1: the reference date is the `as_of` argument. 2020-01 + 4y = 2024-01 -&gt; both goals late; 2028-01 + 4y = 2032-01 -&gt; none.
+&gt;       assert _ids(robert, "2020-01-15") == ["C1", "C1"]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_internal.py:203: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2020-01-15'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c1_skips_when_horizon_missing[objectives.horizon_years]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+path = 'objectives.horizon_years'
+
+    @pytest.mark.parametrize("path", ["objectives.horizon_years"])
+    def test_c1_skips_when_horizon_missing(robert, path):
+&gt;       assert _ids(_del(robert, path)) == []
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_internal.py:210: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c1_skips_goal_without_date_and_missing_goals" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_c1_skips_goal_without_date_and_missing_goals(robert):
+        p = copy.deepcopy(robert)
+        del p["objectives"]["goals"][1]["date"]
+&gt;       assert _ids(p) == []
+               ^^^^^^^
+
+tests/test_internal.py:216: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c2_uses_limits_table_neighbours[low]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+level = 'low'
+
+    @pytest.mark.parametrize("level", LEVELS)
+    def test_c2_uses_limits_table_neighbours(robert, level):
+        # §20.9 C2: tighter than the level below's max_dd_pct or looser than the level above's; no neighbour = no bound.
+        i = LEVELS.index(level)
+&gt;       p = _clean(robert)
+            ^^^^^^^^^^^^^^
+
+tests/test_internal.py:226: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:152: in _clean
+    assert _ids(p) == []
+           ^^^^^^^
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c2_uses_limits_table_neighbours[low_moderate]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+level = 'low_moderate'
+
+    @pytest.mark.parametrize("level", LEVELS)
+    def test_c2_uses_limits_table_neighbours(robert, level):
+        # §20.9 C2: tighter than the level below's max_dd_pct or looser than the level above's; no neighbour = no bound.
+        i = LEVELS.index(level)
+&gt;       p = _clean(robert)
+            ^^^^^^^^^^^^^^
+
+tests/test_internal.py:226: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:152: in _clean
+    assert _ids(p) == []
+           ^^^^^^^
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c2_uses_limits_table_neighbours[moderate]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+level = 'moderate'
+
+    @pytest.mark.parametrize("level", LEVELS)
+    def test_c2_uses_limits_table_neighbours(robert, level):
+        # §20.9 C2: tighter than the level below's max_dd_pct or looser than the level above's; no neighbour = no bound.
+        i = LEVELS.index(level)
+&gt;       p = _clean(robert)
+            ^^^^^^^^^^^^^^
+
+tests/test_internal.py:226: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:152: in _clean
+    assert _ids(p) == []
+           ^^^^^^^
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c2_uses_limits_table_neighbours[moderate_high]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+level = 'moderate_high'
+
+    @pytest.mark.parametrize("level", LEVELS)
+    def test_c2_uses_limits_table_neighbours(robert, level):
+        # §20.9 C2: tighter than the level below's max_dd_pct or looser than the level above's; no neighbour = no bound.
+        i = LEVELS.index(level)
+&gt;       p = _clean(robert)
+            ^^^^^^^^^^^^^^
+
+tests/test_internal.py:226: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:152: in _clean
+    assert _ids(p) == []
+           ^^^^^^^
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c2_uses_limits_table_neighbours[high]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+level = 'high'
+
+    @pytest.mark.parametrize("level", LEVELS)
+    def test_c2_uses_limits_table_neighbours(robert, level):
+        # §20.9 C2: tighter than the level below's max_dd_pct or looser than the level above's; no neighbour = no bound.
+        i = LEVELS.index(level)
+&gt;       p = _clean(robert)
+            ^^^^^^^^^^^^^^
+
+tests/test_internal.py:226: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:152: in _clean
+    assert _ids(p) == []
+           ^^^^^^^
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c2_robert_minus_12_is_inside_the_low_moderate_band" time="0.000"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_c2_robert_minus_12_is_inside_the_low_moderate_band(robert):
+        # §20.9: low_moderate neighbours are low (-8) and moderate (-20); Robert's -12 is inside.
+        assert (LIMITS_TABLE["low"]["max_dd_pct"], LIMITS_TABLE["moderate"]["max_dd_pct"]) == (-8, -20)
+        assert robert["risk"]["max_acceptable_drawdown_pct"] == -12
+&gt;       assert "C2" not in _ids(robert)
+                           ^^^^^^^^^^^^
+
+tests/test_internal.py:252: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c2_fires_on_minimal_edit_with_its_fields" time="0.000"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_c2_fires_on_minimal_edit_with_its_fields(robert):
+        p = copy.deepcopy(robert)
+        p["risk"]["max_acceptable_drawdown_pct"] = -5
+&gt;       assert _ids(p) == ["C1", "C2"]
+               ^^^^^^^
+
+tests/test_internal.py:258: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c2_skips_when_a_field_is_missing[risk.declared]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+path = 'risk.declared'
+
+    @pytest.mark.parametrize("path", ["risk.declared", "risk.max_acceptable_drawdown_pct"])
+    def test_c2_skips_when_a_field_is_missing(robert, path):
+        p = copy.deepcopy(robert)
+        p["risk"]["max_acceptable_drawdown_pct"] = -5      # would fire
+        _del(p, path)
+&gt;       assert "C2" not in _ids(p)
+                           ^^^^^^^
+
+tests/test_internal.py:269: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c2_skips_when_a_field_is_missing[risk.max_acceptable_drawdown_pct]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+path = 'risk.max_acceptable_drawdown_pct'
+
+    @pytest.mark.parametrize("path", ["risk.declared", "risk.max_acceptable_drawdown_pct"])
+    def test_c2_skips_when_a_field_is_missing(robert, path):
+        p = copy.deepcopy(robert)
+        p["risk"]["max_acceptable_drawdown_pct"] = -5      # would fire
+        _del(p, path)
+&gt;       assert "C2" not in _ids(p)
+                           ^^^^^^^
+
+tests/test_internal.py:269: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c3_growth_objective_with_low_risk[growth-low_moderate--12-True]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+primary = 'growth', declared = 'low_moderate', dd = -12, expected = True
+
+    @pytest.mark.parametrize("primary,declared,dd,expected", [
+        ("growth", "low_moderate", -12, True),
+        ("growth", "low", -8, True),
+        ("aggressive_growth", "low", -8, True),
+        ("aggressive_growth", "low_moderate", -12, True),
+        ("growth", "moderate", -20, False),
+        ("aggressive_growth", "high", -40, False),
+        ("capital_preservation_with_growth", "low", -8, False),
+        ("income", "low_moderate", -12, False),
+    ])
+    def test_c3_growth_objective_with_low_risk(robert, primary, declared, dd, expected):
+        p = copy.deepcopy(robert)
+        p["objectives"]["primary"] = primary
+        p["risk"]["declared"], p["risk"]["max_acceptable_drawdown_pct"] = declared, dd
+&gt;       assert ("C3" in _ids(p)) is expected
+                        ^^^^^^^
+
+tests/test_internal.py:286: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c3_growth_objective_with_low_risk[growth-low--8-True]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+primary = 'growth', declared = 'low', dd = -8, expected = True
+
+    @pytest.mark.parametrize("primary,declared,dd,expected", [
+        ("growth", "low_moderate", -12, True),
+        ("growth", "low", -8, True),
+        ("aggressive_growth", "low", -8, True),
+        ("aggressive_growth", "low_moderate", -12, True),
+        ("growth", "moderate", -20, False),
+        ("aggressive_growth", "high", -40, False),
+        ("capital_preservation_with_growth", "low", -8, False),
+        ("income", "low_moderate", -12, False),
+    ])
+    def test_c3_growth_objective_with_low_risk(robert, primary, declared, dd, expected):
+        p = copy.deepcopy(robert)
+        p["objectives"]["primary"] = primary
+        p["risk"]["declared"], p["risk"]["max_acceptable_drawdown_pct"] = declared, dd
+&gt;       assert ("C3" in _ids(p)) is expected
+                        ^^^^^^^
+
+tests/test_internal.py:286: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c3_growth_objective_with_low_risk[aggressive_growth-low--8-True]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+primary = 'aggressive_growth', declared = 'low', dd = -8, expected = True
+
+    @pytest.mark.parametrize("primary,declared,dd,expected", [
+        ("growth", "low_moderate", -12, True),
+        ("growth", "low", -8, True),
+        ("aggressive_growth", "low", -8, True),
+        ("aggressive_growth", "low_moderate", -12, True),
+        ("growth", "moderate", -20, False),
+        ("aggressive_growth", "high", -40, False),
+        ("capital_preservation_with_growth", "low", -8, False),
+        ("income", "low_moderate", -12, False),
+    ])
+    def test_c3_growth_objective_with_low_risk(robert, primary, declared, dd, expected):
+        p = copy.deepcopy(robert)
+        p["objectives"]["primary"] = primary
+        p["risk"]["declared"], p["risk"]["max_acceptable_drawdown_pct"] = declared, dd
+&gt;       assert ("C3" in _ids(p)) is expected
+                        ^^^^^^^
+
+tests/test_internal.py:286: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c3_growth_objective_with_low_risk[aggressive_growth-low_moderate--12-True]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+primary = 'aggressive_growth', declared = 'low_moderate', dd = -12
+expected = True
+
+    @pytest.mark.parametrize("primary,declared,dd,expected", [
+        ("growth", "low_moderate", -12, True),
+        ("growth", "low", -8, True),
+        ("aggressive_growth", "low", -8, True),
+        ("aggressive_growth", "low_moderate", -12, True),
+        ("growth", "moderate", -20, False),
+        ("aggressive_growth", "high", -40, False),
+        ("capital_preservation_with_growth", "low", -8, False),
+        ("income", "low_moderate", -12, False),
+    ])
+    def test_c3_growth_objective_with_low_risk(robert, primary, declared, dd, expected):
+        p = copy.deepcopy(robert)
+        p["objectives"]["primary"] = primary
+        p["risk"]["declared"], p["risk"]["max_acceptable_drawdown_pct"] = declared, dd
+&gt;       assert ("C3" in _ids(p)) is expected
+                        ^^^^^^^
+
+tests/test_internal.py:286: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c3_growth_objective_with_low_risk[growth-moderate--20-False]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+primary = 'growth', declared = 'moderate', dd = -20, expected = False
+
+    @pytest.mark.parametrize("primary,declared,dd,expected", [
+        ("growth", "low_moderate", -12, True),
+        ("growth", "low", -8, True),
+        ("aggressive_growth", "low", -8, True),
+        ("aggressive_growth", "low_moderate", -12, True),
+        ("growth", "moderate", -20, False),
+        ("aggressive_growth", "high", -40, False),
+        ("capital_preservation_with_growth", "low", -8, False),
+        ("income", "low_moderate", -12, False),
+    ])
+    def test_c3_growth_objective_with_low_risk(robert, primary, declared, dd, expected):
+        p = copy.deepcopy(robert)
+        p["objectives"]["primary"] = primary
+        p["risk"]["declared"], p["risk"]["max_acceptable_drawdown_pct"] = declared, dd
+&gt;       assert ("C3" in _ids(p)) is expected
+                        ^^^^^^^
+
+tests/test_internal.py:286: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c3_growth_objective_with_low_risk[aggressive_growth-high--40-False]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+primary = 'aggressive_growth', declared = 'high', dd = -40, expected = False
+
+    @pytest.mark.parametrize("primary,declared,dd,expected", [
+        ("growth", "low_moderate", -12, True),
+        ("growth", "low", -8, True),
+        ("aggressive_growth", "low", -8, True),
+        ("aggressive_growth", "low_moderate", -12, True),
+        ("growth", "moderate", -20, False),
+        ("aggressive_growth", "high", -40, False),
+        ("capital_preservation_with_growth", "low", -8, False),
+        ("income", "low_moderate", -12, False),
+    ])
+    def test_c3_growth_objective_with_low_risk(robert, primary, declared, dd, expected):
+        p = copy.deepcopy(robert)
+        p["objectives"]["primary"] = primary
+        p["risk"]["declared"], p["risk"]["max_acceptable_drawdown_pct"] = declared, dd
+&gt;       assert ("C3" in _ids(p)) is expected
+                        ^^^^^^^
+
+tests/test_internal.py:286: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c3_growth_objective_with_low_risk[capital_preservation_with_growth-low--8-False]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+primary = 'capital_preservation_with_growth', declared = 'low', dd = -8
+expected = False
+
+    @pytest.mark.parametrize("primary,declared,dd,expected", [
+        ("growth", "low_moderate", -12, True),
+        ("growth", "low", -8, True),
+        ("aggressive_growth", "low", -8, True),
+        ("aggressive_growth", "low_moderate", -12, True),
+        ("growth", "moderate", -20, False),
+        ("aggressive_growth", "high", -40, False),
+        ("capital_preservation_with_growth", "low", -8, False),
+        ("income", "low_moderate", -12, False),
+    ])
+    def test_c3_growth_objective_with_low_risk(robert, primary, declared, dd, expected):
+        p = copy.deepcopy(robert)
+        p["objectives"]["primary"] = primary
+        p["risk"]["declared"], p["risk"]["max_acceptable_drawdown_pct"] = declared, dd
+&gt;       assert ("C3" in _ids(p)) is expected
+                        ^^^^^^^
+
+tests/test_internal.py:286: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c3_growth_objective_with_low_risk[income-low_moderate--12-False]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+primary = 'income', declared = 'low_moderate', dd = -12, expected = False
+
+    @pytest.mark.parametrize("primary,declared,dd,expected", [
+        ("growth", "low_moderate", -12, True),
+        ("growth", "low", -8, True),
+        ("aggressive_growth", "low", -8, True),
+        ("aggressive_growth", "low_moderate", -12, True),
+        ("growth", "moderate", -20, False),
+        ("aggressive_growth", "high", -40, False),
+        ("capital_preservation_with_growth", "low", -8, False),
+        ("income", "low_moderate", -12, False),
+    ])
+    def test_c3_growth_objective_with_low_risk(robert, primary, declared, dd, expected):
+        p = copy.deepcopy(robert)
+        p["objectives"]["primary"] = primary
+        p["risk"]["declared"], p["risk"]["max_acceptable_drawdown_pct"] = declared, dd
+&gt;       assert ("C3" in _ids(p)) is expected
+                        ^^^^^^^
+
+tests/test_internal.py:286: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c3_skips_when_a_field_is_missing[objectives.primary]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+path = 'objectives.primary'
+
+    @pytest.mark.parametrize("path", ["objectives.primary", "risk.declared"])
+    def test_c3_skips_when_a_field_is_missing(robert, path):
+        p = copy.deepcopy(robert)
+        p["objectives"]["primary"] = "growth"
+        _del(p, path)
+&gt;       assert "C3" not in _ids(p)
+                           ^^^^^^^
+
+tests/test_internal.py:299: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c3_skips_when_a_field_is_missing[risk.declared]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+path = 'risk.declared'
+
+    @pytest.mark.parametrize("path", ["objectives.primary", "risk.declared"])
+    def test_c3_skips_when_a_field_is_missing(robert, path):
+        p = copy.deepcopy(robert)
+        p["objectives"]["primary"] = "growth"
+        _del(p, path)
+&gt;       assert "C3" not in _ids(p)
+                           ^^^^^^^
+
+tests/test_internal.py:299: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c4_shared_asset_type_fires_and_disjoint_does_not" time="0.000"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_c4_shared_asset_type_fires_and_disjoint_does_not(robert):
+&gt;       assert "C4" not in _ids(robert)
+                           ^^^^^^^^^^^^
+
+tests/test_internal.py:303: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c4_skips_when_a_field_is_missing[preferences.asset_types_allowed]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+path = 'preferences.asset_types_allowed'
+
+    @pytest.mark.parametrize("path", ["preferences.asset_types_allowed", "preferences.asset_types_refused"])
+    def test_c4_skips_when_a_field_is_missing(robert, path):
+        p = copy.deepcopy(robert)
+        p["preferences"]["asset_types_allowed"].append("crypto")
+        _del(p, path)
+&gt;       assert "C4" not in _ids(p)
+                           ^^^^^^^
+
+tests/test_internal.py:317: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c4_skips_when_a_field_is_missing[preferences.asset_types_refused]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+path = 'preferences.asset_types_refused'
+
+    @pytest.mark.parametrize("path", ["preferences.asset_types_allowed", "preferences.asset_types_refused"])
+    def test_c4_skips_when_a_field_is_missing(robert, path):
+        p = copy.deepcopy(robert)
+        p["preferences"]["asset_types_allowed"].append("crypto")
+        _del(p, path)
+&gt;       assert "C4" not in _ids(p)
+                           ^^^^^^^
+
+tests/test_internal.py:317: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c5_reaction_to_drop_against_declared_level[buy_more-low_moderate--12-True]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+reaction = 'buy_more', declared = 'low_moderate', dd = -12, expected = True
+
+    @pytest.mark.parametrize("reaction,declared,dd,expected", [
+        ("buy_more", "low_moderate", -12, True),
+        ("buy_more", "low", -8, True),
+        ("buy_more", "moderate", -20, False),
+        ("sell_all", "moderate_high", -30, True),
+        ("sell_all", "high", -40, True),
+        ("sell_all", "moderate", -20, False),
+        ("sell_all", "low_moderate", -12, False),
+        ("sell_some", "low", -8, False),
+        ("sell_some", "high", -40, False),
+    ])
+    def test_c5_reaction_to_drop_against_declared_level(robert, reaction, declared, dd, expected):
+        p = copy.deepcopy(robert)
+        p["risk"]["reaction_to_20pct_drop"] = reaction
+        p["risk"]["declared"], p["risk"]["max_acceptable_drawdown_pct"] = declared, dd
+&gt;       assert ("C5" in _ids(p)) is expected
+                        ^^^^^^^
+
+tests/test_internal.py:335: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c5_reaction_to_drop_against_declared_level[buy_more-low--8-True]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+reaction = 'buy_more', declared = 'low', dd = -8, expected = True
+
+    @pytest.mark.parametrize("reaction,declared,dd,expected", [
+        ("buy_more", "low_moderate", -12, True),
+        ("buy_more", "low", -8, True),
+        ("buy_more", "moderate", -20, False),
+        ("sell_all", "moderate_high", -30, True),
+        ("sell_all", "high", -40, True),
+        ("sell_all", "moderate", -20, False),
+        ("sell_all", "low_moderate", -12, False),
+        ("sell_some", "low", -8, False),
+        ("sell_some", "high", -40, False),
+    ])
+    def test_c5_reaction_to_drop_against_declared_level(robert, reaction, declared, dd, expected):
+        p = copy.deepcopy(robert)
+        p["risk"]["reaction_to_20pct_drop"] = reaction
+        p["risk"]["declared"], p["risk"]["max_acceptable_drawdown_pct"] = declared, dd
+&gt;       assert ("C5" in _ids(p)) is expected
+                        ^^^^^^^
+
+tests/test_internal.py:335: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c5_reaction_to_drop_against_declared_level[buy_more-moderate--20-False]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+reaction = 'buy_more', declared = 'moderate', dd = -20, expected = False
+
+    @pytest.mark.parametrize("reaction,declared,dd,expected", [
+        ("buy_more", "low_moderate", -12, True),
+        ("buy_more", "low", -8, True),
+        ("buy_more", "moderate", -20, False),
+        ("sell_all", "moderate_high", -30, True),
+        ("sell_all", "high", -40, True),
+        ("sell_all", "moderate", -20, False),
+        ("sell_all", "low_moderate", -12, False),
+        ("sell_some", "low", -8, False),
+        ("sell_some", "high", -40, False),
+    ])
+    def test_c5_reaction_to_drop_against_declared_level(robert, reaction, declared, dd, expected):
+        p = copy.deepcopy(robert)
+        p["risk"]["reaction_to_20pct_drop"] = reaction
+        p["risk"]["declared"], p["risk"]["max_acceptable_drawdown_pct"] = declared, dd
+&gt;       assert ("C5" in _ids(p)) is expected
+                        ^^^^^^^
+
+tests/test_internal.py:335: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c5_reaction_to_drop_against_declared_level[sell_all-moderate_high--30-True]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+reaction = 'sell_all', declared = 'moderate_high', dd = -30, expected = True
+
+    @pytest.mark.parametrize("reaction,declared,dd,expected", [
+        ("buy_more", "low_moderate", -12, True),
+        ("buy_more", "low", -8, True),
+        ("buy_more", "moderate", -20, False),
+        ("sell_all", "moderate_high", -30, True),
+        ("sell_all", "high", -40, True),
+        ("sell_all", "moderate", -20, False),
+        ("sell_all", "low_moderate", -12, False),
+        ("sell_some", "low", -8, False),
+        ("sell_some", "high", -40, False),
+    ])
+    def test_c5_reaction_to_drop_against_declared_level(robert, reaction, declared, dd, expected):
+        p = copy.deepcopy(robert)
+        p["risk"]["reaction_to_20pct_drop"] = reaction
+        p["risk"]["declared"], p["risk"]["max_acceptable_drawdown_pct"] = declared, dd
+&gt;       assert ("C5" in _ids(p)) is expected
+                        ^^^^^^^
+
+tests/test_internal.py:335: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c5_reaction_to_drop_against_declared_level[sell_all-high--40-True]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+reaction = 'sell_all', declared = 'high', dd = -40, expected = True
+
+    @pytest.mark.parametrize("reaction,declared,dd,expected", [
+        ("buy_more", "low_moderate", -12, True),
+        ("buy_more", "low", -8, True),
+        ("buy_more", "moderate", -20, False),
+        ("sell_all", "moderate_high", -30, True),
+        ("sell_all", "high", -40, True),
+        ("sell_all", "moderate", -20, False),
+        ("sell_all", "low_moderate", -12, False),
+        ("sell_some", "low", -8, False),
+        ("sell_some", "high", -40, False),
+    ])
+    def test_c5_reaction_to_drop_against_declared_level(robert, reaction, declared, dd, expected):
+        p = copy.deepcopy(robert)
+        p["risk"]["reaction_to_20pct_drop"] = reaction
+        p["risk"]["declared"], p["risk"]["max_acceptable_drawdown_pct"] = declared, dd
+&gt;       assert ("C5" in _ids(p)) is expected
+                        ^^^^^^^
+
+tests/test_internal.py:335: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c5_reaction_to_drop_against_declared_level[sell_all-moderate--20-False]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+reaction = 'sell_all', declared = 'moderate', dd = -20, expected = False
+
+    @pytest.mark.parametrize("reaction,declared,dd,expected", [
+        ("buy_more", "low_moderate", -12, True),
+        ("buy_more", "low", -8, True),
+        ("buy_more", "moderate", -20, False),
+        ("sell_all", "moderate_high", -30, True),
+        ("sell_all", "high", -40, True),
+        ("sell_all", "moderate", -20, False),
+        ("sell_all", "low_moderate", -12, False),
+        ("sell_some", "low", -8, False),
+        ("sell_some", "high", -40, False),
+    ])
+    def test_c5_reaction_to_drop_against_declared_level(robert, reaction, declared, dd, expected):
+        p = copy.deepcopy(robert)
+        p["risk"]["reaction_to_20pct_drop"] = reaction
+        p["risk"]["declared"], p["risk"]["max_acceptable_drawdown_pct"] = declared, dd
+&gt;       assert ("C5" in _ids(p)) is expected
+                        ^^^^^^^
+
+tests/test_internal.py:335: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c5_reaction_to_drop_against_declared_level[sell_all-low_moderate--12-False]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+reaction = 'sell_all', declared = 'low_moderate', dd = -12, expected = False
+
+    @pytest.mark.parametrize("reaction,declared,dd,expected", [
+        ("buy_more", "low_moderate", -12, True),
+        ("buy_more", "low", -8, True),
+        ("buy_more", "moderate", -20, False),
+        ("sell_all", "moderate_high", -30, True),
+        ("sell_all", "high", -40, True),
+        ("sell_all", "moderate", -20, False),
+        ("sell_all", "low_moderate", -12, False),
+        ("sell_some", "low", -8, False),
+        ("sell_some", "high", -40, False),
+    ])
+    def test_c5_reaction_to_drop_against_declared_level(robert, reaction, declared, dd, expected):
+        p = copy.deepcopy(robert)
+        p["risk"]["reaction_to_20pct_drop"] = reaction
+        p["risk"]["declared"], p["risk"]["max_acceptable_drawdown_pct"] = declared, dd
+&gt;       assert ("C5" in _ids(p)) is expected
+                        ^^^^^^^
+
+tests/test_internal.py:335: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c5_reaction_to_drop_against_declared_level[sell_some-low--8-False]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+reaction = 'sell_some', declared = 'low', dd = -8, expected = False
+
+    @pytest.mark.parametrize("reaction,declared,dd,expected", [
+        ("buy_more", "low_moderate", -12, True),
+        ("buy_more", "low", -8, True),
+        ("buy_more", "moderate", -20, False),
+        ("sell_all", "moderate_high", -30, True),
+        ("sell_all", "high", -40, True),
+        ("sell_all", "moderate", -20, False),
+        ("sell_all", "low_moderate", -12, False),
+        ("sell_some", "low", -8, False),
+        ("sell_some", "high", -40, False),
+    ])
+    def test_c5_reaction_to_drop_against_declared_level(robert, reaction, declared, dd, expected):
+        p = copy.deepcopy(robert)
+        p["risk"]["reaction_to_20pct_drop"] = reaction
+        p["risk"]["declared"], p["risk"]["max_acceptable_drawdown_pct"] = declared, dd
+&gt;       assert ("C5" in _ids(p)) is expected
+                        ^^^^^^^
+
+tests/test_internal.py:335: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c5_reaction_to_drop_against_declared_level[sell_some-high--40-False]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+reaction = 'sell_some', declared = 'high', dd = -40, expected = False
+
+    @pytest.mark.parametrize("reaction,declared,dd,expected", [
+        ("buy_more", "low_moderate", -12, True),
+        ("buy_more", "low", -8, True),
+        ("buy_more", "moderate", -20, False),
+        ("sell_all", "moderate_high", -30, True),
+        ("sell_all", "high", -40, True),
+        ("sell_all", "moderate", -20, False),
+        ("sell_all", "low_moderate", -12, False),
+        ("sell_some", "low", -8, False),
+        ("sell_some", "high", -40, False),
+    ])
+    def test_c5_reaction_to_drop_against_declared_level(robert, reaction, declared, dd, expected):
+        p = copy.deepcopy(robert)
+        p["risk"]["reaction_to_20pct_drop"] = reaction
+        p["risk"]["declared"], p["risk"]["max_acceptable_drawdown_pct"] = declared, dd
+&gt;       assert ("C5" in _ids(p)) is expected
+                        ^^^^^^^
+
+tests/test_internal.py:335: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c5_skips_when_a_field_is_missing[risk.reaction_to_20pct_drop]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+path = 'risk.reaction_to_20pct_drop'
+
+    @pytest.mark.parametrize("path", ["risk.reaction_to_20pct_drop", "risk.declared"])
+    def test_c5_skips_when_a_field_is_missing(robert, path):
+        p = copy.deepcopy(robert)
+        p["risk"]["reaction_to_20pct_drop"] = "buy_more"
+        _del(p, path)
+&gt;       assert "C5" not in _ids(p)
+                           ^^^^^^^
+
+tests/test_internal.py:349: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_c5_skips_when_a_field_is_missing[risk.declared]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+path = 'risk.declared'
+
+    @pytest.mark.parametrize("path", ["risk.reaction_to_20pct_drop", "risk.declared"])
+    def test_c5_skips_when_a_field_is_missing(robert, path):
+        p = copy.deepcopy(robert)
+        p["risk"]["reaction_to_20pct_drop"] = "buy_more"
+        _del(p, path)
+&gt;       assert "C5" not in _ids(p)
+                           ^^^^^^^
+
+tests/test_internal.py:349: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_rules_skip_silently_when_whole_sections_are_missing" time="0.000"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_rules_skip_silently_when_whole_sections_are_missing(robert):
+        # §20.9: a missing field makes the rule skip (no finding, no error), whatever is missing.
+        p = _all_rules_profile(robert)
+&gt;       assert _ids(p) == ["C1", "C2", "C3", "C4", "C5"]
+               ^^^^^^^
+
+tests/test_internal.py:364: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_every_rule_finding_has_the_fixed_shape_and_no_violation" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_every_rule_finding_has_the_fixed_shape_and_no_violation(robert):
+        # §20.9 finding shape; invariant 3: never `violation`.
+        p = _all_rules_profile(robert)
+&gt;       found = internal.rule_findings(p, AS_OF)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_internal.py:379: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_rule_questions_are_fixed_templates_per_rule" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_rule_questions_are_fixed_templates_per_rule(robert):
+        # §20.9 / D7 point 1: one fr-CA / en-CA template per C-rule, written by code, never by the LLM.
+&gt;       found = internal.rule_findings(_all_rules_profile(robert), AS_OF)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_internal.py:392: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_rules_are_pure_deterministic_and_do_not_mutate" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_rules_are_pure_deterministic_and_do_not_mutate(robert):
+        # §20.9, D1: pure function of (profile, as_of).
+        p = _all_rules_profile(robert)
+        before = copy.deepcopy(p)
+&gt;       assert internal.rule_findings(p, AS_OF) == internal.rule_findings(p, AS_OF)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_internal.py:410: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_n6_payload_is_declared_fields_notes_and_rule_hits_only" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_n6_payload_is_declared_fields_notes_and_rule_hits_only(robert):
+        # §20.9: no {value, by} objects, no limits, no llm: fields; includes values.notes and the rule hits.
+&gt;       hits = internal.rule_findings(robert, AS_OF)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_internal.py:419: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_n6_payload_ignores_computed_and_llm_fields" time="0.000"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_n6_payload_ignores_computed_and_llm_fields(robert):
+        # Invariant 2 spirit: the LLM input is the declared fields; changing any computed / llm: field changes nothing.
+&gt;       hits = internal.rule_findings(robert, AS_OF)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_internal.py:438: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_n6_payload_follows_declared_fields_and_hits" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_n6_payload_follows_declared_fields_and_hits(robert):
+&gt;       hits = internal.rule_findings(robert, AS_OF)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_internal.py:454: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_accepts_a_good_output_and_stamps_it" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'accepted'&#10;  &#10;  - accepted&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_gate_accepts_a_good_output_and_stamps_it(robert):
+        # §20.9 gate: accepted -&gt; {value: findings, ...stamp}
+        out = _out(F_INTERESTS)
+        new, status = gate(NODE, None, out, _ctx(robert))
+&gt;       assert status == "accepted"
+E       AssertionError: assert 'rejected:schema' == 'accepted'
+E         
+E         - accepted
+E         + rejected:schema
+
+tests/test_internal.py:474: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_accepts_every_quote_form_and_the_size_boundaries" time="0.001"><failure message="AssertionError: {'kind': 'tension', 'fields': ['objectives.goals[1].date', 'objectives.horizon_years'], 'quotes': ['2032-01', '4'], 'reason': 'The two statements pull in different directions.'}&#10;assert 'rejected:schema' == 'accepted'&#10;  &#10;  - accepted&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_gate_accepts_every_quote_form_and_the_size_boundaries(robert):
+        # scalars via str(), one element of a list, indexed paths, a notes substring, 200-char reason, 5 findings.
+        shapes = [
+            _finding(["objectives.goals[1].date", "objectives.horizon_years"], ["2032-01", "4"]),
+            _finding(["preferences.asset_types_refused", "risk.declared"], ["crypto", "low_moderate"]),
+            _finding(["values.notes", "preferences.prefers_dividends"], ["No hype stocks", "True"]),
+            _finding(["values.notes", "risk.declared"], [NOTES, "low_moderate"]),
+            _finding(["objectives.secondary", "objectives.primary"], ["income", "capital_preservation_with_growth"]),
+            _finding(["risk.declared", "risk.max_acceptable_drawdown_pct", "risk.reaction_to_20pct_drop"],
+                     ["low_moderate", "-12", "sell_some"]),
+            _finding(["risk.declared", "identity.age"], ["low_moderate", "59"], reason="x" * 200),
+        ]
+        for s in shapes:
+            new, status = gate(NODE, None, _out(s), _ctx(robert))
+&gt;           assert status == "accepted", s
+E           AssertionError: {'kind': 'tension', 'fields': ['objectives.goals[1].date', 'objectives.horizon_years'], 'quotes': ['2032-01', '4'], 'reason': 'The two statements pull in different directions.'}
+E           assert 'rejected:schema' == 'accepted'
+E             
+E             - accepted
+E             + rejected:schema
+
+tests/test_internal.py:497: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_abstain_keeps_the_old_value_even_with_garbage_findings" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'accepted'&#10;  &#10;  - accepted&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_gate_abstain_keeps_the_old_value_even_with_garbage_findings(robert):
+        old = _old()
+&gt;       assert gate(NODE, None, _out(F_INTERESTS), _ctx(robert))[1] == "accepted"      # the branch exists
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 'rejected:schema' == 'accepted'
+E         
+E         - accepted
+E         + rejected:schema
+
+tests/test_internal.py:507: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_bad_paths_and_quotes_as_evidence[fewer_quotes_than_paths]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'rejected:evidence'&#10;  &#10;  - rejected:evidence&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'fewer_quotes_than_paths'
+
+    @pytest.mark.parametrize("name", sorted(EVIDENCE_FAILURES))
+    def test_gate_rejects_bad_paths_and_quotes_as_evidence(robert, name):
+        # §20.9 / §11 step 2 / inv. 5: invented or non-declared evidence -&gt; rejected:evidence, previous value kept.
+        old = _old()
+        new, status = gate(NODE, copy.deepcopy(old), _out(EVIDENCE_FAILURES[name]), _ctx(robert))
+&gt;       assert status == "rejected:evidence"
+E       AssertionError: assert 'rejected:schema' == 'rejected:evidence'
+E         
+E         - rejected:evidence
+E         + rejected:schema
+
+tests/test_internal.py:552: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_bad_paths_and_quotes_as_evidence[limits_path]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'rejected:evidence'&#10;  &#10;  - rejected:evidence&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'limits_path'
+
+    @pytest.mark.parametrize("name", sorted(EVIDENCE_FAILURES))
+    def test_gate_rejects_bad_paths_and_quotes_as_evidence(robert, name):
+        # §20.9 / §11 step 2 / inv. 5: invented or non-declared evidence -&gt; rejected:evidence, previous value kept.
+        old = _old()
+        new, status = gate(NODE, copy.deepcopy(old), _out(EVIDENCE_FAILURES[name]), _ctx(robert))
+&gt;       assert status == "rejected:evidence"
+E       AssertionError: assert 'rejected:schema' == 'rejected:evidence'
+E         
+E         - rejected:evidence
+E         + rejected:schema
+
+tests/test_internal.py:552: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_bad_paths_and_quotes_as_evidence[made_up_index]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'rejected:evidence'&#10;  &#10;  - rejected:evidence&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'made_up_index'
+
+    @pytest.mark.parametrize("name", sorted(EVIDENCE_FAILURES))
+    def test_gate_rejects_bad_paths_and_quotes_as_evidence(robert, name):
+        # §20.9 / §11 step 2 / inv. 5: invented or non-declared evidence -&gt; rejected:evidence, previous value kept.
+        old = _old()
+        new, status = gate(NODE, copy.deepcopy(old), _out(EVIDENCE_FAILURES[name]), _ctx(robert))
+&gt;       assert status == "rejected:evidence"
+E       AssertionError: assert 'rejected:schema' == 'rejected:evidence'
+E         
+E         - rejected:evidence
+E         + rejected:schema
+
+tests/test_internal.py:552: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_bad_paths_and_quotes_as_evidence[made_up_path]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'rejected:evidence'&#10;  &#10;  - rejected:evidence&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'made_up_path'
+
+    @pytest.mark.parametrize("name", sorted(EVIDENCE_FAILURES))
+    def test_gate_rejects_bad_paths_and_quotes_as_evidence(robert, name):
+        # §20.9 / §11 step 2 / inv. 5: invented or non-declared evidence -&gt; rejected:evidence, previous value kept.
+        old = _old()
+        new, status = gate(NODE, copy.deepcopy(old), _out(EVIDENCE_FAILURES[name]), _ctx(robert))
+&gt;       assert status == "rejected:evidence"
+E       AssertionError: assert 'rejected:schema' == 'rejected:evidence'
+E         
+E         - rejected:evidence
+E         + rejected:schema
+
+tests/test_internal.py:552: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_bad_paths_and_quotes_as_evidence[made_up_section]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'rejected:evidence'&#10;  &#10;  - rejected:evidence&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'made_up_section'
+
+    @pytest.mark.parametrize("name", sorted(EVIDENCE_FAILURES))
+    def test_gate_rejects_bad_paths_and_quotes_as_evidence(robert, name):
+        # §20.9 / §11 step 2 / inv. 5: invented or non-declared evidence -&gt; rejected:evidence, previous value kept.
+        old = _old()
+        new, status = gate(NODE, copy.deepcopy(old), _out(EVIDENCE_FAILURES[name]), _ctx(robert))
+&gt;       assert status == "rejected:evidence"
+E       AssertionError: assert 'rejected:schema' == 'rejected:evidence'
+E         
+E         - rejected:evidence
+E         + rejected:schema
+
+tests/test_internal.py:552: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_bad_paths_and_quotes_as_evidence[more_quotes_than_paths]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'rejected:evidence'&#10;  &#10;  - rejected:evidence&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'more_quotes_than_paths'
+
+    @pytest.mark.parametrize("name", sorted(EVIDENCE_FAILURES))
+    def test_gate_rejects_bad_paths_and_quotes_as_evidence(robert, name):
+        # §20.9 / §11 step 2 / inv. 5: invented or non-declared evidence -&gt; rejected:evidence, previous value kept.
+        old = _old()
+        new, status = gate(NODE, copy.deepcopy(old), _out(EVIDENCE_FAILURES[name]), _ctx(robert))
+&gt;       assert status == "rejected:evidence"
+E       AssertionError: assert 'rejected:schema' == 'rejected:evidence'
+E         
+E         - rejected:evidence
+E         + rejected:schema
+
+tests/test_internal.py:552: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_bad_paths_and_quotes_as_evidence[notes_quote_invented]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'rejected:evidence'&#10;  &#10;  - rejected:evidence&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'notes_quote_invented'
+
+    @pytest.mark.parametrize("name", sorted(EVIDENCE_FAILURES))
+    def test_gate_rejects_bad_paths_and_quotes_as_evidence(robert, name):
+        # §20.9 / §11 step 2 / inv. 5: invented or non-declared evidence -&gt; rejected:evidence, previous value kept.
+        old = _old()
+        new, status = gate(NODE, copy.deepcopy(old), _out(EVIDENCE_FAILURES[name]), _ctx(robert))
+&gt;       assert status == "rejected:evidence"
+E       AssertionError: assert 'rejected:schema' == 'rejected:evidence'
+E         
+E         - rejected:evidence
+E         + rejected:schema
+
+tests/test_internal.py:552: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_bad_paths_and_quotes_as_evidence[notes_quote_whitespace_folded]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'rejected:evidence'&#10;  &#10;  - rejected:evidence&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'notes_quote_whitespace_folded'
+
+    @pytest.mark.parametrize("name", sorted(EVIDENCE_FAILURES))
+    def test_gate_rejects_bad_paths_and_quotes_as_evidence(robert, name):
+        # §20.9 / §11 step 2 / inv. 5: invented or non-declared evidence -&gt; rejected:evidence, previous value kept.
+        old = _old()
+        new, status = gate(NODE, copy.deepcopy(old), _out(EVIDENCE_FAILURES[name]), _ctx(robert))
+&gt;       assert status == "rejected:evidence"
+E       AssertionError: assert 'rejected:schema' == 'rejected:evidence'
+E         
+E         - rejected:evidence
+E         + rejected:schema
+
+tests/test_internal.py:552: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_bad_paths_and_quotes_as_evidence[notes_quote_wrong_case]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'rejected:evidence'&#10;  &#10;  - rejected:evidence&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'notes_quote_wrong_case'
+
+    @pytest.mark.parametrize("name", sorted(EVIDENCE_FAILURES))
+    def test_gate_rejects_bad_paths_and_quotes_as_evidence(robert, name):
+        # §20.9 / §11 step 2 / inv. 5: invented or non-declared evidence -&gt; rejected:evidence, previous value kept.
+        old = _old()
+        new, status = gate(NODE, copy.deepcopy(old), _out(EVIDENCE_FAILURES[name]), _ctx(robert))
+&gt;       assert status == "rejected:evidence"
+E       AssertionError: assert 'rejected:schema' == 'rejected:evidence'
+E         
+E         - rejected:evidence
+E         + rejected:schema
+
+tests/test_internal.py:552: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_bad_paths_and_quotes_as_evidence[quote_for_wrong_path]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'rejected:evidence'&#10;  &#10;  - rejected:evidence&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'quote_for_wrong_path'
+
+    @pytest.mark.parametrize("name", sorted(EVIDENCE_FAILURES))
+    def test_gate_rejects_bad_paths_and_quotes_as_evidence(robert, name):
+        # §20.9 / §11 step 2 / inv. 5: invented or non-declared evidence -&gt; rejected:evidence, previous value kept.
+        old = _old()
+        new, status = gate(NODE, copy.deepcopy(old), _out(EVIDENCE_FAILURES[name]), _ctx(robert))
+&gt;       assert status == "rejected:evidence"
+E       AssertionError: assert 'rejected:schema' == 'rejected:evidence'
+E         
+E         - rejected:evidence
+E         + rejected:schema
+
+tests/test_internal.py:552: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_bad_paths_and_quotes_as_evidence[quote_is_only_part_of_the_value]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'rejected:evidence'&#10;  &#10;  - rejected:evidence&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'quote_is_only_part_of_the_value'
+
+    @pytest.mark.parametrize("name", sorted(EVIDENCE_FAILURES))
+    def test_gate_rejects_bad_paths_and_quotes_as_evidence(robert, name):
+        # §20.9 / §11 step 2 / inv. 5: invented or non-declared evidence -&gt; rejected:evidence, previous value kept.
+        old = _old()
+        new, status = gate(NODE, copy.deepcopy(old), _out(EVIDENCE_FAILURES[name]), _ctx(robert))
+&gt;       assert status == "rejected:evidence"
+E       AssertionError: assert 'rejected:schema' == 'rejected:evidence'
+E         
+E         - rejected:evidence
+E         + rejected:schema
+
+tests/test_internal.py:552: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_bad_paths_and_quotes_as_evidence[quote_is_the_whole_list]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'rejected:evidence'&#10;  &#10;  - rejected:evidence&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'quote_is_the_whole_list'
+
+    @pytest.mark.parametrize("name", sorted(EVIDENCE_FAILURES))
+    def test_gate_rejects_bad_paths_and_quotes_as_evidence(robert, name):
+        # §20.9 / §11 step 2 / inv. 5: invented or non-declared evidence -&gt; rejected:evidence, previous value kept.
+        old = _old()
+        new, status = gate(NODE, copy.deepcopy(old), _out(EVIDENCE_FAILURES[name]), _ctx(robert))
+&gt;       assert status == "rejected:evidence"
+E       AssertionError: assert 'rejected:schema' == 'rejected:evidence'
+E         
+E         - rejected:evidence
+E         + rejected:schema
+
+tests/test_internal.py:552: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_bad_paths_and_quotes_as_evidence[quote_not_the_value]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'rejected:evidence'&#10;  &#10;  - rejected:evidence&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'quote_not_the_value'
+
+    @pytest.mark.parametrize("name", sorted(EVIDENCE_FAILURES))
+    def test_gate_rejects_bad_paths_and_quotes_as_evidence(robert, name):
+        # §20.9 / §11 step 2 / inv. 5: invented or non-declared evidence -&gt; rejected:evidence, previous value kept.
+        old = _old()
+        new, status = gate(NODE, copy.deepcopy(old), _out(EVIDENCE_FAILURES[name]), _ctx(robert))
+&gt;       assert status == "rejected:evidence"
+E       AssertionError: assert 'rejected:schema' == 'rejected:evidence'
+E         
+E         - rejected:evidence
+E         + rejected:schema
+
+tests/test_internal.py:552: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_bad_paths_and_quotes_as_evidence[same_path_twice]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'rejected:evidence'&#10;  &#10;  - rejected:evidence&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'same_path_twice'
+
+    @pytest.mark.parametrize("name", sorted(EVIDENCE_FAILURES))
+    def test_gate_rejects_bad_paths_and_quotes_as_evidence(robert, name):
+        # §20.9 / §11 step 2 / inv. 5: invented or non-declared evidence -&gt; rejected:evidence, previous value kept.
+        old = _old()
+        new, status = gate(NODE, copy.deepcopy(old), _out(EVIDENCE_FAILURES[name]), _ctx(robert))
+&gt;       assert status == "rejected:evidence"
+E       AssertionError: assert 'rejected:schema' == 'rejected:evidence'
+E         
+E         - rejected:evidence
+E         + rejected:schema
+
+tests/test_internal.py:552: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_bad_paths_and_quotes_as_evidence[single_field]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'rejected:evidence'&#10;  &#10;  - rejected:evidence&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'single_field'
+
+    @pytest.mark.parametrize("name", sorted(EVIDENCE_FAILURES))
+    def test_gate_rejects_bad_paths_and_quotes_as_evidence(robert, name):
+        # §20.9 / §11 step 2 / inv. 5: invented or non-declared evidence -&gt; rejected:evidence, previous value kept.
+        old = _old()
+        new, status = gate(NODE, copy.deepcopy(old), _out(EVIDENCE_FAILURES[name]), _ctx(robert))
+&gt;       assert status == "rejected:evidence"
+E       AssertionError: assert 'rejected:schema' == 'rejected:evidence'
+E         
+E         - rejected:evidence
+E         + rejected:schema
+
+tests/test_internal.py:552: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_bad_paths_and_quotes_as_evidence[value_by_effective]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'rejected:evidence'&#10;  &#10;  - rejected:evidence&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'value_by_effective'
+
+    @pytest.mark.parametrize("name", sorted(EVIDENCE_FAILURES))
+    def test_gate_rejects_bad_paths_and_quotes_as_evidence(robert, name):
+        # §20.9 / §11 step 2 / inv. 5: invented or non-declared evidence -&gt; rejected:evidence, previous value kept.
+        old = _old()
+        new, status = gate(NODE, copy.deepcopy(old), _out(EVIDENCE_FAILURES[name]), _ctx(robert))
+&gt;       assert status == "rejected:evidence"
+E       AssertionError: assert 'rejected:schema' == 'rejected:evidence'
+E         
+E         - rejected:evidence
+E         + rejected:schema
+
+tests/test_internal.py:552: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_bad_paths_and_quotes_as_evidence[value_by_horizon]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'rejected:evidence'&#10;  &#10;  - rejected:evidence&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'value_by_horizon'
+
+    @pytest.mark.parametrize("name", sorted(EVIDENCE_FAILURES))
+    def test_gate_rejects_bad_paths_and_quotes_as_evidence(robert, name):
+        # §20.9 / §11 step 2 / inv. 5: invented or non-declared evidence -&gt; rejected:evidence, previous value kept.
+        old = _old()
+        new, status = gate(NODE, copy.deepcopy(old), _out(EVIDENCE_FAILURES[name]), _ctx(robert))
+&gt;       assert status == "rejected:evidence"
+E       AssertionError: assert 'rejected:schema' == 'rejected:evidence'
+E         
+E         - rejected:evidence
+E         + rejected:schema
+
+tests/test_internal.py:552: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_bad_paths_and_quotes_as_evidence[value_by_llm_field]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'rejected:evidence'&#10;  &#10;  - rejected:evidence&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'value_by_llm_field'
+
+    @pytest.mark.parametrize("name", sorted(EVIDENCE_FAILURES))
+    def test_gate_rejects_bad_paths_and_quotes_as_evidence(robert, name):
+        # §20.9 / §11 step 2 / inv. 5: invented or non-declared evidence -&gt; rejected:evidence, previous value kept.
+        old = _old()
+        new, status = gate(NODE, copy.deepcopy(old), _out(EVIDENCE_FAILURES[name]), _ctx(robert))
+&gt;       assert status == "rejected:evidence"
+E       AssertionError: assert 'rejected:schema' == 'rejected:evidence'
+E         
+E         - rejected:evidence
+E         + rejected:schema
+
+tests/test_internal.py:552: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_bad_paths_and_quotes_as_evidence[value_by_parsed_notes]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'rejected:evidence'&#10;  &#10;  - rejected:evidence&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'value_by_parsed_notes'
+
+    @pytest.mark.parametrize("name", sorted(EVIDENCE_FAILURES))
+    def test_gate_rejects_bad_paths_and_quotes_as_evidence(robert, name):
+        # §20.9 / §11 step 2 / inv. 5: invented or non-declared evidence -&gt; rejected:evidence, previous value kept.
+        old = _old()
+        new, status = gate(NODE, copy.deepcopy(old), _out(EVIDENCE_FAILURES[name]), _ctx(robert))
+&gt;       assert status == "rejected:evidence"
+E       AssertionError: assert 'rejected:schema' == 'rejected:evidence'
+E         
+E         - rejected:evidence
+E         + rejected:schema
+
+tests/test_internal.py:552: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_drops_the_whole_output_when_one_finding_is_bad" time="0.001"><failure message="AssertionError: assert ('rejected:sc...re:old', ...}) == ('rejected:ev...re:old', ...})&#10;  &#10;  At index 0 diff: 'rejected:schema' != 'rejected:evidence'&#10;  Use -v to get more diff">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_gate_drops_the_whole_output_when_one_finding_is_bad(robert):
+        old = _old()
+        out = _out(F_INTERESTS, EVIDENCE_FAILURES["made_up_path"], F_RISK)
+        new, status = gate(NODE, copy.deepcopy(old), out, _ctx(robert))
+&gt;       assert (status, new) == ("rejected:evidence", old)
+E       AssertionError: assert ('rejected:sc...re:old', ...}) == ('rejected:ev...re:old', ...})
+E         
+E         At index 0 diff: 'rejected:schema' != 'rejected:evidence'
+E         Use -v to get more diff
+
+tests/test_internal.py:560: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_schema_violations_and_drops_the_whole_output[findings_not_a_list]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'accepted'&#10;  &#10;  - accepted&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'findings_not_a_list'
+
+    @pytest.mark.parametrize("name", sorted(_schema_failures()))
+    def test_gate_rejects_schema_violations_and_drops_the_whole_output(robert, name):
+        # §20.9: reason with a digit / advisory phrase / &gt; 200 chars, &gt; 5 findings -&gt; rejected:schema; nothing is kept.
+        out = _schema_failures()[name]
+        old = _old()
+&gt;       assert gate(NODE, None, _out(F_INTERESTS), _ctx(robert))[1] == "accepted"      # the branch exists (not the unknown-node fallback)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 'rejected:schema' == 'accepted'
+E         
+E         - accepted
+E         + rejected:schema
+
+tests/test_internal.py:597: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_schema_violations_and_drops_the_whole_output[kind_missing]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'accepted'&#10;  &#10;  - accepted&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'kind_missing'
+
+    @pytest.mark.parametrize("name", sorted(_schema_failures()))
+    def test_gate_rejects_schema_violations_and_drops_the_whole_output(robert, name):
+        # §20.9: reason with a digit / advisory phrase / &gt; 200 chars, &gt; 5 findings -&gt; rejected:schema; nothing is kept.
+        out = _schema_failures()[name]
+        old = _old()
+&gt;       assert gate(NODE, None, _out(F_INTERESTS), _ctx(robert))[1] == "accepted"      # the branch exists (not the unknown-node fallback)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 'rejected:schema' == 'accepted'
+E         
+E         - accepted
+E         + rejected:schema
+
+tests/test_internal.py:597: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_schema_violations_and_drops_the_whole_output[kind_violation]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'accepted'&#10;  &#10;  - accepted&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'kind_violation'
+
+    @pytest.mark.parametrize("name", sorted(_schema_failures()))
+    def test_gate_rejects_schema_violations_and_drops_the_whole_output(robert, name):
+        # §20.9: reason with a digit / advisory phrase / &gt; 200 chars, &gt; 5 findings -&gt; rejected:schema; nothing is kept.
+        out = _schema_failures()[name]
+        old = _old()
+&gt;       assert gate(NODE, None, _out(F_INTERESTS), _ctx(robert))[1] == "accepted"      # the branch exists (not the unknown-node fallback)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 'rejected:schema' == 'accepted'
+E         
+E         - accepted
+E         + rejected:schema
+
+tests/test_internal.py:597: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_schema_violations_and_drops_the_whole_output[reason_advisory:i recommend]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'accepted'&#10;  &#10;  - accepted&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'reason_advisory:i recommend'
+
+    @pytest.mark.parametrize("name", sorted(_schema_failures()))
+    def test_gate_rejects_schema_violations_and_drops_the_whole_output(robert, name):
+        # §20.9: reason with a digit / advisory phrase / &gt; 200 chars, &gt; 5 findings -&gt; rejected:schema; nothing is kept.
+        out = _schema_failures()[name]
+        old = _old()
+&gt;       assert gate(NODE, None, _out(F_INTERESTS), _ctx(robert))[1] == "accepted"      # the branch exists (not the unknown-node fallback)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 'rejected:schema' == 'accepted'
+E         
+E         - accepted
+E         + rejected:schema
+
+tests/test_internal.py:597: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_schema_violations_and_drops_the_whole_output[reason_advisory:i suggest you]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'accepted'&#10;  &#10;  - accepted&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'reason_advisory:i suggest you'
+
+    @pytest.mark.parametrize("name", sorted(_schema_failures()))
+    def test_gate_rejects_schema_violations_and_drops_the_whole_output(robert, name):
+        # §20.9: reason with a digit / advisory phrase / &gt; 200 chars, &gt; 5 findings -&gt; rejected:schema; nothing is kept.
+        out = _schema_failures()[name]
+        old = _old()
+&gt;       assert gate(NODE, None, _out(F_INTERESTS), _ctx(robert))[1] == "accepted"      # the branch exists (not the unknown-node fallback)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 'rejected:schema' == 'accepted'
+E         
+E         - accepted
+E         + rejected:schema
+
+tests/test_internal.py:597: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_schema_violations_and_drops_the_whole_output[reason_advisory:je conseille]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'accepted'&#10;  &#10;  - accepted&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'reason_advisory:je conseille'
+
+    @pytest.mark.parametrize("name", sorted(_schema_failures()))
+    def test_gate_rejects_schema_violations_and_drops_the_whole_output(robert, name):
+        # §20.9: reason with a digit / advisory phrase / &gt; 200 chars, &gt; 5 findings -&gt; rejected:schema; nothing is kept.
+        out = _schema_failures()[name]
+        old = _old()
+&gt;       assert gate(NODE, None, _out(F_INTERESTS), _ctx(robert))[1] == "accepted"      # the branch exists (not the unknown-node fallback)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 'rejected:schema' == 'accepted'
+E         
+E         - accepted
+E         + rejected:schema
+
+tests/test_internal.py:597: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_schema_violations_and_drops_the_whole_output[reason_advisory:je recommande]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'accepted'&#10;  &#10;  - accepted&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'reason_advisory:je recommande'
+
+    @pytest.mark.parametrize("name", sorted(_schema_failures()))
+    def test_gate_rejects_schema_violations_and_drops_the_whole_output(robert, name):
+        # §20.9: reason with a digit / advisory phrase / &gt; 200 chars, &gt; 5 findings -&gt; rejected:schema; nothing is kept.
+        out = _schema_failures()[name]
+        old = _old()
+&gt;       assert gate(NODE, None, _out(F_INTERESTS), _ctx(robert))[1] == "accepted"      # the branch exists (not the unknown-node fallback)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 'rejected:schema' == 'accepted'
+E         
+E         - accepted
+E         + rejected:schema
+
+tests/test_internal.py:597: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_schema_violations_and_drops_the_whole_output[reason_advisory:nous conseillons]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'accepted'&#10;  &#10;  - accepted&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'reason_advisory:nous conseillons'
+
+    @pytest.mark.parametrize("name", sorted(_schema_failures()))
+    def test_gate_rejects_schema_violations_and_drops_the_whole_output(robert, name):
+        # §20.9: reason with a digit / advisory phrase / &gt; 200 chars, &gt; 5 findings -&gt; rejected:schema; nothing is kept.
+        out = _schema_failures()[name]
+        old = _old()
+&gt;       assert gate(NODE, None, _out(F_INTERESTS), _ctx(robert))[1] == "accepted"      # the branch exists (not the unknown-node fallback)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 'rejected:schema' == 'accepted'
+E         
+E         - accepted
+E         + rejected:schema
+
+tests/test_internal.py:597: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_schema_violations_and_drops_the_whole_output[reason_advisory:nous recommandons]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'accepted'&#10;  &#10;  - accepted&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'reason_advisory:nous recommandons'
+
+    @pytest.mark.parametrize("name", sorted(_schema_failures()))
+    def test_gate_rejects_schema_violations_and_drops_the_whole_output(robert, name):
+        # §20.9: reason with a digit / advisory phrase / &gt; 200 chars, &gt; 5 findings -&gt; rejected:schema; nothing is kept.
+        out = _schema_failures()[name]
+        old = _old()
+&gt;       assert gate(NODE, None, _out(F_INTERESTS), _ctx(robert))[1] == "accepted"      # the branch exists (not the unknown-node fallback)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 'rejected:schema' == 'accepted'
+E         
+E         - accepted
+E         + rejected:schema
+
+tests/test_internal.py:597: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_schema_violations_and_drops_the_whole_output[reason_advisory:tu devrais acheter]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'accepted'&#10;  &#10;  - accepted&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'reason_advisory:tu devrais acheter'
+
+    @pytest.mark.parametrize("name", sorted(_schema_failures()))
+    def test_gate_rejects_schema_violations_and_drops_the_whole_output(robert, name):
+        # §20.9: reason with a digit / advisory phrase / &gt; 200 chars, &gt; 5 findings -&gt; rejected:schema; nothing is kept.
+        out = _schema_failures()[name]
+        old = _old()
+&gt;       assert gate(NODE, None, _out(F_INTERESTS), _ctx(robert))[1] == "accepted"      # the branch exists (not the unknown-node fallback)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 'rejected:schema' == 'accepted'
+E         
+E         - accepted
+E         + rejected:schema
+
+tests/test_internal.py:597: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_schema_violations_and_drops_the_whole_output[reason_advisory:tu devrais vendre]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'accepted'&#10;  &#10;  - accepted&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'reason_advisory:tu devrais vendre'
+
+    @pytest.mark.parametrize("name", sorted(_schema_failures()))
+    def test_gate_rejects_schema_violations_and_drops_the_whole_output(robert, name):
+        # §20.9: reason with a digit / advisory phrase / &gt; 200 chars, &gt; 5 findings -&gt; rejected:schema; nothing is kept.
+        out = _schema_failures()[name]
+        old = _old()
+&gt;       assert gate(NODE, None, _out(F_INTERESTS), _ctx(robert))[1] == "accepted"      # the branch exists (not the unknown-node fallback)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 'rejected:schema' == 'accepted'
+E         
+E         - accepted
+E         + rejected:schema
+
+tests/test_internal.py:597: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_schema_violations_and_drops_the_whole_output[reason_advisory:vous devriez acheter]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'accepted'&#10;  &#10;  - accepted&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'reason_advisory:vous devriez acheter'
+
+    @pytest.mark.parametrize("name", sorted(_schema_failures()))
+    def test_gate_rejects_schema_violations_and_drops_the_whole_output(robert, name):
+        # §20.9: reason with a digit / advisory phrase / &gt; 200 chars, &gt; 5 findings -&gt; rejected:schema; nothing is kept.
+        out = _schema_failures()[name]
+        old = _old()
+&gt;       assert gate(NODE, None, _out(F_INTERESTS), _ctx(robert))[1] == "accepted"      # the branch exists (not the unknown-node fallback)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 'rejected:schema' == 'accepted'
+E         
+E         - accepted
+E         + rejected:schema
+
+tests/test_internal.py:597: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_schema_violations_and_drops_the_whole_output[reason_advisory:vous devriez vendre]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'accepted'&#10;  &#10;  - accepted&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'reason_advisory:vous devriez vendre'
+
+    @pytest.mark.parametrize("name", sorted(_schema_failures()))
+    def test_gate_rejects_schema_violations_and_drops_the_whole_output(robert, name):
+        # §20.9: reason with a digit / advisory phrase / &gt; 200 chars, &gt; 5 findings -&gt; rejected:schema; nothing is kept.
+        out = _schema_failures()[name]
+        old = _old()
+&gt;       assert gate(NODE, None, _out(F_INTERESTS), _ctx(robert))[1] == "accepted"      # the branch exists (not the unknown-node fallback)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 'rejected:schema' == 'accepted'
+E         
+E         - accepted
+E         + rejected:schema
+
+tests/test_internal.py:597: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_schema_violations_and_drops_the_whole_output[reason_advisory:we advise]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'accepted'&#10;  &#10;  - accepted&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'reason_advisory:we advise'
+
+    @pytest.mark.parametrize("name", sorted(_schema_failures()))
+    def test_gate_rejects_schema_violations_and_drops_the_whole_output(robert, name):
+        # §20.9: reason with a digit / advisory phrase / &gt; 200 chars, &gt; 5 findings -&gt; rejected:schema; nothing is kept.
+        out = _schema_failures()[name]
+        old = _old()
+&gt;       assert gate(NODE, None, _out(F_INTERESTS), _ctx(robert))[1] == "accepted"      # the branch exists (not the unknown-node fallback)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 'rejected:schema' == 'accepted'
+E         
+E         - accepted
+E         + rejected:schema
+
+tests/test_internal.py:597: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_schema_violations_and_drops_the_whole_output[reason_advisory:we recommend]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'accepted'&#10;  &#10;  - accepted&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'reason_advisory:we recommend'
+
+    @pytest.mark.parametrize("name", sorted(_schema_failures()))
+    def test_gate_rejects_schema_violations_and_drops_the_whole_output(robert, name):
+        # §20.9: reason with a digit / advisory phrase / &gt; 200 chars, &gt; 5 findings -&gt; rejected:schema; nothing is kept.
+        out = _schema_failures()[name]
+        old = _old()
+&gt;       assert gate(NODE, None, _out(F_INTERESTS), _ctx(robert))[1] == "accepted"      # the branch exists (not the unknown-node fallback)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 'rejected:schema' == 'accepted'
+E         
+E         - accepted
+E         + rejected:schema
+
+tests/test_internal.py:597: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_schema_violations_and_drops_the_whole_output[reason_advisory:you should buy]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'accepted'&#10;  &#10;  - accepted&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'reason_advisory:you should buy'
+
+    @pytest.mark.parametrize("name", sorted(_schema_failures()))
+    def test_gate_rejects_schema_violations_and_drops_the_whole_output(robert, name):
+        # §20.9: reason with a digit / advisory phrase / &gt; 200 chars, &gt; 5 findings -&gt; rejected:schema; nothing is kept.
+        out = _schema_failures()[name]
+        old = _old()
+&gt;       assert gate(NODE, None, _out(F_INTERESTS), _ctx(robert))[1] == "accepted"      # the branch exists (not the unknown-node fallback)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 'rejected:schema' == 'accepted'
+E         
+E         - accepted
+E         + rejected:schema
+
+tests/test_internal.py:597: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_schema_violations_and_drops_the_whole_output[reason_advisory:you should sell]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'accepted'&#10;  &#10;  - accepted&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'reason_advisory:you should sell'
+
+    @pytest.mark.parametrize("name", sorted(_schema_failures()))
+    def test_gate_rejects_schema_violations_and_drops_the_whole_output(robert, name):
+        # §20.9: reason with a digit / advisory phrase / &gt; 200 chars, &gt; 5 findings -&gt; rejected:schema; nothing is kept.
+        out = _schema_failures()[name]
+        old = _old()
+&gt;       assert gate(NODE, None, _out(F_INTERESTS), _ctx(robert))[1] == "accepted"      # the branch exists (not the unknown-node fallback)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 'rejected:schema' == 'accepted'
+E         
+E         - accepted
+E         + rejected:schema
+
+tests/test_internal.py:597: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_schema_violations_and_drops_the_whole_output[reason_advisory_mixed_case]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'accepted'&#10;  &#10;  - accepted&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'reason_advisory_mixed_case'
+
+    @pytest.mark.parametrize("name", sorted(_schema_failures()))
+    def test_gate_rejects_schema_violations_and_drops_the_whole_output(robert, name):
+        # §20.9: reason with a digit / advisory phrase / &gt; 200 chars, &gt; 5 findings -&gt; rejected:schema; nothing is kept.
+        out = _schema_failures()[name]
+        old = _old()
+&gt;       assert gate(NODE, None, _out(F_INTERESTS), _ctx(robert))[1] == "accepted"      # the branch exists (not the unknown-node fallback)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 'rejected:schema' == 'accepted'
+E         
+E         - accepted
+E         + rejected:schema
+
+tests/test_internal.py:597: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_schema_violations_and_drops_the_whole_output[reason_missing]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'accepted'&#10;  &#10;  - accepted&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'reason_missing'
+
+    @pytest.mark.parametrize("name", sorted(_schema_failures()))
+    def test_gate_rejects_schema_violations_and_drops_the_whole_output(robert, name):
+        # §20.9: reason with a digit / advisory phrase / &gt; 200 chars, &gt; 5 findings -&gt; rejected:schema; nothing is kept.
+        out = _schema_failures()[name]
+        old = _old()
+&gt;       assert gate(NODE, None, _out(F_INTERESTS), _ctx(robert))[1] == "accepted"      # the branch exists (not the unknown-node fallback)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 'rejected:schema' == 'accepted'
+E         
+E         - accepted
+E         + rejected:schema
+
+tests/test_internal.py:597: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_schema_violations_and_drops_the_whole_output[reason_over_200_chars]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'accepted'&#10;  &#10;  - accepted&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'reason_over_200_chars'
+
+    @pytest.mark.parametrize("name", sorted(_schema_failures()))
+    def test_gate_rejects_schema_violations_and_drops_the_whole_output(robert, name):
+        # §20.9: reason with a digit / advisory phrase / &gt; 200 chars, &gt; 5 findings -&gt; rejected:schema; nothing is kept.
+        out = _schema_failures()[name]
+        old = _old()
+&gt;       assert gate(NODE, None, _out(F_INTERESTS), _ctx(robert))[1] == "accepted"      # the branch exists (not the unknown-node fallback)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 'rejected:schema' == 'accepted'
+E         
+E         - accepted
+E         + rejected:schema
+
+tests/test_internal.py:597: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_schema_violations_and_drops_the_whole_output[reason_with_a_digit]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'accepted'&#10;  &#10;  - accepted&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'reason_with_a_digit'
+
+    @pytest.mark.parametrize("name", sorted(_schema_failures()))
+    def test_gate_rejects_schema_violations_and_drops_the_whole_output(robert, name):
+        # §20.9: reason with a digit / advisory phrase / &gt; 200 chars, &gt; 5 findings -&gt; rejected:schema; nothing is kept.
+        out = _schema_failures()[name]
+        old = _old()
+&gt;       assert gate(NODE, None, _out(F_INTERESTS), _ctx(robert))[1] == "accepted"      # the branch exists (not the unknown-node fallback)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 'rejected:schema' == 'accepted'
+E         
+E         - accepted
+E         + rejected:schema
+
+tests/test_internal.py:597: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_schema_violations_and_drops_the_whole_output[reason_with_a_digit_at_the_end]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'accepted'&#10;  &#10;  - accepted&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'reason_with_a_digit_at_the_end'
+
+    @pytest.mark.parametrize("name", sorted(_schema_failures()))
+    def test_gate_rejects_schema_violations_and_drops_the_whole_output(robert, name):
+        # §20.9: reason with a digit / advisory phrase / &gt; 200 chars, &gt; 5 findings -&gt; rejected:schema; nothing is kept.
+        out = _schema_failures()[name]
+        old = _old()
+&gt;       assert gate(NODE, None, _out(F_INTERESTS), _ctx(robert))[1] == "accepted"      # the branch exists (not the unknown-node fallback)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 'rejected:schema' == 'accepted'
+E         
+E         - accepted
+E         + rejected:schema
+
+tests/test_internal.py:597: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_rejects_schema_violations_and_drops_the_whole_output[six_findings]" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'accepted'&#10;  &#10;  - accepted&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+name = 'six_findings'
+
+    @pytest.mark.parametrize("name", sorted(_schema_failures()))
+    def test_gate_rejects_schema_violations_and_drops_the_whole_output(robert, name):
+        # §20.9: reason with a digit / advisory phrase / &gt; 200 chars, &gt; 5 findings -&gt; rejected:schema; nothing is kept.
+        out = _schema_failures()[name]
+        old = _old()
+&gt;       assert gate(NODE, None, _out(F_INTERESTS), _ctx(robert))[1] == "accepted"      # the branch exists (not the unknown-node fallback)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 'rejected:schema' == 'accepted'
+E         
+E         - accepted
+E         + rejected:schema
+
+tests/test_internal.py:597: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_gate_status_is_always_one_of_the_known_values" time="0.001"><failure message="AssertionError: assert 'rejected:schema' == 'accepted'&#10;  &#10;  - accepted&#10;  + rejected:schema">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_gate_status_is_always_one_of_the_known_values(robert):
+        known = {"accepted", "clamped", "kept:abstain", "rejected:evidence", "rejected:schema"}
+        outs = [_out(F_INTERESTS), _out(abstain=True), *[_out(f) for f in EVIDENCE_FAILURES.values()],
+                *_schema_failures().values()]
+        assert {gate(NODE, None, o, _ctx(robert))[1] for o in outs} &lt;= known
+&gt;       assert gate(NODE, None, outs[0], _ctx(robert))[1] == "accepted"          # the branch exists
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert 'rejected:schema' == 'accepted'
+E         
+E         - accepted
+E         + rejected:schema
+
+tests/test_internal.py:613: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_n6_schema_and_prompt_exist_and_encode_the_contract" time="0.000"><failure message="AssertionError: assert False&#10; +  where False = is_file()&#10; +    where is_file = (PosixPath('/home/safraa/Downloads/Datathon2026/ca-p011/coherence_analyzer/llm/schemas') / 'profile_consistency.json').is_file&#10; +      where PosixPath('/home/safraa/Downloads/Datathon2026/ca-p011/coherence_analyzer/llm/schemas') = config.LLM_SCHEMAS_DIR">def test_n6_schema_and_prompt_exist_and_encode_the_contract():
+        # §20.9: schema llm/schemas/profile_consistency.json, prompt llm/prompts/profile_consistency.v1.md.
+        assert extractors.prompt_version(NODE) == "profile_consistency.v1"
+&gt;       assert (config.LLM_SCHEMAS_DIR / "profile_consistency.json").is_file()
+E       AssertionError: assert False
+E        +  where False = is_file()
+E        +    where is_file = (PosixPath('/home/safraa/Downloads/Datathon2026/ca-p011/coherence_analyzer/llm/schemas') / 'profile_consistency.json').is_file
+E        +      where PosixPath('/home/safraa/Downloads/Datathon2026/ca-p011/coherence_analyzer/llm/schemas') = config.LLM_SCHEMAS_DIR
+
+tests/test_internal.py:622: AssertionError</failure></testcase><testcase classname="tests.test_internal" name="test_recorded_mock_response_for_robert_is_hand_written_valid_and_gated" time="0.000"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_recorded_mock_response_for_robert_is_hand_written_valid_and_gated(robert):
+        # P0.11: scripts/handwrite_llm_cache.py records it (model id fixture:hand-written), as P0.10 did for N3.
+&gt;       entry = _recorded_entry(internal.n6_payload(robert, internal.rule_findings(robert, AS_OF)))
+                                                            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_internal.py:648: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_check_profile_robert_in_mock_mode" time="0.000"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_check_profile_robert_in_mock_mode(robert):
+        # §20.9: C1 first, then the hand-written N6 tension (interests vs notes) as info; status = worst = warning.
+        before = copy.deepcopy(robert)
+&gt;       res = internal.check_profile(robert, AS_OF)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_internal.py:671: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12', use_llm = True
+
+    def check_profile(profile: dict, as_of: str, *, use_llm: bool = True) -&gt; dict:
+        """`{status, findings, llm: {gate_status, call_log} | None}`; status = worst finding status or `pass`."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:27: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_check_profile_cache_miss_keeps_rule_findings_only" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_check_profile_cache_miss_keeps_rule_findings_only(robert):
+        # §20.9: mock mode + LLMCacheMiss -&gt; the rules' findings only, llm.gate_status "skipped:cache_miss".
+        p = copy.deepcopy(robert)
+        p["values"]["notes"] = "I have never been recorded in the mock cache."          # a genuine miss
+&gt;       res = internal.check_profile(p, AS_OF)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_internal.py:693: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12', use_llm = True
+
+    def check_profile(profile: dict, as_of: str, *, use_llm: bool = True) -&gt; dict:
+        """`{status, findings, llm: {gate_status, call_log} | None}`; status = worst finding status or `pass`."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:27: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_check_profile_cache_miss_on_a_clean_profile_is_a_pass" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+fake_llm = &lt;function fake_llm.&lt;locals&gt;.fake at 0x739c23994eb0&gt;
+
+    def test_check_profile_cache_miss_on_a_clean_profile_is_a_pass(robert, fake_llm):
+        fake_llm(raises=bedrock.LLMCacheMiss("no recording"))
+&gt;       res = internal.check_profile(_clean(robert), AS_OF)
+                                     ^^^^^^^^^^^^^^
+
+tests/test_internal.py:702: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:152: in _clean
+    assert _ids(p) == []
+           ^^^^^^^
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_check_profile_without_llm_makes_no_call" time="0.000"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+fake_llm = &lt;function fake_llm.&lt;locals&gt;.fake at 0x739c23995590&gt;
+
+    def test_check_profile_without_llm_makes_no_call(robert, fake_llm):
+        fake_llm(_out(F_INTERESTS))
+&gt;       res = internal.check_profile(robert, AS_OF, use_llm=False)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_internal.py:709: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12', use_llm = False
+
+    def check_profile(profile: dict, as_of: str, *, use_llm: bool = True) -&gt; dict:
+        """`{status, findings, llm: {gate_status, call_log} | None}`; status = worst finding status or `pass`."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:27: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_check_profile_sends_exactly_the_n6_payload_to_the_node" time="0.000"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+fake_llm = &lt;function fake_llm.&lt;locals&gt;.fake at 0x739c23995c70&gt;
+
+    def test_check_profile_sends_exactly_the_n6_payload_to_the_node(robert, fake_llm):
+        fake_llm(_out())
+&gt;       internal.check_profile(robert, AS_OF)
+
+tests/test_internal.py:719: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12', use_llm = True
+
+    def check_profile(profile: dict, as_of: str, *, use_llm: bool = True) -&gt; dict:
+        """`{status, findings, llm: {gate_status, call_log} | None}`; status = worst finding status or `pass`."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:27: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_status_mapping_contradiction_warning_tension_info_never_violation" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+fake_llm = &lt;function fake_llm.&lt;locals&gt;.fake at 0x739c23996350&gt;
+
+    def test_status_mapping_contradiction_warning_tension_info_never_violation(robert, fake_llm):
+        # §20.9 / inv. 3: contradiction -&gt; warning, tension -&gt; info; status = worst finding status, `pass` if none.
+&gt;       clean = _clean(robert)
+                ^^^^^^^^^^^^^^
+
+tests/test_internal.py:728: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:152: in _clean
+    assert _ids(p) == []
+           ^^^^^^^
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_check_profile_status_is_the_worst_of_its_findings" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+fake_llm = &lt;function fake_llm.&lt;locals&gt;.fake at 0x739c23996a30&gt;
+
+    def test_check_profile_status_is_the_worst_of_its_findings(robert, fake_llm):
+        fake_llm(_out(F_INTERESTS))
+&gt;       for profile in (robert, _clean(robert)):
+                                ^^^^^^^^^^^^^^
+
+tests/test_internal.py:756: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+tests/test_internal.py:152: in _clean
+    assert _ids(p) == []
+           ^^^^^^^
+tests/test_internal.py:81: in _ids
+    return [f["id"] for f in internal.rule_findings(profile, as_of)]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12'
+
+    def rule_findings(profile: dict, as_of: str) -&gt; list[dict]:
+        """C1-C5 findings, in rule order (C1 may yield one finding per goal)."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:17: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_n6_finding_with_a_rule_findings_path_set_is_dropped" time="0.000"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+fake_llm = &lt;function fake_llm.&lt;locals&gt;.fake at 0x739c239971c0&gt;
+
+    def test_n6_finding_with_a_rule_findings_path_set_is_dropped(robert, fake_llm):
+        # §20.9: "a finding whose path set equals a C-finding's path set is dropped (rules win)".
+        dup = _finding(["objectives.goals[1].date", "objectives.horizon_years"], ["2032-01", "4"])
+        fake_llm(_out(dup, F_INTERESTS))
+&gt;       res = internal.check_profile(robert, AS_OF)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_internal.py:766: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12', use_llm = True
+
+    def check_profile(profile: dict, as_of: str, *, use_llm: bool = True) -&gt; dict:
+        """`{status, findings, llm: {gate_status, call_log} | None}`; status = worst finding status or `pass`."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:27: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_check_profile_drops_a_rejected_n6_output_and_keeps_the_rules[made_up_path]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+fake_llm = &lt;function fake_llm.&lt;locals&gt;.fake at 0x739c239978a0&gt;
+name = 'made_up_path'
+
+    @pytest.mark.parametrize("name", ["made_up_path", "value_by_effective", "notes_quote_wrong_case", "single_field"])
+    def test_check_profile_drops_a_rejected_n6_output_and_keeps_the_rules(robert, fake_llm, name):
+        # inv. 4: a gate failure keeps the previous state; the rule findings are unaffected.
+        fake_llm(_out(F_INTERESTS, EVIDENCE_FAILURES[name]))
+&gt;       res = internal.check_profile(robert, AS_OF)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_internal.py:781: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12', use_llm = True
+
+    def check_profile(profile: dict, as_of: str, *, use_llm: bool = True) -&gt; dict:
+        """`{status, findings, llm: {gate_status, call_log} | None}`; status = worst finding status or `pass`."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:27: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_check_profile_drops_a_rejected_n6_output_and_keeps_the_rules[value_by_effective]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+fake_llm = &lt;function fake_llm.&lt;locals&gt;.fake at 0x739c239966c0&gt;
+name = 'value_by_effective'
+
+    @pytest.mark.parametrize("name", ["made_up_path", "value_by_effective", "notes_quote_wrong_case", "single_field"])
+    def test_check_profile_drops_a_rejected_n6_output_and_keeps_the_rules(robert, fake_llm, name):
+        # inv. 4: a gate failure keeps the previous state; the rule findings are unaffected.
+        fake_llm(_out(F_INTERESTS, EVIDENCE_FAILURES[name]))
+&gt;       res = internal.check_profile(robert, AS_OF)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_internal.py:781: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12', use_llm = True
+
+    def check_profile(profile: dict, as_of: str, *, use_llm: bool = True) -&gt; dict:
+        """`{status, findings, llm: {gate_status, call_log} | None}`; status = worst finding status or `pass`."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:27: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_check_profile_drops_a_rejected_n6_output_and_keeps_the_rules[notes_quote_wrong_case]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+fake_llm = &lt;function fake_llm.&lt;locals&gt;.fake at 0x739c23996560&gt;
+name = 'notes_quote_wrong_case'
+
+    @pytest.mark.parametrize("name", ["made_up_path", "value_by_effective", "notes_quote_wrong_case", "single_field"])
+    def test_check_profile_drops_a_rejected_n6_output_and_keeps_the_rules(robert, fake_llm, name):
+        # inv. 4: a gate failure keeps the previous state; the rule findings are unaffected.
+        fake_llm(_out(F_INTERESTS, EVIDENCE_FAILURES[name]))
+&gt;       res = internal.check_profile(robert, AS_OF)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_internal.py:781: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12', use_llm = True
+
+    def check_profile(profile: dict, as_of: str, *, use_llm: bool = True) -&gt; dict:
+        """`{status, findings, llm: {gate_status, call_log} | None}`; status = worst finding status or `pass`."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:27: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_check_profile_drops_a_rejected_n6_output_and_keeps_the_rules[single_field]" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+fake_llm = &lt;function fake_llm.&lt;locals&gt;.fake at 0x739c23995b10&gt;
+name = 'single_field'
+
+    @pytest.mark.parametrize("name", ["made_up_path", "value_by_effective", "notes_quote_wrong_case", "single_field"])
+    def test_check_profile_drops_a_rejected_n6_output_and_keeps_the_rules(robert, fake_llm, name):
+        # inv. 4: a gate failure keeps the previous state; the rule findings are unaffected.
+        fake_llm(_out(F_INTERESTS, EVIDENCE_FAILURES[name]))
+&gt;       res = internal.check_profile(robert, AS_OF)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_internal.py:781: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12', use_llm = True
+
+    def check_profile(profile: dict, as_of: str, *, use_llm: bool = True) -&gt; dict:
+        """`{status, findings, llm: {gate_status, call_log} | None}`; status = worst finding status or `pass`."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:27: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_n6_questions_are_fixed_templates_never_llm_text" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+fake_llm = &lt;function fake_llm.&lt;locals&gt;.fake at 0x739c239973d0&gt;
+
+    def test_n6_questions_are_fixed_templates_never_llm_text(robert, fake_llm):
+        # §20.9 / D7 point 1: one generic template naming the two first fields; the LLM's reason never reaches it.
+        three = _finding(F_INTERESTS["fields"] + ["risk.declared"], F_INTERESTS["quotes"] + ["low_moderate"],
+                         reason="Beta wording that differs entirely.")
+        other = _finding(F_DD["fields"], F_DD["quotes"], reason="Gamma wording about drawdown.")
+        first = _finding(F_INTERESTS["fields"], F_INTERESTS["quotes"], reason="Alpha wording about interests.")
+        fake_llm(_out(first, three, other))
+&gt;       res = internal.check_profile(robert, AS_OF)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_internal.py:797: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12', use_llm = True
+
+    def check_profile(profile: dict, as_of: str, *, use_llm: bool = True) -&gt; dict:
+        """`{status, findings, llm: {gate_status, call_log} | None}`; status = worst finding status or `pass`."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:27: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_check_profile_is_deterministic_and_never_mutates_the_profile" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+fake_llm = &lt;function fake_llm.&lt;locals&gt;.fake at 0x739c23995430&gt;
+
+    def test_check_profile_is_deterministic_and_never_mutates_the_profile(robert, fake_llm):
+        fake_llm(_out(F_INTERESTS, F_RISK))
+        p = _all_rules_profile(robert)
+        before = copy.deepcopy(p)
+&gt;       first = internal.check_profile(p, AS_OF)
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_internal.py:815: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12', use_llm = True
+
+    def check_profile(profile: dict, as_of: str, *, use_llm: bool = True) -&gt; dict:
+        """`{status, findings, llm: {gate_status, call_log} | None}`; status = worst finding status or `pass`."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:27: NotImplementedError</failure></testcase><testcase classname="tests.test_internal" name="test_internal_coherence_never_feeds_limits" time="0.001"><failure message="NotImplementedError">robert = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+fake_llm = &lt;function fake_llm.&lt;locals&gt;.fake at 0x739c23994eb0&gt;
+
+    def test_internal_coherence_never_feeds_limits(robert, fake_llm):
+        # Invariant 2: running the check (with accepted N6 findings) changes neither the profile nor the limits it yields.
+        fake_llm(_out(F_INTERESTS, F_RISK))
+        value = 400000
+    
+        def build(profile):
+            derived = derive.derive_all(profile, portfolio_value_cad=value, as_of=AS_OF)
+            return limits_mod.build_limits(derived, value)
+    
+        before_profile, before_limits = copy.deepcopy(robert), build(robert)
+&gt;       res = internal.check_profile(robert, AS_OF)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+tests/test_internal.py:833: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+as_of = '2026-11-12', use_llm = True
+
+    def check_profile(profile: dict, as_of: str, *, use_llm: bool = True) -&gt; dict:
+        """`{status, findings, llm: {gate_status, call_log} | None}`; status = worst finding status or `pass`."""
+&gt;       raise NotImplementedError
+E       NotImplementedError
+
+coherence_analyzer/coherence/internal.py:27: NotImplementedError</failure></testcase></testsuite></testsuites>
