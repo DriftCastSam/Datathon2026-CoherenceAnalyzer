@@ -1,6 +1,6 @@
 You are in PHASE B (implement) of task {id}: {title}.
 
-Read CLAUDE.md, then SPEC.md sections {spec}. SPEC.md is the source of truth.
+Read CLAUDE.md, then these spec sections: {spec}. SPEC.md is the source of truth; docs/spec-decisions.md and docs/spec-factors.md win where they are more specific.
 
 Goal: make these FROZEN tests pass without skips{skip_rule}: {tests}
 Files you will most likely touch: {code}

@@ -43,19 +43,71 @@
     },
     {
       "id": "P0.7",
-      "title": "explain: payload, template fallback, numcheck, N5",
-      "spec": ["§1 inv. 6-7, 9", "§9", "§15 test_numcheck"],
-      "tests": ["tests/test_numcheck.py", "tests/test_explain.py"],
-      "code": ["coherence_analyzer/explain.py", "coherence_analyzer/llm/schemas/explainer.json", "coherence_analyzer/llm/prompts/explainer.v1.md", "fixtures/llm_cache/"],
-      "notes": "numcheck accepts '7,4 %', '7.4%', '360 000 $', '$360,000'; rejects a number not in the payload; advisory blocklist (FR+EN) rejects. template_explain is deterministic (same payload -> byte-identical output) and always passes its own numcheck. explain() mode is llm | llm_retry | template; a cached LLM output containing an invented number must end in mode=template. Disclaimer is the fixed text from config, never LLM text."
+      "title": "five factors: mapping, factor modules, report sections, template_section, numcheck",
+      "spec": [
+        "docs/spec-factors.md §20.2-20.4, §20.8 test_factors",
+        "docs/spec-decisions.md D3 D5",
+        "§7.5",
+        "§9.3 numcheck",
+        "§13",
+        "§15 test_numcheck"
+      ],
+      "tests": [
+        "tests/test_factors.py",
+        "tests/test_numcheck.py"
+      ],
+      "code": [
+        "coherence_analyzer/factors/",
+        "coherence_analyzer/coherence/report.py",
+        "coherence_analyzer/explain.py"
+      ],
+      "notes": "Factor modules are views: do not move or change rules/ or coherence/hard.py. CHECK_FACTOR covers H1-H14, S1-S4, G1, O1 exactly once (table in §20.2). Measured on the real code (hard.run_all, engine.analyse(market, engine.ROBERT_NVDA, 48, 400000), profile derived with as_of 2026-11-12): non-pass checks are H3, H4, H7, H8, H9, H10 violation and H6, H10 unknown. So sections: horizon violation, risque violation, contraintes violation, objectif pass, preferences pass; Robert baseline: contraintes unknown (H6, H10), all others pass, verdict coherent. Section facts pre-format numbers in fr-CA ('13,4 %', '360 000 $'). template_section(facts) is deterministic and its text passes numcheck against its own facts. numcheck accepts '7,4 %', '7.4%', '360 000 $', '$360,000'; rejects a number not in the payload; small integer counts <= 10 exempt. No LLM in this task."
     },
     {
       "id": "P0.8",
-      "title": "pipeline flows B and C + cli demo (Robert end-to-end offline)",
-      "spec": ["§4", "§10", "§12", "§13", "§15 test_pipeline_offline"],
-      "tests": ["tests/test_pipeline_offline.py"],
-      "code": ["coherence_analyzer/pipeline.py", "coherence_analyzer/store.py", "coherence_analyzer/cli.py", "coherence_analyzer/schemas/report.json"],
-      "notes": "P0 acceptance = Robert: `cli check fixtures/robert --intent in_0001 --auto-confirm` in mock mode writes a schema-valid report (verdict incoherent) and an audit record; running it twice gives byte-identical reports except run_id/timestamps (determinism test). `demo` runs whatever personas have complete fixtures and skips the rest with a printed notice (Amira/Mateo profiles are P1). Verdicts: three values only, unknowns never change the verdict (docs/spec-decisions.md D3)."
+      "title": "narration loop: N5 explainer per section, verifier V1-V5, retry once, template fallback",
+      "spec": [
+        "docs/spec-factors.md §20.5, §20.8 test_explain",
+        "§1 inv. 5-7, 9",
+        "§6.1",
+        "§9.3",
+        "§9.4",
+        "docs/spec-decisions.md D6"
+      ],
+      "tests": [
+        "tests/test_explain.py"
+      ],
+      "code": [
+        "coherence_analyzer/explain.py",
+        "coherence_analyzer/llm/schemas/explainer.json",
+        "coherence_analyzer/llm/prompts/explainer.v1.md",
+        "coherence_analyzer/llm/extractors.py",
+        "fixtures/llm_cache/"
+      ],
+      "notes": "Use the P0.6 bedrock.call_tool and cache_key; tests run in mock mode only. Hand-write llm_cache entries for Robert + NVDA's three non-pass sections (horizon, risque, contraintes): one good (mode llm), one bad-then-good (llm_retry; the retry payload carries retry_failures so it has its own cache key), one bad twice (template). Each verifier rule V1-V5 has its own rejecting test case. pass sections must not call the LLM (assert via a call counter, or that no cache lookup happens). explanation.headline is template text; disclaimer is the fixed config text; explanation.mode is the worst section mode."
+    },
+    {
+      "id": "P0.9",
+      "title": "pipeline flows B and C + cli demo (Robert end-to-end offline, five sections)",
+      "spec": [
+        "§4",
+        "§10",
+        "§12",
+        "§13",
+        "docs/spec-factors.md §20.4",
+        "§15 test_pipeline_offline",
+        "docs/spec-decisions.md D3 D5"
+      ],
+      "tests": [
+        "tests/test_pipeline_offline.py"
+      ],
+      "code": [
+        "coherence_analyzer/pipeline.py",
+        "coherence_analyzer/store.py",
+        "coherence_analyzer/cli.py",
+        "coherence_analyzer/schemas/report.json"
+      ],
+      "notes": "P0 acceptance = Robert: `cli check fixtures/robert --intent in_0001 --auto-confirm` in mock mode writes a schema-valid report (verdict incoherent, 5 sections in display order objectif..preferences, every check has a factor key) and an audit record (with per-section narration modes and model_id); running it twice gives byte-identical reports except run_id/timestamps. `demo` runs whatever personas have complete fixtures and skips the rest with a printed notice (Amira/Mateo are P1). Verdicts: three values only, unknowns never change the verdict (D3)."
     }
   ]
 }
