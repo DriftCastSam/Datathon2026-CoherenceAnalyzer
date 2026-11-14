@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="6" skipped="0" tests="15" time="4.132" timestamp="2026-11-14T23:23:27.640289+00:00" hostname="bomboclat-laptop"><testcase classname="tests.test_d10_site" name="test_design_text_has_no_advisory_phrase" time="0.005" /><testcase classname="tests.test_d10_site" name="test_design_source_has_no_advisory_phrase_in_attributes" time="0.003" /><testcase classname="tests.test_d10_site" name="test_design_has_no_option_or_alternative_wording" time="0.001"><failure message="assert &lt;re.Match object; span=(2091, 2098), match='options'&gt; is None&#10; +  where &lt;re.Match object; span=(2091, 2098), match='options'&gt; = &lt;function search at 0x74ae7cd77ed0&gt;('\\boptions?\\b', &quot;coherenceanalyzer screens coherenceanalyzer · ecrans du produit final, v2 refait selon l'idiome visuel d'une banque c...u'a 2,0 % tient dans vos limites (prorata, tous les placements). limite atteinte : h9. sommairecoherenceverifierprofil&quot;)&#10; +    where &lt;function search at 0x74ae7cd77ed0&gt; = re.search">text = "CoherenceAnalyzer Screens CoherenceAnalyzer · écrans du produit final, v2 Refait selon l'idiome visuel d'une banque c...u'à 2,0 % tient dans vos limites (prorata, tous les placements). Limite atteinte : H9. SommaireCohérenceVérifierProfil"
+raw = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width, initial...ment.querySelectorAll(".tabs span").forEach(o=&gt;o.classList.remove("on"));t.classList.add("on")}));\n})();\n&lt;/script&gt;\n'
+
+    def test_design_has_no_option_or_alternative_wording(text, raw):
+        """D10 item 2 / SPEC §8: 'options' and 'alternatives' are not allowed; k-option style and tag removed."""
+        low = norm(text)
+&gt;       assert re.search(r"\boptions?\b", low) is None
+E       assert &lt;re.Match object; span=(2091, 2098), match='options'&gt; is None
+E        +  where &lt;re.Match object; span=(2091, 2098), match='options'&gt; = &lt;function search at 0x74ae7cd77ed0&gt;('\\boptions?\\b', "coherenceanalyzer screens coherenceanalyzer · ecrans du produit final, v2 refait selon l'idiome visuel d'une banque c...u'a 2,0 % tient dans vos limites (prorata, tous les placements). limite atteinte : h9. sommairecoherenceverifierprofil")
+E        +    where &lt;function search at 0x74ae7cd77ed0&gt; = re.search
+
+tests/test_d10_site.py:134: AssertionError</failure></testcase><testcase classname="tests.test_d10_site" name="test_design_removed_fits_in_limits_block_and_card" time="0.002"><failure message="AssertionError: ce qui tient dans vos limites&#10;assert 'ce qui tien... vos limites' not in 'coherencean...rifierprofil'&#10;  &#10;  'ce qui tient dans vos limites' is contained here:&#10;[+3 more lines; full report in element text]">text = "CoherenceAnalyzer Screens CoherenceAnalyzer · écrans du produit final, v2 Refait selon l'idiome visuel d'une banque c...u'à 2,0 % tient dans vos limites (prorata, tous les placements). Limite atteinte : H9. SommaireCohérenceVérifierProfil"
+raw = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width, initial...ment.querySelectorAll(".tabs span").forEach(o=&gt;o.classList.remove("on"));t.classList.add("on")}));\n})();\n&lt;/script&gt;\n'
+
+    def test_design_removed_fits_in_limits_block_and_card(text, raw):
+        """D10: the 'Ce qui tient dans vos limites' block and the 'Jusqu'à 2,0 %' card are gone."""
+        low = norm(text)
+        for phrase in ("ce qui tient dans vos limites", "tient dans vos limites", "dans vos limites",
+                       "jusqu'a 2,0 %", "jusqu'a 2.0 %", "jusqu'a 2,0%"):
+            # SPEC-AMBIGUITY: "dans vos limites" alone could be harmless prose; stricter reading bans it since the
+            # removed block/card used exactly that wording to present sizes as acceptable.
+&gt;           assert phrase not in low, phrase
+E           AssertionError: ce qui tient dans vos limites
+E           assert 'ce qui tien... vos limites' not in 'coherencean...rifierprofil'
+E             
+E             'ce qui tient dans vos limites' is contained here:
+E             ?           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^                                                                                                                                                                                                                                                                                                                                                                                                                                                                             ...
+E             
+E             ...Full output truncated, use '-vv' to show
+
+tests/test_d10_site.py:150: AssertionError</failure></testcase><testcase classname="tests.test_d10_site" name="test_design_no_text_suggests_a_funding_variant_or_size" time="0.001"><failure message="assert &lt;re.Match object; span=(1832, 1839), match='prorata'&gt; is None&#10; +  where &lt;re.Match object; span=(1832, 1839), match='prorata'&gt; = &lt;function search at 0x74ae7cd77ed0&gt;('\\bprorata\\b', &quot;coherenceanalyzer screens coherenceanalyzer · ecrans du produit final, v2 refait selon l'idiome visuel d'une banque c...u'a 2,0 % tient dans vos limites (prorata, tous les placements). limite atteinte : h9. sommairecoherenceverifierprofil&quot;)&#10; +    where &lt;function search at 0x74ae7cd77ed0&gt; = re.search">text = "CoherenceAnalyzer Screens CoherenceAnalyzer · écrans du produit final, v2 Refait selon l'idiome visuel d'une banque c...u'à 2,0 % tient dans vos limites (prorata, tous les placements). Limite atteinte : H9. SommaireCohérenceVérifierProfil"
+
+    def test_design_no_text_suggests_a_funding_variant_or_size(text):
+        """D10 item 1: no 'Prorata, ...' funding variant is offered and no 'Depuis ZST.TO &lt;size&gt;' card remains."""
+        low = norm(text)
+&gt;       assert re.search(r"\bprorata\b", low) is None
+E       assert &lt;re.Match object; span=(1832, 1839), match='prorata'&gt; is None
+E        +  where &lt;re.Match object; span=(1832, 1839), match='prorata'&gt; = &lt;function search at 0x74ae7cd77ed0&gt;('\\bprorata\\b', "coherenceanalyzer screens coherenceanalyzer · ecrans du produit final, v2 refait selon l'idiome visuel d'une banque c...u'a 2,0 % tient dans vos limites (prorata, tous les placements). limite atteinte : h9. sommairecoherenceverifierprofil")
+E        +    where &lt;function search at 0x74ae7cd77ed0&gt; = re.search
+
+tests/test_d10_site.py:161: AssertionError</failure></testcase><testcase classname="tests.test_d10_site" name="test_design_has_factual_headroom_line_in_flow_b_report" time="0.002"><failure message="AssertionError: headroom line (SPEC §8 FR template) missing from board 2&#10;assert None is not None">raw = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width, initial...ment.querySelectorAll(".tabs span").forEach(o=&gt;o.classList.remove("on"));t.classList.add("on")}));\n})();\n&lt;/script&gt;\n'
+
+    def test_design_has_factual_headroom_line_in_flow_b_report(raw):
+        """SPEC §8 template form: FR « Avec le financement indiqué (ZST.TO), la transaction franchit votre limite H9
+        au-delà de X %. » shown in the flow-B report board (board 2)."""
+        board = html_text(_board(raw, 2)).replace("\xa0", " ").replace("\u202f", " ")
+        m = HEADROOM_FR.search(board)
+&gt;       assert m is not None, "headroom line (SPEC §8 FR template) missing from board 2"
+E       AssertionError: headroom line (SPEC §8 FR template) missing from board 2
+E       assert None is not None
+
+tests/test_d10_site.py:176: AssertionError</failure></testcase><testcase classname="tests.test_d10_site" name="test_design_headroom_line_is_flow_b_only" time="0.001" /><testcase classname="tests.test_d10_site" name="test_design_headroom_line_has_no_action_framing" time="0.002"><failure message="assert None is not None">raw = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width, initial...ment.querySelectorAll(".tabs span").forEach(o=&gt;o.classList.remove("on"));t.classList.add("on")}));\n})();\n&lt;/script&gt;\n'
+
+    def test_design_headroom_line_has_no_action_framing(raw):
+        """The headroom line is a fact: no leading 'Option'/'Jusqu'à' framing and no verbs of action around it."""
+        board = html_text(_board(raw, 2))
+        m = HEADROOM_FR.search(board)
+&gt;       assert m is not None
+E       assert None is not None
+
+tests/test_d10_site.py:194: AssertionError</failure></testcase><testcase classname="tests.test_d10_site" name="test_design_does_not_rank_or_prefer_choices" time="0.002" /><testcase classname="tests.test_d10_site" name="test_whatif_strings_and_docstrings_have_no_option_ranking_or_advice" time="0.006" /><testcase classname="tests.test_d10_site" name="test_whatif_docstrings_present_scenarios_as_user_chosen" time="0.000"><failure message="AssertionError: size&#10;assert 'size' in 'precompute the dashboard\'s &quot;search and ask&quot; universe and &quot;what-if&quot; scenarios with the real engine. for each asset of...mmendation: the user picks the asset. output (under &lt;out&gt;/): universe.json, whatif.json ({ticker: {asset, scenarios}})'">whatif_tree = Module(body=[Expr(value=Constant(value='Precompute the dashboard\'s "Search and ask" universe and "What-if" scenarios ...parators=[Constant(...)]), body=[Import(names=[alias(...)]), ..., Expr(value=Call(...))], orelse=[])], type_ignores=[])
+
+    def test_whatif_docstrings_present_scenarios_as_user_chosen(whatif_tree):
+        """D10: scenarios are inputs the user picks (asset, size, funding); the docstring must say so."""
+        doc = norm(ast.get_docstring(whatif_tree) or "")
+        assert doc, "whatif.py needs a module docstring"
+        # SPEC-AMBIGUITY: exact wording is not specified; require that the docstring attributes the choice of asset,
+        # size and funding to the user, and states the tool does not recommend or rank.
+        assert re.search(r"user[- ](chosen|picked|selected|stated|chooses|picks|selects)|chosen by the user|"
+                         r"(picked|selected|stated) by the user|the user (picks|chooses|selects|states)", doc)
+        for word in ("asset", "size", "funding"):
+&gt;           assert word in doc, word
+E           AssertionError: size
+E           assert 'size' in 'precompute the dashboard\'s "search and ask" universe and "what-if" scenarios with the real engine. for each asset of...mmendation: the user picks the asset. output (under &lt;out&gt;/): universe.json, whatif.json ({ticker: {asset, scenarios}})'
+
+tests/test_d10_site.py:262: AssertionError</failure></testcase><testcase classname="tests.test_d10_site" name="test_whatif_does_not_sort_or_rank_by_outcome" time="0.002" /><testcase classname="tests.test_d10_site" name="test_whatif_pure_helpers_emit_no_ranking_or_option_fields" time="0.256" /><testcase classname="tests.test_d10_site" name="test_whatif_module_names_have_no_option_or_ranking_vocabulary" time="0.000" /><testcase classname="tests.test_d10_site" name="test_whatif_build_output_schema_and_narrative" time="3.789" /></testsuite></testsuites>
