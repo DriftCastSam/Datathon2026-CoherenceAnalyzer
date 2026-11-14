@@ -234,7 +234,11 @@ def preflight(args) -> None:
         r = sh("git", "switch", BRANCH)
         if r.returncode != 0:
             sh("git", "switch", "-c", BRANCH, check=True)
-    base = pytest_run([], "preflight")
+    # Oracle tests of a task frozen but not yet implemented (state "tests") are red by design: resuming
+    # at that task's phase B must not be blocked by them.
+    state = jload(STATE, {"done": {}})
+    pending_oracles = [f for t in jload(TASKS, {})["tasks"] if state["done"].get(t["id"]) == "tests" for f in t["tests"]]
+    base = pytest_run([f"--ignore={f}" for f in pending_oracles], "preflight")
     if base["rc"] != 0:
         raise SystemExit("suite is red before starting:\n" + base["tail"])
 

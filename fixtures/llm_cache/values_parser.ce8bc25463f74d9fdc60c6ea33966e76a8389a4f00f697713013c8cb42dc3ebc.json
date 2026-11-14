@@ -1,0 +1,36 @@
+{
+  "cache_key": "ce8bc25463f74d9fdc60c6ea33966e76a8389a4f00f697713013c8cb42dc3ebc",
+  "call_log": {
+    "hand_written": true,
+    "latency_ms": 0,
+    "tokens_in": 0,
+    "tokens_out": 0
+  },
+  "input_hash": "sha256:2bde70d6754acfc120eaf69fd59a464cb76e4675cb3f500ee1a364ff258f8530",
+  "model_id": "fixture:hand-written",
+  "node": "values_parser",
+  "output": {
+    "rules": [
+      {
+        "applies_to": "single_stocks",
+        "params": {
+          "attribute": "understandable_business"
+        },
+        "quote": "I prefer companies I understand.",
+        "rule_kind": "prefer_attribute"
+      },
+      {
+        "applies_to": "single_stocks",
+        "params": {
+          "attribute": "hype"
+        },
+        "quote": "No hype stocks unless I can explain the business.",
+        "rule_kind": "avoid_attribute"
+      }
+    ]
+  },
+  "prompt_version": "values_parser.v1",
+  "user_payload": {
+    "notes": "I prefer companies I understand. No hype stocks unless I can explain the business."
+  }
+}

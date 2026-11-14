@@ -127,13 +127,12 @@
       ],
       "code": [
         "coherence_analyzer/intake.py",
-        "coherence_analyzer/factors/",
         "coherence_analyzer/llm/schemas/values_parser.json",
         "coherence_analyzer/llm/prompts/values_parser.v1.md",
         "coherence_analyzer/llm/extractors.py",
         "fixtures/llm_cache/"
       ],
-      "notes": "intake.missing(profile, factor) and intake.next_question(profile, factor) are pure; questions are fixed fr-CA/en-CA templates per REQUIRED path (no LLM). Robert fixture: missing() is empty for every factor; removing a REQUIRED path makes next_question return that path's question; a skip stores {value: null, by: 'user:skipped'}. N3 in mock mode on Robert's values.notes returns rules whose quote is an exact substring (gate rejects otherwise); parsed rules start approved_by_user false; build_limits ignores unapproved rules and includes an approved max_theme_weight / exclude_activity (invariant 2: test_limits_no_llm_inputs stays green). A parsed max_theme_weight with no number makes next_question ask for the number. Never write data/meta/activity_tags.csv."
+      "notes": "Runs in parallel with P0.7-P0.9: do NOT edit coherence_analyzer/factors/ (P0.7 owns it); keep the REQUIRED checklist per factor as a dict in intake.py (REQUIRED: dict[str, tuple[str, ...]] keyed by the five factor ids), P0.9 will wire it into the factor modules. intake.missing(profile, factor) and intake.next_question(profile, factor) are pure; questions are fixed fr-CA/en-CA templates per REQUIRED path (no LLM). Robert fixture: missing() is empty for every factor; removing a REQUIRED path makes next_question return that path's question; a skip stores {value: null, by: 'user:skipped'}. N3 in mock mode on Robert's values.notes returns rules whose quote is an exact substring (gate rejects otherwise); parsed rules start approved_by_user false; build_limits ignores unapproved rules and includes an approved max_theme_weight / exclude_activity (invariant 2: test_limits_no_llm_inputs stays green). A parsed max_theme_weight with no number makes next_question ask for the number. Never write data/meta/activity_tags.csv."
     }
   ]
 }

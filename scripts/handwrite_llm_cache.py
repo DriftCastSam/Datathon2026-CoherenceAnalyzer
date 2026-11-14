@@ -44,7 +44,33 @@ N4_OUTPUT = {
 }
 
 
+N3_ROBERT_OUTPUT = {"rules": [
+    {"rule_kind": "prefer_attribute", "params": {"attribute": "understandable_business"},
+     "applies_to": "single_stocks", "quote": "I prefer companies I understand."},
+    {"rule_kind": "avoid_attribute", "params": {"attribute": "hype"}, "applies_to": "single_stocks",
+     "quote": "No hype stocks unless I can explain the business."},
+]}
+
+# Amira's notes (SPEC §16): a theme rule with NO number, so the intake form asks for it (D7 point 1).
+N3_AMIRA_NOTES = "I love AI and new tech but I don't want everything in tech."
+N3_AMIRA_OUTPUT = {"rules": [
+    {"rule_kind": "prefer_attribute", "params": {"attribute": "ai_and_new_tech"}, "applies_to": "all",
+     "quote": "I love AI and new tech"},
+    {"rule_kind": "max_theme_weight", "params": {"theme": "tech_heavy"}, "applies_to": "all",
+     "quote": "I don't want everything in tech."},
+]}
+
+
 def main() -> None:
+    profile = json.loads((ROBERT / "profile.json").read_text(encoding="utf-8"))
+    n3_cases = [(profile["values"]["notes"], N3_ROBERT_OUTPUT), (N3_AMIRA_NOTES, N3_AMIRA_OUTPUT)]
+    for notes, out in n3_cases:
+        Draft202012Validator(extractors.load_schema("values_parser")).validate(out)
+        assert all(r["quote"] in notes for r in out["rules"])
+        p = bedrock.write_entry(config.LLM_CACHE_DIR, "values_parser", extractors.prompt_version("values_parser"),
+                                bedrock.MOCK_MODEL_ID, extractors.n3_payload(notes), out, CALL_LOG)
+        print(p.relative_to(ROOT))
+
     events = [json.loads(line) for line in (ROBERT / "events.jsonl").read_text().splitlines() if line.strip()]
     weights = json.loads((ROBERT / "portfolio.json").read_text())["weights_pct"]
     assets = data.load_assets()
