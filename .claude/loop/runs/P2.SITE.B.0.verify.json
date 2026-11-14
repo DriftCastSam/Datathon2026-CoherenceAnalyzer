@@ -1,0 +1,6 @@
+{
+  "errors": [
+    "frozen test modified: tests/test_bedrock_mock.py",
+    "frozen test modified: tests/test_guardrail.py"
+  ]
+}
