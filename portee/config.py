@@ -4,7 +4,12 @@ from __future__ import annotations
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 ROOT = Path(__file__).resolve().parent.parent
+# Load .env before any os.getenv below. Real environment variables win (override=False),
+# so `PORTEE_LLM=record python -m portee.cli demo` still overrides the file.
+load_dotenv(ROOT / ".env", override=False)
 DATA_DIR = Path(os.getenv("PORTEE_DATA", ROOT / "data" / "starter"))
 META_DIR = ROOT / "data" / "meta"
 FIXTURES_DIR = ROOT / "fixtures"

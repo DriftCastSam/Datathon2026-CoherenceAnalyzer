@@ -1,8 +1,9 @@
 pandas
 numpy
-boto3
+boto3[crt]
 jsonschema
 pydantic
 fastapi
 uvicorn
 pytest
+python-dotenv
