@@ -272,8 +272,12 @@ parameter. Its role is `AppAccessPolicy` plus its own log group; the state machi
 `lambda:InvokeFunction` on that function. Nothing here is deployed by the tests or the build.
 
 Package the Lambda code (dependencies, the package, the starter data, the meta tables and the fixtures the execution
-input names) as a zip, upload it to S3, then update the stack. The three new parameters have no default, so the
-first update after this change must pass them:
+input names) as a zip, upload it to S3, then update the stack. The Flow B resources (`FlowB*` and the `StateMachineArn`
+output) carry the `DeployFlowB` condition: `LambdaCodeS3Bucket` and `LambdaCodeS3Key` default to empty, and while either
+is empty a stack update creates no Lambda and no state machine, so updates that do not pass them keep working.
+`BedrockModelId` defaults to `us.anthropic.claude-sonnet-5-5`. Pass the code location to deploy Flow B. The template
+passes `cfn-lint` 1.60.1 (`uvx cfn-lint --regions us-east-1 -- deploy/aws/coherence-analyzer.cfn.json`, exit 0, no findings);
+the nested `States.JsonMerge` in B6 is valid ASL (up to 10 nested intrinsics per field).
 
 ```
 rm -rf build && mkdir build

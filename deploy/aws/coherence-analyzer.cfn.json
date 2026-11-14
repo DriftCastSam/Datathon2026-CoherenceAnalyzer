@@ -4,6 +4,12 @@
   "Metadata": {
     "AWSToolsMetrics": {
       "AWSAgentToolkit": "aws-cloudformation@3"
+    },
+    "com.aws.cloudformation.Context": {
+      "DeployFlowB": {
+        "why": "Flow B (Step Functions + Lambda) is optional: stack updates without packaged Lambda code keep working.",
+        "must": "Only the FlowB* resources and the StateMachineArn output use this condition; the deployed bucket, guardrail and policy never do."
+      }
     }
   },
   "Parameters": {
@@ -26,15 +32,18 @@
     },
     "LambdaCodeS3Bucket": {
       "Type": "String",
-      "Description": "S3 bucket holding the Flow B Lambda zip (coherence_analyzer package, data and its dependencies). See README, AWS deploy."
+      "Description": "S3 bucket holding the Flow B Lambda zip (coherence_analyzer package, data and its dependencies). See README, AWS deploy. Leave empty to skip the Flow B Lambda and state machine.",
+      "Default": ""
     },
     "LambdaCodeS3Key": {
       "Type": "String",
-      "Description": "S3 key of the Flow B Lambda zip in LambdaCodeS3Bucket."
+      "Description": "S3 key of the Flow B Lambda zip in LambdaCodeS3Bucket. Leave empty to skip the Flow B Lambda and state machine.",
+      "Default": ""
     },
     "BedrockModelId": {
       "Type": "String",
-      "Description": "Value of BEDROCK_MODEL_ID for the Flow B Lambda: the model id or inference profile id matching ModelArn."
+      "Description": "Value of BEDROCK_MODEL_ID for the Flow B Lambda: the model id or inference profile id matching ModelArn.",
+      "Default": "us.anthropic.claude-sonnet-5-5"
     }
   },
   "Resources": {
@@ -291,7 +300,8 @@
         "com.aws.cloudformation.Context": {
           "why": "Logs of the Flow B Lambda (P2.15), the only log group its role may write."
         }
-      }
+      },
+      "Condition": "DeployFlowB"
     },
     "FlowBLambdaRole": {
       "Type": "AWS::IAM::Role",
@@ -357,7 +367,8 @@
             "Logs limited to FlowBLogGroup"
           ]
         }
-      }
+      },
+      "Condition": "DeployFlowB"
     },
     "FlowBFunction": {
       "Type": "AWS::Lambda::Function",
@@ -430,7 +441,8 @@
             "The store strips the trailing slash of S3Prefix"
           ]
         }
-      }
+      },
+      "Condition": "DeployFlowB"
     },
     "FlowBStateMachineRole": {
       "Type": "AWS::IAM::Role",
@@ -483,7 +495,8 @@
             }
           }
         ]
-      }
+      },
+      "Condition": "DeployFlowB"
     },
     "FlowBStateMachine": {
       "Type": "AWS::StepFunctions::StateMachine",
@@ -961,7 +974,8 @@
             "Definition is a copy of deploy/aws/flow_b.asl.json (kept equal by tests/test_stepfunctions_sync.py)"
           ]
         }
-      }
+      },
+      "Condition": "DeployFlowB"
     }
   },
   "Outputs": {
@@ -999,7 +1013,38 @@
       "Description": "ARN of the Flow B state machine (start-execution with fixture_dir, intent_id, auto_confirm)",
       "Value": {
         "Ref": "FlowBStateMachine"
-      }
+      },
+      "Condition": "DeployFlowB"
+    }
+  },
+  "Conditions": {
+    "DeployFlowB": {
+      "Fn::And": [
+        {
+          "Fn::Not": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "LambdaCodeS3Bucket"
+                },
+                ""
+              ]
+            }
+          ]
+        },
+        {
+          "Fn::Not": [
+            {
+              "Fn::Equals": [
+                {
+                  "Ref": "LambdaCodeS3Key"
+                },
+                ""
+              ]
+            }
+          ]
+        }
+      ]
     }
   }
 }
