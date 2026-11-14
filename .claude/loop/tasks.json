@@ -31,8 +31,7 @@
       "spec": ["§3.6", "§8", "§15 test_resizer"],
       "tests": ["tests/test_intent.py", "tests/test_resizer.py"],
       "code": ["coherence_analyzer/intent.py", "coherence_analyzer/resizer.py"],
-      "notes": "intent.apply for every funding.kind keeps weights summing to 1 and never goes negative. Resizer, Robert NVDA from ZST: max 5.0% binding H4; pro-rata equities: 8.0% binding H3. §15 allows a skip ONLY if engine checks (H7-H10) bind earlier on real data: in that case the test must skip with the measured value in the reason, never silently pass.",
-      "allow_skips": true
+      "notes": "intent.apply for every funding.kind keeps weights summing to 1 and never goes negative. Resizer per docs/spec-decisions.md D2: run §8 as written and assert the values the engine actually produces (Robert NVDA from ZST: expected below 5.0% with H9 binding, p5_T < 360000 at 5%; pro-rata equities: record measured max and binding check). Record them as golden values with the measured numbers in a comment. No skip marks."
     },
     {
       "id": "P0.6",
@@ -56,7 +55,7 @@
       "spec": ["§4", "§10", "§12", "§13", "§15 test_pipeline_offline"],
       "tests": ["tests/test_pipeline_offline.py"],
       "code": ["coherence_analyzer/pipeline.py", "coherence_analyzer/store.py", "coherence_analyzer/cli.py", "coherence_analyzer/schemas/report.json"],
-      "notes": "P0 acceptance = Robert: `cli check fixtures/robert --intent in_0001 --auto-confirm` in mock mode writes a schema-valid report (verdict incoherent) and an audit record; running it twice gives byte-identical reports except run_id/timestamps (determinism test). `demo` runs whatever personas have complete fixtures and skips the rest with a printed notice (Amira/Mateo profiles are P1)."
+      "notes": "P0 acceptance = Robert: `cli check fixtures/robert --intent in_0001 --auto-confirm` in mock mode writes a schema-valid report (verdict incoherent) and an audit record; running it twice gives byte-identical reports except run_id/timestamps (determinism test). `demo` runs whatever personas have complete fixtures and skips the rest with a printed notice (Amira/Mateo profiles are P1). Verdicts: three values only, unknowns never change the verdict (docs/spec-decisions.md D3)."
     }
   ]
 }

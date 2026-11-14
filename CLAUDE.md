@@ -1,6 +1,7 @@
 # CLAUDE.md: CoherenceAnalyzer
 
 Read `SPEC.md` before any change. It is the source of truth. If code and spec disagree, raise it; don't silently pick one.
+Then read `docs/spec-decisions.md`: team-approved resolutions of SPEC ambiguities. Where it is more specific than SPEC.md, it wins.
 
 ## Invariants (never break)
 - `limits` is computed from `rule:` fields and user-declared values only. No `llm:` field may feed it (test: `tests/test_limits_no_llm_inputs.py`).
