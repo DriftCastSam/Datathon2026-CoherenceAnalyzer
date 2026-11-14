@@ -8,6 +8,7 @@ text, and only after the verifier passed). Every LLM call goes through `bedrock.
 from __future__ import annotations
 
 import copy
+from concurrent.futures import ThreadPoolExecutor
 
 from .config import DISCLAIMER
 from .llm import bedrock, extractors
@@ -335,6 +336,35 @@ def headline(verdict: str, sections: list[dict], locale: str) -> str:
     return base + "."
 
 
+LANE_WORKERS = 5          # §20.10: one lane per factor, at most five at once
+
+
+def _narrate_lane(facts: dict) -> dict:
+    """One lane: `narrate_section`; an exception ends in the template for that section only (as for a cache miss)."""
+    try:
+        return narrate_section(facts)
+    except Exception as exc:          # noqa: BLE001 - a failing lane must not lose the others
+        return _template_narrative(facts, [], f"{type(exc).__name__}: {exc}")
+
+
+def _narrate_all(sections: list[dict]) -> list[dict]:
+    """§20.10 / D8.2: non-pass sections are narrated concurrently (ThreadPoolExecutor, max_workers=5); `pass` sections
+    never reach the writer and are narrated inline. Results are collected in display order, so the output does not
+    depend on which lane finishes first."""
+    lanes: dict[str, object] = {}
+    non_pass = [s for s in sections if s["status"] != "pass"]
+    if non_pass:
+        with ThreadPoolExecutor(max_workers=LANE_WORKERS) as pool:
+            for s in non_pass:
+                lanes[s["factor"]] = pool.submit(_narrate_lane, s["facts"])
+    out = []
+    for s in sections:
+        fut = lanes.get(s["factor"])
+        narrative = fut.result() if fut is not None else narrate_section(s["facts"])
+        out.append({"factor": s["factor"], "narrative": narrative})
+    return out
+
+
 def explain(payload: dict) -> dict:
     """The report's explanation (§20.5): `{mode, headline, segments, disclaimer, sections}`.
 
@@ -343,7 +373,7 @@ def explain(payload: dict) -> dict:
     `factor` key; the headline and the disclaimer are template text. `mode` = worst mode among the non-pass sections
     (`template > llm_retry > llm`); with none, `template`."""
     sections = payload["sections"]
-    out_sections = [{"factor": s["factor"], "narrative": narrate_section(s["facts"])} for s in sections]
+    out_sections = _narrate_all(sections)
     modes = [n["narrative"]["mode"] for s, n in zip(sections, out_sections) if s["status"] != "pass"]
     locale = payload["locale"]
     return {

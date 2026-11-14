@@ -13,6 +13,7 @@ from __future__ import annotations
 import copy
 import json
 import re
+from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 from functools import lru_cache
 from pathlib import Path
@@ -21,7 +22,7 @@ from typing import Any
 from jsonschema import Draft202012Validator
 
 from . import config, data, engine, explain, factors, gate, store
-from .coherence import hard, report as report_mod, soft
+from .coherence import hard, internal, report as report_mod, soft
 from .llm import bedrock, extractors
 from .rules import derive, limits as limits_mod
 
@@ -29,6 +30,7 @@ META_NAMES = ("asset_meta", "etf_sector_weights", "activity_tags")
 DEFAULT_PORTFOLIO = "portfolio.json"
 DEFAULT_LOCALE = "fr-CA"
 N3_NODE = extractors.N3_NODE
+N6_NODE = extractors.N6_NODE
 
 # Flow C assumptions on top of the engine's own list (README -> Assumptions).
 FLOW_C_ASSUMPTIONS = (
@@ -262,6 +264,18 @@ def _narrations(explanation: dict) -> tuple[list[dict], list[dict]]:
     return calls, errors
 
 
+def _n6_audit(result: dict) -> tuple[list[dict], list[dict]]:
+    """Audit entries for the N6 call of `check_profile`: its call log with the gate status; a skipped call (cache
+    miss in mock mode) is an error entry instead."""
+    llm = result.get("llm") or {}
+    log, status = llm.get("call_log"), llm.get("gate_status")
+    if log:
+        return [_call_entry(log, str(status))], []
+    if status:
+        return [], [{"node": N6_NODE, "error": str(status)}]
+    return [], []
+
+
 def review(fixture_dir: Path, portfolio: str | Path | None = None) -> dict:
     """Flow C: baseline coherence report for the current portfolio (B5-B9 without an intent). Writes the report and
     the audit record to the store and returns the report. `portfolio` = file name inside the fixture directory
@@ -290,7 +304,12 @@ def review(fixture_dir: Path, portfolio: str | Path | None = None) -> dict:
     sections = report_mod.build_sections(ctx)
     verdict = report_mod.verdict(tagged)
 
-    explanation = explain.explain({"verdict": verdict, "locale": locale, "sections": sections})
+    with ThreadPoolExecutor(max_workers=1) as pool:              # N6 = sixth lane next to the section lanes (§20.10)
+        n6_lane = pool.submit(lambda: internal.check_profile(profile, pf["as_of"]))     # D1: as_of = portfolio.as_of
+        explanation = explain.explain({"verdict": verdict, "locale": locale, "sections": sections})
+        n6_res = n6_lane.result()
+    profile_coherence = store.plain({"status": n6_res["status"], "findings": n6_res["findings"]})
+    n6_calls, n6_errors = _n6_audit(n6_res)
     for sec, narrated in zip(sections, explanation["sections"]):
         nar = narrated["narrative"]
         sec["narrative"] = {"mode": nar["mode"], "segments": nar["segments"], "verify": nar["verify"]}
@@ -301,13 +320,14 @@ def review(fixture_dir: Path, portfolio: str | Path | None = None) -> dict:
         portfolio_id=pf["portfolio_id"], checks=tagged, metrics=metrics, sections=sections,
         explanation={k: explanation[k] for k in ("mode", "headline", "segments", "disclaimer")},
         assumptions=list(metrics["assumptions"]) + list(FLOW_C_ASSUMPTIONS), data_window=list(market.window),
-        disclaimer=config.DISCLAIMER[locale])
+        disclaimer=config.DISCLAIMER[locale], profile_coherence=profile_coherence)
     store.save_portfolio(pf)
     store.save_report(rep)
     audit = _audit(
         run_id=run_id, flow="C", started_at=started, ended_at=_now(), profile_id=rep["profile_id"], as_of=pf["as_of"],
         version_in=res["version_in"], version_out=res["version_out"], events=events,
-        calls=res["llm_calls"] + n5_calls, errors=res["llm_errors"] + n5_errors, diff=res["diff"],
+        calls=res["llm_calls"] + n5_calls + n6_calls, errors=res["llm_errors"] + n5_errors + n6_errors,
+        diff=res["diff"],
         engine_info={"seed": config.ENGINE_SEED, "n": config.ENGINE_N, "block": config.ENGINE_BLOCK,
                      "drift": "assumed", "data_window": rep["data_window"], "horizon_months": horizon_m},
         verdict=verdict, explanation_mode=rep["explanation"]["mode"],

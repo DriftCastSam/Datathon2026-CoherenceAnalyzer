@@ -24,6 +24,13 @@ def _print_review(label: str, rep: dict) -> None:
     if unknown:
         print(f"  cannot verify: {', '.join(unknown)}")
     print(f"  run_id {rep['run_id']}  report {store.root() / 'reports' / (rep['run_id'] + '.json')}")
+    print(profile_line(rep["profile_coherence"]))
+
+
+def profile_line(block: dict) -> str:
+    """`profile: warning (C1, N6.1)`; without findings just `profile: pass`."""
+    ids = ", ".join(f["id"] for f in block["findings"])
+    return f"profile: {block['status']} ({ids})" if ids else f"profile: {block['status']}"
 
 
 def demo(fixtures_dir: Path | None = None) -> list[dict]:

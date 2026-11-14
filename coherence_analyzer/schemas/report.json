@@ -6,7 +6,7 @@
   "type": "object",
   "required": ["run_id", "flow", "profile_id", "profile_version", "portfolio_id", "intent", "verdict", "checks_current",
                "checks_proposed", "diff", "metrics_current", "metrics_proposed", "alternatives", "unknowns",
-               "assumptions", "data_window", "explanation", "disclaimer", "sections"],
+               "assumptions", "data_window", "explanation", "disclaimer", "sections", "profile_coherence"],
   "properties": {
     "run_id": {"type": "string", "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"},
     "flow": {"enum": ["A", "B", "C"]},
@@ -39,6 +39,16 @@
       }
     },
     "disclaimer": {"type": "string", "minLength": 1},
+    "profile_coherence": {
+      "description": "Internal coherence of the profile (docs/spec-factors.md 20.9): separate from the verdict; never violation (invariant 3).",
+      "type": "object",
+      "required": ["status", "findings"],
+      "additionalProperties": false,
+      "properties": {
+        "status": {"enum": ["pass", "info", "warning"]},
+        "findings": {"type": "array", "items": {"$ref": "#/$defs/profile_finding"}}
+      }
+    },
     "sections": {
       "type": "array",
       "minItems": 5,
@@ -48,6 +58,25 @@
   },
   "$defs": {
     "status": {"enum": ["pass", "violation", "warning", "info", "unknown"]},
+    "profile_finding": {
+      "type": "object",
+      "required": ["id", "source", "kind", "status", "fields", "question"],
+      "properties": {
+        "id": {"type": "string", "pattern": "^(C[0-9]+|N6\\.[0-9]+)$"},
+        "source": {"type": "string", "pattern": "^(rule:C[0-9]+|llm:profile_consistency)$"},
+        "kind": {"enum": ["tension", "contradiction"]},
+        "status": {"enum": ["info", "warning"]},
+        "fields": {"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 1},
+        "values": {"type": "array"},
+        "quotes": {"type": "array", "items": {"type": "string"}},
+        "reason": {"type": ["string", "null"]},
+        "question": {
+          "type": "object",
+          "required": ["fr-CA", "en-CA"],
+          "properties": {"fr-CA": {"type": "string", "minLength": 1}, "en-CA": {"type": "string", "minLength": 1}}
+        }
+      }
+    },
     "check": {
       "type": "object",
       "required": ["id", "kind", "status", "factor", "derived_from"],
