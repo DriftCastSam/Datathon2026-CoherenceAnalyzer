@@ -71,8 +71,7 @@
         "§1 inv. 5-7, 9",
         "§6.1",
         "§9.3",
-        "§9.4",
-        "docs/spec-decisions.md D6"
+        "§9.4"
       ],
       "tests": [
         "tests/test_explain.py"
