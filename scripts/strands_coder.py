@@ -129,7 +129,12 @@ def run(prompt: str, *, max_turns: int, timeout: int, model_id: str | None = Non
                 event.cancel_tool = f"BLOCKED by the build-loop guard: {reason}"
 
     claude_md = (ROOT / "CLAUDE.md").read_text()
-    model = BedrockModel(model_id=model_id, region_name=os.environ.get("AWS_REGION", "us-east-1"), max_tokens=max_tokens)
+    from botocore.config import Config
+    # Long generations (up to max_tokens) outlast botocore's 60 s default read timeout: P0.7.B died twice on
+    # ReadTimeoutError. Adaptive retries also absorb throttling when two loops run in parallel.
+    client_cfg = Config(read_timeout=900, connect_timeout=30, retries={"max_attempts": 6, "mode": "adaptive"})
+    model = BedrockModel(model_id=model_id, region_name=os.environ.get("AWS_REGION", "us-east-1"), max_tokens=max_tokens,
+                         boto_client_config=client_cfg)
     agent = Agent(model=model, tools=[read, write, edit, shell], hooks=[Guard()], callback_handler=None,
                   system_prompt=SYSTEM.format(root=ROOT, claude_md=claude_md), name="ca-coder")
     cwd = os.getcwd()
