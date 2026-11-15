@@ -8,7 +8,8 @@ from fastapi.testclient import TestClient
 
 from deploy.serve_local import create_app
 
-INDEX_HTML = "<!doctype html><title>site</title><p>hello</p>"
+INDEX_HTML = "<!doctype html><title>dashboard</title><p>dashboard</p>"
+APP_HTML = "<!doctype html><title>app</title><p>app</p>"
 SITE_REVIEW_URL = "/site-api/profiles"
 EDITED_RISK = "high"
 SKIPPABLE_PATH = "preferences.prefers_dividends"
@@ -20,6 +21,7 @@ def client(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> TestClient:
     site_dir = tmp_path / "site"
     site_dir.mkdir()
     (site_dir / "index.html").write_text(INDEX_HTML, encoding="utf-8")
+    (site_dir / "app.html").write_text(APP_HTML, encoding="utf-8")
     monkeypatch.setenv("COHERENCE_ANALYZER_STORE_DIR", str(tmp_path / "store"))
     return TestClient(create_app(site_dir))
 
@@ -31,11 +33,18 @@ def test_api_health_is_mounted_under_api(client: TestClient) -> None:
     assert response.json() == {"ok": True}
 
 
-def test_root_serves_index_html(client: TestClient) -> None:
-    response = client.get("/")
+def test_root_redirects_to_app_html(client: TestClient) -> None:
+    response = client.get("/", follow_redirects=False)
+
+    assert response.status_code in (302, 307)
+    assert response.headers["location"] == "/app.html"
+
+
+def test_root_redirect_resolves_to_app_html(client: TestClient) -> None:
+    response = client.get("/", follow_redirects=True)
 
     assert response.status_code == 200
-    assert response.text == INDEX_HTML
+    assert response.text == APP_HTML
 
 
 def test_api_lists_three_fixture_personas(client: TestClient) -> None:
@@ -87,21 +96,11 @@ def test_site_review_survives_skipped_answer(client: TestClient) -> None:
     assert not any(isinstance(value, dict) and "value" in value for value in card.values())
 
 
-def test_intake_skip_allows_skippable_required_paths(client: TestClient) -> None:
-    response = client.post(
-        "/api/profiles/persona-robert/intake/skip", json={"path": "preferences.prefers_dividends"}
-    )
-
-    assert response.status_code == 200
-
-
-def test_intake_skip_rejects_horizon(client: TestClient) -> None:
-    response = client.post(
-        "/api/profiles/persona-robert/intake/skip", json={"path": "objectives.horizon_years"}
-    )
-
-    assert response.status_code == 422
-    assert "needed" in response.text.lower() and "analysis" in response.text.lower()
+def test_intake_skip_allows_any_required_path(client: TestClient) -> None:
+    # loop/p0: all required paths including horizon are now skippable
+    for path in ("preferences.prefers_dividends", "objectives.horizon_years", "risk.declared"):
+        response = client.post("/api/profiles/persona-robert/intake/skip", json={"path": path})
+        assert response.status_code == 200, f"Skip {path} should succeed"
 
 
 def test_intake_answer_rejects_non_intake_path(client: TestClient) -> None:

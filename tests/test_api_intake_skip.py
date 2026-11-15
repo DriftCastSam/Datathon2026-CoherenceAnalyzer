@@ -1,6 +1,6 @@
-"""T1: API-level parametrized test for skip on REQUIRED paths except horizon (site-followups plan).
+"""T1: API-level parametrized test for skip on REQUIRED paths (loop/p0: all skippable).
 
-Tests that skipping each REQUIRED path (except horizon) works through the API and doesn't cause violations.
+Tests that skipping any REQUIRED path works through the API and doesn't cause violations.
 """
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ import os
 import shutil
 import tempfile
 from pathlib import Path
+from typing import Any
 
 import pytest
 from fastapi.testclient import TestClient
@@ -52,25 +53,19 @@ def _get_path(profile: dict, path: str) -> Any:
     return node
 
 
-def _all_skippable_paths() -> list[tuple[str, str]]:
-    """All REQUIRED paths except NOT_SKIPPABLE."""
+def _all_required_paths() -> list[tuple[str, str]]:
+    """All REQUIRED paths (loop/p0: all are now skippable)."""
     out = []
     for factor, paths in intake.REQUIRED.items():
         for path in paths:
-            if path not in intake.NOT_SKIPPABLE:
-                out.append((factor, path))
+            out.append((factor, path))
     return out
 
 
-def _all_not_skippable_paths() -> list[str]:
-    """All NOT_SKIPPABLE paths."""
-    return sorted(intake.NOT_SKIPPABLE)
-
-
 @pytest.mark.parametrize("pid", [ROBERT_ID, AMIRA_ID, MATEO_ID])
-@pytest.mark.parametrize("factor,path", _all_skippable_paths())
-def test_skip_required_path_then_review_succeeds(client, pid, factor, path):
-    """T1: skip each REQUIRED path (except NOT_SKIPPABLE), then POST /review returns 200 with no violations from skipped value."""
+@pytest.mark.parametrize("factor,path", _all_required_paths())
+def test_skip_any_required_path_then_review_succeeds(client, pid, factor, path):
+    """loop/p0: skip any REQUIRED path, then POST /review returns 200 with unknown checks for skipped value."""
     # Get the profile and skip the path
     r = client.post(f"/profiles/{pid}/intake/skip", json={"path": path})
     assert r.status_code == 200, f"Skip {path} failed: {r.text}"
@@ -84,6 +79,7 @@ def test_skip_required_path_then_review_succeeds(client, pid, factor, path):
     report = r.json()
 
     # Check that no check has status "violation" with this path in derived_from or subject
+    # Skipped paths should result in "unknown" status, not "violation"
     for check in report.get("checks_current", []):
         if check.get("status") == "violation":
             der = check.get("derived_from", []) or []
@@ -92,51 +88,13 @@ def test_skip_required_path_then_review_succeeds(client, pid, factor, path):
                 f"Check {check['id']} has violation status with {path} in derived_from/subject after skip"
 
 
-@pytest.mark.parametrize("path", _all_not_skippable_paths())
-def test_skip_not_skippable_path_returns_422(client, path):
-    """T1: skip NOT_SKIPPABLE paths return 422 with clear message."""
-    r = client.post(f"/profiles/{ROBERT_ID}/intake/skip", json={"path": path})
-    assert r.status_code == 422, f"Expected 422 for {path} skip, got {r.status_code}: {r.text}"
-    assert "needed" in r.text.lower() and "analysis" in r.text.lower(), \
-        f"Error message should mention 'needed' and 'analysis': {r.text}"
-
-
-@pytest.mark.parametrize("path", _all_not_skippable_paths())
-def test_get_intake_shows_not_skippable_paths_correctly(client, path):
-    """T1: GET /intake shows skippable=False for NOT_SKIPPABLE paths."""
-    # Use Robert's profile
+def test_get_intake_shows_no_skippable_field(client):
+    """loop/p0: GET /intake no longer returns skippable field in questions."""
     r = client.get(f"/profiles/{ROBERT_ID}/intake")
     assert r.status_code == 200
     intake_data = r.json()
 
-    # Find the question for this path
     for factor_data in intake_data.values():
         q = factor_data.get("next_question")
-        if q and q.get("path") == path:
-            assert q.get("skippable") is False, f"{path} question should have skippable=False: {q}"
-            return
-
-    # If we didn't find it, the path might be answered. Remove it and check again.
-    profile = client.get(f"/profiles/{ROBERT_ID}").json()
-    work_dir = store.root() / "profiles" / ROBERT_ID
-    profile_path = work_dir / "profile.json"
-
-    # Remove the path
-    parts = path.split(".")
-    node = profile
-    for part in parts[:-1]:
-        if part not in node:
-            return  # Path doesn't exist in this profile structure, skip test
-        node = node[part]
-    if parts[-1] in node:
-        del node[parts[-1]]
-        profile_path.write_text(json.dumps(profile, indent=2), encoding="utf-8")
-
-    r = client.get(f"/profiles/{ROBERT_ID}/intake")
-    assert r.status_code == 200
-    intake_data = r.json()
-    for factor_data in intake_data.values():
-        q = factor_data.get("next_question")
-        if q and q.get("path") == path:
-            assert q.get("skippable") is False, f"{path} question should have skippable=False: {q}"
-            return
+        if q:
+            assert "skippable" not in q, f"Question should not have skippable field: {q}"
