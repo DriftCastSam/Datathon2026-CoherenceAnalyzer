@@ -42,6 +42,7 @@
     "tests/llm/test_persona_narration_cache.py": "240bd1e340e1c068af4e214f61d1ada0887e5aaa0d70d2f5eb663d6d0246a194",
     "tests/llm/test_question_rubric.py": "9277917aff58174588b00874f46f465c156a71226e2042329bf78a4f874202da",
     "tests/profile/test_intake.py": "edf1a84872979d3995da1561ab15efec89b64d45cbc19290bc56c5137ef0ce9c",
+    "tests/profile/test_intake_covers_rule_inputs.py": "d9887e7e146cd2f44388f84a302df7bd79ffdf9bcf36b1d907a0bc76bd8bd4df",
     "tests/profile/test_levels.py": "641adec31b05635f2f1b6363963aa2c07069b3813d2eca1807422a10b3363697",
     "tests/profile/test_limits_no_llm_inputs.py": "dbc9de038f9aef78f560bb432494475e0b6c6313e670498af07fd4c10aa90453",
     "tests/profile/test_profile_schema.py": "1e295cd7636b43186e40e4bd3e4bd3d824be8c09dc0d1946850e5d0d799cc790",

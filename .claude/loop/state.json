@@ -44,6 +44,7 @@
     "P4.N1WIN": "impl",
     "P4.N4GATE": "impl",
     "P4.WARNEN": "impl",
+    "P5.INTAKEFULL": "tests",
     "P5.NOPF": "impl",
     "P5.USERS": "impl"
   }
