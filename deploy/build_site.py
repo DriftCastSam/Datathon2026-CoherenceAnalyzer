@@ -31,6 +31,8 @@ sys.path.insert(0, str(ROOT))
 os.environ.setdefault("COHERENCE_ANALYZER_LLM", "mock")
 
 FIXTURES = ROOT / "fixtures"
+SITE_LOCALE = "en-CA"
+STORE_DIR_ENV = "COHERENCE_ANALYZER_STORE_DIR"
 REPORTS = [  # (file name, persona fixture dir, portfolio file, picker label); the index keeps this order
     ("robert-review-nvda", "robert", "portfolio_review.json", "Robert · portefeuille avec NVDA à {NVDA} %"),
     ("robert-review", "robert", "portfolio.json", "Robert · portefeuille actuel"),
@@ -47,13 +49,33 @@ def _val(x):
     return x.get("value") if isinstance(x, dict) and "value" in x else x
 
 
-def site_extras(persona: str, portfolio_file: str, whatif_files: dict | None = None) -> dict:
+class Persona:
+    """A persona fixture: directory name, profile id, and display name."""
+    def __init__(self, dir_name: str, profile_id: str, name: str):
+        self.dir_name = dir_name
+        self.profile_id = profile_id
+        self.name = name
+
+
+def load_persona(dir_name: str) -> Persona:
+    """Read `fixtures/<dir_name>/profile.json` and return the persona (id from `meta.profile_id`, name from identity)."""
+    profile = json.loads((FIXTURES / dir_name / "profile.json").read_text(encoding="utf-8"))
+    name = (profile.get("identity") or {}).get("name") or dir_name.capitalize()
+    return Persona(dir_name, profile["meta"]["profile_id"], name)
+
+
+def site_extras(profile_dir: Path, name: str, portfolio_file: str, whatif_files: dict | None = None) -> dict:
     """Display-only extras from the real rules code (derive + limits); nothing here is a check or a status.
-    `whatif_files` = {"universe": file, "scenarios": file} (names inside reports/) of this profile's precomputed what-if."""
+
+    Args:
+        profile_dir: directory holding `profile.json` and the portfolio file (fixture or API working copy).
+        name: display name for the profile card.
+        portfolio_file: name of the portfolio JSON file within profile_dir.
+        whatif_files: {"universe": file, "scenarios": file} (names inside reports/) of this profile's precomputed what-if.
+    """
     from coherence_analyzer.rules import derive, limits as limits_mod
-    fixture = FIXTURES / persona
-    profile = json.loads((fixture / "profile.json").read_text())
-    pf = json.loads((fixture / portfolio_file).read_text())
+    profile = json.loads((profile_dir / "profile.json").read_text(encoding="utf-8"))
+    pf = json.loads((profile_dir / portfolio_file).read_text(encoding="utf-8"))
     value, as_of = float(pf["value_cad"]), pf["as_of"]
     p = derive.derive_all(copy.deepcopy(profile), portfolio_value_cad=value, as_of=as_of)
     lim, trace = limits_mod.build_limits(p, value)
@@ -64,7 +86,7 @@ def site_extras(persona: str, portfolio_file: str, whatif_files: dict | None = N
         "limits": {k: v for k, v in lim.items() if not k.startswith("_") and k != "by"},
         "limits_trace": trace,
         "profile_card": {
-            "name": persona.capitalize(), "age": p["identity"]["age"], "occupation": p["identity"]["occupation"],
+            "name": name, "age": p["identity"]["age"], "occupation": p["identity"]["occupation"],
             "life_stage": _val(p["identity"]["life_stage"]), "risk_declared": p["risk"]["declared"],
             "risk_capacity": _val(p["risk"]["capacity"]), "risk_effective": _val(p["risk"]["effective"]),
             "horizon_years": p["objectives"]["horizon_years"],
@@ -115,14 +137,15 @@ def build_reports(out: Path, whatif_files: dict[str, dict] | None = None) -> lis
     out.mkdir(parents=True, exist_ok=True)
     index = []
     for name, persona, pf_file, template in REPORTS:
-        rep = pipeline.review(FIXTURES / persona, pf_file)
-        extras = site_extras(persona, pf_file, (whatif_files or {}).get(persona))
+        rep = pipeline.review(FIXTURES / persona, pf_file, locale=SITE_LOCALE)
+        pers = load_persona(persona)
+        extras = site_extras(FIXTURES / persona, pers.name, pf_file, (whatif_files or {}).get(persona))
         label = _label(template, extras)
         rep["site"] = {**extras, "label": label, "intake": missing_by_factor(persona)}
-        (out / f"{name}.json").write_text(json.dumps(rep, ensure_ascii=False, separators=(",", ":")))
+        (out / f"{name}.json").write_text(json.dumps(rep, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
         index.append({"file": f"{name}.json", "label": label, "verdict": rep["verdict"],
                       "profile": rep.get("profile_coherence", {}).get("status")})
-    (out / "index.json").write_text(json.dumps(index, ensure_ascii=False))
+    (out / "index.json").write_text(json.dumps(index, ensure_ascii=False), encoding="utf-8")
     return index
 
 
@@ -155,15 +178,15 @@ def build(out: Path) -> Path:
     saved = os.environ.get("COHERENCE_ANALYZER_STORE_DIR")
     try:
         with tempfile.TemporaryDirectory() as store:
-            os.environ["COHERENCE_ANALYZER_STORE_DIR"] = store
+            os.environ[STORE_DIR_ENV] = store
             files = build_whatif(out / "reports")
             build_reports(out / "reports", files)
             build_flow_b(out / "reports")
     finally:
         if saved is None:
-            os.environ.pop("COHERENCE_ANALYZER_STORE_DIR", None)
+            os.environ.pop(STORE_DIR_ENV, None)
         else:
-            os.environ["COHERENCE_ANALYZER_STORE_DIR"] = saved
+            os.environ[STORE_DIR_ENV] = saved
     return out
 
 

@@ -25,8 +25,9 @@ os.environ.setdefault("COHERENCE_ANALYZER_LLM", "mock")
 
 import uvicorn  # noqa: E402
 from fastapi import FastAPI, HTTPException  # noqa: E402
+from fastapi.responses import RedirectResponse  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
-from pydantic import BaseModel, Field, field_validator  # noqa: E402
+from pydantic import BaseModel, Field  # noqa: E402
 
 from coherence_analyzer import api, data  # noqa: E402
 from coherence_analyzer.api import app as api_app  # noqa: E402
@@ -59,10 +60,10 @@ def live_review(profile_id: str) -> dict[str, Any]:
     """
     report = api.post_review(profile_id, locale=build_site.SITE_LOCALE)
     work, fixture = api.workdir(profile_id)
-    name = build_site.load_persona(fixture.name).name
+    pers = build_site.load_persona(fixture.name)
     report["site"] = {
-        **build_site.site_extras(work, name, PORTFOLIO_FILE),
-        "label": f"{name}{LIVE_LABEL_SUFFIX}",
+        **build_site.site_extras(work, pers.name, PORTFOLIO_FILE),
+        "label": f"{pers.name}{LIVE_LABEL_SUFFIX}",
     }
     return report
 
@@ -105,13 +106,19 @@ def create_app(site_dir: Path) -> FastAPI:
     """Build the one-origin app.
 
     Args:
-        site_dir: directory holding the built static site (`index.html`, ...).
+        site_dir: directory holding the built static site (`index.html`, `app.html`, ...).
 
     Returns:
         A FastAPI app with the API mounted at `/api` and the static site at `/`.
-        The API mount is registered first so `/` never shadows it.
+        GET `/` redirects to `/app.html` (the English app page).
     """
     root_app = FastAPI(title="CoherenceAnalyzer local")
+
+    @root_app.get("/")
+    def redirect_root():
+        """Redirect root to the English app page."""
+        return RedirectResponse(url="/app.html", status_code=307)
+
     root_app.add_api_route(
         f"{SITE_API_PREFIX}/profiles/{{profile_id}}/review", live_review, methods=["POST"]
     )
