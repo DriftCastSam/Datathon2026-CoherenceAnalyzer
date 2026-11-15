@@ -20,6 +20,7 @@ response is the Flow B report. A second confirmation of the same intent is a 409
 """
 from __future__ import annotations
 
+import copy
 import json
 import os
 import re
@@ -245,6 +246,120 @@ def _append_event(work: Path, event: dict) -> None:
     store.append_event(path, event)
 
 
+FLOW_A_EVENTS = ("question", "quiz_result", "profile_edit", "note")
+
+
+def _is_number(v: Any) -> bool:
+    return isinstance(v, (int, float)) and not isinstance(v, bool)
+
+
+def _computed(node: Any) -> bool:
+    """A system-computed object `{value, by, ...}` (rule: or llm:). `user:*` stamps (a skipped answer) are declared."""
+    return isinstance(node, dict) and "by" in node and not str(node["by"]).startswith("user:")
+
+
+def _holds_computed(node: Any) -> bool:
+    if _computed(node):
+        return True
+    if isinstance(node, dict):
+        return any(_holds_computed(v) for v in node.values())
+    return False
+
+
+def _kind(v: Any) -> str:
+    return ("bool" if isinstance(v, bool) else "number" if _is_number(v) else "str" if isinstance(v, str)
+            else "list" if isinstance(v, list) else "dict" if isinstance(v, dict) else "null")
+
+
+def _quiz_score(payload: dict | None) -> float:
+    """§3.4 {score, quiz_id}; §3.1 quiz_score is a 0-1 fraction. 422 for anything else, before anything is written."""
+    score = (payload or {}).get("score")
+    if not _is_number(score) or not 0 <= score <= 1:
+        raise HTTPException(status_code=422, detail="a quiz_result payload needs `score`, a number from 0 to 1 (§3.4)")
+    quiz_id = (payload or {}).get("quiz_id")
+    if quiz_id is not None and not isinstance(quiz_id, str):
+        raise HTTPException(status_code=422, detail="quiz_id must be a string")
+    return score
+
+
+def _apply_profile_edit(profile: dict, payload: dict | None) -> dict:
+    """The profile with a `profile_edit` payload `{path, old, new}` applied (a copy). Only declared fields: the path
+    names an existing key under identity / situation / objectives / risk / knowledge / values / preferences and no
+    segment on the way is a computed `{value, by}` object (rule: or llm:), so limits, limits_trace, meta and every
+    computed or llm: field are refused (422, inv. 1-3). A stale `old` is a 409. Schema failures are caught by `_save`'s
+    validation (422) before the edit lands."""
+    p = payload or {}
+    path, new = p.get("path"), p.get("new")
+    if not isinstance(path, str) or not path.strip() or "path" not in p or "new" not in p or "old" not in p:
+        raise HTTPException(status_code=422, detail="a profile_edit payload needs `path`, `old` and `new` (§3.4)")
+    parts = path.split(".")
+    if len(parts) < 2 or parts[0] not in _EDITABLE_ROOTS or not all(parts):
+        raise HTTPException(status_code=422, detail=f"{path!r} is not a user-editable declared field "
+                            "(limits, limits_trace, meta and computed fields can never be written through the API)")
+    out = copy.deepcopy(profile)
+    parent: Any = out
+    for seg in parts[:-1]:
+        if not isinstance(parent, dict) or seg not in parent or _computed(parent[seg]):
+            raise HTTPException(status_code=422, detail=f"{path!r} is not a user-editable declared field")
+        parent = parent[seg]
+    key = parts[-1]
+    if not isinstance(parent, dict) or key not in parent or _holds_computed(parent[key]):
+        raise HTTPException(status_code=422, detail=f"{path!r} is not a user-editable declared field")
+    current = parent[key]
+    if p["old"] != current:
+        raise HTTPException(status_code=409, detail=f"the value at {path!r} is not the one the edit was made on "
+                            "(stale `old`); nothing was changed")
+    skipped = isinstance(current, dict) and str(current.get("by", "")).startswith("user:")
+    if not skipped and current is not None and _kind(new) != _kind(current):
+        raise HTTPException(status_code=422, detail=f"the value at {path!r} must be a {_kind(current)}")
+    parent[key] = copy.deepcopy(new)
+    return out
+
+
+_EDITABLE_ROOTS = ("identity", "situation", "objectives", "risk", "knowledge", "values", "preferences")
+
+
+def _flow_a(work: Path, profile_id: str, fixture: Path, body: EventIn) -> dict:
+    """§4 Flow A for a question / quiz_result / profile_edit / note event, on the working copy. Everything is
+    validated before anything is written; a failure after the append restores events.jsonl and profile.json."""
+    path = work / "events.jsonl"
+    stored = _load(work)
+    edited = None
+    if body.type == "quiz_result":
+        score = _quiz_score(body.payload)
+        edited = copy.deepcopy(stored)
+        edited["knowledge"]["quiz_score"] = score
+    elif body.type == "profile_edit":
+        edited = _apply_profile_edit(stored, body.payload)
+    if edited is not None:
+        try:
+            pipeline.validate_profile(edited, "edited profile")
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+    events = store.read_events(path)
+    event = {"event_id": _next_event_id(events, fixture), "profile_id": profile_id, "ts": body.ts,
+             "type": body.type, "text": body.text, "payload": body.payload, "source": body.source}
+    if body.parent_event_id:
+        event["parent_event_id"] = body.parent_event_id
+    events_before = path.read_bytes() if path.exists() else b""
+    profile_before = (work / "profile.json").read_bytes()
+    try:
+        _append_event(work, event)
+        try:
+            res = pipeline.refresh(work, edited=edited)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        audit = res["audit"]
+        if audit["profile_version_out"] != audit["profile_version_in"]:
+            _save(work, res["profile"])
+    except BaseException:
+        path.write_bytes(events_before)
+        (work / "profile.json").write_bytes(profile_before)
+        raise
+    return {"event": event, "run_id": res["run_id"], "profile_diff": res["profile_diff"],
+            "profile_version": audit["profile_version_out"]}
+
+
 @app.post("/profiles/{profile_id}/events")
 def post_event(profile_id: str, body: EventIn) -> dict:
     work, fixture = _workdir(profile_id)
@@ -252,6 +367,8 @@ def post_event(profile_id: str, body: EventIn) -> dict:
         raise HTTPException(status_code=422, detail="intent_confirmed needs the confirmed intent as payload (§3.4)")
     path = work / "events.jsonl"
     with _LOCK:
+        if body.type in FLOW_A_EVENTS:
+            return _flow_a(work, profile_id, fixture, body)
         events = store.read_events(path)
         event = {"event_id": _next_event_id(events, fixture), "profile_id": profile_id, "ts": body.ts,
                  "type": body.type, "text": body.text, "payload": body.payload, "source": body.source}
