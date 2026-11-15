@@ -448,14 +448,19 @@ def test_running_the_review_twice_gives_byte_identical_reports_except_run_id_and
 # ---------------------------------------------------------------- Flow C on the current portfolio
 
 def test_review_current_portfolio_is_coherent_with_h6_h10_unknown(review_current, expected_base, report_schema):
-    """D7 acceptance + D3: `cli review fixtures/robert` -> verdict coherent, H6 and H10 listed in unknowns, no violation;
-    sections: contraintes unknown, every other section pass (§20.4 ranking); metrics are the engine's for ROBERT."""
+    """D7 acceptance + D3: `cli review fixtures/robert` -> verdict coherent, no violation; sections: contraintes
+    unknown, every other section pass (§20.4 ranking); metrics are the engine's for ROBERT.
+
+    D19: real ETF look-through data resolves H6/H10 (both pass); H11 (ESG exclusion tags) stays unknown, which
+    is what keeps the contraintes section at `unknown` rather than `pass`.
+    """
     rep, audit = _only(review_current)
     assert Draft202012Validator(report_schema).is_valid(rep)
     assert rep["verdict"] == audit["verdict"] == "coherent"
     assert rep["portfolio_id"] == "robert-main" and rep["flow"] == "C"
     unknown_ids = {u["id"] for u in rep["unknowns"]}
-    assert {"H6", "H10"} <= unknown_ids
+    assert "H11" in unknown_ids
+    assert {"H6", "H10"}.isdisjoint(unknown_ids)
     assert unknown_ids == {c["id"] for c in expected_base["checks"] if c["status"] == "unknown"}
     assert all(c["status"] not in ("violation", "warning") for c in rep["checks_current"])
     assert all(c["factor"] == factors.CHECK_FACTOR[c["id"]] for c in rep["checks_current"])
@@ -464,7 +469,8 @@ def test_review_current_portfolio_is_coherent_with_h6_h10_unknown(review_current
         "objectif": "pass", "horizon": "pass", "risque": "pass", "contraintes": "unknown", "preferences": "pass"}
     assert report_mod.sections_verdict(rep["sections"]) == "coherent"
     contraintes = next(s for s in rep["sections"] if s["factor"] == "contraintes")
-    assert {"H6", "H10"} <= {u["id"] for u in contraintes["unknowns"]}
+    assert "H11" in {u["id"] for u in contraintes["unknowns"]}
+    assert {"H6", "H10"}.isdisjoint({u["id"] for u in contraintes["unknowns"]})
     for k in ("vol", "mdd", "loss_prob", "width", "p5_T", "p50_T", "p95_T"):
         assert rep["metrics_current"][k] == pytest.approx(expected_base["metrics"][k], abs=1e-9), k
     for s in rep["sections"]:

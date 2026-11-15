@@ -22,9 +22,11 @@ def golden(root, tmp_path_factory):
 
 
 @pytest.mark.parametrize("name", CASES)
-def test_matches_v0(golden, market, name):
+def test_matches_v0(golden, market, name, tmp_path):
+    # v0 has no ETF look-through, so the parity run gets an empty meta dir (D19: once data/meta holds the issuer
+    # weights, groups.sector is split by them; that is data, not engine math, and test_lookthrough.py pins it).
     w, h, start = CASES[name]
-    new, old = engine.analyse(market, w, h, start), golden[name]
+    new, old = engine.analyse(market, w, h, start, meta_dir=tmp_path), golden[name]
     for k in KEYS:
         assert new[k] == old[k], k
     for p, series in old["cone"].items():

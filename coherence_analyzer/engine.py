@@ -14,7 +14,7 @@ from pathlib import Path
 import numpy as np
 import pandas as pd
 
-from . import config, data
+from . import config, data, exposure
 
 # Team assumption: annual drift in CAD per class (labelled in `assumptions`, not a forecast).
 ASSUMED = {"Stocks": .06, "Equity ETFs": .06, "Bonds": .03, "Gold": .03, "Crypto": .06}
@@ -103,6 +103,42 @@ def _lookthrough_shares(mk: Market, tickers: list[str],
     held = [t for t in tickers if mk.assets.loc[t, "asset_class"] == "etf_equity"]
     shares = {t: avail[t] for t in held if t in avail}
     return shares, bool(avail) and len(shares) == len(held)
+
+
+def portfolio_exposure(mk: Market, weights_pct: dict[str, float], value_cad: float,
+                       meta_dir: str | Path | None = None) -> dict:
+    """D19 exposure block (exposure.build), next to analyse() and not inside it: analyse() is the risk math, this is
+    the descriptive look-through view. The meta files are read here, the split itself is pure."""
+    w = pd.Series(weights_pct, dtype=float)
+    w = w[w > 0] / w[w > 0].sum()
+    md = config.META_DIR if meta_dir is None else Path(meta_dir)
+    frames = {n: data.load_meta(n, md) for n in ("etf_sector_weights", "etf_country_weights", "etf_top_holdings")}
+    labels = {}
+    for t in w.index:
+        a = mk.assets.loc[t]
+        cls = str(a.asset_class)
+        labels[t] = {"name": str(a["name"]), "asset_class": cls, "is_etf": cls.startswith("etf"),
+                     "sector": sector(mk, t), "country": country(mk, t), "class": klass(mk, t),
+                     "currency": str(a.currency),
+                     # nothing to look through: a bond ETF has no GICS sector, gold has no country or companies
+                     "lookthrough_sector": cls == "etf_equity", "lookthrough_names": cls == "etf_equity",
+                     "lookthrough_country": cls in ("etf_equity", "etf_bond")}
+    for frame in frames.values():   # companies an ETF holds that are also in the universe get the universe name
+        if frame is not None and "holding_ticker" in frame:
+            for h in set(frame["holding_ticker"]) - set(labels):
+                if h in mk.assets.index:
+                    labels[h] = {"name": str(mk.assets.loc[h, "name"]), "asset_class": "equity", "is_etf": False}
+    sources = []
+    for name, frame in frames.items():
+        if frame is not None:
+            for (etf, url, as_of), _ in frame.groupby(["etf", "source_url", "as_of"], sort=True):
+                sources.append({"file": f"data/meta/{name}.csv", "etf": etf, "as_of": as_of, "source_url": url})
+    return exposure.build(dict(w), labels, value_cad,
+                          sector_shares=data.etf_shares(frames["etf_sector_weights"], "sector"),
+                          country_shares=data.etf_shares(frames["etf_country_weights"], "country"),
+                          top_holdings=data.etf_top_holdings(frames["etf_top_holdings"]), sources=sources,
+                          class_shares={t: {CLASS_LABEL["equity"]: 1.0} for t in w.index
+                                        if mk.assets.loc[t, "asset_class"] == "etf_equity"})
 
 
 def assumptions(mk: Market, drift: str, block: int) -> list[str]:

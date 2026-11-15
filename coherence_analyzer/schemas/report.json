@@ -250,7 +250,8 @@
         "p95_T": {"type": "number"},
         "cone": {"type": "object", "required": ["p5", "p25", "p50", "p75", "p95"]},
         "assumptions": {"type": "array", "items": {"type": "string"}},
-        "lookthrough": {"type": "boolean"}
+        "lookthrough": {"type": "boolean"},
+        "exposure": {"type": "object", "description": "D19: descriptive ETF look-through view (sector, country, class, currency, single companies); never read by a check"}
       }
     },
     "segment": {

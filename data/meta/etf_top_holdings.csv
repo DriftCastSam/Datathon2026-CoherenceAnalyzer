@@ -1,0 +1,61 @@
+etf,holding_ticker,holding_name,weight,source_url,as_of
+XIU.TO,RY.TO,ROYAL BANK OF CANADA,0.0955,https://www.blackrock.com/ca/investors/en/products/239832/ishares-sptsx-60-index-etf/1464253357814.ajax?fileType=csv&fileName=XIU_holdings&dataType=fund,2026-11-13
+XIU.TO,TD.TO,TORONTO DOMINION,0.0693,https://www.blackrock.com/ca/investors/en/products/239832/ishares-sptsx-60-index-etf/1464253357814.ajax?fileType=csv&fileName=XIU_holdings&dataType=fund,2026-11-13
+XIU.TO,SHOP.TO,SHOPIFY SUBORDINATE VOTING CLASS A,0.0606,https://www.blackrock.com/ca/investors/en/products/239832/ishares-sptsx-60-index-etf/1464253357814.ajax?fileType=csv&fileName=XIU_holdings&dataType=fund,2026-11-13
+XIU.TO,BMO.TO,BANK OF MONTREAL,0.0413,https://www.blackrock.com/ca/investors/en/products/239832/ishares-sptsx-60-index-etf/1464253357814.ajax?fileType=csv&fileName=XIU_holdings&dataType=fund,2026-11-13
+XIU.TO,BNS.TO,BANK OF NOVA SCOTIA,0.0384,https://www.blackrock.com/ca/investors/en/products/239832/ishares-sptsx-60-index-etf/1464253357814.ajax?fileType=csv&fileName=XIU_holdings&dataType=fund,2026-11-13
+XIU.TO,ENB.TO,ENBRIDGE,0.0361,https://www.blackrock.com/ca/investors/en/products/239832/ishares-sptsx-60-index-etf/1464253357814.ajax?fileType=csv&fileName=XIU_holdings&dataType=fund,2026-11-13
+XIU.TO,CM.TO,CANADIAN IMPERIAL BANK OF COMMERCE,0.0360,https://www.blackrock.com/ca/investors/en/products/239832/ishares-sptsx-60-index-etf/1464253357814.ajax?fileType=csv&fileName=XIU_holdings&dataType=fund,2026-11-13
+XIU.TO,CNQ.TO,CANADIAN NATURAL RESOURCES LTD,0.0349,https://www.blackrock.com/ca/investors/en/products/239832/ishares-sptsx-60-index-etf/1464253357814.ajax?fileType=csv&fileName=XIU_holdings&dataType=fund,2026-11-13
+XIU.TO,AEM.TO,AGNICO EAGLE MINES,0.0308,https://www.blackrock.com/ca/investors/en/products/239832/ishares-sptsx-60-index-etf/1464253357814.ajax?fileType=csv&fileName=XIU_holdings&dataType=fund,2026-11-13
+XIU.TO,BN.TO,BROOKFIELD CLASS A,0.0298,https://www.blackrock.com/ca/investors/en/products/239832/ishares-sptsx-60-index-etf/1464253357814.ajax?fileType=csv&fileName=XIU_holdings&dataType=fund,2026-11-13
+XIU.TO,CP.TO,CANADIAN PACIFIC KANSAS CITY,0.0282,https://www.blackrock.com/ca/investors/en/products/239832/ishares-sptsx-60-index-etf/1464253357814.ajax?fileType=csv&fileName=XIU_holdings&dataType=fund,2026-11-13
+XIU.TO,SU.TO,SUNCOR ENERGY INC,0.0278,https://www.blackrock.com/ca/investors/en/products/239832/ishares-sptsx-60-index-etf/1464253357814.ajax?fileType=csv&fileName=XIU_holdings&dataType=fund,2026-11-13
+XIU.TO,MFC.TO,MANULIFE FINANCIAL,0.0250,https://www.blackrock.com/ca/investors/en/products/239832/ishares-sptsx-60-index-etf/1464253357814.ajax?fileType=csv&fileName=XIU_holdings&dataType=fund,2026-11-13
+XIU.TO,CNR.TO,CANADIAN NATIONAL RAILWAY,0.0238,https://www.blackrock.com/ca/investors/en/products/239832/ishares-sptsx-60-index-etf/1464253357814.ajax?fileType=csv&fileName=XIU_holdings&dataType=fund,2026-11-13
+XIU.TO,TRP.TO,TC ENERGY,0.0230,https://www.blackrock.com/ca/investors/en/products/239832/ishares-sptsx-60-index-etf/1464253357814.ajax?fileType=csv&fileName=XIU_holdings&dataType=fund,2026-11-13
+SPY,AAPL,APPLE INC,0.0790,https://www.ssga.com/us/en/intermediary/library-content/products/fund-data/etfs/us/holdings-daily-us-en-spy.xlsx,2026-11-12
+SPY,NVDA,NVIDIA CORP,0.0614,https://www.ssga.com/us/en/intermediary/library-content/products/fund-data/etfs/us/holdings-daily-us-en-spy.xlsx,2026-11-12
+SPY,MSFT,MICROSOFT CORP,0.0593,https://www.ssga.com/us/en/intermediary/library-content/products/fund-data/etfs/us/holdings-daily-us-en-spy.xlsx,2026-11-12
+SPY,GOOGL,Alphabet,0.0482,https://www.ssga.com/us/en/intermediary/library-content/products/fund-data/etfs/us/holdings-daily-us-en-spy.xlsx,2026-11-12
+SPY,AMZN,AMAZON.COM INC,0.0401,https://www.ssga.com/us/en/intermediary/library-content/products/fund-data/etfs/us/holdings-daily-us-en-spy.xlsx,2026-11-12
+SPY,AVGO,BROADCOM INC,0.0265,https://www.ssga.com/us/en/intermediary/library-content/products/fund-data/etfs/us/holdings-daily-us-en-spy.xlsx,2026-11-12
+SPY,META,META PLATFORMS INC CLASS A,0.0210,https://www.ssga.com/us/en/intermediary/library-content/products/fund-data/etfs/us/holdings-daily-us-en-spy.xlsx,2026-11-12
+SPY,LLY,ELI LILLY + CO,0.0174,https://www.ssga.com/us/en/intermediary/library-content/products/fund-data/etfs/us/holdings-daily-us-en-spy.xlsx,2026-11-12
+SPY,TSLA,TESLA INC,0.0171,https://www.ssga.com/us/en/intermediary/library-content/products/fund-data/etfs/us/holdings-daily-us-en-spy.xlsx,2026-11-12
+SPY,BRK.B,Berkshire Hathaway,0.0168,https://www.ssga.com/us/en/intermediary/library-content/products/fund-data/etfs/us/holdings-daily-us-en-spy.xlsx,2026-11-12
+SPY,AMD,ADVANCED MICRO DEVICES,0.0146,https://www.ssga.com/us/en/intermediary/library-content/products/fund-data/etfs/us/holdings-daily-us-en-spy.xlsx,2026-11-12
+SPY,JPM,JPMORGAN CHASE + CO,0.0139,https://www.ssga.com/us/en/intermediary/library-content/products/fund-data/etfs/us/holdings-daily-us-en-spy.xlsx,2026-11-12
+SPY,MU,MICRON TECHNOLOGY INC,0.0138,https://www.ssga.com/us/en/intermediary/library-content/products/fund-data/etfs/us/holdings-daily-us-en-spy.xlsx,2026-11-12
+SPY,V,VISA INC CLASS A SHARES,0.0109,https://www.ssga.com/us/en/intermediary/library-content/products/fund-data/etfs/us/holdings-daily-us-en-spy.xlsx,2026-11-12
+SPY,XOM,EXXONMOBIL HOLDINGS CORP,0.0107,https://www.ssga.com/us/en/intermediary/library-content/products/fund-data/etfs/us/holdings-daily-us-en-spy.xlsx,2026-11-12
+QQQ,AAPL,Apple Inc,0.0845,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/holdings/fund?idType=ticker&productType=ETF,2026-11-12
+QQQ,NVDA,NVIDIA Corp,0.0653,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/holdings/fund?idType=ticker&productType=ETF,2026-11-12
+QQQ,MSFT,Microsoft Corp,0.0633,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/holdings/fund?idType=ticker&productType=ETF,2026-11-12
+QQQ,GOOGL,Alphabet,0.0552,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/holdings/fund?idType=ticker&productType=ETF,2026-11-12
+QQQ,AMZN,Amazon.com Inc,0.0470,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/holdings/fund?idType=ticker&productType=ETF,2026-11-12
+QQQ,AMD,Advanced Micro Devices Inc,0.0430,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/holdings/fund?idType=ticker&productType=ETF,2026-11-12
+QQQ,MU,Micron Technology Inc,0.0406,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/holdings/fund?idType=ticker&productType=ETF,2026-11-12
+QQQ,TSLA,Tesla Inc,0.0340,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/holdings/fund?idType=ticker&productType=ETF,2026-11-12
+QQQ,META,Meta Platforms Inc,0.0302,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/holdings/fund?idType=ticker&productType=ETF,2026-11-12
+QQQ,AVGO,Broadcom Inc,0.0282,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/holdings/fund?idType=ticker&productType=ETF,2026-11-12
+QQQ,WMT,Walmart Inc,0.0276,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/holdings/fund?idType=ticker&productType=ETF,2026-11-12
+QQQ,SPCX,Space Exploration Technologies Corp,0.0270,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/holdings/fund?idType=ticker&productType=ETF,2026-11-12
+QQQ,COST,Costco Wholesale Corp,0.0218,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/holdings/fund?idType=ticker&productType=ETF,2026-11-12
+QQQ,CSCO,Cisco Systems Inc,0.0181,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/holdings/fund?idType=ticker&productType=ETF,2026-11-12
+QQQ,PLTR,Palantir Technologies Inc,0.0178,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/holdings/fund?idType=ticker&productType=ETF,2026-11-12
+ESGV,AAPL,Apple Inc,0.0871,https://advisors.vanguard.com/investments/products/api/funds/4393/holdings/daily,2026-11-12
+ESGV,MSFT,Microsoft Corp,0.0659,https://advisors.vanguard.com/investments/products/api/funds/4393/holdings/daily,2026-11-12
+ESGV,NVDA,NVIDIA Corp,0.0658,https://advisors.vanguard.com/investments/products/api/funds/4393/holdings/daily,2026-11-12
+ESGV,GOOGL,Alphabet,0.0534,https://advisors.vanguard.com/investments/products/api/funds/4393/holdings/daily,2026-11-12
+ESGV,AMZN,Amazon.com Inc,0.0440,https://advisors.vanguard.com/investments/products/api/funds/4393/holdings/daily,2026-11-12
+ESGV,AVGO,Broadcom Inc,0.0288,https://advisors.vanguard.com/investments/products/api/funds/4393/holdings/daily,2026-11-12
+ESGV,META,Meta Platforms Inc,0.0233,https://advisors.vanguard.com/investments/products/api/funds/4393/holdings/daily,2026-11-12
+ESGV,TSLA,Tesla Inc,0.0197,https://advisors.vanguard.com/investments/products/api/funds/4393/holdings/daily,2026-11-12
+ESGV,LLY,Eli Lilly & Co,0.0193,https://advisors.vanguard.com/investments/products/api/funds/4393/holdings/daily,2026-11-12
+ESGV,AMD,Advanced Micro Devices Inc,0.0162,https://advisors.vanguard.com/investments/products/api/funds/4393/holdings/daily,2026-11-12
+ESGV,JPM,JPMorgan Chase & Co,0.0156,https://advisors.vanguard.com/investments/products/api/funds/4393/holdings/daily,2026-11-12
+ESGV,MU,Micron Technology Inc,0.0153,https://advisors.vanguard.com/investments/products/api/funds/4393/holdings/daily,2026-11-12
+ESGV,V,Visa Inc,0.0121,https://advisors.vanguard.com/investments/products/api/funds/4393/holdings/daily,2026-11-12
+ESGV,MA,Mastercard Inc,0.0089,https://advisors.vanguard.com/investments/products/api/funds/4393/holdings/daily,2026-11-12
+ESGV,ABBV,AbbVie Inc,0.0088,https://advisors.vanguard.com/investments/products/api/funds/4393/holdings/daily,2026-11-12

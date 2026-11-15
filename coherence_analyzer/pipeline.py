@@ -444,6 +444,14 @@ def _horizon_months(profile: dict) -> int:
     return int(round(float(years) * 12))
 
 
+def _metrics(market: engine.Market, pf: dict, horizon_m: int) -> dict:
+    """engine.analyse (risk math) plus the D19 look-through `exposure` block, which is descriptive only: no check,
+    verdict or LLM node reads it."""
+    m = store.plain(engine.analyse(market, pf["weights_pct"], horizon_m, pf["value_cad"]))
+    m["exposure"] = store.plain(engine.portfolio_exposure(market, pf["weights_pct"], pf["value_cad"]))
+    return m
+
+
 def _b5_side(state: dict, side: str) -> dict:
     """One side of B5: only the keys it adds (a delta, not the whole state), so that the two sides can run as the two
     branches of a Step Functions Parallel state and be merged by key (P2.15). Same seed and horizon on both sides."""
@@ -451,7 +459,7 @@ def _b5_side(state: dict, side: str) -> dict:
     horizon_m = _horizon_months(state["profile"])
     market = engine.load_market(str(config.DATA_DIR))
     return {"horizon_months": horizon_m, "data_window": list(market.window),
-            f"metrics_{side}": store.plain(engine.analyse(market, pf["weights_pct"], horizon_m, pf["value_cad"]))}
+            f"metrics_{side}": _metrics(market, pf, horizon_m)}
 
 
 def b5_analyse_current(state: dict) -> dict:
@@ -537,7 +545,7 @@ def review(fixture_dir: Path, portfolio: str | Path | None = None, locale: str |
     locale = loc
     horizon_m = _horizon_months(profile)
     market = engine.load_market(str(config.DATA_DIR))
-    metrics = store.plain(engine.analyse(market, pf["weights_pct"], horizon_m, pf["value_cad"]))
+    metrics = _metrics(market, pf, horizon_m)
     goals_block, goal_checks = _goals_block(market, pf, profile, horizon_m, metrics)
     meta = {n: data.load_meta(n) for n in META_NAMES}
     checks = (hard.run_all(pf["weights"], metrics, profile, assets, meta)
