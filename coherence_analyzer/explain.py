@@ -11,7 +11,7 @@ import copy
 import unicodedata
 from concurrent.futures import ThreadPoolExecutor
 
-from .config import DISCLAIMER
+from .config import DISCLAIMER, DISCLAIMER_USER, USER_ORIGIN
 from .llm import bedrock, extractors
 from .numfacts import numcheck as _numcheck
 
@@ -395,10 +395,73 @@ def explain(payload: dict) -> dict:
         "headline": headline(payload["verdict"], sections, locale),
         "segments": [{"factor": n["factor"], **copy.deepcopy(seg)} for n in out_sections
                      for seg in n["narrative"]["segments"]],
-        "disclaimer": disclaimer(locale),
+        "disclaimer": disclaimer(locale, getattr(sections, "origin", None)),   # D16: set by report.build_sections
         "sections": out_sections,
     }
 
 
-def disclaimer(locale: str = "fr-CA") -> str:
-    return DISCLAIMER[locale]
+def disclaimer(locale: str = "fr-CA", origin: str | None = None) -> str:
+    """D16: the fixed disclaimer of the profile's origin. `origin == "user"` -> the text without the
+    fictional-profiles clause; anything else (seed personas, absent, unknown) -> the SPEC §9.4 text."""
+    return (DISCLAIMER_USER if origin == USER_ORIGIN else DISCLAIMER)[locale]
+
+
+# ---------------------------------------------------------------- D13: one plain statement per crossed limit
+
+_STATEMENT_LABELS = {
+    "en-CA": {
+        "H1": "an asset type you exclude, {subject}", "H2": "maximum crypto weight",
+        "H3": "maximum weight for {subject}", "H4": "minimum fixed-income weight",
+        "H5": "maximum foreign-currency weight", "H6": "maximum weight of your employer's sector, {subject}",
+        "H7": "maximum annual volatility", "H8": "maximum historical drawdown",
+        "H9": "minimum value of the low scenario at your horizon",
+        "H10": "maximum share of the risk for the {subject} sector",
+        "H11": "an activity you exclude, held through {subject}",
+        "H12": "maximum fee for {subject}", "H13": "maximum weight for the {subject} theme",
+        "H14": "maximum drawdown given that you say you would sell after a large drop",
+        "?": "limit {id}",
+    },
+    "fr-CA": {
+        "H1": "un type d'actif que vous excluez, {subject}", "H2": "poids maximal en cryptoactifs",
+        "H3": "poids maximal pour {subject}", "H4": "poids minimal du revenu fixe",
+        "H5": "poids maximal en devises étrangères", "H6": "poids maximal du secteur de votre employeur, {subject}",
+        "H7": "volatilité annuelle maximale", "H8": "repli historique maximal",
+        "H9": "valeur minimale du scénario bas à votre horizon",
+        "H10": "part maximale du risque pour le secteur {subject}",
+        "H11": "une activité que vous excluez, détenue via {subject}",
+        "H12": "frais maximaux pour {subject}", "H13": "poids maximal pour le thème {subject}",
+        "H14": "repli historique maximal, compte tenu de votre réaction à une forte baisse",
+        "?": "limite {id}",
+    },
+}
+_STATEMENT = {
+    "en-CA": {"head": "Making this trade takes you outside your profile: {label}{limit}. "
+                      "Facts: {value} after the trade{before}.",
+              "before": ", {before} before the trade", "quote": " From what you told us: '{quote}' ({source})."},
+    "fr-CA": {"head": "Cette transaction vous place hors de votre profil\u00a0: {label}{limit}. "
+                      "Faits\u00a0: {value} après la transaction{before}.",
+              "before": ", {before} avant la transaction",
+              "quote": " Selon ce que vous nous avez dit\u00a0: «\u00a0{quote}\u00a0» ({source})."},
+}
+
+
+def trade_statement(check: dict, before: dict | None, locale: str, quote: tuple[str, str] | None = None) -> str:
+    """D13: the one plain statement for a hard limit the trade crosses (FR / EN template, no question, no suggestion).
+    `check` = the proposed violation, `before` = the same check on the current side when it was already breached
+    (the value before the trade is then shown), `quote` = (verbatim quote, source) only when the limit traces to the
+    user's own words. Every number is the check's own value / limit formatted by its unit (so numcheck passes)."""
+    from .factors import fmt        # lazy: factors imports the report module
+    loc = locale if locale in _STATEMENT else "fr-CA"
+    t, unit = _STATEMENT[loc], check.get("unit")
+    labels = _STATEMENT_LABELS[loc]
+    label = labels.get(check["id"], labels["?"]).format(id=check["id"], subject=check.get("subject") or "")
+    limit = check.get("limit")
+    limit_txt = f" ({fmt.check_value(limit, unit, loc)})" if limit is not None else ""
+    before_txt = ""
+    if before is not None and before.get("value") is not None:
+        before_txt = t["before"].format(before=fmt.check_value(before["value"], before.get("unit", unit), loc))
+    text = t["head"].format(label=label, limit=limit_txt, before=before_txt,
+                            value=fmt.check_value(check.get("value"), unit, loc))
+    if quote is not None:
+        text += t["quote"].format(quote=quote[0], source=quote[1])
+    return text

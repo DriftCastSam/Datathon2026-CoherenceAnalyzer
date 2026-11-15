@@ -59,3 +59,12 @@ DISCLAIMER = {
     "en-CA": "Educational simulation with fictional profiles. This is not personalised financial "
              "advice. No transaction is executed.",
 }
+# D16: a profile a user created (meta.origin == "user", set by POST /profiles) carries the same text without the
+# fictional-profiles clause. `DISCLAIMER[locale]` stays the seed text (SPEC §9.4); reports pick by profile origin
+# (`explain.disclaimer(locale, origin)`). Fixed texts, never LLM-written.
+DISCLAIMER_USER = {
+    "fr-CA": "Simulation éducative. Ceci n'est pas un conseil financier personnalisé. "
+             "Aucune transaction n'est exécutée.",
+    "en-CA": "Educational simulation. This is not personalised financial advice. No transaction is executed.",
+}
+USER_ORIGIN = "user"
