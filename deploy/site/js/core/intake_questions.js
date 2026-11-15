@@ -53,11 +53,38 @@
   const DRAWDOWN_CHIPS = [-5, -10, -20, -30].map(value => ({label: value + "%", value}));
   const HORIZON_CHIPS = [1, 3, 5, 10, 20].map(value => ({label: value + (value === 1 ? " year" : " years"), value}));
 
+  const MAX_AGE = 120;
   const MAX_RETIREMENT_AGE = 120;
   const MAX_HORIZON_YEARS = 100;
   const MAX_PERCENT = 100;
 
+  const EMPLOYMENT_TYPE_CHIPS = [
+    {label: "Salaried", value: "salaried"},
+    {label: "Self-employed", value: "self_employed"},
+    {label: "Contract", value: "contract"},
+    {label: "Commission", value: "commission"},
+    {label: "Unemployed", value: "unemployed"},
+    {label: "Retired", value: "retired"}
+  ];
+
+  const KNOWLEDGE_LEVEL_CHIPS = [
+    {label: "Novice", value: "novice"},
+    {label: "Intermediate", value: "intermediate"},
+    {label: "Advanced", value: "advanced"},
+    {label: "Expert", value: "expert"}
+  ];
+
   const SPEC = {
+    "identity.age": {
+      label: "Age", kind: KIND.NUMBER, unit: "years", integer: true, min: 0,
+      max: MAX_AGE, placeholder: "e.g. 45", chips: []
+    },
+    "identity.employment_type": {
+      label: "Employment type", kind: KIND.ENUM, chips: EMPLOYMENT_TYPE_CHIPS
+    },
+    "knowledge.declared_level": {
+      label: "Investment knowledge", kind: KIND.ENUM, chips: KNOWLEDGE_LEVEL_CHIPS
+    },
     "objectives.primary": {
       label: "Objective", kind: KIND.ENUM, chips: OBJECTIVE_CHIPS
     },

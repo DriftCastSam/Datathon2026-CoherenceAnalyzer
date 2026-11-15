@@ -192,7 +192,7 @@ def missing(profile: dict, factor: str) -> list[str]:
 def next_question(profile: dict, factor: str, locale: str = "fr-CA") -> dict | None:
     """Fixed template question for the first missing path, or None. No LLM. Pure.
 
-    Returns {factor, path, text, locale, skippable}.
+    Returns {factor, path, text, locale}.
     """
     if locale not in LOCALES:
         raise ValueError(f"unknown locale {locale!r}; expected one of {LOCALES}")
