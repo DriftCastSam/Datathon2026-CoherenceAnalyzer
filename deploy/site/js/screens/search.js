@@ -66,22 +66,14 @@
   const REFUSE_REPLY = "I can't rank or recommend assets. I can add filters to narrow the list, or run a coherence analysis on the assets you select yourself.";
   const UNKNOWN_REPLY = "I didn't recognize a filter. Try an asset class (stocks, ETFs, bonds, crypto), a market (Canada, United States), a sector (technology, energy, financials) or a ticker.";
 
-  const SAMPLE_TOTAL = 31;
-  const SAMPLE_ASSETS = [
-    {key: "sample-1", ticker: "[TICKER]", name: "Technology sector ETF", asset_class: "etf", market: "NYSE Arca", currency: "USD", sector: "Technology"},
-    {key: "sample-2", ticker: "[TICKER]", name: "US cloud software company", asset_class: "equity", market: "NASDAQ", currency: "USD", sector: "Technology"},
-    {key: "sample-3", ticker: "[TICKER]", name: "US consumer electronics company", asset_class: "equity", market: "NASDAQ", currency: "USD", sector: "Technology"},
-    {key: "sample-4", ticker: "[TICKER]", name: "US semiconductor company A", asset_class: "equity", market: "NASDAQ", currency: "USD", sector: "Technology"},
-    {key: "sample-5", ticker: "[TICKER]", name: "US semiconductor company B", asset_class: "equity", market: "NASDAQ", currency: "USD", sector: "Technology"},
-    {key: "sample-6", ticker: "[TICKER]", name: "US social media company", asset_class: "equity", market: "NASDAQ", currency: "USD", sector: "Technology"}
-  ];
-
   const SEED_CHAT = [
     {who: "user", text: "Show me US technology stocks and technology ETFs."},
-    {who: "agent", text: "I applied 3 filters to the 31-asset universe. 6 assets match. The list is sorted A to Z and is not a recommendation."},
+    {who: "agent", dynamic: true},
     {who: "user", text: "Which one of these is best for me?"},
     {who: "agent", text: REFUSE_REPLY, outside: true}
   ];
+  const EMPTY_UNIVERSE_ROW = "The asset universe for this profile is not available. Reload the page or choose another profile.";
+  const ANALYZE_ROUTE = "#/whatif?assets=";
 
   const NORMALIZE = /[\u0300-\u036f]/g;
   const TICKER_SHAPE = /^[a-z][a-z0-9.\-]{0,9}$/;
@@ -89,7 +81,6 @@
   /* Module state, like the reference dashboard's askState: it survives re-renders. */
   const state = {
     filters: {cls: ["equity", "etf"], mkt: ["us"], sec: ["tech"], ccy: []},
-    sel: ["sample-1", "sample-4"],
     chat: SEED_CHAT.slice()
   };
 
@@ -98,23 +89,26 @@
   }
 
   function rowSource() {
-    const universe = App.data && App.data.universe;
-    const assets = universe && Array.isArray(universe.assets) ? universe.assets : null;
-    if (assets && assets.length) {
-      return {
-        total: assets.length,
-        rows: assets.map(asset => ({
-          key: String(asset.ticker),
-          ticker: asset.ticker,
-          name: asset.name,
-          asset_class: asset.asset_class,
-          market: asset.market,
-          currency: asset.currency,
-          sector: asset.sector
-        }))
-      };
-    }
-    return {total: SAMPLE_TOTAL, rows: SAMPLE_ASSETS};
+    const universe = App.state && App.state.universe;
+    const assets = universe && Array.isArray(universe.assets) ? universe.assets : [];
+    return {
+      total: assets.length,
+      rows: assets.map(asset => ({
+        key: String(asset.ticker),
+        ticker: asset.ticker,
+        name: asset.name,
+        asset_class: asset.asset_class,
+        market: asset.market,
+        currency: asset.currency,
+        sector: asset.sector
+      }))
+    };
+  }
+
+  /* The selection lives in App.state.selection (reset on persona change); only tickers
+     that exist in the current universe count. */
+  function selectedKeys(source) {
+    return (App.state.selection || []).filter(key => source.rows.some(row => row.key === key));
   }
 
   function matchesRow(row) {
@@ -169,9 +163,11 @@
     if (!Object.keys(hits).length) {
       if (named.length) {
         const tickers = named.map(row => row.ticker).join(", ");
+        const keys = selectedKeys(source);
         named.forEach(row => {
-          if (state.sel.indexOf(row.key) < 0) state.sel.push(row.key);
+          if (keys.indexOf(row.key) < 0) keys.push(row.key);
         });
+        App.setSelection(keys);
         return {text: "I checked " + tickers + " in the list. Select Analyze coherence of selected to see how the portfolio would change."};
       }
       return {text: UNKNOWN_REPLY};
@@ -188,14 +184,16 @@
       });
     });
 
+    return {text: filterSummary(source)};
+  }
+
+  function filterSummary(source) {
     const count = visibleRows(source).length;
     const filters = filterCount();
-    return {
-      text: "I applied " + filters + (filters === 1 ? " filter" : " filters")
-        + " to the " + source.total + "-asset universe. "
-        + count + (count === 1 ? " asset matches" : " assets match")
-        + ". The list is sorted A to Z and is not a recommendation."
-    };
+    return "I applied " + filters + (filters === 1 ? " filter" : " filters")
+      + " to the " + source.total + "-asset universe. "
+      + count + (count === 1 ? " asset matches" : " assets match")
+      + ". The list is sorted A to Z and is not a recommendation.";
   }
 
   /* ---------- markup ---------- */
@@ -245,8 +243,8 @@
       + optionsMarkup("ccy", "Currency", CURRENCIES.map(key => [key, key]));
   }
 
-  function rowMarkup(row) {
-    const selected = state.sel.indexOf(row.key) >= 0;
+  function rowMarkup(row, selection) {
+    const selected = selection.indexOf(row.key) >= 0;
     return '<tr class="sq-row' + (selected ? " sq-row--on" : "") + '">'
       + '<td><input class="sq-check" type="checkbox" data-key="' + App.esc(row.key) + '"'
       + (selected ? " checked" : "") + ' aria-label="Select ' + App.esc(row.name) + '"></td>'
@@ -258,32 +256,31 @@
       + '</tr>';
   }
 
-  function rowsMarkup(rows) {
+  function rowsMarkup(rows, selection, total) {
+    if (!total) {
+      return '<tr><td colspan="6" class="t-small muted">' + App.esc(EMPTY_UNIVERSE_ROW) + '</td></tr>';
+    }
     if (!rows.length) {
       return '<tr><td colspan="6" class="t-small muted">No asset matches these filters. Remove a filter to widen the list.</td></tr>';
     }
-    return rows.map(rowMarkup).join("");
+    return rows.map(row => rowMarkup(row, selection)).join("");
   }
 
   function countLabel(matched, total) {
     return matched + " of " + total + (matched === 1 ? " asset matches" : " assets match");
   }
 
-  function selectionLabel() {
-    return state.sel.length + (state.sel.length === 1 ? " asset selected" : " assets selected");
+  function selectionLabel(count) {
+    return count + (count === 1 ? " asset selected" : " assets selected");
   }
 
   /* ---------- render ---------- */
 
-  function pruneSelection(source) {
-    state.sel = state.sel.filter(key => source.rows.some(row => row.key === key));
-  }
-
-  function paintSelection(section) {
+  function paintSelection(section, count) {
     const label = section.querySelector("[data-selected]");
-    if (label) label.textContent = selectionLabel();
+    if (label) label.textContent = selectionLabel(count);
     const button = section.querySelector("[data-analyze]");
-    if (button) button.disabled = state.sel.length === 0;
+    if (button) button.disabled = count === 0;
   }
 
   /* Profile note: the declared name, risk level and horizon, never the sample values for a
@@ -303,7 +300,7 @@
     const note = section.querySelector("[data-note]");
     if (!note) return;
     const report = App.data && App.data.report;
-    let text = "Robert \u00b7 low to moderate risk \u00b7 3 to 5 years";
+    let text = "";
     if (report) {
       const card = report.site && report.site.profile_card ? report.site.profile_card : null;
       const parts = [];
@@ -333,16 +330,17 @@
     if (!thread || !chips || !count || !rows || !add) return;
 
     const source = rowSource();
-    pruneSelection(source);
+    const selection = selectedKeys(source);
     const visible = visibleRows(source);
 
-    thread.innerHTML = state.chat.map(messageMarkup).join("");
+    const messages = state.chat.map(message => (message.dynamic ? {...message, text: filterSummary(source)} : message));
+    thread.innerHTML = messages.map(messageMarkup).join("");
     chips.innerHTML = chipsMarkup();
     count.textContent = countLabel(visible.length, source.total);
-    rows.innerHTML = rowsMarkup(visible);
+    rows.innerHTML = rowsMarkup(visible, selection, source.total);
     if (add.options.length === 1) add.insertAdjacentHTML("beforeend", addOptionsMarkup());
     add.value = "";
-    paintSelection(section);
+    paintSelection(section, selection.length);
     paintNote(section);
     scrollThread(section);
   }
@@ -357,6 +355,15 @@
     paint(section);
     const field = section.querySelector("[data-message-input]");
     if (field) field.focus();
+  }
+
+  function toggleSelection(section, box) {
+    const key = box.getAttribute("data-key");
+    const keys = selectedKeys(rowSource()).filter(item => item !== key);
+    if (box.checked) keys.push(key);
+    App.setSelection(keys);
+    const again = Array.from(section.querySelectorAll("input[data-key]")).find(item => item.getAttribute("data-key") === key);
+    if (again) again.focus();
   }
 
   /* Delegated once per section; the shell keeps the section between visits. */
@@ -392,19 +399,14 @@
         paint(section);
         return;
       }
-      if (state.sel.length) App.go("#/whatif");
+      const keys = selectedKeys(rowSource());
+      if (keys.length) App.go(ANALYZE_ROUTE + keys.map(encodeURIComponent).join(","));
     });
 
     section.addEventListener("change", event => {
       const box = event.target.closest("input[data-key]");
       if (box) {
-        const key = box.getAttribute("data-key");
-        const at = state.sel.indexOf(key);
-        if (box.checked && at < 0) state.sel.push(key);
-        if (!box.checked && at >= 0) state.sel.splice(at, 1);
-        const row = box.closest("tr");
-        if (row) row.classList.toggle("sq-row--on", box.checked);
-        paintSelection(section);
+        toggleSelection(section, box);
         return;
       }
       const adder = event.target.closest("select[data-add]");
