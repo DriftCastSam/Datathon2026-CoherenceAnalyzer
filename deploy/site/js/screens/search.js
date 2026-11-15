@@ -66,12 +66,6 @@
   const REFUSE_REPLY = "I can't rank or recommend assets. I can add filters to narrow the list, or run a coherence analysis on the assets you select yourself.";
   const UNKNOWN_REPLY = "I didn't recognize a filter. Try an asset class (stocks, ETFs, bonds, crypto), a market (Canada, United States), a sector (technology, energy, financials) or a ticker.";
 
-  const SEED_CHAT = [
-    {who: "user", text: "Show me US technology stocks and technology ETFs."},
-    {who: "agent", dynamic: true},
-    {who: "user", text: "Which one of these is best for me?"},
-    {who: "agent", text: REFUSE_REPLY, outside: true}
-  ];
   const EMPTY_UNIVERSE_ROW = "The asset universe for this profile is not available. Reload the page or choose another profile.";
   const ANALYZE_ROUTE = "#/whatif?assets=";
 
@@ -80,8 +74,8 @@
 
   /* Module state, like the reference dashboard's askState: it survives re-renders. */
   const state = {
-    filters: {cls: ["equity", "etf"], mkt: ["us"], sec: ["tech"], ccy: []},
-    chat: SEED_CHAT.slice()
+    filters: {cls: [], mkt: [], sec: [], ccy: []},
+    chat: []
   };
 
   function deacc(value) {
@@ -333,8 +327,7 @@
     const selection = selectedKeys(source);
     const visible = visibleRows(source);
 
-    const messages = state.chat.map(message => (message.dynamic ? {...message, text: filterSummary(source)} : message));
-    thread.innerHTML = messages.map(messageMarkup).join("");
+    thread.innerHTML = state.chat.map(messageMarkup).join("");
     chips.innerHTML = chipsMarkup();
     count.textContent = countLabel(visible.length, source.total);
     rows.innerHTML = rowsMarkup(visible, selection, source.total);
