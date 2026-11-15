@@ -104,22 +104,22 @@
     return document.querySelector('section[data-route="summary"] .scr-summary');
   }
 
-  function accountsTab() {
+  function analysisTab() {
     const tabs = document.getElementById("app-tabs");
     if (!tabs) return null;
     return Array.prototype.find.call(tabs.querySelectorAll("a.tab"), tab => {
       const label = tab.querySelector(".tab__label");
-      return label !== null && label.textContent.trim() === "Accounts";
+      return label !== null && label.textContent.trim() === "Analysis";
     }) || null;
   }
 
   function setMenuState(open) {
     const screen = summaryScreen();
     if (screen) screen.classList.toggle("is-open", open);
-    const tab = accountsTab();
+    const tab = analysisTab();
     if (!tab) return;
     tab.setAttribute("aria-expanded", open ? "true" : "false");
-    tab.setAttribute("aria-controls", "summary-accounts-menu");
+    tab.setAttribute("aria-controls", "summary-analysis-menu");
   }
 
   function closeMenu() {
@@ -132,7 +132,7 @@
       const target = event.target instanceof Element ? event.target.closest("a.tab") : null;
       if (!target || App.route !== "summary") return;
       const label = target.querySelector(".tab__label");
-      if (!label || label.textContent.trim() !== "Accounts") return;
+      if (!label || label.textContent.trim() !== "Analysis") return;
       event.preventDefault();
       const screen = summaryScreen();
       if (screen) setMenuState(!screen.classList.contains("is-open"));

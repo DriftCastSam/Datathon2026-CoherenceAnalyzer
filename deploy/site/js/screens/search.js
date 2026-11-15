@@ -372,7 +372,7 @@
     section.dataset.searchBound = "1";
 
     section.addEventListener("submit", event => {
-      const form = event.target.closest("form[data-query-form], form[data-message-form]");
+      const form = event.target.closest("form[data-message-form]");
       if (!form) return;
       event.preventDefault();
       const input = form.querySelector("input[type=text]");
@@ -424,11 +424,12 @@
     paint(section);
   };
 
-  /* The design (node 8:552) keeps the standard Accounts chrome, with Accounts active. */
+  /* The design (node 8:552) keeps the standard chrome, with Analysis active. */
   App.navSpec.search = {
     chrome: "full",
     tabs: [
-      {label: "Accounts", href: "#/summary", active: true},
+      {label: "Accounts", href: "#", active: false},
+      {label: "Analysis", href: "#/summary", active: true},
       {label: "Markets", href: "#", active: false},
       {label: "Activities", href: "#", active: false},
       {label: "Documents", href: "#", active: false},

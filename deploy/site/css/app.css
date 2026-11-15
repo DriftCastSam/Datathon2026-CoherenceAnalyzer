@@ -420,10 +420,7 @@ h3{font:600 16px/24px var(--f)}
 .scr-search .sq-inner{display:flex;flex-direction:column;gap:16px;min-width:0}
 .scr-search .sq-titlerow{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
 .scr-search .sq-note{color:var(--label)}
-.scr-search .sq-query{display:flex;flex-direction:column;gap:10px}
-.scr-search .sq-queryrow{display:flex;align-items:center;gap:8px}
 .scr-search .sq-field{display:flex;align-items:center;gap:8px;min-width:0;background:var(--surface);border:1px solid var(--muted);border-radius:999px;padding:0 16px;height:42px}
-.scr-search .sq-field--query{flex:1}
 .scr-search .sq-field--message{flex:1;height:44px;border-radius:22px;padding:0 14px}
 .scr-search .sq-field:focus-within{outline:3px solid var(--blue);outline-offset:2px}
 .scr-search .sq-input{flex:1;min-width:0;border:0;background:transparent;padding:9px 0;font:400 14px/22px var(--f);color:var(--ink)}
