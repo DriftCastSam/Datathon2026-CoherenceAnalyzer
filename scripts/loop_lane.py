@@ -27,6 +27,7 @@ import argparse
 import fcntl
 import json
 import os
+import re
 import signal
 import subprocess
 import sys
@@ -140,7 +141,8 @@ def merge(task_id: str) -> int:
     r = git("merge", "--no-ff", branch, "-m", f"Merge {branch}")
     if r.returncode != 0:
         unmerged = git("diff", "--name-only", "--diff-filter=U").stdout.split()
-        other = [f for f in unmerged if f != ".claude/loop/state.json" and not f.startswith(".claude/loop/runs/")]
+        auto = {".claude/loop/state.json", ".claude/loop/frozen.json", "README.md"}
+        other = [f for f in unmerged if f not in auto and not f.startswith(".claude/loop/runs/")]
         if other:
             git("merge", "--abort")
             print(f"merge of {branch} has real conflicts, aborted: {other}", file=sys.stderr)
@@ -156,6 +158,23 @@ def merge(task_id: str) -> int:
                 if "impl" in (ours["done"].get(k), theirs["done"].get(k)):
                     done[k] = "impl"
             (ROOT / ".claude/loop/state.json").write_text(json.dumps({**ours, "done": done}, indent=2, sort_keys=True) + "\n")
+        if ".claude/loop/frozen.json" in unmerged:   # 3-way per file: the lane's hash wins where the lane changed it
+            side = lambda n: json.loads(git("show", f":{n}:.claude/loop/frozen.json").stdout)["files"]
+            base, ours, theirs = side(1), side(2), side(3)
+            files = {**ours, **{f: h for f, h in theirs.items() if base.get(f) != h}}
+            (ROOT / ".claude/loop/frozen.json").write_text(json.dumps({"files": files}, indent=2, sort_keys=True) + "\n")
+        if "README.md" in unmerged:   # lanes append bullets: keep both sides of each hunk, show them for review
+            text = (ROOT / "README.md").read_text(encoding="utf-8")
+            hunks = re.findall(r"<<<<<<< [^\n]*\n(.*?)=======\n(.*?)>>>>>>> [^\n]*\n", text, flags=re.S)
+            text = re.sub(r"<<<<<<< [^\n]*\n(.*?)=======\n(.*?)>>>>>>> [^\n]*\n", lambda m: m.group(1) + m.group(2),
+                          text, flags=re.S)
+            if "<<<<<<<" in text or ">>>>>>>" in text:
+                git("merge", "--abort")
+                print("README.md conflict markers left after union, aborted", file=sys.stderr)
+                return 4
+            (ROOT / "README.md").write_text(text, encoding="utf-8")
+            for o, t in hunks:
+                print(f"README union hunk:\n  ours:   {o.strip()[:160]}\n  theirs: {t.strip()[:160]}")
         git("add", *unmerged)
         c = git("commit", "--no-edit")
         if c.returncode != 0:
