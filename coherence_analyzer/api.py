@@ -367,11 +367,18 @@ def put_portfolio(profile_id: str, body: PortfolioIn) -> dict:
                  "ts": pipeline._now(), "type": "profile_edit",
                  "text": f"The portfolio holdings were set ({len(new['weights_pct'])} positions, as of {body.as_of}).",
                  "payload": {"path": "portfolio", "old": old, "new": new}, "source": PORTFOLIO_EDIT_SOURCE}
+        profile_before = (work / "profile.json").read_bytes()
         try:
             _write_json(pf_path, doc)
             _append_event(work, event)
+            try:
+                res = pipeline.refresh(work)      # Flow A on the new value and date (D1): GET serves the new limits
+            except ValueError as exc:
+                raise HTTPException(status_code=422, detail=str(exc)) from exc
+            _save(work, res["profile"])
         except BaseException:
             events_path.write_bytes(events_before)
+            (work / "profile.json").write_bytes(profile_before)
             if pf_before is None:
                 pf_path.unlink(missing_ok=True)
             else:
