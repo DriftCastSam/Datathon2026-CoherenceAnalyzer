@@ -24,7 +24,8 @@ coherence_analyzer/          package (SPEC §2): engine, rules/, coherence/, fac
                              explain, stress, pipeline, store, api, cli, lambda_handler
 coherence_analyzer/schemas/  profile.v2.json, report.json (JSON Schema)
 fixtures/                    personas (robert, amira, mateo) + llm_cache/ for mock mode
-docs/                        spec-decisions.md, spec-factors.md (approved SPEC resolutions), architecture.html
+docs/                        index.html: one expandable flowchart of a whole run (open it in a browser);
+                             spec-decisions.md + spec-factors.md (approved SPEC resolutions)
 deploy/                      site/ (static dashboard), build_site.py, preview_report.py, whatif.py (site data),
                              cloudfront.yaml, aws/ (CloudFormation stack + Flow B state machine)
 scripts/                     engine_v0.py (golden-test reference), handwrite_*_cache.py (mock cache), agent_loop.py
@@ -312,6 +313,17 @@ All persona financial figures beyond the case brief are fictional team assumptio
   - N3 vocabulary and N4 action (P3.GATE): SPEC-AMBIGUITY: a rule that fails the tag / theme / `max_pct` check is "rejected with a reason, never coerced". SPEC §11 has no per-rule status, so the whole N3 output is `rejected:schema` and the previous value stays (§1 inv. 4), as for an invented quote. A missing `tag` / `theme` counts as outside the vocabulary. With no `asset_meta.csv` (or an invalid one) the theme vocabulary is empty and no theme rule passes. SPEC gives no sell semantics (§3.6, `intent.apply` is buy only), so the N4 gate rejects any action but `buy` with `rejected:schema` and returns the previous draft (none by default), never a confirmable sell. The prompt `values_parser.v1` is unchanged (the vocabularies reach the model through the tool schema enum); the schema's `max_pct` minimum is now exclusive.
   - Provisional theme limits (P6.PROVISIONAL, D11): SPEC-AMBIGUITY: D11.1 does not give the shape of the flagged entry or how a rejection is recorded. (1) The entry is `{value: <fraction>, provisional: true, quote: <the user's words>}`; an approved limit stays a bare fraction. (2) A theme that already has an approved limit keeps it; an unapproved rule for the same theme adds nothing (the user's approval outranks a reading of their notes). Between several unapproved rules for a theme, the stricter wins. (3) Rejection (`POST .../parsed-rules/{i}/decision {approved: false}`) lists the rule's quote in `values.parsed_notes.rejected_quotes`; limits skip a rule whose quote is listed, and approval removes it from the list. A fresh N3 parse replaces the node, so a re-read rule is provisional again. The small edit in `api.py` (decision route) is the only way to record it without changing the rule dict, which `test_rule_decision_refresh.py` pins. (4) `limits_trace.max_theme_weight` keeps `[approved_by_user]` as its static dependency (fixtures and frozen tests pin it) and, when the limit is built only from provisional readings, shows `[provisional]` instead; this is why `test_limits_no_llm_inputs.py::test_llm_fields_do_not_change_limits` cannot pass next to `test_provisional_limits.py` (see `.claude/loop/BLOCKED.md`). (5) Percent to fraction is converted once, in `build_limits`. Amira's committed report is unchanged; a provisional limit only appears on a profile with an unapproved numeric theme rule.
 
+## Agentic flow
+
+Where the six LLM nodes sit in Flows A, B and C (`coherence_analyzer/pipeline.py`). Every LLM output passes
+`gate.py` (evidence must be real `event_id`s or exact substrings of the notes); a rejected output keeps the previous
+value. No LLM output feeds `limits`, and LLM-derived checks give `warning | info | unknown` only.
+
+Diagram: [docs/index.html](docs/index.html), one flowchart of a whole run (Flows A, B and C), where every box opens to show what it reads, does and writes.
+
+Headline, segments outside sections and the disclaimer are always template text. Hard checks (H*) are the only
+source of `violation`; soft checks from N1 (S1, S3) have confidence capped at 0.8.
+
 ## AWS deploy
 
 The template is `deploy/aws/coherence-analyzer.cfn.json` (S3 bucket with versioning, public access block, SSE and a TLS-only policy; Bedrock Guardrail with a denied topic for personalised investment recommendations; one least-privilege managed policy). It is never deployed by the tests or the build. To deploy by hand:
@@ -434,6 +446,9 @@ stateDiagram-v2
 ```
 
 Every Task (B1, B3 to B9, both B5 branches) and the Parallel state lead to `FlowBFailed` on error; the diagram shows two.
+
+The Flow B steps, including the Parallel engine state, are in the flowchart at [docs/index.html](docs/index.html); the state machine itself is `deploy/aws/flow_b.asl.json`.
+
 
 ## Known limitations
 
