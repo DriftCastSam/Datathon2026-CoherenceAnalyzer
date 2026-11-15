@@ -124,7 +124,7 @@ def create_app(site_dir: Path) -> FastAPI:
         A FastAPI app with the API mounted at `/api` and the static site at `/`.
         GET `/` redirects to `/app.html` (the English app page).
     """
-    root_app = FastAPI(title="CoherenceAnalyzer local")
+    root_app = FastAPI(title="Compass local")
 
     @root_app.get("/")
     def redirect_root():

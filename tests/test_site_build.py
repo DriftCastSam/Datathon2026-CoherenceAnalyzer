@@ -143,7 +143,7 @@ def test_build_emits_app_html_and_index_html(tmp_path, monkeypatch):
 
     app_html = (tmp_path / "app.html").read_text(encoding="utf-8")
     assert 'lang="en-CA"' in app_html
-    assert "Profile Coherence" in app_html
+    assert "Compass" in app_html
 
     index_html = (tmp_path / "index.html").read_text(encoding="utf-8")
     assert 'lang="fr"' in index_html

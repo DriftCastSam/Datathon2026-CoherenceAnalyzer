@@ -59,7 +59,7 @@ _THEME_NUMBER_PATH = re.compile(
 
 _LOCK = threading.RLock()     # one writer at a time: a local demo server, files are small
 
-app = FastAPI(title="CoherenceAnalyzer")
+app = FastAPI(title="Compass")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET", "POST", "PUT"], allow_headers=["*"])
 
 

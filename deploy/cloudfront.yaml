@@ -33,7 +33,7 @@ Resources:
       DistributionConfig:
         Enabled: true
         Comment: CoherenceAnalyzer prototype
-        DefaultRootObject: index.html
+        DefaultRootObject: app.html  # David's app (serve_local.py also sends / to /app.html); the French dashboard stays at /index.html
         HttpVersion: http2and3
         PriceClass: PriceClass_100
         Origins:

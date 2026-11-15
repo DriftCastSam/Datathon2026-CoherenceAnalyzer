@@ -3,14 +3,14 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CoherenceAnalyzer · how a run works</title>
+<title>Compass · how a run works</title>
 <link rel="stylesheet" href="assets/site.css">
 <link rel="stylesheet" href="assets/explorer.css">
 <script defer src="assets/explorer.js"></script>
 </head>
 <body>
 <main class="explorer" data-show="all">
-<h1>CoherenceAnalyzer: one run, top to bottom</h1>
+<h1>Compass: one run, top to bottom</h1>
 <p class="lead">One flowchart for a whole run. Click any box to open it, and click again to close it. Some boxes open into
 their own smaller flowchart, and so on down to grey <b>code</b> boxes that show the real function (filled from the source
 by <code>scripts/build_docs.py</code>, so they match the code on this branch). Python decides everything; amber boxes
@@ -98,7 +98,7 @@ are the only places an LLM is called, and each one is followed by a red box that
     <code>POST /profiles/{id}/review</code>.</dd>
   <dt>Flow A</dt><dd>The profile refresh (box below) also runs on its own: CLI <code>refresh</code>, or a profile edit in the API.</dd></dl>
 
-  <div class="srcs"><div class="srcs-h">Code</div><details class="node c" data-src="coherence_analyzer/pipeline.py::check" data-why="Flow B entry point"><summary><b><code>pipeline.check</code></b><small>coherence_analyzer/pipeline.py:703 · 11 lines · Flow B entry point</small></summary><div class="body"><div class="srcbar"><a href="../coherence_analyzer/pipeline.py">coherence_analyzer/pipeline.py</a> lines 703-713</div><pre class="src"><span class="kw">def</span> <span class="fn">check</span>(fixture_dir: Path, intent_id: str, *, auto_confirm: bool = <span class="n">False</span>) -&gt; dict:
+  <div class="srcs"><div class="srcs-h">Code</div><details class="node c" data-src="coherence_analyzer/pipeline.py::check" data-why="Flow B entry point"><summary><b><code>pipeline.check</code></b><small>coherence_analyzer/pipeline.py:707 · 11 lines · Flow B entry point</small></summary><div class="body"><div class="srcbar"><a href="../coherence_analyzer/pipeline.py">coherence_analyzer/pipeline.py</a> lines 707-717</div><pre class="src"><span class="kw">def</span> <span class="fn">check</span>(fixture_dir: Path, intent_id: str, *, auto_confirm: bool = <span class="n">False</span>) -&gt; dict:
     <span class="s">&quot;&quot;&quot;Flow B (SPEC §4): B1 N4 -&gt; gate -&gt; B2 draft -&gt; B3 refresh (+ N1) -&gt; B4 apply -&gt; B5 analyse both -&gt; B6 checks +
     diff -&gt; B7 resizer -&gt; B8 explain -&gt; B9 save + audit. Returns the report. Without `auto_confirm` the run stops at
     B2 (nothing is saved) and returns `{status: &quot;awaiting_confirmation&quot;, draft, intent, ...}`.&quot;&quot;&quot;</span>
@@ -108,10 +108,11 @@ are the only places an LLM is called, and each one is followed by a red box that
                 <span class="s">&quot;intent&quot;</span>: state[<span class="s">&quot;fixture_intent&quot;</span>], <span class="s">&quot;event&quot;</span>: state[<span class="s">&quot;event&quot;</span>]}
     <span class="kw">for</span> step <span class="kw">in</span> FLOW_B_STEPS:
         state = step(state)
-    <span class="kw">return</span> state[<span class="s">&quot;report&quot;</span>]</pre></div></details><details class="node c" data-src="coherence_analyzer/pipeline.py::review" data-why="Flow C entry point"><summary><b><code>pipeline.review</code></b><small>coherence_analyzer/pipeline.py:527 · 61 lines · Flow C entry point</small></summary><div class="body"><div class="srcbar"><a href="../coherence_analyzer/pipeline.py">coherence_analyzer/pipeline.py</a> lines 527-587</div><pre class="src"><span class="kw">def</span> <span class="fn">review</span>(fixture_dir: Path, portfolio: str | Path | <span class="n">None</span> = <span class="n">None</span>) -&gt; dict:
+    <span class="kw">return</span> state[<span class="s">&quot;report&quot;</span>]</pre></div></details><details class="node c" data-src="coherence_analyzer/pipeline.py::review" data-why="Flow C entry point"><summary><b><code>pipeline.review</code></b><small>coherence_analyzer/pipeline.py:527 · 65 lines · Flow C entry point</small></summary><div class="body"><div class="srcbar"><a href="../coherence_analyzer/pipeline.py">coherence_analyzer/pipeline.py</a> lines 527-591</div><pre class="src"><span class="kw">def</span> <span class="fn">review</span>(fixture_dir: Path, portfolio: str | Path | <span class="n">None</span> = <span class="n">None</span>, locale: str | <span class="n">None</span> = <span class="n">None</span>) -&gt; dict:
     <span class="s">&quot;&quot;&quot;Flow C: baseline coherence report for the current portfolio (B5-B9 without an intent). Writes the report and
     the audit record to the store and returns the report. `portfolio` = file name inside the fixture directory
-    (default `portfolio.json`).&quot;&quot;&quot;</span>
+    (default `portfolio.json`). `locale` = language for the explanation (default: profile `meta.locale`, or fr-CA),
+    validated against `intake.LOCALES`.&quot;&quot;&quot;</span>
     fixture_dir = Path(fixture_dir)
     started = _now()
     run_id = store.new_run_id()
@@ -122,7 +123,10 @@ are the only places an LLM is called, and each one is followed by a red box that
 
     res = _refresh(profile_in, pf, events)                       <span class="cm"># Flow A: rules + N3 (only if the notes changed)</span>
     profile = res[<span class="s">&quot;profile&quot;</span>]
-    locale = profile[<span class="s">&quot;meta&quot;</span>].get(<span class="s">&quot;locale&quot;</span>, DEFAULT_LOCALE)
+    loc = locale <span class="kw">if</span> locale <span class="kw">is</span> <span class="kw">not</span> <span class="n">None</span> <span class="kw">else</span> profile[<span class="s">&quot;meta&quot;</span>].get(<span class="s">&quot;locale&quot;</span>, DEFAULT_LOCALE)
+    <span class="kw">if</span> loc <span class="kw">not</span> <span class="kw">in</span> intake.LOCALES:
+        <span class="kw">raise</span> ValueError(<span class="s">f&quot;</span><span class="s">locale must be one of </span>{intake.LOCALES}<span class="s">, got </span>{loc!r}<span class="s">&quot;</span>)
+    locale = loc
     horizon_m = _horizon_months(profile)
     market = engine.load_market(str(config.DATA_DIR))
     metrics = _metrics(market, pf, horizon_m)
@@ -1659,7 +1663,7 @@ are the only places an LLM is called, and each one is followed by a red box that
   </div>
 
   <div class="srcs"><div class="srcs-h">Code</div><details class="node c" data-src="coherence_analyzer/coherence/hard.py::run_all" data-why=""><summary><b><code>hard.run_all</code></b><small>coherence_analyzer/coherence/hard.py:419 · 2 lines</small></summary><div class="body"><div class="srcbar"><a href="../coherence_analyzer/coherence/hard.py">coherence_analyzer/coherence/hard.py</a> lines 419-420</div><pre class="src"><span class="kw">def</span> <span class="fn">run_all</span>(weights: dict[str, float], metrics: dict, profile: dict, assets, meta: dict) -&gt; list[Check]:
-    <span class="kw">return</span> run_cheap(weights, profile, assets, meta) + run_engine(metrics, profile) + _o1(metrics, profile)</pre></div></details><details class="node c" data-src="coherence_analyzer/pipeline.py::b6_checks_and_diff" data-why=""><summary><b><code>pipeline.b6_checks_and_diff</code></b><small>coherence_analyzer/pipeline.py:596 · 21 lines</small></summary><div class="body"><div class="srcbar"><a href="../coherence_analyzer/pipeline.py">coherence_analyzer/pipeline.py</a> lines 596-616</div><pre class="src"><span class="kw">def</span> <span class="fn">b6_checks_and_diff</span>(state: dict) -&gt; dict:
+    <span class="kw">return</span> run_cheap(weights, profile, assets, meta) + run_engine(metrics, profile) + _o1(metrics, profile)</pre></div></details><details class="node c" data-src="coherence_analyzer/pipeline.py::b6_checks_and_diff" data-why=""><summary><b><code>pipeline.b6_checks_and_diff</code></b><small>coherence_analyzer/pipeline.py:600 · 21 lines</small></summary><div class="body"><div class="srcbar"><a href="../coherence_analyzer/pipeline.py">coherence_analyzer/pipeline.py</a> lines 600-620</div><pre class="src"><span class="kw">def</span> <span class="fn">b6_checks_and_diff</span>(state: dict) -&gt; dict:
     <span class="s">&quot;&quot;&quot;B6: hard + soft checks on both portfolios (S3 on the proposed side only), tagged by factor. The diff is built
     by the report builder from these lists.&quot;&quot;&quot;</span>
     assets, profile, meta = data.load_assets(), state[<span class="s">&quot;profile&quot;</span>], _meta()
@@ -1862,7 +1866,7 @@ are the only places an LLM is called, and each one is followed by a red box that
   </div>
   <p>Code: <code>pipeline.b7_resize</code>, <code>resizer.resize</code></p>
 
-  <div class="srcs"><div class="srcs-h">Code</div><details class="node c" data-src="coherence_analyzer/pipeline.py::b7_resize" data-why=""><summary><b><code>pipeline.b7_resize</code></b><small>coherence_analyzer/pipeline.py:619 · 10 lines</small></summary><div class="body"><div class="srcbar"><a href="../coherence_analyzer/pipeline.py">coherence_analyzer/pipeline.py</a> lines 619-628</div><pre class="src"><span class="kw">def</span> <span class="fn">b7_resize</span>(state: dict) -&gt; dict:
+  <div class="srcs"><div class="srcs-h">Code</div><details class="node c" data-src="coherence_analyzer/pipeline.py::b7_resize" data-why=""><summary><b><code>pipeline.b7_resize</code></b><small>coherence_analyzer/pipeline.py:623 · 10 lines</small></summary><div class="body"><div class="srcbar"><a href="../coherence_analyzer/pipeline.py">coherence_analyzer/pipeline.py</a> lines 623-632</div><pre class="src"><span class="kw">def</span> <span class="fn">b7_resize</span>(state: dict) -&gt; dict:
     <span class="s">&quot;&quot;&quot;B7: the resizer (SPEC §8, D2, D10) when the TRADE adds a hard violation (one absent on the current side, or a
     breach already there that the trade makes worse; SPEC-AMBIGUITY, see `resizer.violations_added`). A breach the
     current portfolio already has and the trade leaves as is does not trigger it. `headroom` = its result for the
@@ -2492,7 +2496,7 @@ are the only places an LLM is called, and each one is followed by a red box that
   <dt>Code</dt><dd><code>report.build_review</code> / <code>build_trade_check</code>, <code>store.save_report</code>,
     <code>store.save_audit</code>; S3 with <code>COHERENCE_ANALYZER_STORE=s3</code></dd></dl>
 
-  <div class="srcs"><div class="srcs-h">Code</div><details class="node c" data-src="coherence_analyzer/pipeline.py::b9_save" data-why=""><summary><b><code>pipeline.b9_save</code></b><small>coherence_analyzer/pipeline.py:658 · 40 lines</small></summary><div class="body"><div class="srcbar"><a href="../coherence_analyzer/pipeline.py">coherence_analyzer/pipeline.py</a> lines 658-697</div><pre class="src"><span class="kw">def</span> <span class="fn">b9_save</span>(state: dict) -&gt; dict:
+  <div class="srcs"><div class="srcs-h">Code</div><details class="node c" data-src="coherence_analyzer/pipeline.py::b9_save" data-why=""><summary><b><code>pipeline.b9_save</code></b><small>coherence_analyzer/pipeline.py:662 · 40 lines</small></summary><div class="body"><div class="srcbar"><a href="../coherence_analyzer/pipeline.py">coherence_analyzer/pipeline.py</a> lines 662-701</div><pre class="src"><span class="kw">def</span> <span class="fn">b9_save</span>(state: dict) -&gt; dict:
     <span class="s">&quot;&quot;&quot;B9: the report and the audit record (model id, as_of, every call with its gate decision) go to the store.&quot;&quot;&quot;</span>
     profile, pf, refresh_ = state[<span class="s">&quot;profile&quot;</span>], state[<span class="s">&quot;portfolio&quot;</span>], state[<span class="s">&quot;refresh&quot;</span>]
     notes = (list(state[<span class="s">&quot;metrics_current&quot;</span>][<span class="s">&quot;assumptions&quot;</span>]) + list(FLOW_B_ASSUMPTIONS)
@@ -2580,9 +2584,9 @@ are the only places an LLM is called, and each one is followed by a red box that
 <summary><b>The UI shows the report</b><small>GET /reports/{run_id} · GET /audit/{run_id}</small></summary>
 <div class="body"><p>The dashboard reads the saved JSON through the FastAPI app (<code>api.py</code>). The audit view is
   the "show your work" screen.</p>
-  <div class="srcs"><div class="srcs-h">Code</div><details class="node c" data-src="coherence_analyzer/api.py::get_report" data-why=""><summary><b><code>api.get_report</code></b><small>coherence_analyzer/api.py:914 · 3 lines</small></summary><div class="body"><div class="srcbar"><a href="../coherence_analyzer/api.py">coherence_analyzer/api.py</a> lines 914-916</div><pre class="src"><span class="kw">@</span>app.get(<span class="s">&quot;/reports/{run_id}&quot;</span>)
+  <div class="srcs"><div class="srcs-h">Code</div><details class="node c" data-src="coherence_analyzer/api.py::get_report" data-why=""><summary><b><code>api.get_report</code></b><small>coherence_analyzer/api.py:933 · 3 lines</small></summary><div class="body"><div class="srcbar"><a href="../coherence_analyzer/api.py">coherence_analyzer/api.py</a> lines 933-935</div><pre class="src"><span class="kw">@</span>app.get(<span class="s">&quot;/reports/{run_id}&quot;</span>)
 <span class="kw">def</span> <span class="fn">get_report</span>(run_id: str) -&gt; dict:
-    <span class="kw">return</span> _stored(store.load_report, run_id, <span class="s">&quot;report&quot;</span>)</pre></div></details><details class="node c" data-src="coherence_analyzer/api.py::get_audit" data-why=""><summary><b><code>api.get_audit</code></b><small>coherence_analyzer/api.py:919 · 3 lines</small></summary><div class="body"><div class="srcbar"><a href="../coherence_analyzer/api.py">coherence_analyzer/api.py</a> lines 919-921</div><pre class="src"><span class="kw">@</span>app.get(<span class="s">&quot;/audit/{run_id}&quot;</span>)
+    <span class="kw">return</span> _stored(store.load_report, run_id, <span class="s">&quot;report&quot;</span>)</pre></div></details><details class="node c" data-src="coherence_analyzer/api.py::get_audit" data-why=""><summary><b><code>api.get_audit</code></b><small>coherence_analyzer/api.py:938 · 3 lines</small></summary><div class="body"><div class="srcbar"><a href="../coherence_analyzer/api.py">coherence_analyzer/api.py</a> lines 938-940</div><pre class="src"><span class="kw">@</span>app.get(<span class="s">&quot;/audit/{run_id}&quot;</span>)
 <span class="kw">def</span> <span class="fn">get_audit</span>(run_id: str) -&gt; dict:
     <span class="kw">return</span> _stored(store.load_audit, run_id, <span class="s">&quot;audit record&quot;</span>)</pre></div></details></div>
 </div></details>
