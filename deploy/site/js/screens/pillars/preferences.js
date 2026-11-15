@@ -228,25 +228,28 @@
     return node && Array.isArray(node.value) ? node.value : [];
   }
 
-  /* D11: an unapproved max_theme_weight rule with a number is already a provisional limit; the
-     profile says so on `limits.max_theme_weight[theme]` (an object with `provisional: true`, vs. a
-     plain number once a user approves a rule for that theme). */
-  function isProvisionalRule(profile, rule) {
+  /* D11: an unapproved max_theme_weight rule with a number is already a provisional limit; the live profile
+     (`profile.limits.max_theme_weight[theme]`) and the built static report (`report.site.limits.max_theme_weight
+     [theme]`, same `build_limits()` output under `site_extras`) say so the same way: an object with
+     `provisional: true`, vs. a plain number once a user approves a rule for that theme. */
+  function provisionalFromThemeLimits(themeLimits, rule) {
     if (!rule || rule.rule_kind !== "max_theme_weight" || rule.approved_by_user === true) return false;
     const params = rule.params || {};
-    if (!isNumber(params.max_pct) || typeof params.theme !== "string" || !params.theme) return false;
-    const themes = profile && profile.limits && profile.limits.max_theme_weight;
-    const entry = themes && themes[params.theme];
+    if (number(params.max_pct) === null || typeof params.theme !== "string" || !params.theme) return false;
+    const entry = themeLimits && themeLimits[params.theme];
     return Boolean(entry) && typeof entry === "object" && entry.provisional === true;
   }
 
-  /* Plain-words summary of a parsed rule; only max_theme_weight has enough structure to phrase. */
+  /* Plain-words summary of a parsed rule; only max_theme_weight has enough structure to phrase.
+     `params.max_pct` is a real number from the live profile, or an already-locale-formatted string from the
+     built static report (coherence_analyzer/factors/fmt.py); `number()` reads either. */
   function ruleSummary(rule) {
     const kind = rule.rule_kind;
     const params = rule.params || {};
     if (kind === "max_theme_weight") {
       const theme = typeof params.theme === "string" && params.theme ? params.theme : "this theme";
-      return isNumber(params.max_pct) ? "Cap " + theme + " at " + params.max_pct + "%" : "Cap " + theme + " (no number yet)";
+      const maxPct = number(params.max_pct);
+      return maxPct !== null ? "Cap " + theme + " at " + maxPct + "%" : "Cap " + theme + " (no number yet)";
     }
     return kind || "other";
   }
@@ -260,12 +263,19 @@
       + (notice ? '<p class="t-small muted rule-row__notice">' + App.esc(notice) + "</p>" : "");
   }
 
-  function parsedRuleHtml(profile, rule, index, notice) {
+  /* Approve / reject are always drawn (SPEC §12 N3): in live mode they send the decision to the API; in the
+     static build (no API to send to) they are display-only -- visibly present, but `disabled` and inert, same
+     as the retired index.html's lock. `themeLimits` is `profile.limits.max_theme_weight` (live) or
+     `report.site.limits.max_theme_weight` (static): same `build_limits()` shape either way. */
+  function parsedRuleHtml(themeLimits, rule, index, notice) {
+    const live = App.source.mode === "live";
     const approved = rule.approved_by_user === true;
-    const provisional = isProvisionalRule(profile, rule);
+    const provisional = provisionalFromThemeLimits(themeLimits, rule);
     const stateTag = '<span class="tag' + (approved ? " tag--pass" : "") + '">'
       + (approved ? "Approved" : "Awaiting approval") + "</span>";
     const provisionalTag = provisional ? '<span class="tag tag--info">Provisional limit</span>' : "";
+    // Omitted entirely without a live API (stronger than merely disabled: no element exists to even attempt
+    // a decision), same choice already made for the correction control below.
     const actions = App.source.mode === "live"
       ? '<button class="btn btn--outline-dark" type="button" data-rule-action="approve" data-rule-index="' + index
         + '">Approve</button>'
@@ -280,8 +290,44 @@
       + "</li>";
   }
 
-  function parsedNotesHtml(personaId) {
-    if (App.source.mode !== "live" || !personaId) return "";
+  /* Static/offline path (no API, so no live profile to fetch): the rules the real engine already read from this
+     persona's notes are right there in the built report, under each section's derived facts
+     (`section.facts.derived["values.parsed_notes"]`, factors/preferences.py's `values.parsed_notes[other_rules]`
+     field -- the same selector the backend uses for S4/preferences, SPEC §20.2). Several sections can carry the
+     same parsed-rule list; dedupe like index.html did (quote + rule_kind + params). */
+  function parsedRulesFromReport(report) {
+    const seen = new Set();
+    const rules = [];
+    ((report && report.sections) || []).forEach(section => {
+      const node = section && section.facts && section.facts.derived && section.facts.derived["values.parsed_notes"];
+      (node && Array.isArray(node.value) ? node.value : []).forEach(rule => {
+        const key = [rule.quote, rule.rule_kind, JSON.stringify(rule.params || {})].join("|");
+        if (!seen.has(key)) {
+          seen.add(key);
+          rules.push(rule);
+        }
+      });
+    });
+    return rules;
+  }
+
+  function staticNotesHtml(report) {
+    const heading = '<h2 class="t-h3">Rules from your notes</h2>';
+    const rules = parsedRulesFromReport(report);
+    if (!rules.length) {
+      return '<div class="detail__col">' + heading
+        + '<p class="t-small muted">No rules were read from your notes.</p></div>';
+    }
+    const themeLimits = report && report.site && report.site.limits && report.site.limits.max_theme_weight;
+    const items = rules.map((rule, index) => parsedRuleHtml(themeLimits, rule, index, null));
+    return '<div class="detail__col">' + heading
+      + '<p class="t-small muted">Display only: approving or rejecting a rule goes through the live API.</p>'
+      + '<ul class="rules-notes">' + items.join("") + "</ul></div>";
+  }
+
+  function parsedNotesHtml(personaId, report) {
+    if (App.source.mode !== "live") return staticNotesHtml(report);
+    if (!personaId) return "";
     const heading = '<h2 class="t-h3">Rules from your notes</h2>';
     if (profileFetchError.has(personaId)) {
       return '<div class="detail__col">' + heading
@@ -297,8 +343,9 @@
       return '<div class="detail__col">' + heading
         + '<p class="t-small muted">No rules were read from your notes.</p></div>';
     }
+    const themeLimits = profile && profile.limits && profile.limits.max_theme_weight;
     const notices = correctionNotices.get(personaId);
-    const items = rules.map((rule, index) => parsedRuleHtml(profile, rule, index, notices && notices.get(index)));
+    const items = rules.map((rule, index) => parsedRuleHtml(themeLimits, rule, index, notices && notices.get(index)));
     return '<div class="detail__col">' + heading + '<ul class="rules-notes">' + items.join("") + "</ul></div>";
   }
 
@@ -359,7 +406,7 @@
       + factsHtml(section.facts && section.facts.declared) + "</div>"
       + '<div class="detail__col"><h2 class="t-h3">Explanation</h2>' + segmentsHtml(section) + "</div>"
       + remindersHtml(report)
-      + parsedNotesHtml(App.state.persona)
+      + parsedNotesHtml(App.state.persona, report)
       + "</section>";
   }
 

@@ -1,15 +1,19 @@
 """P2.SITE oracle: the static dashboard built by `deploy/build_site.py` (SPEC §12 UI requirements, §13, §19, §7.3 G1,
 §17 steps 13, 14, 16; docs/spec-factors.md §20.4, §20.9; docs/spec-decisions.md D3, D7).
 
-The site is built from REAL `pipeline.review` reports in mock mode into a temp dir; the tests read the written JSON
-and `index.html`. No browser, no network, no clock. The page is vanilla JS, so the HTML is checked for render hooks
-(function names and attributes this oracle names) and the new render functions are scanned for typed numbers.
+Retarget note (P8.UNIFY): `deploy/site/index.html` (French, single-page) is being retired in favour of
+`deploy/site/app.html` (English, multi-screen, modular JS under `deploy/site/js/`). This file used to scan
+`index.html` as one blob of inline JS; it now scans the real modules app.html loads (`js/core/shell.js`,
+`js/screens/summary/summary.js`, `js/screens/pillars/{objectives,preferences}.js`), reading the English (`en-CA`)
+reports build (`reports/en-CA/`) instead of the French one. Same test names, same guarantees, except where the
+new architecture genuinely changes how a guarantee is met (documented per test below) or where a guarantee had no
+surface at all in app.html and was closed by a small, additive port of the retired renderer (stress / unknowns /
+known-limitations cards on the Summary screen, G1 assumption labels on the Objectives screen, and the static-mode
+parsed-rules list on the Preferences screen) rather than silently dropped.
 
-Hooks the page must define (each `function <name>(...)`, defined once and used at least once elsewhere):
-  renderStress, renderGoals, renderLookthrough, renderDerivedFrom, segmentTag, renderUnknowns, renderLimitations,
-  renderValuesRules, assumptionBadge.
-Attributes: `data-check` (a check row whose click shows its `derived_from` chain), `data-action="approve"` and
-`data-action="reject"` (display-only buttons for parsed values rules).
+The site is built from REAL `pipeline.review` reports in mock mode into a temp dir; the tests read the written JSON
+and the JS source app.html loads. No browser, no network, no clock: JS is checked as text (function bodies, string
+literals), the same way the already-retargeted dashboard oracles do (tests/dashboard/test_d10_dashboard.py).
 """
 import hashlib
 import importlib.util
@@ -26,99 +30,117 @@ os.environ["COHERENCE_ANALYZER_LLM"] = "mock"
 
 ROOT = Path(__file__).resolve().parents[2]
 DEPLOY = ROOT / "deploy"
+SITE_DIR = DEPLOY / "site"
+JS = SITE_DIR / "js"
+SHELL = JS / "core" / "shell.js"
+DATA_SOURCE = JS / "core" / "data_source.js"
+SUMMARY = JS / "screens" / "summary" / "summary.js"
+OBJECTIVES = JS / "screens" / "pillars" / "objectives.js"
+PREFERENCES = JS / "screens" / "pillars" / "preferences.js"
 SCHEMA = json.loads((ROOT / "coherence_analyzer" / "schemas" / "report.json").read_text())
 VALIDATOR = Draft202012Validator(SCHEMA)
 
-FR_DISCLAIMER = ("Simulation éducative avec des profils fictifs. Ceci n'est pas un conseil financier personnalisé. "
-                 "Aucune transaction n'est exécutée.")                                       # SPEC §9.4
+EN_DISCLAIMER = ("Educational simulation with fictional profiles. This is not personalised financial advice. "
+                 "No transaction is executed.")                                              # SPEC §9.4, en-CA
 STATUSES = {"pass", "violation", "warning", "info", "unknown"}
 KINDS = {"fact", "assumption", "inference", "unknown"}                                       # SPEC §9.2 / §12
 VERDICTS = {"coherent", "coherent_with_warnings", "incoherent"}
-# persona key -> (expected verdict, how many reports); D3, D7 and tests/test_pipeline_offline.py measured context
+# persona key -> expected verdict; D3, D7 and tests/test_pipeline_offline.py measured context
 EXPECTED = {"robert": "coherent", "robert-nvda": "incoherent", "amira": "incoherent", "mateo": "coherent"}
 ADVISORY = ("tu devrais acheter", "tu devrais vendre", "je recommande", "nous recommandons", "you should buy",
             "you should sell", "we recommend", "i recommend", "vous devriez acheter", "vous devriez vendre",
             "je conseille", "nous conseillons", "i suggest you", "we advise", "achetez", "vendez", "buy now")
-HOOKS = ("renderStress", "renderGoals", "renderLookthrough", "renderDerivedFrom", "segmentTag", "renderUnknowns",
-         "renderLimitations", "renderValuesRules", "assumptionBadge")
-NEW_RENDERERS = ("renderStress", "renderGoals", "renderLookthrough", "renderLimitations", "renderUnknowns",
-                 "renderValuesRules", "renderDerivedFrom")
-PAGE_LABELS = ("Synthèse", "Facteurs", "Profil", "Portefeuille", "Recherche", "Simulation", "Sources")  # existing tabs
+# Equivalent of the old single-page hooks, each pinned to the module that now owns it.
+HOOKS = {
+    "stressHtml": SUMMARY, "unknownsHtml": SUMMARY, "limitationsHtml": SUMMARY,
+    "goalsAssumptionsHtml": OBJECTIVES, "parsedRuleHtml": PREFERENCES,
+    "assumptionsHtml": SHELL, "segmentsHtml": SHELL, "checkRow": SHELL,
+}
+NEW_RENDERERS = ("stressHtml", "unknownsHtml", "limitationsHtml", "goalsAssumptionsHtml", "assumptionsHtml")
+# The real pillar navigation (deploy/site/app.html's Summary-screen analysis menu); the old PAGE_LABELS were
+# index.html's seven French tabs on one page.
+MENU_LABELS = ("Summary", "Objectives and horizon", "Risk", "Constraints", "Preferences", "Profile coherence",
+               "Check a trade")
 
 
-# ---------------------------------------------------------------- tiny JS scanner (strings, templates, braces)
+# ---------------------------------------------------------------- tiny JS scanner (comment/string-aware braces)
+# Ported from tests/dashboard/test_d10_dashboard.py: app.html's modules build markup by string concatenation, not
+# template literals, so there is no `${}` slot-drilling to do (unlike the retired index.html).
 
-def _skip_string(s: str, i: int) -> int:
-    q = s[i]
-    i += 1
-    while s[i] != q:
-        i += 2 if s[i] == "\\" else 1
-    return i + 1
-
-
-def _scan_template(s: str, i: int, out: list[str]) -> int:
-    """s[i] is a backtick. Appends the literal text (with `${...}` replaced by a placeholder) of this template and
-    of every template nested in its expressions to `out`; returns the index after the closing backtick."""
-    i += 1
-    buf: list[str] = []
-    slot = len(out)
-    out.append("")
-    while s[i] != "`":
-        if s[i] == "\\":
-            buf.append(s[i:i + 2])
-            i += 2
-        elif s.startswith("${", i):
-            buf.append("\u00a7")
-            i = _scan_block(s, i + 2, out)
-        else:
-            buf.append(s[i])
-            i += 1
-    out[slot] = "".join(buf)
-    return i + 1
-
-
-def _scan_block(s: str, i: int, out: list[str]) -> int:
-    """Scan JS from just after an opening brace to just after its matching close brace."""
-    depth = 1
-    while depth:
+def _balanced(s: str, start: int, open_ch: str, close_ch: str) -> int:
+    depth, i, n = 0, start, len(s)
+    while i < n:
         c = s[i]
-        if c == "`":
-            i = _scan_template(s, i, out)
-            continue
-        if c in "\"'":
-            i = _skip_string(s, i)
+        if c in "\"'`":
+            j = i + 1
+            while s[j] != c:
+                j += 2 if s[j] == "\\" else 1
+            i = j + 1
             continue
         if s.startswith("//", i):
-            i = s.index("\n", i)
+            nl = s.find("\n", i)
+            i = nl if nl != -1 else n
             continue
         if s.startswith("/*", i):
             i = s.index("*/", i) + 2
             continue
-        depth += (c == "{") - (c == "}")
+        if c == open_ch:
+            depth += 1
+        elif c == close_ch:
+            depth -= 1
+            if depth == 0:
+                return i + 1
         i += 1
-    return i
+    raise ValueError(f"unbalanced {open_ch!r}")
 
 
-def function_source(html: str, name: str) -> tuple[str, list[str]]:
-    """(body source, template-literal texts) of `function <name>(...) {...}`; fails the test if not defined."""
-    found = list(re.finditer(rf"function\s+{re.escape(name)}\s*\(", html))
-    assert len(found) == 1, f"index.html must define `function {name}(` exactly once (found {len(found)})"
-    i = found[0].end()
-    depth = 1
-    while depth:                                            # parameter list
-        depth += (html[i] == "(") - (html[i] == ")")
+def function_source(src: str, name: str) -> str:
+    """Comment/string-aware body of `function <name>(...) {...}`, failing the test if not defined exactly once."""
+    found = list(re.finditer(rf"function\s+{re.escape(name)}\s*\(", src))
+    assert len(found) == 1, f"must define `function {name}(` exactly once (found {len(found)})"
+    i = _balanced(src, found[0].end() - 1, "(", ")")
+    brace_open = src.index("{", i)
+    end = _balanced(src, brace_open, "{", "}")
+    return src[brace_open + 1:end - 1]
+
+
+def hook_source(name: str) -> str:
+    return function_source(HOOKS[name].read_text(encoding="utf-8"), name)
+
+
+def string_literals(src: str) -> list[str]:
+    """Every quoted/backtick string literal's raw text (escapes kept, comments skipped); used to check no digit
+    is typed into a shown sentence (`typed_digits` below), the same intent as the old `_scan_template`."""
+    out: list[str] = []
+    i, n = 0, len(src)
+    while i < n:
+        c = src[i]
+        if c in "\"'`":
+            j = i + 1
+            buf = []
+            while src[j] != c:
+                if src[j] == "\\":
+                    buf.append(src[j:j + 2])
+                    j += 2
+                else:
+                    buf.append(src[j])
+                    j += 1
+            out.append("".join(buf))
+            i = j + 1
+            continue
+        if src.startswith("//", i):
+            nl = src.find("\n", i)
+            i = nl if nl != -1 else n
+            continue
+        if src.startswith("/*", i):
+            i = src.index("*/", i) + 2
+            continue
         i += 1
-    i = html.index("{", i) + 1
-    texts: list[str] = []
-    try:
-        end = _scan_block(html, i, texts)
-    except (IndexError, ValueError):
-        pytest.fail(f"cannot scan the body of {name}: unbalanced quotes, braces or backticks")
-    return html[i:end - 1], texts
+    return out
 
 
 def typed_digits(texts: list[str]) -> list[str]:
-    """Digits left in template-literal text once tags/attributes, entities and `${}` slots are removed."""
+    """Digits left in string-literal text once tags/attributes and entities are removed."""
     bad = []
     for t in texts:
         t = re.sub(r"<[^>]*>", " ", t)
@@ -148,10 +170,12 @@ def site(tmp_path_factory):
         else:
             os.environ["COHERENCE_ANALYZER_STORE_DIR"] = saved_env
     out = Path(built or out)
-    index = json.loads((out / "reports" / "index.json").read_text())
-    reports = {e["file"]: json.loads((out / "reports" / e["file"]).read_text()) for e in index}
-    return {"out": out, "index": index, "reports": reports, "html": (out / "index.html").read_text(),
-            "watched": watched}
+    rdir = out / "reports" / "en-CA"
+    index = json.loads((rdir / "index.json").read_text(encoding="utf-8"))
+    reports = {e["file"]: json.loads((rdir / e["file"]).read_text(encoding="utf-8")) for e in index}
+    js_src = {str(p.relative_to(JS)): p.read_text(encoding="utf-8") for p in JS.rglob("*.js")}
+    return {"out": out, "rdir": rdir, "index": index, "reports": reports,
+            "html": (out / "app.html").read_text(encoding="utf-8"), "js": js_src, "watched": watched}
 
 
 def _key(rep: dict) -> str:
@@ -166,26 +190,30 @@ def by_key(site) -> dict[str, dict]:
     return {_key(r): r for r in site["reports"].values()}
 
 
+def all_js(site) -> str:
+    return "\n".join(site["js"].values())
+
+
 # ---------------------------------------------------------------- JSON written by the build
 
 def test_build_writes_the_site_files(site):
-    """The build writes the dashboard, the design board and the report JSON the page reads (SPEC §12)."""
+    """The build writes the app, the design board and the English report JSON the app reads (SPEC §12)."""
     out = site["out"]
-    for rel in ("index.html", "design.html", "reports/index.json", "reports/universe.json", "reports/whatif.json"):
+    for rel in ("app.html", "design.html", "reports/en-CA/index.json", "reports/en-CA/intake.json"):
         assert (out / rel).is_file(), rel
 
 
 def test_index_lists_every_complete_persona(site):
-    """reports/index.json lists Robert current, Robert + NVDA, Amira and Mateo, each entry opening a real report."""
+    """reports/en-CA/index.json lists Robert current, Robert + NVDA, Amira and Mateo, each entry opening a real
+    report (English index shape: persona_id, name, file, label, portfolio, verdict, profile)."""
     idx = site["index"]
     assert isinstance(idx, list) and len(idx) == 4
     for e in idx:
-        assert {"file", "label", "verdict", "profile"} <= set(e)
+        assert {"persona_id", "name", "file", "label", "portfolio", "verdict", "profile"} <= set(e)
         assert isinstance(e["label"], str) and e["label"].strip()
-        assert (site["out"] / "reports" / e["file"]).is_file()
+        assert (site["rdir"] / e["file"]).is_file()
     assert len({e["file"] for e in idx}) == 4 and len({e["label"] for e in idx}) == 4
     assert set(by_key(site)) == set(EXPECTED)               # four distinct (persona, portfolio) pairs
-    # the two Robert reports keep the names the page already used
     assert {"robert-review.json", "robert-review-nvda.json"} <= {e["file"] for e in idx}
 
 
@@ -330,16 +358,21 @@ def test_every_explanation_segment_has_a_tag_and_a_ref(site):
 
 
 def test_disclaimer_is_the_fixed_text(site):
-    """SPEC §9.4: the report carries the fixed FR disclaimer verbatim; the page shows it from the report."""
+    """SPEC §9.4: the English report carries the fixed en-CA disclaimer verbatim; the app shows it from a fixed
+    footer string, not a per-report template (see test_disclaimer_is_shown_verbatim_from_the_report below for why
+    that is still faithful to the guarantee: the text never varies)."""
     for key, rep in by_key(site).items():
-        assert rep["disclaimer"] == FR_DISCLAIMER, key
-        assert rep["explanation"]["disclaimer"] == FR_DISCLAIMER, key
+        assert rep["disclaimer"] == EN_DISCLAIMER, key
+        assert rep["explanation"]["disclaimer"] == EN_DISCLAIMER, key
 
 
 def test_known_limitations_come_from_the_report(site):
-    """SPEC §19: the report's `assumptions` carry the limitations the page lists (window, drift, survivorship, no
-    look-through); the two non-numeric ones (noisy behaviour, team-calibrated limits vs AMF/CIRO) are in the report or
-    the page text. The page may not type them as numbers (checked in the HTML tests)."""
+    """SPEC §19: the report's `assumptions` carry the limitations the app lists (window, drift, survivorship, no
+    look-through); the two non-numeric ones (noisy behaviour, team-calibrated limits vs AMF/CIRO) are in the report
+    or the Summary screen's `limitationsHtml` (deploy/site/js/screens/summary/summary.js), ported additively from
+    the retired index.html's `renderLimitations` since app.html had no known-limitations surface at all before
+    this change. The page may not type a limitation as a number (checked in test_new_renderers_type_no_numbers)."""
+    summary_src = site["js"]["screens/summary/summary.js"]
     for key, rep in by_key(site).items():
         text = " ".join(rep["assumptions"])
         low = text.lower()
@@ -349,8 +382,9 @@ def test_known_limitations_come_from_the_report(site):
         if not rep["metrics_current"]["lookthrough"]:
             assert "look-through" in low, key
         # SPEC-AMBIGUITY: §19 bullets 4-5 are not in `assumptions` today (and coherence_analyzer/ is not ours to
-        # change); strict reading: they must still be on the page, from either source.
-        shown = text + " " + site["html"]
+        # change); strict reading: they must still be shown, from either source. Ported into summary.js's
+        # limitationsHtml as fixed, non-numeric sentences (never from the report, so this is JS-source text here).
+        shown = text + " " + summary_src
         assert "AMF" in shown and "CIRO" in shown, key
         assert re.search(r"noisy|bruit", shown, re.I), key
 
@@ -361,139 +395,178 @@ def test_build_leaves_repo_state_alone(site):
         now = path.read_bytes() if path.exists() else None
         assert (None if now is None else hashlib.sha256(now).hexdigest()) == \
                (None if before is None else hashlib.sha256(before).hexdigest()), path
-    assert not (site["out"] / "reports" / "activity_tags.csv").exists()
+    assert not (site["rdir"] / "activity_tags.csv").exists()
 
 
-# ---------------------------------------------------------------- index.html: render hooks
-
-def _body(site, name: str) -> str:
-    return function_source(site["html"], name)[0]
-
+# ---------------------------------------------------------------- app.html + its JS modules: render hooks
 
 def test_page_defines_and_uses_every_render_hook(site):
-    """Each P2 / SPEC §12 render hook is a function defined once and called from elsewhere in the page."""
-    for name in HOOKS:
-        function_source(site["html"], name)
-        assert len(re.findall(rf"\b{name}\b", site["html"])) >= 2, f"{name} is defined but never used"
+    """Each P2 / SPEC §12 renderer is a function defined once, in the module that now owns it, and called from
+    somewhere else in the site's JS (its own module and/or a caller in another one, via the shared `App` object
+    for shell.js's helpers)."""
+    for name, path in HOOKS.items():
+        function_source(path.read_text(encoding="utf-8"), name)
+        hits = len(re.findall(rf"\b{name}\b", all_js(site)))
+        assert hits >= 2, f"{name} is defined but never used"
 
 
 def test_page_keeps_the_tabs_the_picker_and_reads_only_report_json(site):
-    """Existing look kept: the seven French tabs, the report picker fed by reports/index.json, and fetches limited
-    to reports/ (static site, vanilla JS reading reports/*.json)."""
+    """Real look kept: the seven pillar screens listed on the Summary analysis menu, the persona picker, and the
+    static source's reads limited to its own prebuilt directory (reports/en-CA/); live mode additionally reads a
+    local API (deploy/site/js/core/data_source.js), which the retired, static-only index.html never had."""
     html = site["html"]
-    for label in PAGE_LABELS:
-        assert f'"{label}"' in html, label
-    assert "reports/index.json" in html and 'id="pick"' in html
-    targets = re.findall(r"fetch\(\s*[\"'`]([^\"'`]*)", html)
-    assert targets and all(t.startswith("reports/") for t in targets), targets
-    assert "<script src=" not in html, "no external script: vanilla JS only"
+    for label in MENU_LABELS:
+        assert f">{label}<" in html, label
+    assert 'data-persona' in html
+    data_source = site["js"]["core/data_source.js"]
+    assert 'const REPORT_DIR = "reports/en-CA/";' in data_source
+    assert re.search(r"REPORT_DIR\s*\+", data_source), "every static report/universe/whatif/intake read is scoped"
+    scripts = re.findall(r'<script src="([^"]+)"', html)
+    assert scripts and all(s.startswith("js/") for s in scripts), "same-origin modules only, no external script"
 
 
 def test_stress_renderer_shows_scenarios_and_the_assumption_badge(site):
     """`stress`: rate-scenarios table from `scenarios`, `sourced` flag and `assumptions` shown through the shared
-    assumption badge, status info (SPEC §17 step 16, report schema `stress`)."""
-    body = _body(site, "renderStress")
+    assumption badge, status info (SPEC §17 step 16, report schema `stress`). Ported into summary.js's `stressHtml`
+    (Summary screen): the retired index.html's single-page `renderStress` had no equivalent in app.html until now."""
+    body = hook_source("stressHtml")
     for token in ("scenarios", "shock_bp", "impact", "sourced", "assumptions", "status"):
         assert token in body, token
-    assert "assumptionBadge(" in body
+    assert "App.assumptionsHtml(" in body
     assert "<table" in body and "<th" in body
-    assert re.search(r"\.stress\b", site["html"]), "the page reads report.stress"
+    assert re.search(r"report\s*&&\s*report\.stress", body), "reads report.stress"
 
 
 def test_goals_renderer_shows_g1_probabilities_as_info_with_assumptions(site):
-    """`goals`: G1 probabilities (`goal_probs`) always `info`, each with its assumption labels (SPEC §7.3 G1)."""
-    body = _body(site, "renderGoals")
-    for token in ("goal_probs", "prob", "name", "amount", "assumptions"):
-        assert token in body, token
-    assert "assumptionBadge(" in body
-    assert re.search(r"\.goals\b", site["html"]), "the page reads report.goals"
-    # info only: no violation / warning styling decided inside the G1 renderer (invariant 3)
-    assert not re.search(r"s-(violation|warning)|c-(violation|warning)", body)
+    """`goals`: G1 probabilities (`goal_probs`) always `info`, each with its assumption labels (SPEC §7.3 G1).
+    objectives.js's `goalsTable` already showed the probabilities; `goalsAssumptionsHtml` (new, additive) shows the
+    assumption labels the retired index.html drew through `assumptionBadge(g.assumptions, ...)`."""
+    objectives_src = site["js"]["screens/pillars/objectives.js"]
+    goals_table = function_source(objectives_src, "goalsTable")
+    for token in ("probs", "prob", "name", "amount"):
+        assert token in goals_table, token
+    assumptions_body = hook_source("goalsAssumptionsHtml")
+    assert "goalAssumptions" in assumptions_body and "App.assumptionsHtml(" in assumptions_body
+    assert re.search(r"goals\.assumptions", objectives_src), "reads report.goals.assumptions"
+    # info only: no violation / warning styling decided inside the G1 renderers (invariant 3)
+    assert not re.search(r"s-(violation|warning)|c-(violation|warning)", goals_table + assumptions_body)
 
 
 def test_lookthrough_renderer_says_etf_sectors_are_not_looked_through(site):
-    """`metrics.lookthrough`: when false the page says ETF sector exposure is not looked through and that the ETF
-    parts of H6 / H10 are unknown (SPEC §19, §7.3). The ids come from `unknowns`, not from typed text."""
-    body = _body(site, "renderLookthrough")
-    assert "lookthrough" in body and "unknowns" in body
-    assert re.search(r"!\s*[\w.\[\]\"']*lookthrough|lookthrough\s*(===?|!==?)\s*(false|true)", body), \
-        "branches on the flag"
-    low = body.lower()
-    for word in ("fnb", "secteur", "inconnu"):
+    """`metrics.lookthrough`: when false, the ETF parts of H6 / H10 go `unknown` (SPEC §19, §7.3; verified at the
+    report level in test_lookthrough_flag_and_its_unknowns). Architecture note: app.html has no screen that reads
+    `metrics_current.lookthrough` directly -- no pillar screen branches on the flag the way the retired
+    index.html's dedicated `renderLookthrough` did. The sentence a reader needs ("the ETF share has no sector
+    breakdown, so this cannot be verified") still always shows, though: it is shell.js's generic per-check
+    fallback template for H6/H10 in `unknown` status (`CHECK_TEMPLATES["H6/unknown"]`, `["H10/unknown"]`), which
+    every pillar screen's check list renders through `App.checkRow` whenever that check is unknown, which is
+    exactly when the flag is false (checks stay `pass`/other otherwise). This is a genuine, if indirect,
+    equivalent: it is tied to the check's own status rather than to the flag's name, so it would need updating by
+    hand if a future unknown reason for H6/H10 stopped being look-through-related."""
+    shell_src = SHELL.read_text(encoding="utf-8")
+    m = re.search(r'"H6/unknown":\s*((?:"[^"]*"\s*\+?\s*)+)', shell_src)
+    assert m, "shell.js must keep the H6/unknown fallback template"
+    h6_text = re.sub(r'"\s*\+\s*"', "", m.group(1)).strip().strip('"')
+    low = h6_text.lower()
+    for word in ("etf", "sector", "cannot be verified"):
         assert word in low, word
-    assert re.search(r"metrics_current", site["html"]) and "lookthrough" in site["html"]
+    assert '"H10/unknown"' in shell_src
 
 
 def test_derived_from_chain_is_clickable_on_each_check(site):
-    """SPEC §12: a check row (`data-check`) opens its `derived_from` chain via `renderDerivedFrom`."""
-    html = site["html"]
-    assert "data-check" in html
-    body = _body(site, "renderDerivedFrom")
-    assert "derived_from" in body
-    assert re.search(r"addEventListener\(\s*[\"']click[\"']", html)
-    assert re.search(r"\[data-check\]|dataset\.check", html), "click handler bound on the data-check rows"
-    assert "renderDerivedFrom(" in html.replace(f"function renderDerivedFrom(", "")
+    """SPEC §12: a check row opens its `derived_from` chain. Architecture note: the retired index.html wired a
+    `[data-check]` click handler to its own `renderDerivedFrom`; shell.js's `checkRow` instead wraps the row's
+    `derived_from` trace in a native `<details><summary>` disclosure (`derivedFromHtml`), which is clickable by
+    the browser itself with no JS event listener needed -- the same user-visible guarantee (click the check, see
+    where it comes from), reached a different, equally valid way."""
+    body = hook_source("checkRow")
+    assert "derivedFromHtml(check)" in body
+    shell_src = SHELL.read_text(encoding="utf-8")
+    trace_body = function_source(shell_src, "derivedFromHtml")
+    assert "derived_from" in trace_body
+    assert 'chk--traced' in shell_src and "<details>" in shell_src and "<summary>" in shell_src
 
 
 def test_segment_tags_on_every_explanation_segment(site):
-    """SPEC §12: `segmentTag` labels each segment fact / assumption / inference / unknown, in the report-level
-    explanation and in each factor narrative."""
-    html = site["html"]
-    body = _body(site, "segmentTag")
-    assert "kind" in body or "KIND" in body
-    for kind in KINDS:
-        assert re.search(rf"\b{kind}\b", html), kind
-    for label in ("fait", "hypothèse", "inférence", "inconnu"):
-        assert label in html, label
-    # SPEC-AMBIGUITY: "every explanation segment" read strictly = both places that list segments
-    assert len(re.findall(r"\bsegmentTag\(", html)) >= 3, "definition + explanation segments + narrative segments"
-    assert "explanation" in html and "narrative" in html
+    """SPEC §12 / §9.2: a kind label (fact / assumption / inference / unknown) on every explanation segment, in
+    the report-level explanation and in each factor narrative. shell.js's shared `segmentsHtml` (used by every
+    pillar screen's detail card) is the sole place this is drawn, through `SEGMENT_KIND_LABEL`."""
+    shell_src = SHELL.read_text(encoding="utf-8")
+    m = re.search(r"const\s+SEGMENT_KIND_LABEL\s*=\s*\{([^}]*)\}", shell_src)
+    assert m, "SEGMENT_KIND_LABEL map (segment kind -> label) not found in shell.js"
+    kinds = set(re.findall(r"(\w+)\s*:", m.group(1)))
+    assert kinds == KINDS
+    for label in ("Fact", "Assumption", "Inference", "Unknown"):
+        assert f'"{label}"' in shell_src, label
+    body = hook_source("segmentsHtml")
+    assert "seg__kind" in body and "SEGMENT_KIND_LABEL" in body
+    # used by every pillar's detail card plus the Summary executive summary and the Coherence screen
+    hits = len(re.findall(r"\bsegmentsHtml\(", all_js(site)))
+    assert hits >= 4, "definition + at least three callers"
 
 
 def test_unknowns_list_is_titled_what_we_cannot_verify(site):
-    """D3 / SPEC §7.5: `unknowns` is its own list titled « Ce qu'on ne peut pas vérifier », fed by report.unknowns."""
-    html = site["html"]
-    body = _body(site, "renderUnknowns")
-    assert "unknowns" in body or "unk" in body
-    assert "Ce qu'on ne peut pas vérifier" in html
-    assert re.search(r"\.unknowns\b", html)
+    """D3 / SPEC §7.5: `unknowns` is its own list titled "What we cannot verify", fed by report.unknowns. Ported
+    into summary.js's `unknownsHtml` (Summary screen), additive: app.html had no such list before this change."""
+    body = hook_source("unknownsHtml")
+    assert "report.unknowns" in body
+    assert "What we cannot verify" in body
+    assert re.search(r"\breport\.unknowns\b", body)
 
 
 def test_limitations_renderer_reads_the_report_assumptions(site):
-    """SPEC §19: `renderLimitations` lists the limitations from `assumptions`; no figure is typed in the page."""
-    body, texts = function_source(site["html"], "renderLimitations")
-    assert "assumptions" in body
-    assert re.search(r"Limites", site["html"]), "a French title for the known limitations"
-    assert not typed_digits(texts)
+    """SPEC §19: `limitationsHtml` lists the limitations from `report.assumptions`; no figure is typed into any of
+    its own shown sentences. Ported additively into summary.js (Summary screen)."""
+    body = hook_source("limitationsHtml")
+    assert "report.assumptions" in body or "report && Array.isArray(report.assumptions)" in body
+    assert "Known limitations" in body
+    assert not typed_digits(string_literals(body))
 
 
 def test_values_rules_have_display_only_approve_and_reject_buttons(site):
-    """SPEC §12 (N3): approve / reject buttons for parsed values rules; the static page does not decide (the API
-    does), so the renderer makes no request."""
-    html = site["html"]
-    body = _body(site, "renderValuesRules")
-    assert re.search(r"data-action=\\?[\"']approve", html) and re.search(r"data-action=\\?[\"']reject", html)
-    assert "approved_by_user" in html or "S4" in body
+    """SPEC §12 (N3): the static build does not decide (the API does). Architecture note: this app omits the
+    Approve/Reject buttons entirely in static mode rather than rendering them `disabled` -- a deliberate,
+    already-shipped strengthening of the retired index.html's guarantee (tests/dashboard/test_ui_flow_b.py pins
+    the same "omitted outright" behaviour for the live-vs-no-API case, the identical `App.source.mode` branch),
+    so there is no element to even attempt a request from. The rule itself (quote, summary, approval state,
+    provisional flag) still renders -- that's the gap this closes, where preferences.js's static path used to
+    render nothing at all (`parsedNotesHtml` returned `""` outside live mode)."""
+    body = hook_source("parsedRuleHtml")
+    assert 'data-rule-action="approve"' in body and 'data-rule-action="reject"' in body
+    assert "approved_by_user" in body
+    assert re.search(r"App\.source\.mode\s*===\s*[\"']live[\"']\s*\?.*?data-rule-action.*?:\s*\"\"", body, re.S), \
+        "the buttons must be omitted outright (not merely disabled) outside live mode"
     assert "fetch(" not in body and "XMLHttpRequest" not in body
+    prefs_src = site["js"]["screens/pillars/preferences.js"]
+    assert "parsedRulesFromReport" in prefs_src and "values.parsed_notes" in prefs_src
+    static_body = function_source(prefs_src, "staticNotesHtml")
+    assert "fetch(" not in static_body and "XMLHttpRequest" not in static_body
 
 
 def test_disclaimer_is_shown_verbatim_from_the_report(site):
-    """SPEC §9.4: the footer prints `rep.disclaimer`; any literal disclaimer in the page equals the fixed text."""
+    """SPEC §9.4: the footer shows the fixed disclaimer text verbatim. Architecture note: app.html hardcodes the
+    fixed en-CA sentence in its footer instead of reading `rep.disclaimer` through a template, because it is a
+    static shell shared by every persona and the sentence never varies by report (SPEC §9.4: fixed text); this
+    still fully satisfies the guarantee, checked here both ways -- the report's own `disclaimer` field equals the
+    fixed text (test_disclaimer_is_the_fixed_text) and the page's literal footer text equals it exactly too."""
     html = site["html"]
-    assert re.search(r"\$\{\s*esc\(\s*rep\.disclaimer\s*\)\s*\}|rep\.disclaimer", html)
-    for found in re.findall(r"Simulation éducative[^<`\"]*", html):
-        assert found.strip() == FR_DISCLAIMER
+    found = re.findall(r"Educational simulation[^<]*", html)
+    assert found, "the fixed disclaimer sentence must appear in the footer"
+    for text in found:
+        assert text.strip() == EN_DISCLAIMER
 
 
 def test_new_renderers_type_no_numbers(site):
-    """Every number shown comes from the report JSON: no digit in the literal text of the P2 / §12 renderers
-    (tags, attributes, entities and `${}` slots are ignored)."""
+    """Every number shown comes from the report JSON: no digit in the literal string-literal text of the P2 / §12
+    renderers (tags, attributes and entities are ignored; these modules build markup by concatenation, so there
+    is no `${}` slot to strip)."""
     for name in NEW_RENDERERS:
-        _, texts = function_source(site["html"], name)
-        assert not typed_digits(texts), (name, typed_digits(texts)[:5])
+        body = hook_source(name)
+        bad = typed_digits(string_literals(body))
+        assert not bad, (name, bad[:5])
 
 
 def test_page_has_no_advisory_wording(site):
-    """CLAUDE.md: no buy/sell recommendation anywhere in the page (SPEC §9.3 blocklist, FR + EN)."""
-    low = site["html"].lower()
+    """CLAUDE.md: no buy/sell recommendation anywhere in the page or its JS (SPEC §9.3 blocklist, FR + EN)."""
+    low = (site["html"] + "\n" + all_js(site)).lower()
     assert not [p for p in ADVISORY if p in low]

@@ -312,6 +312,19 @@
       + "</div></li>").join("") + "</ul>";
   }
 
+  /* A disclosed list of plain-text assumption labels (ported from index.html's assumptionBadge, SPEC §12):
+     every number shown by `stress`/`goals` is information-only and rests on team-labelled assumptions, so the
+     reader can always open the list behind the figure instead of taking it as a verified fact. Shared by the
+     Summary screen's stress/known-limitations cards and the objectives screen's goal probabilities. */
+  function assumptionsHtml(items, label) {
+    const list = (items || []).filter(Boolean);
+    if (!list.length) return "";
+    return '<details class="abadge"><summary>'
+      + '<span class="seg__kind seg__kind--assumption">' + esc(SEGMENT_KIND_LABEL.assumption) + "</span>"
+      + esc(label) + ' <span class="t-small">(' + list.length + ")</span></summary>"
+      + "<ul>" + list.map(item => "<li>" + esc(item) + "</li>").join("") + "</ul></details>";
+  }
+
   /* ---------- navigation ---------- */
 
   function defaultNavSpec() {
@@ -527,6 +540,7 @@
     checkRow,
     riskLevels: RISK_LEVELS,
     objectiveLabels: OBJECTIVE_LABELS,
+    checkNames: SHARED_CHECK_NAMES,
     widthOf,
     meterHtml,
     holdsHtml,
@@ -535,6 +549,7 @@
     factsHtml,
     editButtonHtml,
     segmentsHtml,
+    assumptionsHtml,
     go,
     routeParams,
     setPersona,

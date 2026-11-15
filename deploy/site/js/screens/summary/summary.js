@@ -49,6 +49,82 @@
     {label: "Preferences", href: "#/preferences", finding: "Bitcoin is held, and one stock is a recent, highly publicized name."}
   ];
 
+  /* ---------- P2 / SPEC §12, §17, §19: stress, unknowns and known limitations (report-level, ported from
+     the retired index.html; English wording, same guarantees: information only, never a check, never the
+     verdict, every number read from the report). */
+
+  const UNKNOWN_WHY = {
+    employer_sector_etf_part_unknown: "the ETF share is not broken down by sector, so the employer sector cap cannot be verified",
+    sector_risk_broad_market_unknown: "the “broad market” sector groups ETFs whose composition is unknown",
+    excluded_activity_no_tag_rows: "no sourced activity tag for this holding",
+    excluded_activity_etf_no_lookthrough: "the ETF's internal composition is unknown (no look-through)",
+    excluded_activity_etf_constituents_unknown: "the ETF's constituents are not tagged",
+    fee_unknown: "fees are not available",
+    theme_weight_unknown: "themes are not available"
+  };
+
+  function stressHtml(report) {
+    const stress = report && report.stress;
+    if (!stress) return "";
+    const rows = (stress.scenarios || []).map(sc => {
+      const shock = sc.shock_bp === null || sc.shock_bp === undefined ? "—"
+        : (sc.shock_bp > 0 ? "+" : "") + sc.shock_bp;
+      return "<tr><td>" + App.esc(sc.kind || sc.id || "") + '</td><td class="r">' + App.esc(String(shock))
+        + '</td><td class="r"><b>' + App.esc(App.fmtPct(sc.impact)) + "</b></td></tr>";
+    }).join("");
+    const durations = (stress.bond_holdings || [])
+      .map(h => App.esc(h.ticker) + ": " + App.esc(String(h.duration)) + " (" + App.esc(h.duration_source) + ")")
+      .join(" · ");
+    const sourceNote = stress.sourced ? "Durations are sourced."
+      : "Durations are not sourced: values assumed by the team (ASSUMED).";
+    return '<div class="sum__head"><h2 class="t-h3">Interest rate scenarios</h2>' + App.chip(stress.status) + "</div>"
+      + '<p class="t-small muted">An illustration of the effect of a rate shock on bond ETFs, not a forecast. '
+      + "Information only: this is not a check, and it changes neither the verdict nor the limits.</p>"
+      + '<div class="tbl"><table class="table"><thead><tr><th>Scenario</th><th class="r">Shock (bp)</th>'
+      + '<th class="r">Effect on value</th></tr></thead><tbody>' + rows + "</tbody></table></div>"
+      + '<p class="t-small muted">' + App.esc(sourceNote) + (durations ? " Durations used: " + durations + "." : "") + "</p>"
+      + App.assumptionsHtml(stress.assumptions, stress.sourced ? "scenario assumptions" : "unsourced: scenario assumptions");
+  }
+
+  function unknownsHtml(report) {
+    const list = (report && Array.isArray(report.unknowns)) ? report.unknowns : [];
+    const names = App.checkNames;
+    const rows = list.map(u => {
+      const why = UNKNOWN_WHY[u.message_key] || u.message_key || "";
+      const subject = u.subject ? " (" + App.esc(u.subject) + ")" : "";
+      return '<li class="unkrow">' + App.chip("unknown") + " <b>" + App.esc(u.id) + "</b> "
+        + App.esc(names[u.id] || u.id) + ": " + App.esc(why) + subject + "</li>";
+    }).join("");
+    return '<h2 class="t-h3">What we cannot verify</h2>'
+      + (list.length
+        ? '<p class="t-small muted">These checks could not be decided for lack of data. They are listed '
+          + "separately and never change the verdict.</p>" + '<ul class="unklist">' + rows + "</ul>"
+        : '<p class="t-small muted">Everything could be verified.</p>');
+  }
+
+  function limitationsHtml(report) {
+    const all = (report && Array.isArray(report.assumptions)) ? report.assumptions : [];
+    const pick = keys => all.filter(a => keys.some(k => String(a).toLowerCase().includes(k)));
+    const groups = [
+      ["Short historical window and expected return", pick(["data window", "drift", "bootstrap", "the sample includes"]),
+       "Block resampling reuses this one history. The expected return is a team assumption (ASSUMED), not a forecast."],
+      ["Survivorship bias", pick(["survivorship"]), "The asset universe was chosen after the fact."],
+      ["ETFs without look-through", pick(["look-through"]),
+       "Without ETF composition, the sector, employer and activity checks on ETFs stay unknown."],
+      ["Noisy behaviour", [],
+       "Behaviour classification is noisy: confidence is capped and several events are required. "
+       + "This is a warning, never a block."],
+      ["Team limits, not a regulation", [],
+       "The limits table values are team calibrations. The real equivalent, a Quebec suitability assessment "
+       + "(AMF/CIRO), remains out of scope."]
+    ];
+    const items = groups.map(([title, lines, note]) => "<li><b>" + App.esc(title) + "</b>"
+      + '<div class="t-small muted">' + App.esc(note) + "</div>"
+      + (lines.length ? "<ul>" + lines.map(a => "<li>" + App.esc(a) + "</li>").join("") + "</ul>" : "")
+      + "</li>").join("");
+    return '<h2 class="t-h3">Known limitations</h2><ul class="limits-list">' + items + "</ul>";
+  }
+
   /* ---------- small helpers ---------- */
 
   const {num} = App.format;
@@ -526,6 +602,9 @@
     screen.querySelector("[data-chart-note]").textContent = chartNoteHtml(ctx);
     screen.querySelector("[data-tiles]").innerHTML = tilesHtml(ctx);
     screen.querySelector("[data-keydata]").innerHTML = App._summary.keyDataHtml(ctx);
+    screen.querySelector("[data-stress]").innerHTML = stressHtml(report);
+    screen.querySelector("[data-unknowns]").innerHTML = unknownsHtml(report);
+    screen.querySelector("[data-limitations]").innerHTML = limitationsHtml(report);
   };
 
   App._summary = {

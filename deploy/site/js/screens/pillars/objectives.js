@@ -108,6 +108,7 @@
       floor: num(limits && limits.floor_at_horizon, live ? null : SAMPLE.floor),
       cone: live ? cone : SAMPLE_CONE,
       probs: probs,
+      goalAssumptions: (goals && Array.isArray(goals.assumptions)) ? goals.assumptions : [],
       goalChecks: (goals && Array.isArray(goals.checks)) ? goals.checks : [],
       checks: (report && Array.isArray(report.checks_current)) ? report.checks_current : [],
       sections: sections,
@@ -337,6 +338,12 @@
       + '<th class="r">Probability</th></tr></thead><tbody>' + rows.join("") + "</tbody></table></div>";
   }
 
+  /* G1 (SPEC §7.3) is information only: the probabilities rest on stated assumptions (resampled return path,
+     declared contribution, horizon), always surfaced next to the table they qualify, never folded into a check. */
+  function goalsAssumptionsHtml(state) {
+    return App.assumptionsHtml(state.goalAssumptions, "assumptions behind these probabilities");
+  }
+
   function checksFor(state) {
     const related = state.checks.filter(check => check && (check.factor === "objectif" || check.factor === "horizon"));
     return related.concat(state.goalChecks.filter(check => check && typeof check === "object"));
@@ -382,6 +389,7 @@
       + facts
       + '<h3 class="detail__sub">Goal probabilities</h3>'
       + goalsTable(state)
+      + goalsAssumptionsHtml(state)
       + checkList
       + (narrative ? '<h3 class="detail__sub">What the analysis says</h3>' + narrative : "")
       + "</section>";
