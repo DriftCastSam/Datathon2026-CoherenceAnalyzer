@@ -984,6 +984,25 @@
     "README.md"
    ],
    "notes": "Audit gap: SPEC §11 step 5 asks the gate to store warn_enabled; grep finds 0 hits in coherence_analyzer/. Behaviour is the same today (soft.py compares confidence with config.WARN_MIN_CONF directly). Required: read §11 for the exact rule, stamp warn_enabled on the gated llm: field for the N1, N2 and N3 branches as the spec says, accept it in schemas/profile.v2.json, keep every existing gate status and output otherwise identical; soft checks may keep their own comparison (do not edit soft.py). Do not edit pipeline.py (other lanes). These P4 tasks run IN PARALLEL in separate worktrees: edit only the files (and, in pipeline.py / api.py / cli.py, only the functions) your task owns, plus README.md and new test files. No network, no pip install, no real AWS calls in code paths the tests run. Never write the activity-tags meta CSV (humans only, CLAUDE.md). The engine golden test must stay green. D10 (describe, never prescribe) applies to every user-facing string. Do not change frozen tests; if one contradicts the spec write .claude/loop/BLOCKED.md naming the test and the spec line."
+  },
+  {
+   "id": "P4.N1WIN",
+   "title": "N1 gate only accepts event ids the model was shown (the extractors.n1_events window)",
+   "spec": [
+    "§11 step 2",
+    "§1 inv. 5",
+    "§6.2 N1",
+    "§4 Flow B",
+    "CLAUDE.md evidence rule"
+   ],
+   "tests": [
+    "tests/llm/test_n1_gate_window.py"
+   ],
+   "code": [
+    "coherence_analyzer/pipeline.py (the N1 gate context only, around line 209)",
+    "README.md"
+   ],
+   "notes": "Audit gap: in pipeline.py (~line 209) the N1 gate context `event_ids` is every event up to the order intent, not the window that extractors.n1_events sends to the model; an N1 answer citing an event outside that window (e.g. ev_robert_0001, a quiz_result, or an event older than the window) passes the gate. §11 step 2 checks evidence against 'the context events'. Required: build event_ids from exactly the events in the N1 payload; an answer citing any other id is rejected by the gate (status as gate.py names it), the previous risk.behavioural value is kept, S1/S3 follow; the recorded Robert N1 answer (mock cache) is still accepted with the same outcome. Touch only the N1 gate-context code in pipeline.py. No network, no pip install. Do not change frozen tests; if one contradicts the spec write .claude/loop/BLOCKED.md naming the test and the spec line. D10 applies to every user-facing string."
   }
  ]
 }
