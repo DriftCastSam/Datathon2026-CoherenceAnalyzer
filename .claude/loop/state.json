@@ -27,6 +27,6 @@
     "P2.FB": "impl",
     "P2.N2": "impl",
     "P2.SITE": "impl",
-    "P2.UI": "tests"
+    "P2.UI": "impl"
   }
 }
