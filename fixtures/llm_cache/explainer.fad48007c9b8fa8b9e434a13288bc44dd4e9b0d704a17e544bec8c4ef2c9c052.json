@@ -6,12 +6,12 @@
     "guardrail_intervened": false,
     "guardrail_version": "2",
     "input_hash": "sha256:a331ba431d955c6d1dfb8ae19355f83af4c4395ce2ee09f06f51854eca534164",
-    "latency_ms": 8319.5,
+    "latency_ms": 8948.3,
     "model_id": "us.anthropic.claude-haiku-5-5",
     "node": "explainer",
     "prompt_version": "explainer.v2",
     "tokens_in": 6924,
-    "tokens_out": 1443
+    "tokens_out": 1564
   },
   "input_hash": "sha256:a331ba431d955c6d1dfb8ae19355f83af4c4395ce2ee09f06f51854eca534164",
   "model_id": "us.anthropic.claude-haiku-5-5",
@@ -21,29 +21,35 @@
       {
         "kind": "fact",
         "refs": [
+          "H9",
+          "metrics.current.p5_T"
+        ],
+        "text": "Contrôle H9 en violation : le scénario bas (p5_T) de 316 971 $ est inférieur au plancher de 360 000 $ fixé pour l'horizon effectif."
+      },
+      {
+        "kind": "fact",
+        "refs": [
           "declared.objectives.horizon_years",
           "declared.situation.planned_withdrawals",
           "derived.objectives.effective_horizon_years"
         ],
-        "text": "Horizon déclaré : 4 ans. Retrait planifié de 60 000 $ en 2030-06 (retraite, année 1) : l'horizon effectif ressort à 3,6 ans."
+        "text": "Horizon déclaré de 4 ans et retrait prévu de 60 000 $ en 2030-06 (revenu de retraite, année 1) donnent un horizon effectif de 3,6 ans (règle effective_horizon, confiance 1)."
       },
       {
         "kind": "fact",
         "refs": [
           "H9",
-          "verdict",
-          "derived.objectives.effective_horizon_years"
+          "metrics.current.p50_T",
+          "metrics.current.p95_T"
         ],
-        "text": "Contrôle H9 en violation : en scénario bas (p5_T), la valeur de 316 971 $ est sous le plancher de 360 000 $ calculé à l'horizon effectif de 3,6 ans. Verdict : incohérent."
+        "text": "Le plancher de 360 000 $ découle de l'horizon effectif, du risque effectif et de la capacité de risque, qui tient compte du fonds d'urgence et de la stabilité du revenu. Le scénario médian (p50_T) est de 487 578 $ et le scénario haut (p95_T) de 670 173 $."
       },
       {
         "kind": "assumption",
         "refs": [
-          "metrics.current.p50_T",
-          "metrics.current.p95_T",
           "metrics.current.p5_T"
         ],
-        "text": "Les scénarios reposent sur des hypothèses : médiane p50_T de 487 578 $, borne haute p95_T de 670 173 $. Ces résultats sont indicatifs."
+        "text": "Les valeurs de scénario sont indicatives et reposent sur des hypothèses de rendement et de dispersion; elles ne garantissent pas le montant disponible à la date du retrait."
       }
     ]
   },

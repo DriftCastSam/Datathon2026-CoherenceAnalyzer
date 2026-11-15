@@ -1,0 +1,115 @@
+{
+  "cache_key": "6d81da334e9e706d4b176dd55c472fbf8a816099f5b1087e2f0972ac78e140f7",
+  "call_log": {
+    "cache_hit": false,
+    "guardrail_id": "j85vlkrhs5xz",
+    "guardrail_intervened": false,
+    "guardrail_version": "2",
+    "input_hash": "sha256:28fe89f7213fa318825226039c1af64483a3fdabc02b0624c40c954b6ee7245a",
+    "latency_ms": 8483.8,
+    "model_id": "us.anthropic.claude-haiku-5-5",
+    "node": "explainer",
+    "prompt_version": "explainer.v2",
+    "tokens_in": 7128,
+    "tokens_out": 1409
+  },
+  "input_hash": "sha256:28fe89f7213fa318825226039c1af64483a3fdabc02b0624c40c954b6ee7245a",
+  "model_id": "us.anthropic.claude-haiku-5-5",
+  "node": "explainer",
+  "output": {
+    "segments": [
+      {
+        "kind": "fact",
+        "refs": [
+          "declared.objectives.horizon_years",
+          "declared.situation.planned_withdrawals",
+          "derived.objectives.effective_horizon_years"
+        ],
+        "text": "L'horizon déclaré est de 20 ans et aucun retrait n'est planifié; l'horizon effectif reste de 20 ans."
+      },
+      {
+        "kind": "fact",
+        "refs": [
+          "H9",
+          "metrics.current.p5_T"
+        ],
+        "text": "Le scénario bas (p5_T) atteint 18 379 $, sous le plancher de 36 000 $ de la vérification H9, qui dépend de l'horizon effectif, de la tolérance au risque effective et de la capacité de risque."
+      },
+      {
+        "kind": "assumption",
+        "refs": [
+          "metrics.current.p50_T",
+          "metrics.current.p95_T"
+        ],
+        "text": "Les scénarios médian (p50_T, 119 844 $) et haut (p95_T, 640 170 $) sont des projections indicatives qui reposent sur des hypothèses de rendement et de volatilité."
+      }
+    ]
+  },
+  "prompt_version": "explainer.v2",
+  "user_payload": {
+    "checks": [
+      {
+        "derived_from": [
+          "limits.floor_at_horizon",
+          "risk.effective",
+          "risk.declared",
+          "risk.capacity",
+          "objectives.effective_horizon_years",
+          "objectives.horizon_years",
+          "situation.planned_withdrawals",
+          "situation.emergency_fund_months",
+          "situation.emergency_fund",
+          "situation.monthly_expenses",
+          "situation.income_stability",
+          "identity.employment_type"
+        ],
+        "id": "H9",
+        "limit": "36 000 $",
+        "message_key": "floor_breached",
+        "source": "rule:floor_at_horizon",
+        "status": "violation",
+        "subject": null,
+        "value": "18 379 $"
+      }
+    ],
+    "declared": {
+      "identity.retirement_target_age": "65",
+      "objectives.horizon_years": "20",
+      "situation.planned_withdrawals": []
+    },
+    "derived": {
+      "objectives.effective_horizon_years": {
+        "because": [
+          "objectives.horizon_years = 20",
+          "situation.planned_withdrawals = "
+        ],
+        "by": "rule:effective_horizon",
+        "confidence": "1",
+        "value": "20"
+      }
+    },
+    "evidence_events": [],
+    "factor": "horizon",
+    "intent": null,
+    "locale": "fr-CA",
+    "metrics": {
+      "current": {
+        "p50_T": "119 844 $",
+        "p5_T": "18 379 $",
+        "p95_T": "640 170 $",
+        "width": "621 791 $"
+      },
+      "proposed": {}
+    },
+    "question": "Quand l'argent sera-t-il requis?",
+    "retry_failures": [
+      "V1: segment 1 ref 'objectives.horizon_years' is no check id, key path or event_id of the facts",
+      "V1: segment 1 ref 'situation.planned_withdrawals' is no check id, key path or event_id of the facts",
+      "V1: segment 1 ref 'objectives.effective_horizon_years' is no check id, key path or event_id of the facts",
+      "V1: segment 2 ref 'objectives.effective_horizon_years' is no check id, key path or event_id of the facts"
+    ],
+    "status": "violation",
+    "unknowns": [],
+    "verdict": "incoherent"
+  }
+}

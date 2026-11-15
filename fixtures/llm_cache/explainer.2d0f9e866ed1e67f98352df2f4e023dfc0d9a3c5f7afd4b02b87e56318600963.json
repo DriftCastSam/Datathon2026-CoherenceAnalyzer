@@ -6,12 +6,12 @@
     "guardrail_intervened": false,
     "guardrail_version": "2",
     "input_hash": "sha256:3e281e8eeb16de6054d855bfce53139beb3715d0212740bd0ed91eeae27b8226",
-    "latency_ms": 9067.7,
+    "latency_ms": 9386.1,
     "model_id": "us.anthropic.claude-haiku-5-5",
     "node": "explainer",
     "prompt_version": "explainer.v2",
-    "tokens_in": 7054,
-    "tokens_out": 1564
+    "tokens_in": 7011,
+    "tokens_out": 1551
   },
   "input_hash": "sha256:3e281e8eeb16de6054d855bfce53139beb3715d0212740bd0ed91eeae27b8226",
   "model_id": "us.anthropic.claude-haiku-5-5",
@@ -21,12 +21,10 @@
       {
         "kind": "fact",
         "refs": [
-          "declared.preferences.interests",
-          "declared.preferences.prefers_dividends",
-          "declared.preferences.prefers_large_caps",
-          "declared.preferences.home_bias_ok"
+          "S4",
+          "derived.values.parsed_notes"
         ],
-        "text": "Intérêts déclarés : fonds ESG et revenu de dividendes. Préférences déclarées : dividendes (vrai), grandes capitalisations (vrai), biais domestique accepté (vrai)."
+        "text": "Aucune vérification de cette section n'est en violation ou en avertissement. Deux règles tirées de vos notes sont signalées en information (S4) : elles ne sont pas approuvées par vous."
       },
       {
         "kind": "fact",
@@ -35,22 +33,25 @@
           "declared.values.social.importance",
           "declared.values.notes"
         ],
-        "text": "Importance déclarée : environnement 5 et social 4. La note indique vouloir écarter les entreprises ayant de grandes controverses environnementales ou sociales."
+        "text": "Vos scores d'importance déclarés sont de 5 pour l'environnement et de 4 pour le social. Vos notes indiquent : « Avoid companies with major environmental or social controversies. »"
+      },
+      {
+        "kind": "fact",
+        "refs": [
+          "declared.preferences.interests",
+          "declared.preferences.prefers_dividends",
+          "declared.preferences.prefers_large_caps",
+          "declared.preferences.home_bias_ok"
+        ],
+        "text": "Préférences déclarées : intérêts pour les fonds ESG et le revenu de dividendes, préférence pour les dividendes et pour les grandes capitalisations, et biais domestique jugé acceptable (vrai)."
       },
       {
         "kind": "unknown",
         "refs": [
-          "S4",
-          "derived.values.parsed_notes"
+          "derived.values.parsed_notes",
+          "S4"
         ],
-        "text": "Deux règles tirées de la note ne sont pas approuvées par l'utilisateur : ouverture aux nouvelles technologies si elles conviennent, et aucun titre spéculatif. Elles ne créent aucune violation et ne peuvent pas être vérifiées automatiquement."
-      },
-      {
-        "kind": "inference",
-        "refs": [
-          "derived.values.parsed_notes"
-        ],
-        "text": "Lecture de la note par l'analyseur (inférence llm) : la mention « rien de spéculatif » est classée comme règle d'attribut à éviter, sans approbation de l'utilisateur. Cette lecture reste à confirmer."
+        "text": "Les règles « open to new tech if it fits » et « nothing speculative » sont extraites automatiquement de vos notes, sans votre approbation. Elles ne peuvent pas être vérifiées automatiquement et ne créent aucune violation."
       }
     ]
   },

@@ -6,12 +6,12 @@
     "guardrail_intervened": false,
     "guardrail_version": "2",
     "input_hash": "sha256:1b46706fc615f54e654b399646abdf4451ce5597f026400331b4330cb991045e",
-    "latency_ms": 9846.4,
+    "latency_ms": 9659.9,
     "model_id": "us.anthropic.claude-haiku-5-5",
     "node": "explainer",
     "prompt_version": "explainer.v2",
     "tokens_in": 9362,
-    "tokens_out": 1581
+    "tokens_out": 1658
   },
   "input_hash": "sha256:1b46706fc615f54e654b399646abdf4451ce5597f026400331b4330cb991045e",
   "model_id": "us.anthropic.claude-haiku-5-5",
@@ -22,34 +22,38 @@
         "kind": "fact",
         "refs": [
           "H2",
-          "situation.emergency_fund_months",
-          "situation.income_stability"
-        ],
-        "text": "Cryptomonnaies : 15,0 % du portefeuille, limite de 10,0 %. La limite découle de limits.max_crypto_weight, calculée à partir du risque effectif et de la capacité, elle-même liée à l'horizon, au fonds d'urgence (5 mois) et à la stabilité du revenu (élevée)."
-      },
-      {
-        "kind": "fact",
-        "refs": [
           "H5",
-          "situation.emergency_fund_months",
-          "situation.income_stability"
+          "limits.max_crypto_weight",
+          "limits.max_foreign_currency_weight"
         ],
-        "text": "Devises étrangères : 76,0 % du portefeuille, limite de 70,0 %. La limite découle de limits.max_foreign_currency_weight, avec la même chaîne de risque, d'horizon et de capacité que H2."
+        "text": "Plafond de cryptos (H2) : 15,0 % du portefeuille contre une limite de 10,0 %, dérivée de limits.max_crypto_weight et de risk.effective. Plafond de devises étrangères (H5) : 76,0 % contre 70,0 %, dérivé de limits.max_foreign_currency_weight."
       },
       {
         "kind": "fact",
         "refs": [
           "H6",
-          "identity.employer_sector"
+          "identity.employer_sector",
+          "limits.max_employer_sector_weight"
         ],
-        "text": "Secteur de l'employeur (Information Technology) : 16,0 % du portefeuille, limite de 15,0 %, tirée de identity.employer_sector. La part de ce secteur détenue par les FNB n'est pas décomposée, donc H6 reste non vérifiée à 47,0 %."
+        "text": "Limite sectorielle de l'employeur (H6) : Information Technology à 16,0 % contre 15,0 %, dérivée de identity.employer_sector. La part de ce secteur détenue via des FNB (47,0 %) n'est pas ventilée : cette limite ne peut pas être vérifiée pour cette part."
+      },
+      {
+        "kind": "fact",
+        "refs": [
+          "S2",
+          "knowledge.score",
+          "knowledge.quiz_score",
+          "knowledge.declared_level"
+        ],
+        "text": "Connaissances (S2, avertissement) : score de 45 contre une limite de 50 pour BTC-USD, CNR.TO, ETH-USD, NVDA et SHOP.TO, dérivé de knowledge.score, knowledge.quiz_score et knowledge.declared_level."
       },
       {
         "kind": "unknown",
         "refs": [
-          "H10"
+          "H10",
+          "limits.max_sector_risk_share"
         ],
-        "text": "Part du secteur Broad market à 30,7 % contre une limite de 45,0 % (H10) : ce secteur de risque ne peut pas être vérifié, car la répartition sectorielle n'est pas connue pour cette part."
+        "text": "Part du risque sectoriel « Broad market » (H10) : 30,7 % contre une limite de 45,0 %. Le statut est inconnu, car cette part n'est pas ventilée ; la limite ne peut pas être vérifiée."
       }
     ]
   },

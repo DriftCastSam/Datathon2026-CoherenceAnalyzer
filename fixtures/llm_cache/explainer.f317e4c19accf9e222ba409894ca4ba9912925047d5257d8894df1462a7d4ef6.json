@@ -1,19 +1,19 @@
 {
-  "cache_key": "d53700a1830b9c5d1fbc5060dbbf1d515bccc6a6df1c98cfdf6aff96066d156e",
+  "cache_key": "f317e4c19accf9e222ba409894ca4ba9912925047d5257d8894df1462a7d4ef6",
   "call_log": {
     "cache_hit": false,
     "guardrail_id": "j85vlkrhs5xz",
     "guardrail_intervened": false,
     "guardrail_version": "2",
-    "input_hash": "sha256:5cbc0f8eff377e06415406d1c69a728d7f3d9d811dbd90d03a4304a6469e90fa",
-    "latency_ms": 9237.4,
+    "input_hash": "sha256:ff4245797ec18ddfb69f8ae71e1e477c272579a98738f37b58264463f7ce609f",
+    "latency_ms": 8756.5,
     "model_id": "us.anthropic.claude-haiku-5-5",
     "node": "explainer",
     "prompt_version": "explainer.v2",
-    "tokens_in": 8563,
-    "tokens_out": 1642
+    "tokens_in": 8622,
+    "tokens_out": 1651
   },
-  "input_hash": "sha256:5cbc0f8eff377e06415406d1c69a728d7f3d9d811dbd90d03a4304a6469e90fa",
+  "input_hash": "sha256:ff4245797ec18ddfb69f8ae71e1e477c272579a98738f37b58264463f7ce609f",
   "model_id": "us.anthropic.claude-haiku-5-5",
   "node": "explainer",
   "output": {
@@ -25,7 +25,7 @@
           "derived.risk.effective",
           "declared.risk.declared"
         ],
-        "text": "La capacité au risque est low_moderate : horizon effectif de 3,6 ans, fonds d'urgence de 4,6 mois, stabilité des revenus élevée, et un retrait prévu de 60 000 $ en 2030-06 (revenu de retraite). Le risque effectif est low_moderate, comme le risque déclaré."
+        "text": "Capacité de risque : low_moderate, calculée à partir d'un horizon effectif de 3,6 ans, d'un fonds d'urgence de 4,6 mois, d'une stabilité de revenu high et d'un retrait prévu de 60 000 $ en 2030-06 (revenu de retraite). Risque effectif : low_moderate, égal au risque déclaré et à la capacité."
       },
       {
         "kind": "fact",
@@ -34,17 +34,18 @@
           "H8",
           "metrics.current.vol",
           "metrics.current.mdd",
+          "metrics.current.loss_prob",
           "declared.risk.max_acceptable_drawdown_pct"
         ],
-        "text": "Volatilité de 9,8 % contre une limite de 9,0 % (H7), dérivée du risque effectif. Perte maximale de -13,4 % contre une limite de -12,0 % (H8), dérivée de la perte maximale acceptable déclarée de -12 %."
+        "text": "Volatilité actuelle de 9,8 % contre une bande maximale de 9,0 % (H7). Perte maximale actuelle de -13,4 % contre la limite de -12,0 % issue de la tolérance déclarée de -12 % (H8). Probabilité de perte de 21,3 %."
       },
       {
         "kind": "fact",
         "refs": [
           "H4",
-          "metrics.current.loss_prob"
+          "derived.risk.effective"
         ],
-        "text": "Poids des titres à revenu fixe de 25,0 % contre un minimum de 30,0 % (H4), dérivé du risque effectif. Probabilité de perte de 21,3 %, indicative et fondée sur des hypothèses de modélisation."
+        "text": "Poids des titres à revenu fixe de 25,0 % contre un minimum de 30,0 % tiré du risque effectif et de la capacité (H4)."
       },
       {
         "kind": "inference",
@@ -52,7 +53,7 @@
           "derived.risk.behavioural",
           "declared.risk.reaction_to_20pct_drop"
         ],
-        "text": "Selon le classificateur comportemental (confiance 0,55), le profil de risque comportemental est moderate_high ; la réaction déclarée à une baisse est sell_some. Il s'agit d'une inférence, non d'un fait déclaré."
+        "text": "Selon le classificateur comportemental, le profil de risque comportemental serait moderate_high (confiance de 0,55), fondé sur les événements ev_robert_0007 et ev_robert_0004, classés hype_chasing. Ce résultat est une inférence."
       }
     ]
   },
@@ -182,11 +183,12 @@
     "retry_failures": [
       "V1: segment 1 ref 'objectives.effective_horizon_years' is no check id, key path or event_id of the facts",
       "V1: segment 1 ref 'situation.planned_withdrawals' is no check id, key path or event_id of the facts",
+      "V1: segment 1 ref 'risk.capacity' is no check id, key path or event_id of the facts",
       "V1: segment 1 ref 'situation.emergency_fund_months' is no check id, key path or event_id of the facts",
-      "V1: segment 2 ref 'limits.vol_band_annual' is no check id, key path or event_id of the facts",
-      "V1: segment 2 ref 'limits.max_drawdown_pct' is no check id, key path or event_id of the facts",
-      "V1: segment 3 ref 'limits.min_fixed_income_weight' is no check id, key path or event_id of the facts",
-      "V2: segment 4 has number(s) not in the facts: 20 %"
+      "V1: segment 1 ref 'situation.income_stability' is no check id, key path or event_id of the facts",
+      "V1: segment 2 ref 'risk.effective' is no check id, key path or event_id of the facts",
+      "V1: segment 3 ref 'risk.effective' is no check id, key path or event_id of the facts",
+      "V1: segment 4 ref 'risk.behavioural' is no check id, key path or event_id of the facts"
     ],
     "status": "violation",
     "unknowns": [],

@@ -1,19 +1,19 @@
 {
-  "cache_key": "e0420cff1e4d6873d7a94737605f5a198e312bf4b6d0e74d4006cd6adb76fa86",
+  "cache_key": "e7ab951806faa170ff59a5f6918d73421e6396495c8dc4e873aa6e14ae6edae4",
   "call_log": {
     "cache_hit": false,
     "guardrail_id": "j85vlkrhs5xz",
     "guardrail_intervened": false,
     "guardrail_version": "2",
-    "input_hash": "sha256:fe3fdbed66f5c0dbcaf66da2464052551dc44b5739c0dc9cbcbdc5aed23a3004",
-    "latency_ms": 8852.3,
+    "input_hash": "sha256:df546dd6c3fe8422b9b696473642b72f11c36af7e87559f022836f52d64c64cc",
+    "latency_ms": 9933.0,
     "model_id": "us.anthropic.claude-haiku-5-5",
     "node": "explainer",
     "prompt_version": "explainer.v2",
-    "tokens_in": 14912,
-    "tokens_out": 1611
+    "tokens_in": 14580,
+    "tokens_out": 1673
   },
-  "input_hash": "sha256:fe3fdbed66f5c0dbcaf66da2464052551dc44b5739c0dc9cbcbdc5aed23a3004",
+  "input_hash": "sha256:df546dd6c3fe8422b9b696473642b72f11c36af7e87559f022836f52d64c64cc",
   "model_id": "us.anthropic.claude-haiku-5-5",
   "node": "explainer",
   "output": {
@@ -23,37 +23,36 @@
         "refs": [
           "H6",
           "identity.employer_sector",
-          "limits.max_employer_sector_weight"
+          "declared.identity.employer_sector"
         ],
-        "text": "H6 : part du secteur de l'employeur (Industrials) de 45,0 % détenue via des FNB, non ventilée par secteur ; limite de 15,0 %. Cette limite ne peut pas être vérifiée."
+        "text": "H6 : secteur de l'employeur Industrials à 45,0 % pour une limite de 15,0 %. La part de l'ETF par secteur n'est pas connue; la limite ne peut pas être vérifiée."
+      },
+      {
+        "kind": "unknown",
+        "refs": [
+          "H11",
+          "declared.values.environment.exclusions",
+          "declared.values.social.exclusions",
+          "derived.values.parsed_notes"
+        ],
+        "text": "H11 : exclusions environnementales et sociales déclarées (controverses significatives). Aucune ligne d'exclusion pour CNR.TO, ENB.TO, FTS.TO, MSFT, RY.TO, XOM (5,0 % chacun) et pour les ETF AGG (5,0 %), ESGV (20,0 %), SPY (10,0 %), XBB.TO (20,0 %), XIU.TO (15,0 %). Non vérifiable."
       },
       {
         "kind": "unknown",
         "refs": [
           "H10",
-          "risk.effective",
-          "objectives.effective_horizon_years"
+          "derived.situation.emergency_fund_months",
+          "derived.situation.income_stability"
         ],
-        "text": "H10 : risque du marché large à 59,8 % contre une limite de 35,0 %. Cette limite dépend de risk.effective, de l'horizon effectif et du fonds d'urgence ; elle ne peut pas être vérifiée."
+        "text": "H10 : Broad market à 59,8 % pour une limite de 35,0 % (part maximale par secteur de risque). La limite dépend du risque effectif, de la capacité et de l'horizon; la répartition n'étant pas connue, elle ne peut pas être vérifiée."
       },
       {
-        "kind": "unknown",
+        "kind": "fact",
         "refs": [
-          "H11",
-          "values.environment.exclusions",
-          "values.social.exclusions",
-          "values.parsed_notes[approved_by_user]"
+          "declared.preferences.max_fee_mer_pct",
+          "declared.preferences.asset_types_refused"
         ],
-        "text": "H11 (exclusions environnementales et sociales approuvées) : impossible à vérifier pour les FNB sans transparence : ESGV 20,0 %, SPY 10,0 %, XBB.TO 20,0 %, XIU.TO 15,0 %, AGG 5,0 %."
-      },
-      {
-        "kind": "unknown",
-        "refs": [
-          "H11",
-          "values.environment.exclusions",
-          "values.social.exclusions"
-        ],
-        "text": "H11 : aucune ligne d'étiquetage pour CNR.TO, ENB.TO, FTS.TO, MSFT, RY.TO et XOM (5,0 % chacun) ; ces exclusions ne peuvent pas être vérifiées pour ces titres."
+        "text": "Aucune violation n'est relevée dans cette section. Les frais maximaux déclarés sont de 0,5 %; les types d'actifs refusés sont crypto, options, ETF à levier et marge."
       }
     ]
   },
@@ -351,7 +350,7 @@
     },
     "question": "Quelles limites s'appliquent?",
     "retry_failures": [
-      "V5: the output did not match the explainer schema: explainer: output failed schema validation twice: \"H11 : exclusions environnementales et sociales (controverses importantes, approuvées par l'utilisateur). Impossible à vérifier pour FNB sans transparence : ESGV 20,0 %, SPY 10,0 %, XBB.TO 20,0 %, XIU.TO 15,0 %, AGG 5,0 %. Aucune ligne d'étiquetage pour CNR.TO, ENB.TO, FTS.TO, MSFT, RY.TO, XOM (5,0 % chacun).\" is too long"
+      "V5: the output did not match the explainer schema: explainer: output failed schema validation twice: no toolUse block named 'explainer' in the response"
     ],
     "status": "unknown",
     "unknowns": [

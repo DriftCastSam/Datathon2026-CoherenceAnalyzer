@@ -3,12 +3,12 @@
   "call_log": {
     "cache_hit": false,
     "input_hash": "sha256:28b6453cdae628f8d8518609836c7531ddbd32375d56f1393fb9ce91d41bb06a",
-    "latency_ms": 6673.9,
+    "latency_ms": 5098.5,
     "model_id": "us.anthropic.claude-haiku-5-5",
     "node": "profile_consistency",
     "prompt_version": "profile_consistency.v1",
-    "tokens_in": 5370,
-    "tokens_out": 1099
+    "tokens_in": 2153,
+    "tokens_out": 868
   },
   "input_hash": "sha256:28b6453cdae628f8d8518609836c7531ddbd32375d56f1393fb9ce91d41bb06a",
   "model_id": "us.anthropic.claude-haiku-5-5",

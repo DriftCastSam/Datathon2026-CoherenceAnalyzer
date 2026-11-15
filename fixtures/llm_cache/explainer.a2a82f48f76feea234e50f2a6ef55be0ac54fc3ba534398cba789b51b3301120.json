@@ -1,84 +1,63 @@
 {
-  "cache_key": "01a875122070c435f20a5ce55ac47f6876020b3fd602e625035177b7106c39d1",
+  "cache_key": "a2a82f48f76feea234e50f2a6ef55be0ac54fc3ba534398cba789b51b3301120",
   "call_log": {
     "cache_hit": false,
     "guardrail_id": "j85vlkrhs5xz",
     "guardrail_intervened": false,
     "guardrail_version": "2",
-    "input_hash": "sha256:11fa429cf567bd4b01bcafaeceef71701f82eeade4f62395c13da79d1b5be1c6",
-    "latency_ms": 9463.3,
+    "input_hash": "sha256:6ac499562941d92d921377e20c7de90e5afb7558440187d833f81da7de089b07",
+    "latency_ms": 8884.9,
     "model_id": "us.anthropic.claude-haiku-5-5",
     "node": "explainer",
     "prompt_version": "explainer.v2",
-    "tokens_in": 15768,
-    "tokens_out": 1636
+    "tokens_in": 14062,
+    "tokens_out": 1615
   },
-  "input_hash": "sha256:11fa429cf567bd4b01bcafaeceef71701f82eeade4f62395c13da79d1b5be1c6",
+  "input_hash": "sha256:6ac499562941d92d921377e20c7de90e5afb7558440187d833f81da7de089b07",
   "model_id": "us.anthropic.claude-haiku-5-5",
   "node": "explainer",
   "output": {
     "segments": [
       {
-        "kind": "fact",
+        "kind": "unknown",
         "refs": [
-          "H3",
-          "derived.situation.emergency_fund_months",
-          "derived.situation.income_stability"
+          "H6",
+          "identity.employer_sector",
+          "limits.max_employer_sector_weight"
         ],
-        "text": "NVDA pèse 10,0 % du portefeuille; la limite de concentration par titre est de 8,0 % (H3). Cette limite découle du risque effectif, de l'horizon effectif, de la capacité de risque, du fonds d'urgence de 4,6 mois et d'une stabilité de revenu élevée."
-      },
-      {
-        "kind": "fact",
-        "refs": [
-          "H10"
-        ],
-        "text": "Le secteur Information Technology pèse 34,7 %, au-delà de la limite de 30,0 % (H10). Le Broad market, à 33,6 %, ne peut pas être décomposé par secteur: cette part reste non vérifiable (H10)."
+        "text": "H6 : le secteur de l'employeur, Health Care, pèse 30,0 % contre une limite de 15,0 %. La part détenue via des FNB n'est pas ventilée par secteur, donc la limite ne peut pas être vérifiée."
       },
       {
         "kind": "unknown",
         "refs": [
-          "H6",
-          "declared.identity.employer_sector"
+          "H10",
+          "limits.max_sector_risk_share"
         ],
-        "text": "La part du secteur Health Care, employeur de l'utilisateur, est de 30,0 % et dépasse la limite de 15,0 % (H6). Elle ne peut pas être vérifiée car la part des FNB n'est pas ventilée par secteur."
+        "text": "H10 : la part Broad market est de 44,0 % contre une limite de 30,0 %. Faute de ventilation de risque par classe, cette limite ne peut pas être vérifiée."
+      },
+      {
+        "kind": "fact",
+        "refs": [
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.environment.exclusions"
+        ],
+        "text": "Exclusions déclarées : tabac (values.social.exclusions), fraude comptable des 5 dernières années (values.governance.exclusions). Aucune exclusion environnementale déclarée."
       },
       {
         "kind": "unknown",
         "refs": [
           "H11",
-          "declared.values.social.exclusions",
-          "declared.values.governance.exclusions"
+          "values.social.exclusions",
+          "values.governance.exclusions"
         ],
-        "text": "Les exclusions déclarées (tabac, fraude comptable des 5 dernières années) ne peuvent pas être vérifiées pour ENB.TO, FTS.TO, GLD, JNJ, NVDA, PG, RY.TO, SPY, XBB.TO, XIU.TO et ZST.TO (H11): aucune donnée d'activité ni transparence des FNB."
+        "text": "H11 : pour ENB.TO 6,0 %, FTS.TO 7,0 %, JNJ 5,0 %, PG 5,0 %, RY.TO 7,0 %, les données d'activité manquent; pour GLD 5,0 %, SPY 12,0 %, XBB.TO 22,0 %, XIU.TO 18,0 %, ZST.TO 13,0 %, la transparence des FNB manque. Exclusions non vérifiables."
       }
     ]
   },
   "prompt_version": "explainer.v2",
   "user_payload": {
     "checks": [
-      {
-        "derived_from": [
-          "limits.max_single_stock_weight",
-          "risk.effective",
-          "risk.declared",
-          "risk.capacity",
-          "objectives.effective_horizon_years",
-          "objectives.horizon_years",
-          "situation.planned_withdrawals",
-          "situation.emergency_fund_months",
-          "situation.emergency_fund",
-          "situation.monthly_expenses",
-          "situation.income_stability",
-          "identity.employment_type"
-        ],
-        "id": "H3",
-        "limit": "8,0 %",
-        "message_key": "single_stock_over",
-        "source": "rule:max_single_stock",
-        "status": "violation",
-        "subject": "NVDA",
-        "value": "10,0 %"
-      },
       {
         "derived_from": [
           "limits.max_employer_sector_weight",
@@ -155,22 +134,6 @@
         "status": "unknown",
         "subject": "JNJ",
         "value": "5,0 %"
-      },
-      {
-        "derived_from": [
-          "limits.excluded_activities",
-          "values.environment.exclusions",
-          "values.social.exclusions",
-          "values.governance.exclusions",
-          "values.parsed_notes[approved_by_user]"
-        ],
-        "id": "H11",
-        "limit": "—",
-        "message_key": "excluded_activity_no_tag_rows",
-        "source": "rule:excluded_activities",
-        "status": "unknown",
-        "subject": "NVDA",
-        "value": "10,0 %"
       },
       {
         "derived_from": [
@@ -266,30 +229,7 @@
         "source": "rule:excluded_activities",
         "status": "unknown",
         "subject": "ZST.TO",
-        "value": "3,0 %"
-      },
-      {
-        "derived_from": [
-          "limits.max_sector_risk_share",
-          "risk.effective",
-          "risk.declared",
-          "risk.capacity",
-          "objectives.effective_horizon_years",
-          "objectives.horizon_years",
-          "situation.planned_withdrawals",
-          "situation.emergency_fund_months",
-          "situation.emergency_fund",
-          "situation.monthly_expenses",
-          "situation.income_stability",
-          "identity.employment_type"
-        ],
-        "id": "H10",
-        "limit": "30,0 %",
-        "message_key": "sector_risk_over",
-        "source": "rule:max_sector_risk",
-        "status": "violation",
-        "subject": "Information Technology",
-        "value": "34,7 %"
+        "value": "13,0 %"
       },
       {
         "derived_from": [
@@ -312,7 +252,7 @@
         "source": "rule:max_sector_risk",
         "status": "unknown",
         "subject": "Broad market",
-        "value": "33,6 %"
+        "value": "44,0 %"
       }
     ],
     "declared": {
@@ -371,19 +311,9 @@
     },
     "question": "Quelles limites s'appliquent?",
     "retry_failures": [
-      "V1: segment 1 ref 'limits.max_single_stock_weight' is no check id, key path or event_id of the facts",
-      "V1: segment 1 ref 'risk.effective' is no check id, key path or event_id of the facts",
-      "V1: segment 1 ref 'objectives.effective_horizon_years' is no check id, key path or event_id of the facts",
-      "V1: segment 1 ref 'situation.emergency_fund_months' is no check id, key path or event_id of the facts",
-      "V1: segment 1 ref 'situation.income_stability' is no check id, key path or event_id of the facts",
-      "V1: segment 2 ref 'limits.max_sector_risk_share' is no check id, key path or event_id of the facts",
-      "V1: segment 2 ref 'risk.effective' is no check id, key path or event_id of the facts",
-      "V1: segment 2 ref 'situation.income_stability' is no check id, key path or event_id of the facts",
-      "V1: segment 3 ref 'identity.employer_sector' is no check id, key path or event_id of the facts",
-      "V1: segment 4 ref 'values.social.exclusions' is no check id, key path or event_id of the facts",
-      "V1: segment 4 ref 'values.governance.exclusions' is no check id, key path or event_id of the facts"
+      "V5: the output did not match the explainer schema: explainer: output failed schema validation twice: \"H11 : exclusions déclarées (tabac, fraude comptable des 5 dernières années) non vérifiables pour ENB.TO 6,0 %, FTS.TO 7,0 %, JNJ 5,0 %, PG 5,0 %, RY.TO 7,0 %, faute de données d'activité. Pour les FNB GLD 5,0 %, SPY 12,0 %, XBB.TO 22,0 %, XIU.TO 18,0 %, ZST.TO 13,0 %, la transparence sous-jacente manque.\" is too long"
     ],
-    "status": "violation",
+    "status": "unknown",
     "unknowns": [
       {
         "derived_from": [
@@ -475,22 +405,6 @@
         "message_key": "excluded_activity_no_tag_rows",
         "source": "rule:excluded_activities",
         "status": "unknown",
-        "subject": "NVDA",
-        "value": "10,0 %"
-      },
-      {
-        "derived_from": [
-          "limits.excluded_activities",
-          "values.environment.exclusions",
-          "values.social.exclusions",
-          "values.governance.exclusions",
-          "values.parsed_notes[approved_by_user]"
-        ],
-        "id": "H11",
-        "limit": "—",
-        "message_key": "excluded_activity_no_tag_rows",
-        "source": "rule:excluded_activities",
-        "status": "unknown",
         "subject": "PG",
         "value": "5,0 %"
       },
@@ -572,7 +486,7 @@
         "source": "rule:excluded_activities",
         "status": "unknown",
         "subject": "ZST.TO",
-        "value": "3,0 %"
+        "value": "13,0 %"
       },
       {
         "derived_from": [
@@ -595,9 +509,9 @@
         "source": "rule:max_sector_risk",
         "status": "unknown",
         "subject": "Broad market",
-        "value": "33,6 %"
+        "value": "44,0 %"
       }
     ],
-    "verdict": "incoherent"
+    "verdict": "coherent"
   }
 }

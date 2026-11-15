@@ -6,12 +6,12 @@
     "guardrail_intervened": false,
     "guardrail_version": "2",
     "input_hash": "sha256:17a25c1cf9a635205a47be488029f93fe726b69a62546bf4fc234ae8cc078b03",
-    "latency_ms": 8671.7,
+    "latency_ms": 9256.8,
     "model_id": "us.anthropic.claude-haiku-5-5",
     "node": "explainer",
     "prompt_version": "explainer.v2",
-    "tokens_in": 6674,
-    "tokens_out": 1485
+    "tokens_in": 6668,
+    "tokens_out": 1477
   },
   "input_hash": "sha256:17a25c1cf9a635205a47be488029f93fe726b69a62546bf4fc234ae8cc078b03",
   "model_id": "us.anthropic.claude-haiku-5-5",
@@ -26,29 +26,30 @@
           "declared.preferences.prefers_large_caps",
           "declared.preferences.home_bias_ok"
         ],
-        "text": "Intérêts déclarés : IA, nouvelles technologies et cryptomonnaies. Préférence pour les dividendes : false. Préférence pour les grandes capitalisations : false. Biais domestique jugé acceptable : true."
+        "text": "Intérêts déclarés : IA, nouvelles technologies et crypto. Dividendes préférés : non. Grandes capitalisations préférées : non. Biais domestique accepté : oui."
       },
       {
         "kind": "fact",
         "refs": [
           "declared.values.notes"
         ],
-        "text": "Notes de l'utilisateur : « I love AI and new tech but I don't want everything in tech. »"
+        "text": "Note du profil, telle qu'écrite : « I love AI and new tech but I don't want everything in tech. »"
       },
       {
-        "kind": "inference",
+        "kind": "fact",
         "refs": [
           "derived.values.parsed_notes",
           "S4"
         ],
-        "text": "Inférence : l'analyseur des notes (llm) lit une préférence pour l'IA et les nouvelles technologies, applicable à l'ensemble du portefeuille, non approuvée par l'utilisateur."
+        "text": "Règle extraite de la note : préférer l'attribut ai_and_new_tech, citée « I love AI and new tech ». Elle n'est pas approuvée par l'utilisateur. Vérification S4 : information, aucune violation."
       },
       {
         "kind": "unknown",
         "refs": [
-          "S4"
+          "S4",
+          "derived.values.parsed_notes"
         ],
-        "text": "Cette règle ne peut pas être vérifiée automatiquement et n'est pas approuvée : elle ne crée aucune violation et aucune comparaison avec le portefeuille n'est présentée ici."
+        "text": "Cette règle ne peut pas être vérifiée automatiquement. Son effet sur les choix n'est pas vérifié et elle ne crée aucune violation."
       }
     ]
   },

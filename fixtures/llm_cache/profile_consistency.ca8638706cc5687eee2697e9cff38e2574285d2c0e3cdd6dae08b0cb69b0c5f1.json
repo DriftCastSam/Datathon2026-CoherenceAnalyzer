@@ -3,12 +3,12 @@
   "call_log": {
     "cache_hit": false,
     "input_hash": "sha256:2d909238f816ec329a124fae2c54bb5119227e00971adc19192d66f1b8468e54",
-    "latency_ms": 8064.2,
+    "latency_ms": 7972.0,
     "model_id": "us.anthropic.claude-haiku-5-5",
     "node": "profile_consistency",
     "prompt_version": "profile_consistency.v1",
-    "tokens_in": 5088,
-    "tokens_out": 1292
+    "tokens_in": 5053,
+    "tokens_out": 1306
   },
   "input_hash": "sha256:2d909238f816ec329a124fae2c54bb5119227e00971adc19192d66f1b8468e54",
   "model_id": "us.anthropic.claude-haiku-5-5",
@@ -18,27 +18,27 @@
     "findings": [
       {
         "fields": [
-          "values.notes",
-          "preferences.interests"
+          "preferences.interests",
+          "risk.max_acceptable_drawdown_pct"
         ],
         "kind": "tension",
         "quotes": [
-          "I don't want everything in tech.",
-          "ai"
+          "crypto",
+          "-35"
         ],
-        "reason": "The notes say the person does not want everything in tech, while the declared interests list is built around AI and new tech, which may pull holdings toward one theme."
+        "reason": "Crypto is a listed interest, yet the stated maximum acceptable drawdown is fairly shallow for an asset class that often falls further."
       },
       {
         "fields": [
           "identity.employer_sector",
-          "preferences.interests"
+          "values.notes"
         ],
         "kind": "tension",
         "quotes": [
           "Information Technology",
-          "new_tech"
+          "I don't want everything in tech"
         ],
-        "reason": "Income comes from the technology sector and the declared interests also centre on new tech, so career and investment exposure to one sector may overlap."
+        "reason": "The person works in tech and lists tech-themed interests, while the notes say they do not want everything in tech; the overlap of job and holdings may matter."
       }
     ]
   },
