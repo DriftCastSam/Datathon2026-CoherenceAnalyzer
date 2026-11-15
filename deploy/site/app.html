@@ -1,0 +1,361 @@
+<!doctype html>
+<html lang="en-CA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Profile Coherence — Datathon Polyfinance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/whatif.css">
+<link rel="stylesheet" href="css/charts.css">
+<link rel="stylesheet" href="css/conversation.css">
+</head>
+<body>
+
+<header class="hdr">
+  <div class="wrap hdr__inner">
+    <div class="brand">
+      <img class="brand__img" src="assets/brand.png" alt="National Bank Direct Brokerage">
+    </div>
+    <div class="util">
+      <button class="iconbtn" type="button" aria-label="Help"><img class="i30" src="assets/icon-help.svg" alt="" width="30" height="30"></button>
+      <button class="iconbtn" type="button" aria-label="Messages"><img class="i30" src="assets/icon-mail.svg" alt="" width="30" height="30"></button>
+      <button class="user-chip" type="button"><img class="i18" src="assets/icon-user.svg" alt="" width="18" height="18"><span>Robert</span></button>
+      <button class="signout" type="button"><img class="i16" src="assets/icon-out.svg" alt="" width="16" height="16"><span>Sign out</span></button>
+    </div>
+  </div>
+</header>
+
+<nav class="nav" id="app-nav" aria-label="Primary">
+  <div class="wrap">
+    <div class="nav__inner">
+      <div class="tabs" id="app-tabs"></div>
+      <div class="nav-actions">
+        <button class="btn btn--outline-dark" type="button">Edit profile</button>
+        <button class="btn btn--outline-blue" type="button">Export report</button>
+        <button class="btn btn--primary" type="button">Re-run analysis</button>
+      </div>
+    </div>
+    <div class="nav-rule" aria-hidden="true"></div>
+  </div>
+</nav>
+
+<main id="app-main">
+  <section data-route="summary" hidden>
+<div class="scr scr-summary wrap">
+  <div class="sum__title-row">
+    <h1 class="t-title">Summary</h1>
+    <select class="select" data-persona aria-label="Persona">
+      <option value="">Persona: Robert</option>
+    </select>
+    <div class="sum__lastrun">
+      <img class="i22" src="assets/icon-refresh.svg" alt="" width="22" height="22">
+      <div class="sum__stamp">
+        <b data-run-at>14 Nov 2026, 17:40</b>
+        <span data-mode-stamp>Sample data</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card sum__totals" data-totals>
+    <div class="sum__figures">
+      <div class="sum__figure">
+        <p class="sum__figure-label">Portfolio value (CAD)</p>
+        <p class="sum__figure-value num">250,000.00</p>
+      </div>
+      <div class="sum__figure">
+        <p class="sum__figure-label sum__figure-label--blue">Median projection, year 5</p>
+        <p class="sum__figure-value sum__figure-value--l num">298,000.00 (+19.2%)</p>
+      </div>
+    </div>
+    <div class="sum__verdicts">
+      <div class="sum__verdict">
+        <p class="sum__verdict-label">Is the profile coherent?</p>
+        <span class="st st--pass"><img class="st__icon" src="assets/icon-check.svg" alt="" width="16" height="16"><span class="st__label">Aligned</span></span>
+      </div>
+      <div class="sum__verdict">
+        <p class="sum__verdict-label">Does the portfolio fit the profile?</p>
+        <span class="st st--violation"><img class="st__icon" src="assets/icon-x.svg" alt="" width="16" height="16"><span class="st__label">Misaligned</span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card sum__profile" data-profile>
+    <div class="sum__figure"><p class="sum__figure-label">Age, occupation</p><p class="sum__figure-value">59, healthcare professional</p></div>
+    <div class="sum__figure"><p class="sum__figure-label">Objective</p><p class="sum__figure-value">Preserve capital, some growth</p></div>
+    <div class="sum__figure"><p class="sum__figure-label">Horizon</p><p class="sum__figure-value">3 to 5 years</p></div>
+    <div class="sum__figure"><p class="sum__figure-label">Risk profile</p><p class="sum__figure-value">Low to moderate</p></div>
+    <div class="sum__figure"><p class="sum__figure-label">Experience</p><p class="sum__figure-value">Advanced</p></div>
+  </div>
+
+  <div class="card sum__exec">
+    <h2 class="t-h3">Executive summary</h2>
+    <div class="sum__exec-body" data-exec>
+      <p class="sum__summary-text">Robert's profile holds together: a short horizon, a capital-preservation goal and a low-to-moderate risk level point the same way. The portfolio does not fully match it. A 22% position in one high-volatility technology stock breaks the concentration constraint and pushes the bad-scenario loss well past what the profile tolerates.</p>
+      <div class="tbl">
+        <table class="table sum__table">
+          <colgroup><col style="width:250px"><col style="width:210px"><col style="width:290px"><col></colgroup>
+          <thead><tr><th>Check</th><th>Status</th><th>Key figure</th><th>Finding</th></tr></thead>
+          <tbody>
+            <tr><td><a class="sum__link" href="#/coherence">Profile coherence</a></td><td><span class="st st--pass"><img class="st__icon" src="assets/icon-check.svg" alt="" width="16" height="16"><span class="st__label">Aligned</span></span></td><td>3 of 4 checks consistent</td><td>Interest in publicized stocks pulls against a low-to-moderate risk level.</td></tr>
+            <tr><td><a class="sum__link" href="#/objectives">Objectives and horizon</a></td><td><span class="st st--pass"><img class="st__icon" src="assets/icon-check.svg" alt="" width="16" height="16"><span class="st__label">Aligned</span></span></td><td>Median 298,000 vs goal 250,000</td><td>Median and optimistic scenarios preserve the capital over 3 to 5 years.</td></tr>
+            <tr><td><a class="sum__link" href="#/risk">Risk</a></td><td><span class="st st--violation"><img class="st__icon" src="assets/icon-x.svg" alt="" width="16" height="16"><span class="st__label">Misaligned</span></span></td><td>Loss 60,000 vs tolerance 25,000</td><td>Bad-scenario loss is 2.4× what the profile tolerates.</td></tr>
+            <tr><td><a class="sum__link" href="#/constraints">Constraints</a></td><td><span class="st st--violation"><img class="st__icon" src="assets/icon-x.svg" alt="" width="16" height="16"><span class="st__label">Misaligned</span></span></td><td>1 of 3 violated</td><td>One stock holds 22% of the portfolio; the limit is 10%.</td></tr>
+            <tr><td><a class="sum__link" href="#/preferences">Preferences</a></td><td><span class="st st--warning"><img class="st__icon" src="assets/icon-warn.svg" alt="" width="16" height="16"><span class="st__label">Warning</span></span></td><td>2 of 3 not met</td><td>Bitcoin is held, and one stock is a recent, highly publicized name.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <footer class="foot">
+    <div class="wrap foot__wrap">
+      <p class="foot__legal">This analysis is informational only and does not constitute investment advice, an offer, or a solicitation. Trading securities involves risk. Past performance does not guarantee future results. Consult a professional before making investment decisions.</p>
+    </div>
+  </footer>
+</div>
+  </section>
+
+  <section data-route="objectives" hidden>
+<div class="scr scr-factor wrap">
+  <div class="sum__menu" aria-label="Factor navigation">
+    <a class="sum__menu-item sum__menu-item--active" role="menuitem" href="#/summary">Summary</a>
+    <a class="sum__menu-item" role="menuitem" href="#/objectives">Objectives and horizon</a>
+    <a class="sum__menu-item" role="menuitem" href="#/risk">Risk</a>
+    <a class="sum__menu-item" role="menuitem" href="#/constraints">Constraints</a>
+    <a class="sum__menu-item" role="menuitem" href="#/preferences">Preferences</a>
+    <a class="sum__menu-item" role="menuitem" href="#/coherence">Profile coherence</a>
+  </div>
+
+  <h1 class="t-h2 scr-factor__title">Objectives and horizon</h1>
+  <a class="back" href="#/summary"><img class="i16" src="assets/icon-back.svg" alt="" width="16" height="16"><span>Accounts summary</span></a>
+  <div class="card" data-factor-detail>
+    <p>Content loaded dynamically.</p>
+  </div>
+</div>
+  </section>
+
+  <section data-route="risk" hidden>
+<div class="scr scr-factor wrap">
+  <div class="sum__menu" aria-label="Factor navigation">
+    <a class="sum__menu-item sum__menu-item--active" role="menuitem" href="#/summary">Summary</a>
+    <a class="sum__menu-item" role="menuitem" href="#/objectives">Objectives and horizon</a>
+    <a class="sum__menu-item" role="menuitem" href="#/risk">Risk</a>
+    <a class="sum__menu-item" role="menuitem" href="#/constraints">Constraints</a>
+    <a class="sum__menu-item" role="menuitem" href="#/preferences">Preferences</a>
+    <a class="sum__menu-item" role="menuitem" href="#/coherence">Profile coherence</a>
+  </div>
+
+  <h1 class="t-h2 scr-factor__title">Risk</h1>
+  <a class="back" href="#/summary">
+    <img class="i16" src="assets/icon-back.svg" alt="" width="16" height="16"><span>Accounts summary</span>
+  </a>
+  <div class="card" data-factor-detail>
+    <p>Content loaded dynamically.</p>
+  </div>
+</div>
+  </section>
+
+  <section data-route="constraints" hidden>
+<div class="scr scr-factor wrap">
+  <div class="sum__menu" aria-label="Factor navigation">
+    <a class="sum__menu-item sum__menu-item--active" role="menuitem" href="#/summary">Summary</a>
+    <a class="sum__menu-item" role="menuitem" href="#/objectives">Objectives and horizon</a>
+    <a class="sum__menu-item" role="menuitem" href="#/risk">Risk</a>
+    <a class="sum__menu-item" role="menuitem" href="#/constraints">Constraints</a>
+    <a class="sum__menu-item" role="menuitem" href="#/preferences">Preferences</a>
+    <a class="sum__menu-item" role="menuitem" href="#/coherence">Profile coherence</a>
+  </div>
+
+  <h1 class="t-h2 scr-factor__title">Constraints</h1>
+  <a class="back" href="#/summary"><img class="i16" src="assets/icon-back.svg" alt="" width="16" height="16"><span>Accounts summary</span></a>
+  <div class="card" data-factor-detail>
+    <p>Content loaded dynamically.</p>
+  </div>
+</div>
+  </section>
+
+  <section data-route="preferences" hidden>
+<div class="scr scr-factor wrap">
+  <div class="sum__menu" aria-label="Factor navigation">
+    <a class="sum__menu-item sum__menu-item--active" role="menuitem" href="#/summary">Summary</a>
+    <a class="sum__menu-item" role="menuitem" href="#/objectives">Objectives and horizon</a>
+    <a class="sum__menu-item" role="menuitem" href="#/risk">Risk</a>
+    <a class="sum__menu-item" role="menuitem" href="#/constraints">Constraints</a>
+    <a class="sum__menu-item" role="menuitem" href="#/preferences">Preferences</a>
+    <a class="sum__menu-item" role="menuitem" href="#/coherence">Profile coherence</a>
+  </div>
+
+  <h1 class="t-h2 scr-factor__title">Preferences</h1>
+    <a class="back" href="#/summary"><img class="i16" src="assets/icon-back.svg" alt="" width="16" height="16"><span class="t-body-strong">Accounts summary</span></a>
+    <div class="card" data-factor-detail>
+      <p>Content loaded dynamically.</p>
+    </div>
+</div>
+  </section>
+
+  <section data-route="coherence" hidden>
+<div class="scr scr-factor wrap">
+  <div class="sum__menu" aria-label="Factor navigation">
+    <a class="sum__menu-item sum__menu-item--active" role="menuitem" href="#/summary">Summary</a>
+    <a class="sum__menu-item" role="menuitem" href="#/objectives">Objectives and horizon</a>
+    <a class="sum__menu-item" role="menuitem" href="#/risk">Risk</a>
+    <a class="sum__menu-item" role="menuitem" href="#/constraints">Constraints</a>
+    <a class="sum__menu-item" role="menuitem" href="#/preferences">Preferences</a>
+    <a class="sum__menu-item" role="menuitem" href="#/coherence">Profile coherence</a>
+  </div>
+
+  <h1 class="t-h2 scr-factor__title">Profile coherence</h1>
+  <a class="back" href="#/summary"><img class="i16" src="assets/icon-back.svg" alt="" width="16" height="16"><span>Accounts summary</span></a>
+  <div class="card" data-factor-detail>
+    <p>Content loaded dynamically.</p>
+  </div>
+</div>
+  </section>
+
+  <section data-route="conversation" hidden>
+<div class="scr scr-conv wrap">
+  <h1 class="t-h2 scr-conv__title">Your profile</h1>
+
+  <div class="conv" id="conv-root">
+    <div class="conv__msgs" id="conv-msgs">
+      <div class="bot-card">
+        <img class="bot-card__logo" src="assets/brand.png" alt="National Bank Direct Brokerage">
+        <p class="bot-card__greeting">Hi! Let's set up your profile.</p>
+      </div>
+    </div>
+    <form class="conv__form" id="conv-form">
+      <div class="conv__input-wrap">
+        <textarea class="conv__input" id="conv-input" rows="1" placeholder="Type your response" aria-label="Message"></textarea>
+        <button class="btn btn--primary conv__send" type="submit" disabled>Send</button>
+      </div>
+    </form>
+  </div>
+
+  <footer class="foot">
+    <div class="wrap foot__wrap">
+      <p class="foot__legal">This analysis is informational only and does not constitute investment advice, an offer, or a solicitation. Trading securities involves risk. Past performance does not guarantee future results. Consult a professional before making investment decisions.</p>
+    </div>
+  </footer>
+</div>
+  </section>
+
+  <section data-route="search" hidden>
+<div class="scr scr-search wrap">
+  <h1 class="t-h2 scr-search__title">Search</h1>
+
+  <div class="chat" id="chat-root">
+    <div class="chat__msgs" id="chat-msgs">
+      <div class="bot-msg">
+        <img class="bot-msg__av" src="assets/av-bot.png" alt="">
+        <div class="bot-msg__bubble">
+          <p>Hi! Ask me anything about an asset in your portfolio, or one you're thinking of adding.</p>
+        </div>
+      </div>
+    </div>
+    <form class="chat__form" id="chat-form">
+      <div class="chat__input-wrap">
+        <textarea class="chat__input" id="chat-input" rows="1" placeholder="Ask about an asset..." aria-label="Message"></textarea>
+        <button class="btn btn--primary chat__send" type="submit">Send</button>
+      </div>
+    </form>
+  </div>
+</div>
+  </section>
+
+  <section data-route="whatif" hidden>
+<div class="scr scr-wf wrap">
+  <a class="wf-back" href="#/search"><img class="wf-back__icon" src="assets/icon-back.svg" alt="" width="16" height="16"><span>Back to search results</span></a>
+
+  <div class="wf-noasset" id="wf-noasset" hidden>
+    <h1 class="t-h2 wf-noasset__title">Simulate a What-if</h1>
+    <a class="btn btn--primary" href="#/search">Go to search</a>
+  </div>
+
+  <div class="wf-main" id="wf-main" hidden>
+    <div class="wf-hdr">
+      <div class="wf-hdr__top">
+        <div class="wf-hdr__title-group">
+          <h1 class="t-h2 wf-hdr__title" id="wf-asset-name">Apple Inc.</h1>
+          <p class="wf-hdr__meta"><span class="t-body-strong" id="wf-asset-ticker">AAPL</span> · <span id="wf-asset-market">NASDAQ</span> · <span id="wf-asset-currency">USD</span></p>
+        </div>
+      </div>
+    </div>
+
+    <div class="wf-controls card">
+      <div class="wf-ctrl">
+        <label class="wf-ctrl__label" for="wf-target">Target position (% of portfolio)</label>
+        <div class="wf-ctrl__field">
+          <input class="wf-ctrl__input" type="number" id="wf-target" value="5" min="0" max="100" step="1">
+          <span class="wf-ctrl__unit">%</span>
+        </div>
+      </div>
+
+      <div class="wf-ctrl">
+        <label class="wf-ctrl__label" for="wf-funding">Fund the purchase from</label>
+        <select class="select wf-ctrl__select" id="wf-funding">
+          <option value="pro_rata">Pro rata from all positions</option>
+        </select>
+      </div>
+
+      <button class="btn btn--primary wf-compute" id="wf-compute" type="button">Calculate</button>
+    </div>
+
+    <div class="wf-loading" id="wf-loading" hidden>
+      <p>Computing scenario...</p>
+    </div>
+
+    <div class="wf-error card" id="wf-error" hidden>
+      <p class="wf-error__text"></p>
+    </div>
+
+    <div class="wf-results" id="wf-results" hidden>
+      <div class="wf-verdict card" id="wf-verdict">
+        <div class="wf-verdict__row">
+          <p class="wf-verdict__label">Verdict</p>
+          <span class="st" id="wf-verdict-badge"></span>
+        </div>
+        <div class="wf-verdict__row">
+          <p class="wf-verdict__label">Key changes</p>
+          <ul class="wf-verdict__list" id="wf-verdict-changes"></ul>
+        </div>
+      </div>
+
+      <div class="wf-sections" id="wf-sections"></div>
+
+      <div class="wf-charts card">
+        <h2 class="t-h3 wf-charts__title">Projection comparison</h2>
+        <div class="wf-charts__wrapper">
+          <canvas class="wf-chart" id="wf-chart-before" width="400" height="300"></canvas>
+          <canvas class="wf-chart" id="wf-chart-after" width="400" height="300"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <a class="btn btn--outline-blue wf-another" href="#/search">Ask about another asset</a>
+
+  <footer class="foot">
+    <div class="wrap foot__wrap">
+      <p class="foot__legal">This analysis is informational only and does not constitute investment advice, an offer, or a solicitation. Trading securities involves risk. Past performance does not guarantee future results. Consult a professional before making investment decisions.</p>
+    </div>
+  </footer>
+</div>
+  </section>
+</main>
+
+<script src="js/core/state.js"></script>
+<script src="js/core/data_source.js"></script>
+<script src="js/core/router.js"></script>
+<script src="js/core/intake_questions.js"></script>
+<script src="js/core/charts.js"></script>
+<script src="js/screens/summary.js"></script>
+<script src="js/screens/factor.js"></script>
+<script src="js/screens/conversation.js"></script>
+<script src="js/screens/search.js"></script>
+<script src="js/screens/whatif.js"></script>
+<script src="js/main.js"></script>
+</body>
+</html>
