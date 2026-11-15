@@ -19,7 +19,7 @@ FIELDS: tuple[str, ...] = (
 )
 METRICS: tuple[str, ...] = ("p50_T",)
 REQUIRED: tuple[str, ...] = tuple(_REQUIRED[ID])    # intake checklist (§20.6)
-NOT_COVERED: tuple[str, ...] = ("objective_vs_portfolio",)   # until O1 lands
+NOT_COVERED: tuple[str, ...] = ()   # objective_vs_portfolio is covered by O1 (hard.run_all)
 
 
 def facts(ctx) -> dict:

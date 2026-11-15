@@ -55,6 +55,8 @@ AFFECTED_LIMITS["preferences.asset_types_refused"] = {"excluded_asset_types": "H
 AFFECTED_CHECKS: dict[str, set[str]] = {p: set(v.values()) for p, v in AFFECTED_LIMITS.items()}
 AFFECTED_CHECKS["identity.employer_sector"] = {"H6"}
 AFFECTED_CHECKS["risk.reaction_to_20pct_drop"] = {"H14"}
+# P3.O1 (docs/spec-factors.md §20.2): O1 reads objectives.primary; a skipped objective gives an `unknown` O1 row.
+AFFECTED_CHECKS.setdefault("objectives.primary", set()).add("O1")
 
 # derived field -> skipped paths that make it impossible to compute (transitively)
 _EF = {"situation.emergency_fund", "situation.monthly_expenses"}
