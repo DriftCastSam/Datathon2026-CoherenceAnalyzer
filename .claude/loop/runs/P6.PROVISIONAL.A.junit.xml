@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="7" skipped="0" tests="24" time="1.296" timestamp="2026-11-15T05:47:43.642543+00:00" hostname="bomboclat-laptop"><testcase classname="tests.profile.test_provisional_limits" name="test_unapproved_numeric_theme_rule_is_promoted_as_a_provisional_limit" time="0.002"><failure message="KeyError: 'tech_heavy'">def test_unapproved_numeric_theme_rule_is_promoted_as_a_provisional_limit():
+        # D11.1: a gated, unapproved max_theme_weight rule with max_pct 30 is in limits at once, flagged provisional,
+        # percent -&gt; fraction once (0.30).
+        p = _ruled(_variant(approved=False, max_pct=30))
+&gt;       entry = _theme_limits(p)[THEME]
+                ^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'tech_heavy'
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-provisional/tests/profile/test_provisional_limits.py:129: KeyError</failure></testcase><testcase classname="tests.profile.test_provisional_limits" name="test_provisional_limit_trace_names_provisional_not_approved" time="0.002"><failure message="AssertionError: assert 'values.parsed_notes[provisional]' in ['values.parsed_notes[approved_by_user]']">def test_provisional_limit_trace_names_provisional_not_approved():
+        # D11.1: limits_trace.max_theme_weight names values.parsed_notes[provisional], distinct from [approved_by_user].
+        p = _ruled(_variant(approved=False, max_pct=30))
+        trace = p["limits_trace"]["max_theme_weight"]
+&gt;       assert PROVISIONAL_PATH in trace
+E       AssertionError: assert 'values.parsed_notes[provisional]' in ['values.parsed_notes[approved_by_user]']
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-provisional/tests/profile/test_provisional_limits.py:139: AssertionError</failure></testcase><testcase classname="tests.profile.test_provisional_limits" name="test_approved_numeric_theme_rule_is_full_strength_with_the_approved_trace" time="0.002" /><testcase classname="tests.profile.test_provisional_limits" name="test_amiras_committed_approved_rule_is_unchanged" time="0.001" /><testcase classname="tests.profile.test_provisional_limits" name="test_theme_rule_without_a_real_number_promotes_nothing[no_number-False]" time="0.001" /><testcase classname="tests.profile.test_provisional_limits" name="test_theme_rule_without_a_real_number_promotes_nothing[no_number-True]" time="0.001" /><testcase classname="tests.profile.test_provisional_limits" name="test_theme_rule_without_a_real_number_promotes_nothing[string-False]" time="0.001" /><testcase classname="tests.profile.test_provisional_limits" name="test_theme_rule_without_a_real_number_promotes_nothing[string-True]" time="0.001" /><testcase classname="tests.profile.test_provisional_limits" name="test_theme_rule_without_a_real_number_promotes_nothing[bool-False]" time="0.001" /><testcase classname="tests.profile.test_provisional_limits" name="test_theme_rule_without_a_real_number_promotes_nothing[bool-True]" time="0.001" /><testcase classname="tests.profile.test_provisional_limits" name="test_unapproved_exclude_activity_rule_is_not_promoted" time="0.001" /><testcase classname="tests.profile.test_provisional_limits" name="test_provisional_rule_changes_no_other_limit_and_no_other_trace" time="0.001" /><testcase classname="tests.profile.test_provisional_limits" name="test_no_other_llm_field_feeds_limits_with_a_provisional_rule" time="0.001" /><testcase classname="tests.profile.test_provisional_limits" name="test_h13_breach_of_a_provisional_limit_is_a_warning_never_a_violation" time="0.007"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">def test_h13_breach_of_a_provisional_limit_is_a_warning_never_a_violation():
+        # D11.2 + inv. 3: tech_heavy weighs 0.38 &gt; provisional 0.30 -&gt; `warning`, never `violation`.
+        checks = _h13(_ruled(_variant(approved=False, max_pct=30)))
+        assert all(x["status"] != "violation" for x in checks)
+&gt;       (c,) = _tech_checks(checks)
+        ^^^^
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-provisional/tests/profile/test_provisional_limits.py:213: ValueError</failure></testcase><testcase classname="tests.profile.test_provisional_limits" name="test_h13_within_a_provisional_limit_passes" time="0.005"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">def test_h13_within_a_provisional_limit_passes():
+        # D11.2: the cap only lowers a breach to warning; below the limit it is a pass (0.38 &lt;= 0.50).
+&gt;       (c,) = _tech_checks(_h13(_ruled(_variant(approved=False, max_pct=50))))
+        ^^^^
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-provisional/tests/profile/test_provisional_limits.py:221: ValueError</failure></testcase><testcase classname="tests.profile.test_provisional_limits" name="test_h13_provisional_check_says_it_comes_from_the_users_notes" time="0.006"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">def test_h13_provisional_check_says_it_comes_from_the_users_notes():
+        # D11.2 / task notes: the check carries the provisional trace path and the user's quote (subject or derived_from).
+        # SPEC-AMBIGUITY: "quote in subject / derived_from" -&gt; accept the quote in either field; the provisional path is required.
+&gt;       (c,) = _tech_checks(_h13(_ruled(_variant(approved=False, max_pct=30))))
+        ^^^^
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-provisional/tests/profile/test_provisional_limits.py:229: ValueError</failure></testcase><testcase classname="tests.profile.test_provisional_limits" name="test_h13_same_breach_is_a_violation_once_the_rule_is_approved" time="0.006" /><testcase classname="tests.profile.test_provisional_limits" name="test_h13_on_amiras_committed_profile_is_unchanged" time="0.005" /><testcase classname="tests.profile.test_provisional_limits" name="test_s4_still_reminds_about_the_unapproved_rule_that_is_now_provisional" time="0.001" /><testcase classname="tests.profile.test_provisional_limits" name="test_review_with_a_provisional_breach_has_a_warning_and_no_h13_violation" time="0.606"><failure message="AssertionError: assert [] == ['warning']&#10;  &#10;  Right contains one more item: 'warning'&#10;  Use -v to get more diff">amira_copy = PosixPath('/tmp/pytest-of-safraa/pytest-595/test_review_with_a_provisional0/amira')
+tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-595/test_review_with_a_provisional0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7527a096dad0&gt;
+
+    def test_review_with_a_provisional_breach_has_a_warning_and_no_h13_violation(amira_copy, tmp_path, monkeypatch):
+        # Inv. 3 + §7.5: the provisional breach is a `warning` in the report; it alone never makes the verdict `incoherent`.
+        monkeypatch.chdir(tmp_path)
+        monkeypatch.setenv("COHERENCE_ANALYZER_STORE_DIR", str(tmp_path))
+        rep = pipeline.review(amira_copy)
+        h13 = _tech_checks(rep["checks_current"])
+&gt;       assert [c["status"] for c in h13] == ["warning"]
+E       AssertionError: assert [] == ['warning']
+E         
+E         Right contains one more item: 'warning'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-provisional/tests/profile/test_provisional_limits.py:283: AssertionError</failure></testcase><testcase classname="tests.profile.test_provisional_limits" name="test_flow_a_refresh_stores_the_provisional_limit_and_trace" time="0.017"><failure message="KeyError: 'max_theme_weight'">client = &lt;starlette.testclient.TestClient object at 0x7527a075b770&gt;
+tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-595/test_flow_a_refresh_stores_the0')
+
+    def test_flow_a_refresh_stores_the_provisional_limit_and_trace(client, tmp_path):
+        # D11.1 through the API: the refresh promotes the unapproved numeric rule; GET shows it flagged, with the trace.
+        p = _seed_unapproved(client, tmp_path)
+&gt;       entry = p["limits"]["max_theme_weight"][THEME]
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'max_theme_weight'
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-provisional/tests/profile/test_provisional_limits.py:334: KeyError</failure></testcase><testcase classname="tests.profile.test_provisional_limits" name="test_approving_the_provisional_rule_makes_it_full_strength" time="0.027" /><testcase classname="tests.profile.test_provisional_limits" name="test_rejecting_the_provisional_rule_removes_the_limit_and_it_stays_removed" time="0.039" /><testcase classname="tests.profile.test_provisional_limits" name="test_amiras_approved_rule_through_the_api_stays_a_plain_full_strength_limit" time="0.013" /></testsuite></testsuites>

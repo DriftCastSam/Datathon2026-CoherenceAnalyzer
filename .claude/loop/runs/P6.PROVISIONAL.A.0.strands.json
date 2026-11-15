@@ -1,0 +1,63 @@
+{
+  "duration_s": 225.8,
+  "guard_cancellations": [
+    {
+      "reason": "'provisional\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'provisional\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'H13' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'H13' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'max_theme\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'^class' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'^' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'amira\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'p[limits]=lim' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'chdir\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'hash\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "command substitution is not allowed; run the inner command on its own",
+      "tool": "shell"
+    }
+  ],
+  "is_error": false,
+  "model_id": "us.anthropic.claude-sonnet-5-5",
+  "num_turns": 51,
+  "result": " a provisional entry is a dict with `provisional: True` and one numeric field. D11 doesn't give that field's name, so the tests accept any single numeric key.\n\nTwo failing tests use an Amira copy with the tech rule unapproved and `max_pct` 30. Her committed portfolio holds 0.38 in `tech_heavy`, so 30 % is breached and 50 % is not.\n\nTests, one line each:\n- `test_unapproved_numeric_theme_rule_is_promoted_as_a_provisional_limit`: an unapproved rule with `max_pct` 30 becomes `limits.max_theme_weight[\"tech_heavy\"]` with `provisional: True` and fraction 0.30 (D11.1).\n- `test_provisional_limit_trace_names_provisional_not_approved`: the trace holds `values.parsed_notes[provisional]` and not `[approved_by_user]` (D11.1).\n- `test_approved_numeric_theme_rule_is_full_strength_with_the_approved_trace`: once approved, the limit is a plain fraction with no `provisional` key and the `[approved_by_user]` trace (D11.3).\n- `test_amiras_committed_approved_rule_is_unchanged`: Amira's committed limits and trace stay `{tech_heavy: 0.5}` / `[approved_by_user]` (D11, Amira's fixture).\n- `test_theme_rule_without_a_real_number_promotes_nothing` (6 cases): a theme rule with no number, a string or a bool, approved or not, promotes nothing and adds no provisional trace (D11.4).\n- `test_unapproved_exclude_activity_rule_is_not_promoted`: an unapproved `exclude_activity` rule does not reach `excluded_activities` (D11.4).\n- `test_provisional_rule_changes_no_other_limit_and_no_other_trace`: only `max_theme_weight` and its trace differ between the provisional and approved readings (D11.1, invariant 2).\n- `test_no_other_llm_field_feeds_limits_with_a_provisional_rule`: no `risk.behavioural`, `knowledge.*` or bare `values.parsed_notes` path in any trace, and the provisional path appears only under `max_theme_weight` (invariant 1 as amended).\n- `test_h13_breach_of_a_provisional_limit_is_a_warning_never_a_violation`: 0.38 against a provisional 0.30 gives `warning` and no H13 `violation` (D11.2, invariant 3).\n- `test_h13_within_a_provisional_limit_passes`: 0.38 against a provisional 0.50 is a `pass` (D11.2).\n- `test_h13_provisional_check_says_it_comes_from_the_users_notes`: the check's `derived_from` has the provisional path and not the approved one, and the user's quote is in `subject` or `derived_from` (D11.2).\n- `test_h13_same_breach_is_a_violation_once_the_rule_is_approved`: the same 0.38 against an approved 0.30 is a `violation`, with the approved trace and `subject` equal to the bare theme (D11.3).\n- `test_h13_on_amiras_committed_profile_is_unchanged`: Amira's committed H13 stays `pass` at 0.38 vs 0.5, with `derived_from` `[\"limits.max_theme_weight\", \"values.parsed_notes[approved_by_user]\"]` (D11).\n- `test_s4_still_reminds_about_the_unapproved_rule_that_is_now_provisional`: S4 still gives an info reminder with the quote while the rule is unapproved, and not once it is approved (D11.4).\n- `test_review_with_a_provisional_breach_has_a_warning_and_no_h13_violation`: `pipeline.review` on a tmp Amira copy gives an H13 `warning` citing the provisional path and the quote, a verdict consistent with that warning, and an S4 reminder (invariant 3, \u00a77.5).\n- `test_flow_a_refresh_stores_the_provisional_limit_and_trace`: after a refresh through the API, GET shows the flagged provisional limit and its trace, and the rule is still unapproved (D11.1).\n- `test_approving_the_provisional_rule_makes_it_full_strength`: the existing decision route makes the limit a plain 0.30 with the approved trace; the response equals GET and the version goes up by one (D11.3).\n- `test_rejecting_the_provisional_rule_removes_the_limit_and_it_stays_removed`: rejecting removes `max_theme_weight` from the response, from GET and after a later refresh. D11 doesn't say how a rejection is marked, so only limits and trace are asserted (D11.3).\n- `test_amiras_approved_rule_through_the_api_stays_a_plain_full_strength_limit`: a refreshed Amira profile still has `{tech_heavy: 0.5}` and no provisional trace (D11).\n",
+  "stop_reason": "end_turn",
+  "usage": {
+    "inputTokens": 1968759,
+    "outputTokens": 29738,
+    "totalTokens": 1998497
+  }
+}

@@ -47,6 +47,7 @@
     "tests/profile/test_levels.py": "641adec31b05635f2f1b6363963aa2c07069b3813d2eca1807422a10b3363697",
     "tests/profile/test_limits_no_llm_inputs.py": "dbc9de038f9aef78f560bb432494475e0b6c6313e670498af07fd4c10aa90453",
     "tests/profile/test_profile_schema.py": "1e295cd7636b43186e40e4bd3e4bd3d824be8c09dc0d1946850e5d0d799cc790",
+    "tests/profile/test_provisional_limits.py": "0f947b1cd81e8d1ba03e32e02a0d33f343407119d3915ce75bcce2b09c0107a2",
     "tests/profile/test_rules.py": "5f16153a954d571c2a42594add9e8a157315f07c751d85aefccd203e2321f2b8",
     "tests/profile/test_skipped_fields.py": "4f83661a58227655316fee4bba535497d54248861ba5579d9be59581fbff9fc9",
     "tests/test_d10.py": "e85d554694d07701baa72dd1d81a3496834098ba9bcc7c7535bf2da7c5689cd1",
