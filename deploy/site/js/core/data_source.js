@@ -268,8 +268,6 @@
     personas,
     report,
     rerun,
-    /* The prebuilt report for a persona, whatever the mode (the what-if base profile). */
-    prebuiltReport: staticReport,
     intake,
     answer,
     skip,

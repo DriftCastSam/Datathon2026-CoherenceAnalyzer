@@ -109,7 +109,7 @@
     if (!tabs) return null;
     return Array.prototype.find.call(tabs.querySelectorAll("a.tab"), tab => {
       const label = tab.querySelector(".tab__label");
-      return label !== null && label.textContent.trim() === "Analysis";
+      return label !== null && label.textContent.trim() === App.ANALYSIS_TAB_LABEL;
     }) || null;
   }
 
@@ -132,7 +132,7 @@
       const target = event.target instanceof Element ? event.target.closest("a.tab") : null;
       if (!target || App.route !== "summary") return;
       const label = target.querySelector(".tab__label");
-      if (!label || label.textContent.trim() !== "Analysis") return;
+      if (!label || label.textContent.trim() !== App.ANALYSIS_TAB_LABEL) return;
       event.preventDefault();
       const screen = summaryScreen();
       if (screen) setMenuState(!screen.classList.contains("is-open"));

@@ -1,22 +1,14 @@
 (function () {
   "use strict";
 
-  App.navSpec.whatif = {
-    chrome: "full",
-    tabs: [
-      {label: "Accounts", href: "#", active: false},
-      {label: "Analysis", href: "#/summary", active: true},
-      {label: "Markets", href: "#", active: false},
-      {label: "Activities", href: "#", active: false},
-      {label: "Documents", href: "#", active: false},
-      {label: "Research", href: "#", active: false}
-    ]
-  };
+  App.navSpec.whatif = App.navTabs();
 
   const view = App.whatifView;
   const {num} = App.format;
   const ASSETS_PARAM = "assets";
   const TICKER_SEPARATOR = ",";
+  const LOADING_TITLE = "Loading scenarios…";
+  const LOADING_TEXT = "Computing what-if scenarios from the current profile.";
   const EMPTY_NONE = {
     title: "No assets selected",
     text: "Choose one or more assets in the search results to see how the portfolio changes with each of them."
@@ -41,6 +33,7 @@
   /* Live what-if loading: guard against stale results and avoid refetching unchanged selections. */
   let loadSeq = 0;
   let loadedKey = null;
+  let inFlightKey = null;
   let liveLoadSuccess = false;
   let loading = false;
 
@@ -71,31 +64,41 @@
   function loadLiveWhatif(personaId, tickers, section) {
     loadSeq += 1;
     const token = loadSeq;
+    const requestKey = cacheKey(personaId, tickers, App.state.report);
     loading = true;
+    inFlightKey = requestKey;
     liveLoadSuccess = false;
     App.source.whatifLive(personaId, tickers).then(data => {
-      if (token !== loadSeq) return;
+      if (token !== loadSeq || App.state.persona !== personaId) return;
       App.state.universe = data.universe;
       App.state.whatif = data.whatif;
+      App.data.universe = data.universe;
+      App.data.whatif = data.whatif;
       liveLoadSuccess = true;
       loading = false;
-      loadedKey = cacheKey(personaId, tickers, App.state.report);
+      loadedKey = requestKey;
+      inFlightKey = null;
       if (App.state.persona === personaId) App.renderers.whatif(section);
     }).catch(error => {
-      if (token !== loadSeq) return;
+      if (token !== loadSeq || App.state.persona !== personaId) return;
       console.error("[whatif] live what-if failed, using static files", error);
-      loading = false;
       liveLoadSuccess = false;
       Promise.all([App.source.universe(personaId), App.source.whatif(personaId)]).then(([universe, whatif]) => {
-        if (token !== loadSeq) return;
+        if (token !== loadSeq || App.state.persona !== personaId) return;
         App.state.universe = universe;
         App.state.whatif = whatif;
-        loadedKey = cacheKey(personaId, tickers, App.state.report);
+        App.data.universe = universe;
+        App.data.whatif = whatif;
+        loading = false;
+        loadedKey = requestKey;
+        inFlightKey = null;
         if (App.state.persona === personaId) App.renderers.whatif(section);
       }).catch(fallbackError => {
-        if (token !== loadSeq) return;
+        if (token !== loadSeq || App.state.persona !== personaId) return;
         console.error("[whatif] fallback to static files also failed", fallbackError);
         loading = false;
+        inFlightKey = null;
+        if (App.state.persona === personaId) App.renderers.whatif(section);
       });
     });
   }
@@ -253,13 +256,13 @@
     const tickers = requestedTickers();
     if (App.source.mode === MODE_LIVE && tickers.length > 0) {
       const currentKey = cacheKey(personaId, tickers, App.state.report);
-      if (currentKey !== loadedKey && !loading) {
+      if (currentKey !== loadedKey && currentKey !== inFlightKey) {
         loadLiveWhatif(personaId, tickers, section);
       }
     }
 
     if (loading) {
-      paintEmpty(mount, {title: "Loading scenarios…", text: "Computing what-if scenarios from the current profile."});
+      paintEmpty(mount, {title: LOADING_TITLE, text: LOADING_TEXT});
       return;
     }
 

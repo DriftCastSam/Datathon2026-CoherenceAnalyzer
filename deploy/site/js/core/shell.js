@@ -7,6 +7,7 @@
   const SAMPLE_PHRASE = "illustrative sample data";
   const REAL_PHRASE = "fictional persona data";
   const NAV_TABS = ["Accounts", "Analysis", "Markets", "Activities", "Documents", "Research"];
+  const ANALYSIS_TAB_LABEL = "Analysis";
   const ESCAPES = {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"};
   const STATUS_LABEL = {pass: "Aligned", warning: "Warning", violation: "Misaligned", info: "Info", unknown: "Unknown"};
   const STATUS_ICON = {pass: "icon-check", warning: "icon-warn", violation: "icon-x", info: "icon-info", unknown: "icon-info"};
@@ -450,7 +451,9 @@
     setSelection,
     rerunAnalysis,
     setNav,
-    reload: loadData
+    reload: loadData,
+    ANALYSIS_TAB_LABEL,
+    navTabs: defaultNavSpec
   };
 
   /* ---------- start ---------- */

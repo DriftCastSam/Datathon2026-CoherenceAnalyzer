@@ -425,15 +425,5 @@
   };
 
   /* The design (node 8:552) keeps the standard chrome, with Analysis active. */
-  App.navSpec.search = {
-    chrome: "full",
-    tabs: [
-      {label: "Accounts", href: "#", active: false},
-      {label: "Analysis", href: "#/summary", active: true},
-      {label: "Markets", href: "#", active: false},
-      {label: "Activities", href: "#", active: false},
-      {label: "Documents", href: "#", active: false},
-      {label: "Research", href: "#", active: false}
-    ]
-  };
+  App.navSpec.search = App.navTabs();
 })();
