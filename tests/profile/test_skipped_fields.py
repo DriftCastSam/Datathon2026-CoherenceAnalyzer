@@ -41,7 +41,8 @@ REQUIRED_PATHS = [p for factor in intake.FACTORS for p in intake.REQUIRED[factor
 # ---------------------------------------------------------------- what each skipped path touches (SPEC §7.1-§7.3)
 # Inputs of risk.effective (and so of every LIMITS_TABLE limit): horizon, withdrawals, emergency fund, expenses, declared.
 TABLE_PATHS = {"objectives.horizon_years", "situation.planned_withdrawals", "situation.emergency_fund",
-               "situation.monthly_expenses", "risk.declared"}
+               "situation.monthly_expenses", "risk.declared",
+               "identity.employment_type"}   # P5.INTAKEFULL: employment_type -> income_stability -> risk.capacity
 TABLE_LIMITS = {"vol_band_annual": "H7", "floor_at_horizon": "H9", "max_drawdown_pct": "H8",
                 "min_fixed_income_weight": "H4", "max_single_stock_weight": "H3", "max_sector_risk_share": "H10",
                 "max_crypto_weight": "H2", "max_foreign_currency_weight": "H5", "excluded_asset_types": "H1"}
@@ -61,10 +62,11 @@ AFFECTED_CHECKS.setdefault("objectives.primary", set()).add("O1")
 # derived field -> skipped paths that make it impossible to compute (transitively)
 _EF = {"situation.emergency_fund", "situation.monthly_expenses"}
 _EH = {"objectives.horizon_years", "situation.planned_withdrawals"}
-_CAP = _EH | _EF
+_CAP = _EH | _EF | {"identity.employment_type"}       # P5.INTAKEFULL: income_stability is a capacity input
 DERIVED_DEPENDS: dict[str, set[str]] = {
-    "identity.life_stage": {"identity.retirement_target_age"},
-    "situation.income_stability": set(),
+    "identity.life_stage": {"identity.retirement_target_age", "identity.age"},       # P5.INTAKEFULL
+    "situation.income_stability": {"identity.employment_type"},                      # P5.INTAKEFULL
+    "knowledge.score": {"knowledge.declared_level"},                                 # P5.INTAKEFULL: null, never a default
     "situation.emergency_fund_months": _EF,
     "objectives.effective_horizon_years": _EH,
     "risk.capacity": _CAP,
@@ -161,7 +163,8 @@ def baseline_checks(baseline, metrics, assets, meta) -> list:
 
 def test_the_checklist_has_the_15_required_paths_and_every_path_is_covered_by_the_tables_below():
     """§20.6: REQUIRED = 2 + 3 + 3 + 4 + 3 = 15 paths; this file parametrizes over all of them."""
-    assert len(REQUIRED_PATHS) == 15 and len(set(REQUIRED_PATHS)) == 15
+    # P5.INTAKEFULL (owner request 2026-11-14, any user): + identity.age, identity.employment_type, knowledge.declared_level
+    assert len(REQUIRED_PATHS) == 18 and len(set(REQUIRED_PATHS)) == 18
     assert set(AFFECTED_CHECKS) <= set(REQUIRED_PATHS)
 
 

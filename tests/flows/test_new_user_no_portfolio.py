@@ -80,6 +80,10 @@ ANSWERS: dict[str, object] = {
     "preferences.prefers_dividends": True,
     "preferences.prefers_large_caps": False,
     "preferences.home_bias_ok": True,
+    # P5.INTAKEFULL (owner request 2026-11-14, any user): rule inputs the intake now asks.
+    "identity.age": 55,
+    "identity.employment_type": "salaried",
+    "knowledge.declared_level": "intermediate",
 }
 PF = {"as_of": "2026-11-12", "value_cad": 120000, "weights_pct": {"XIU.TO": 30, "XBB.TO": 30, "SPY": 25, "GLD": 15}}
 

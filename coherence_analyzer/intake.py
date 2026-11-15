@@ -20,16 +20,39 @@ PARSED_RULES_PATH = "values.parsed_notes.value"
 THEME_NUMBER_KEY = "max_pct"
 
 # Intake checklist per factor (§20.6). P0.9 wires it into the factor modules (`REQUIRED` of §20.3).
+# P5.INTAKEFULL: every user-declared input read by `rules/registry.REGISTRY` and `rules/limits.LIMIT_INPUTS` is asked
+# here, except the OPTIONAL ones below. `identity.age` feeds `identity.life_stage` (objectif);
+# `identity.employment_type` feeds `situation.income_stability`, hence `risk.capacity` / `risk.effective` and every
+# table limit (contraintes); `knowledge.declared_level` feeds `knowledge.score` (contraintes). `knowledge.quiz_score`
+# (quiz events) and `knowledge.question_quality` (N2) are event-fed, not questions.
 REQUIRED: dict[str, tuple[str, ...]] = {
-    "objectif": ("objectives.primary", "objectives.goals"),
+    "objectif": ("objectives.primary", "objectives.goals", "identity.age"),
     "horizon": ("objectives.horizon_years", "identity.retirement_target_age", "situation.planned_withdrawals"),
     "risque": ("risk.declared", "risk.max_acceptable_drawdown_pct", "risk.reaction_to_20pct_drop"),
     "contraintes": ("situation.emergency_fund", "situation.monthly_expenses", "identity.employer_sector",
-                    "preferences.asset_types_refused"),
+                    "identity.employment_type", "knowledge.declared_level", "preferences.asset_types_refused"),
     "preferences": ("preferences.prefers_dividends", "preferences.prefers_large_caps", "preferences.home_bias_ok"),
 }
 
+# Declared inputs the rules and limits read that are NOT asked. Absent means "no constraint": `limits` only gains
+# `max_fee_mer_pct` when it is declared, and an absent exclusions list excludes nothing.
+OPTIONAL: dict[str, str] = {
+    "preferences.max_fee_mer_pct": "absent = no fee cap (a cap of 0 would mean no product allowed)",
+    "values.environment.exclusions": "absent = no environmental exclusion",
+    "values.social.exclusions": "absent = no social exclusion",
+    "values.governance.exclusions": "absent = no governance exclusion",
+}
+
 QUESTIONS: dict[str, dict[str, str]] = {
+    "identity.age": {
+        "fr-CA": "Quel est votre âge, en années?",
+        "en-CA": "How old are you, in years?"},
+    "identity.employment_type": {
+        "fr-CA": "Quel est votre type d'emploi: salarié, travailleur autonome, contractuel, à commission, sans emploi ou retraité?",
+        "en-CA": "What is your type of employment: salaried, self-employed, contract, commission, unemployed or retired?"},
+    "knowledge.declared_level": {
+        "fr-CA": "Comment décririez-vous votre niveau de connaissance des placements: débutant, intermédiaire ou avancé?",
+        "en-CA": "How would you describe your knowledge of investing: beginner, intermediate or advanced?"},
     "objectives.primary": {
         "fr-CA": "Quel est votre objectif principal avec ce portefeuille (par exemple préserver le capital, "
                  "générer un revenu ou faire croître le capital)?",
