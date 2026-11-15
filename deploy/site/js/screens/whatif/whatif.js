@@ -4,7 +4,8 @@
   App.navSpec.whatif = {
     chrome: "full",
     tabs: [
-      {label: "Accounts", href: "#/summary", active: true},
+      {label: "Accounts", href: "#", active: false},
+      {label: "Analysis", href: "#/summary", active: true},
       {label: "Markets", href: "#", active: false},
       {label: "Activities", href: "#", active: false},
       {label: "Documents", href: "#", active: false},
@@ -37,6 +38,12 @@
   /* Choices persist while the screen re-renders; a persona change starts them over. */
   const choice = {persona: null, ticker: null, target: null, funding: null};
 
+  /* Live what-if loading: guard against stale results and avoid refetching unchanged selections. */
+  let loadSeq = 0;
+  let loadedKey = null;
+  let liveLoadSuccess = false;
+  let loading = false;
+
   function requestedTickers() {
     const raw = App.routeParams().get(ASSETS_PARAM);
     const fromRoute = raw ? raw.split(TICKER_SEPARATOR).filter(Boolean) : [];
@@ -56,34 +63,52 @@
     return {context: {base: universe.base, whatif, tickers}};
   }
 
-  /* Scenarios come from the persona's prebuilt profile; live mode shows that profile's report
-     once it has loaded (personaId -> report | null while loading or failed). */
-  const baseReports = new Map();
-
-  function loadBaseReport(personaId, section) {
-    if (baseReports.has(personaId)) return;
-    baseReports.set(personaId, null);
-    App.source.prebuiltReport(personaId).then(report => {
-      baseReports.set(personaId, report);
-      if (App.state.persona === personaId) App.renderers.whatif(section);
-    }).catch(error => console.error("[whatif] base profile unavailable for " + personaId, error));
+  function cacheKey(personaId, tickers, report) {
+    const reportId = report ? report.run_id || "" : "";
+    return personaId + "|" + tickers.slice().sort().join(",") + "|" + reportId;
   }
 
-  /* The floor line belongs to the profile the scenarios were computed from: the prebuilt report
-     in live mode (once loaded), the current report in prebuilt mode. */
+  function loadLiveWhatif(personaId, tickers, section) {
+    loadSeq += 1;
+    const token = loadSeq;
+    loading = true;
+    liveLoadSuccess = false;
+    App.source.whatifLive(personaId, tickers).then(data => {
+      if (token !== loadSeq) return;
+      App.state.universe = data.universe;
+      App.state.whatif = data.whatif;
+      liveLoadSuccess = true;
+      loading = false;
+      loadedKey = cacheKey(personaId, tickers, App.state.report);
+      if (App.state.persona === personaId) App.renderers.whatif(section);
+    }).catch(error => {
+      if (token !== loadSeq) return;
+      console.error("[whatif] live what-if failed, using static files", error);
+      loading = false;
+      liveLoadSuccess = false;
+      Promise.all([App.source.universe(personaId), App.source.whatif(personaId)]).then(([universe, whatif]) => {
+        if (token !== loadSeq) return;
+        App.state.universe = universe;
+        App.state.whatif = whatif;
+        loadedKey = cacheKey(personaId, tickers, App.state.report);
+        if (App.state.persona === personaId) App.renderers.whatif(section);
+      }).catch(fallbackError => {
+        if (token !== loadSeq) return;
+        console.error("[whatif] fallback to static files also failed", fallbackError);
+        loading = false;
+      });
+    });
+  }
+
   function scenarioFloor() {
-    const source = App.source.mode === MODE_LIVE ? baseReports.get(App.state.persona) : App.state.report;
-    const limits = source && source.site ? source.site.limits : null;
+    const limits = App.state.report && App.state.report.site ? App.state.report.site.limits : null;
     return limits ? num(limits.floor_at_horizon, undefined) : undefined;
   }
 
-  function profileDisplay(section) {
+  function profileDisplay() {
     const live = view.profileLine(App.state.report);
-    if (App.source.mode !== MODE_LIVE) return {line: live, note: false};
-    loadBaseReport(App.state.persona, section);
-    const baseReport = baseReports.get(App.state.persona);
-    const baseLine = baseReport ? view.profileLine(baseReport) : "";
-    return baseLine && baseLine !== live ? {line: baseLine, note: true} : {line: live, note: false};
+    const note = App.source.mode !== MODE_LIVE || !liveLoadSuccess;
+    return {line: live, note};
   }
 
   function syncChoice(context) {
@@ -192,7 +217,7 @@
       fundings.map(item => ({value: item.id, label: item.label})), choice.funding);
     text(mount, "meta", (tickers.indexOf(choice.ticker) + 1) + " of " + tickers.length
       + (tickers.length === 1 ? " selected asset" : " selected assets"));
-    const profile = profileDisplay(section);
+    const profile = profileDisplay();
     text(mount, "profile", profile.line);
     text(mount, "profile-note", profile.note ? BASE_PROFILE_NOTE : "");
     show(mount, "profile-note", profile.note);
@@ -223,6 +248,21 @@
   function renderWhatIf(section) {
     const mount = section.querySelector(".scr");
     if (!mount) return;
+
+    const personaId = App.state.persona;
+    const tickers = requestedTickers();
+    if (App.source.mode === MODE_LIVE && tickers.length > 0) {
+      const currentKey = cacheKey(personaId, tickers, App.state.report);
+      if (currentKey !== loadedKey && !loading) {
+        loadLiveWhatif(personaId, tickers, section);
+      }
+    }
+
+    if (loading) {
+      paintEmpty(mount, {title: "Loading scenarios…", text: "Computing what-if scenarios from the current profile."});
+      return;
+    }
+
     const resolved = resolve();
     if (resolved.empty) {
       paintEmpty(mount, resolved.empty);

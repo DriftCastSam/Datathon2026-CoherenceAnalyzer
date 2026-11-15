@@ -161,6 +161,11 @@
     return personaFile("whatif", personaId);
   }
 
+  function whatifLive(personaId, tickers) {
+    return requireLive("compute live what-if scenarios")
+      || post(SITE_API_DIR + "profiles/" + encodeURIComponent(personaId) + "/whatif", {tickers});
+  }
+
   /* ---------- personas ---------- */
 
   async function personas() {
@@ -270,6 +275,7 @@
     skip,
     universe,
     whatif,
+    whatifLive,
     /* True when this report is the prebuilt stand-in for a failed live analysis. */
     isFallback,
     staticIndex: () => staticIndex
