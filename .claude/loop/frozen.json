@@ -10,6 +10,7 @@
     "tests/dashboard/test_d10_dashboard.py": "2983f901903a9bb9896ddced35e12aab06670752ddc5c14ea6a42622f621cfda",
     "tests/dashboard/test_d10_site.py": "13410842fa8ea0a567faead6065d58b0aaeb9f438ae9df95f7370b1ed00d3f75",
     "tests/dashboard/test_site.py": "969830a9af98efcbaca9e5ac0c4b1efee8afa7d1ca7a18b187865b6dc8f98366",
+    "tests/dashboard/test_ui_flow_b.py": "5a9b0ade32a15335b0b8a7b3e9ada8271eb4f03b6dae633932845926fee70147",
     "tests/engine/test_goals.py": "daed630b8fc0f527b73e5813116fb6c131d6ba0af9a7526b6c5d7695b922dd8e",
     "tests/engine/test_lookthrough.py": "035eebeb4b72b3718e1487f442c4276ca8e1b5de1c4cd7e87019d47c99380fc1",
     "tests/engine/test_stress.py": "fbf2d6e7e38b83050fef334cad7d5641a0e3badf477143ad7086659185a7d318",
