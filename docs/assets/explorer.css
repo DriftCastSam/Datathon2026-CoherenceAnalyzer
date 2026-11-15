@@ -1,0 +1,99 @@
+/* Explorer: one big flowchart, every box expandable (details/summary). */
+main.explorer{max-width:1500px;margin:0 auto}
+#toolbar{position:sticky;top:0;z-index:5;display:flex;gap:8px;align-items:center;flex-wrap:wrap;
+  background:var(--bg);padding:10px 0;margin-bottom:6px;border-bottom:1px solid var(--line)}
+#toolbar input{flex:1;min-width:220px;max-width:420px;background:var(--card);border:1px solid var(--line);border-radius:8px;
+  color:var(--fg);padding:7px 11px;font:14px system-ui,sans-serif}
+#toolbar input:focus{outline:none;border-color:var(--accent)}
+.xbtn,#toolbar button{background:var(--card);border:1px solid var(--line);color:var(--fg);border-radius:8px;
+  padding:6px 12px;font:13px system-ui,sans-serif;cursor:pointer}
+.xbtn:hover,#toolbar button:hover{border-color:var(--accent)}
+#toolbar button.on{background:#1f2a3d;border-color:var(--accent)}
+#toolbar .sep{width:1px;height:24px;background:var(--line);margin:0 4px}
+
+/* ---- flowchart primitives */
+.flow{display:flex;flex-direction:column;align-items:center;width:100%}
+.arr{position:relative;width:2px;height:30px;background:#56607a;flex:none}
+.arr::after{content:"";position:absolute;left:-5px;bottom:-1px;border:6px solid transparent;border-top:7px solid #56607a;border-bottom:0}
+.arr[data-l]::before{content:attr(data-l);position:absolute;left:10px;top:5px;white-space:nowrap;font-size:11.5px;color:var(--mute)}
+.arr.short{height:18px}
+
+/* fork / join: lanes side by side, bars drawn by each lane so they always connect */
+.fork{display:flex;align-items:stretch;justify-content:center;width:100%;max-width:100%}
+.lane{position:relative;flex:1 1 0;min-width:150px;padding:20px 8px;display:flex;flex-direction:column;align-items:center}
+.lane::before,.lane::after{content:"";position:absolute;left:0;right:0;border-top:2px solid #56607a}
+.lane::before{top:0} .lane::after{bottom:0}
+.lane:first-child::before,.lane:first-child::after{left:50%}
+.lane:last-child::before,.lane:last-child::after{right:50%}
+.lane:only-child::before,.lane:only-child::after{display:none}
+.lane>.stub{position:absolute;left:calc(50% - 1px);width:2px;height:20px;background:#56607a}
+.lane>.stub.top{top:0} .lane>.stub.bot{bottom:0}
+.lane>.flow{flex:1;justify-content:flex-start}
+.lane>.flow>.grow{flex:1;width:2px;background:#56607a;min-height:0}
+.lane:has(details.node[open]){flex-grow:3}
+.lane-h{font-size:11.5px;color:var(--mute);text-transform:uppercase;letter-spacing:.05em;margin:0 0 6px;text-align:center}
+
+/* ---- nodes */
+details.node{width:min(520px,100%);background:var(--card);border:1px solid var(--line);border-top:3px solid var(--c);
+  border-radius:10px;transition:width .12s;flex:none}
+.lane details.node{width:100%}
+details.node[open]{width:min(980px,100%);box-shadow:0 6px 24px #0007}
+.lane details.node[open]{width:100%}
+details.node>summary{cursor:pointer;list-style:none;padding:9px 12px 9px 30px;position:relative;text-align:left}
+details.node>summary::-webkit-details-marker{display:none}
+details.node>summary::before{content:"+";position:absolute;left:10px;top:8px;color:var(--c);font-weight:700}
+details.node[open]>summary::before{content:"−"}
+details.node>summary:hover{background:#1c2230;border-radius:10px}
+details.node>summary b{display:block;font-size:14.5px;line-height:1.35}
+details.node>summary small{display:block;color:var(--mute);font-size:12.5px;line-height:1.35;margin-top:1px}
+details.node[data-flow]>summary::after{position:absolute;right:9px;top:8px;font-size:10.5px;border:1px solid var(--line);
+  border-radius:999px;padding:0 7px;color:var(--mute)}
+details.node[data-flow="B"]>summary::after{content:"Flow B only"}
+details.node[data-flow="C"]>summary::after{content:"Flow C only"}
+details.node[data-flow]>summary b{padding-right:74px}
+details.node.decision{border-style:dashed;border-top-style:solid}
+details.node.decision>summary b::before{content:"◇ ";color:var(--c)}
+details.node.io{border-radius:22px}
+details.node.r{--c:var(--rule)} details.node.l{--c:var(--llm)} details.node.g{--c:var(--gate)}
+details.node.u{--c:var(--user)} details.node.t{--c:var(--tpl)}
+details.node .body{padding:4px 16px 14px;border-top:1px solid var(--line);font-size:14px;text-align:left}
+details.node .body p,details.node .body li{max-width:none}
+details.node .body .flow{margin:10px 0 4px;padding:14px 8px;background:var(--card2);border:1px solid var(--line);border-radius:10px}
+details.node .body .flow details.node{background:var(--card)}
+details.node dl{display:grid;grid-template-columns:72px 1fr;gap:4px 12px;margin:8px 0}
+details.node dt{color:var(--mute);font-size:12.5px;padding-top:1px} details.node dd{margin:0}
+details.node table{font-size:13px}
+.flowtitle{font-size:12px;color:var(--mute);text-transform:uppercase;letter-spacing:.06em;margin:2px 0 8px}
+.endcap{font-size:12px;color:var(--mute);padding:4px 12px;border:1px dashed var(--line);border-radius:999px}
+
+/* flow filter + search */
+main[data-show="B"] [data-flow="C"], main[data-show="C"] [data-flow="B"]{opacity:.22}
+details.node.hit{outline:2px solid var(--llm);outline-offset:2px}
+details.node:target{outline:2px solid var(--accent);outline-offset:2px}
+
+
+/* ---- code level: the deepest boxes, filled from the source by scripts/build_docs.py */
+:root{--code:#8a93a6}
+.legend .c{--c:var(--code)}
+.srcs{margin:12px 0 2px;display:flex;flex-direction:column;gap:6px}
+.srcs-h{font-size:11px;color:var(--mute);text-transform:uppercase;letter-spacing:.07em}
+details.node.c{--c:var(--code);width:100%;border-top-width:1px;border-left:3px solid var(--c);background:var(--card2)}
+details.node.c[open]{width:100%;box-shadow:none}
+details.node.c>summary{padding:5px 10px 5px 28px}
+details.node.c>summary::before{top:4px}
+details.node.c>summary b{display:inline;font-size:13px}
+details.node.c>summary b code{background:none;padding:0;color:#dfe5ef}
+details.node.c>summary small{display:inline;margin-left:10px;font-size:12px}
+details.node.c .body{padding:0;border-top:1px solid var(--line)}
+.srcbar{font-size:12px;color:var(--mute);padding:5px 12px;background:#0c0f14;border-bottom:1px solid var(--line)}
+pre.src{margin:0;max-height:560px;overflow:auto;padding:10px 14px;background:#0a0d12;
+  font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;color:#cfd6e4;tab-size:4}
+pre.src .kw{color:#c792ea} pre.src .s{color:#a5d6a7} pre.src .cm{color:#6b7488;font-style:italic}
+pre.src .n{color:#f0b37e} pre.src .fn{color:#82aaff;font-weight:600}
+
+/* keyboard focus + breadcrumb */
+details.node>summary:focus-visible{outline:2px solid var(--accent);outline-offset:-2px;border-radius:10px}
+#crumbs{width:100%;font-size:12px;color:var(--mute);min-height:18px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+#crumbs b{color:var(--fg);font-weight:600}
+.keys{font-size:12px;color:var(--mute)} .keys kbd{font:11px ui-monospace,monospace;border:1px solid var(--line);
+  border-radius:4px;padding:0 4px;background:var(--card)}
