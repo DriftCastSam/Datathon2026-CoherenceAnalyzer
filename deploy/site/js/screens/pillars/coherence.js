@@ -212,7 +212,8 @@
       paths: paths,
       kind: kind,
       reason: typeof source.reason === "string" ? source.reason : "",
-      question: questionText(source.question)
+      question: questionText(source.question),
+      id: typeof source.id === "string" ? source.id : ""
     };
   }
 
@@ -255,6 +256,26 @@
       + '</div>';
   }
 
+  /* Module-level so a message from a correction response survives the full-app
+     re-render that App.setReport triggers (the response itself is not part of the report). */
+  const correctionNotes = {};
+
+  /* Passive correction affordance (P6.CORRECT pattern, ported from index.html): a text box
+     and a plain verb, nothing asked. Only drawn in live mode, and only for findings that
+     came from the backend (real findings carry an id; the SAMPLE fallback does not). */
+  function correctionFormHtml(finding) {
+    if (App.source.mode !== "live" || !finding.id) return "";
+    return '<form class="coh-correct" data-correct-ref="' + App.esc(finding.id) + '">'
+      + '<textarea name="text" maxlength="500" aria-label="Correct"></textarea>'
+      + '<button class="btn btn--outline-dark" type="submit">Correct</button>'
+      + '</form>';
+  }
+
+  function correctionNoteHtml(finding) {
+    const note = finding.id ? correctionNotes[finding.id] : "";
+    return note ? '<p class="t-small coh-note">' + App.esc(note) + '</p>' : "";
+  }
+
   function findingCard(finding) {
     const extra = (finding.reason
       ? '<p class="t-small coh-reason">' + App.esc(finding.reason) + '</p>'
@@ -266,6 +287,8 @@
       + sidesMarkup(finding.sides, {icon: "icon-warn-circle", wide: true})
       + checkChip("warning", KIND_LABEL[finding.kind])
       + extra
+      + correctionFormHtml(finding)
+      + correctionNoteHtml(finding)
       + '</div>';
   }
 
@@ -288,9 +311,44 @@
     return dots.join("");
   }
 
+  /* ---------- correction submit ---------- */
+
+  function submitCorrection(section, form) {
+    const ref = form.dataset.correctRef;
+    const text = String((form.elements.text && form.elements.text.value) || "").trim();
+    if (!ref || !text) return;
+    const button = form.querySelector('button[type="submit"]');
+    if (button) button.disabled = true;
+    App.source.correction(App.state.persona, "profile_finding", ref, text).then(response => {
+      if (response && Array.isArray(response.messages) && response.messages.length) {
+        correctionNotes[ref] = response.messages.join(" ");
+      } else {
+        delete correctionNotes[ref];
+      }
+      App.setReport(response.report);
+    }).catch(error => {
+      console.error("[coherence] correction not sent", error);
+      correctionNotes[ref] = "Correction not sent: " + error.message;
+      if (button) button.disabled = false;
+      App.renderers["coherence"](section);
+    });
+  }
+
+  function bindOnce(section) {
+    if (section.dataset.cohBound === "1") return;
+    section.dataset.cohBound = "1";
+    section.addEventListener("submit", event => {
+      const form = event.target.closest("[data-correct-ref]");
+      if (!form) return;
+      event.preventDefault();
+      submitCorrection(section, form);
+    });
+  }
+
   /* ---------- renderer ---------- */
 
   App.renderers["coherence"] = function (section) {
+    bindOnce(section);
     const report = reportData();
     const coherence = report && report.profile_coherence ? report.profile_coherence : null;
     const card = profileCard();

@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const ROUTES = ["summary", "objectives", "risk", "constraints", "preferences", "coherence", "search", "whatif", "conversation"];
+  const ROUTES = ["summary", "objectives", "risk", "constraints", "preferences", "coherence", "search", "whatif", "conversation", "trade"];
   const DEFAULT_ROUTE = "summary";
   const SAMPLE_STAMP = "Sample data";
   const SAMPLE_PHRASE = "illustrative sample data";
@@ -12,6 +12,53 @@
   const STATUS_LABEL = {pass: "Aligned", warning: "Warning", violation: "Misaligned", info: "Info", unknown: "Unknown"};
   const STATUS_ICON = {pass: "icon-check", warning: "icon-warn", violation: "icon-x", info: "icon-info", unknown: "icon-info"};
   const NUMBER_FORMATS = new Map();
+
+  /* Every check id the report can contain (SPEC §7.3/§7.4, docs/spec-factors.md §20.9 for C1-C5).
+     A screen's own CHECK_NAMES (passed as `names` to checkRow) still wins; this is only the fallback,
+     so no row ever shows a bare id like "H11". */
+  const SHARED_CHECK_NAMES = {
+    H1: "Excluded asset type", H2: "Crypto weight", H3: "Single-stock weight", H4: "Fixed income weight",
+    H5: "Foreign currency weight", H6: "Employer sector weight", H7: "Annual volatility", H8: "Max drawdown",
+    H9: "Pessimistic value at the horizon", H10: "Sector risk concentration", H11: "Excluded activity",
+    H12: "Fees", H13: "Theme weight", H14: "Stated reaction vs history", S1: "Behaviour vs effective risk",
+    S2: "Knowledge vs complexity", S3: "Hype pattern in the trade", S4: "Reminder from your notes",
+    G1: "Goal probability", O1: "Objective vs portfolio",
+    C1: "Goal beyond horizon", C2: "Max drawdown vs risk level", C3: "Growth objective vs low risk",
+    C4: "Asset type in both allowed and refused", C5: "Reaction to a drop vs risk level"
+  };
+
+  /* Mirrors coherence_analyzer/explain.py's _EN template table (en-CA): the same deterministic fallback
+     sentence the backend itself falls back to when narration fails, filled from the check's own fields.
+     Kept in sync by hand; never invent new wording here. */
+  const CHECK_TEMPLATES = {
+    H1: "{subject} is an asset type you exclude ({value} of the portfolio).",
+    H2: "Crypto assets weigh {value}, above the maximum of {limit}.",
+    H3: "{subject} weighs {value}, above the maximum of {limit} per stock.",
+    H4: "Fixed income weighs {value}, below the minimum of {limit}.",
+    H5: "Foreign-currency assets weigh {value}, above the maximum of {limit}.",
+    H6: "Your employer's sector ({subject}) weighs {value}, above the maximum of {limit}.",
+    H7: "Historical volatility is {value}, above the band limit of {limit}.",
+    "H7/info": "Historical volatility is {value}, below the lower bound of {limit} of the band for your profile.",
+    H8: "The maximum historical drawdown is {value}, deeper than the limit of {limit}.",
+    H9: "The low scenario (5th percentile) at the horizon is {value}, below the floor of {limit}.",
+    H10: "The {subject} sector accounts for {value} of the risk, above the maximum of {limit}.",
+    H11: "{subject} is linked to an activity you exclude.",
+    H12: "The fees of {subject} are {value}, above the maximum of {limit}.",
+    H13: "The {subject} theme weighs {value}, above the maximum of {limit}.",
+    H14: "The historical drawdown is {value}, deeper than {limit}, while you say you would sell after a large drop.",
+    S1: "Your observed behaviour exceeds your effective risk level by {value} level(s).",
+    S2: "Your knowledge score is low for the complexity of some holdings.",
+    S3: "The request looks like a purchase driven by current hype.",
+    S4: "A rule written in your notes cannot be checked automatically.",
+    G1: "Goal probabilities are indicative and rest on stated assumptions.",
+    O1: "Your goal is capital preservation; the historical drawdown is {value}.",
+    "H6/unknown": "H6: the ETF share ({value}) has no sector breakdown; the {limit} cap for your employer's "
+      + "sector ({subject}) cannot be verified.",
+    "H10/unknown": "H10: the “{subject}” share ({value} of the risk) has no sector breakdown; the "
+      + "{limit} cap cannot be verified for it.",
+    "?/unknown": "Check {id} cannot be verified{on}.",
+    "?": "Check {id} has status {status}{on}."
+  };
 
   /* ---------- formatting ---------- */
 
@@ -121,16 +168,52 @@
     return fmtCad(numeric, 0);
   }
 
-  function checkRow(check, names) {
-    const name = (names && names[check.id]) || check.id;
+  function derivedFromHtml(check) {
+    const chain = (check.derived_from || []).filter(Boolean);
+    if (!chain.length) return "";
+    return '<div class="chk__trace"><p class="t-small label">Comes from</p>'
+      + '<ul class="chk__trace-list">' + chain.map(path => '<li>' + esc(path) + "</li>").join("") + "</ul></div>";
+  }
+
+  /* Fills a template string with a check's own fields, same placeholders as explain.py's _line(). */
+  function fillTemplate(template, check) {
+    const subject = check.subject || "";
+    const fields = {
+      id: check.id, status: check.status, subject,
+      value: formatValue(check.value, check.unit), limit: formatValue(check.limit, check.unit),
+      on: subject ? " (" + subject + ")" : ""
+    };
+    return template.replace(/\{(\w+)\}/g, (match, key) => (key in fields ? String(fields[key]) : match));
+  }
+
+  function templateFor(check) {
+    const candidates = check.status === "unknown" ? [check.id + "/unknown", "?/unknown"]
+      : [check.id + "/" + check.status, check.id, "?"];
+    const key = candidates.find(candidate => Object.prototype.hasOwnProperty.call(CHECK_TEMPLATES, candidate));
+    return fillTemplate(CHECK_TEMPLATES[key || "?"], check);
+  }
+
+  /* An AI narrative segment already said something about this check (its refs include the check id),
+     use that gated, number-checked text; otherwise fall back to the same deterministic template the
+     backend itself falls back to (explain.py), filled from the check's own fields. Never invented here. */
+  function explanationFor(check, segments) {
+    const matched = (segments || []).find(segment => (segment.refs || []).indexOf(check.id) >= 0);
+    return matched ? matched.text : templateFor(check);
+  }
+
+  function checkRow(check, names, segments) {
+    const name = (names && names[check.id]) || SHARED_CHECK_NAMES[check.id] || "Check";
     const subject = check.subject ? ' <span class="muted">· ' + esc(check.subject) + "</span>" : "";
     const limit = check.limit === null || check.limit === undefined ? ""
       : ' <span class="muted">/ limit ' + esc(formatValue(check.limit, check.unit)) + "</span>";
-    return '<li class="chk">'
-      + '<span class="chk__id">' + esc(check.id) + "</span>"
-      + '<span class="chk__body">' + esc(name) + subject + "</span>"
+    const trace = derivedFromHtml(check);
+    const explanation = '<span class="chk__explain t-small muted">' + esc(explanationFor(check, segments)) + "</span>";
+    const row = '<span class="chk__id">' + esc(check.id) + "</span>"
+      + '<span class="chk__body">' + esc(name) + subject + explanation + "</span>"
       + '<span class="chk__figs">' + esc(formatValue(check.value, check.unit)) + limit + "</span>"
-      + '<span class="chk__st">' + chip(check.status) + "</span></li>";
+      + '<span class="chk__st">' + chip(check.status) + "</span>";
+    if (!trace) return '<li class="chk">' + row + "</li>";
+    return '<li class="chk chk--traced"><details><summary>' + row + "</summary>" + trace + "</details></li>";
   }
 
   /* Constraint and preference cards share one card builder each; the screen supplies its
@@ -220,7 +303,8 @@
     const segments = (section.narrative && section.narrative.segments) || [];
     if (!segments.length) return '<p class="t-small muted">No written explanation is attached to this section.</p>';
     return '<ul class="segs">' + segments.map(segment => '<li class="seg">'
-      + '<span class="seg__kind">' + esc(SEGMENT_KIND_LABEL[segment.kind] || segment.kind) + "</span>"
+      + '<span class="seg__kind seg__kind--' + esc(segment.kind || "unknown") + '">'
+      + esc(SEGMENT_KIND_LABEL[segment.kind] || segment.kind) + "</span>"
       + '<div class="seg__body"><p class="t-body">' + esc(segment.text) + "</p>"
       + ((segment.refs || []).length
         ? '<p class="t-small seg__refs">' + esc((segment.refs || []).join(", ")) + "</p>"

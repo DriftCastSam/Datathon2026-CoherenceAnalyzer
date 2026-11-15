@@ -359,8 +359,26 @@ h3{font:600 16px/24px var(--f)}
   :is(.scr-constraints,.scr-preferences) .seg{display:flex;align-items:flex-start;gap:8px;padding:9px 0;border-bottom:1px solid var(--line)}
   :is(.scr-constraints,.scr-preferences) .seg:last-child{border-bottom:0}
   :is(.scr-constraints,.scr-preferences) .seg__kind{flex:none;padding:0 8px;border:1px solid var(--line);border-radius:999px;font:600 12px/18px var(--f);color:var(--label)}
+  :is(.scr-constraints,.scr-preferences) .seg__kind--fact{color:var(--blue);border-color:var(--blue)}
+  :is(.scr-constraints,.scr-preferences) .seg__kind--assumption{color:var(--label);border-color:var(--label)}
+  :is(.scr-constraints,.scr-preferences) .seg__kind--inference{color:var(--navy);border-color:var(--navy)}
+  :is(.scr-constraints,.scr-preferences) .seg__kind--unknown{color:var(--muted);border-color:var(--muted)}
   :is(.scr-constraints,.scr-preferences) .seg__body{min-width:0}
   :is(.scr-constraints,.scr-preferences) .seg__refs{margin-top:2px;color:var(--muted)}
+
+  /* Check rows with a derived_from chain: the row becomes a <details>, click to see what it comes from. */
+  .chk--traced summary{list-style:none;cursor:pointer;display:flex;align-items:center;gap:12px;flex-wrap:wrap;width:100%}
+  .chk--traced summary::-webkit-details-marker{display:none}
+  .chk__trace{padding:6px 0 10px 40px}
+  .chk__trace-list{margin:4px 0 0;padding:0;list-style:none;font:400 13px/20px var(--f);color:var(--muted)}
+  .chk__trace-list li{padding:2px 0}
+  .chk__explain{display:block;margin:2px 0 0;flex-basis:100%}
+
+  /* Passive correction control under S1/S3 behaviour checks (risk screen, live mode only). */
+  .chk-corr{list-style:none;padding:0 0 9px;border-bottom:1px solid var(--line)}
+  .corr{display:flex;gap:8px;flex-wrap:wrap;align-items:flex-start;padding-left:40px}
+  .corr textarea{flex:1 1 240px;min-width:0;min-height:32px;resize:vertical;font:400 13px/18px var(--f);padding:6px 8px;border:1px solid var(--line);border-radius:6px}
+  .corr__note{padding-left:40px;margin:4px 0 0}
 
   /* Constraints only: the meter tick and limit label, the count figure, a symmetric detail grid. */
   .scr-constraints .meter__plot{position:relative;padding-top:18px}
@@ -385,6 +403,17 @@ h3{font:600 16px/24px var(--f)}
   .scr-preferences .reminder{display:flex;align-items:flex-start;gap:8px;padding:9px 0;border-bottom:1px solid var(--line)}
   .scr-preferences .reminder:last-child{border-bottom:0}
   .scr-preferences .reminder__quote{min-width:0;font:400 14px/22px var(--f)}
+  .scr-preferences .rules-notes{display:flex;flex-direction:column;gap:4px;margin-top:4px;padding:0;list-style:none}
+  .scr-preferences .rule-row{display:flex;flex-direction:column;gap:6px;padding:12px 0;border-bottom:1px solid var(--line)}
+  .scr-preferences .rule-row:last-child{border-bottom:0}
+  .scr-preferences .rule-row__quote{margin:0;font:400 14px/22px var(--f);color:var(--ink)}
+  .scr-preferences .rule-row__acts{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+  .scr-preferences .rule-row__correct{display:flex;gap:8px;align-items:flex-start;margin-top:4px}
+  .scr-preferences .rule-row__correct textarea{flex:1 1 0;min-width:0;min-height:36px;resize:vertical;background:var(--surface);border:1px solid var(--muted);border-radius:10px;padding:8px 12px;font:400 14px/22px var(--f);color:var(--ink)}
+  .scr-preferences .rule-row__notice{margin:0;color:var(--muted)}
+  .scr-preferences .tag{flex:none;padding:0 8px;border:1px solid var(--line);border-radius:999px;font:600 12px/18px var(--f);color:var(--label)}
+  .scr-preferences .tag--pass{color:var(--green);border-color:var(--green)}
+  .scr-preferences .tag--info{color:var(--navy);border-color:var(--navy)}
   @media (max-width:1000px){
     .scr-preferences .detail{grid-template-columns:minmax(0,1fr)}
   }
@@ -413,6 +442,8 @@ h3{font:600 16px/24px var(--f)}
   .scr-coherence .coh-question{color:var(--ink)}
   .scr-coherence .coh-question b{font-weight:600}
   .scr-coherence .coh-note{color:var(--muted);font:400 12px/18px var(--f)}
+  .scr-coherence .coh-correct{display:flex;gap:8px;align-items:flex-start}
+  .scr-coherence .coh-correct textarea{flex:1 1 0;min-width:0;min-height:36px;resize:vertical;background:var(--surface);border:1px solid var(--muted);border-radius:10px;padding:8px 12px;font:400 14px/22px var(--f);color:var(--ink)}
   @media (max-width:900px){.scr-coherence .coh-checks{grid-template-columns:minmax(0,1fr)}}
 
 /* Search and ask (Figma node 8:552). Layout: query card, then a fixed 400px

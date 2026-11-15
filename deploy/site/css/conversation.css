@@ -3,7 +3,16 @@
 .scr-conversation .current__readonly{margin:0;padding:8px 12px;border:1px solid var(--line);border-radius:12px}
 .scr-conversation .prow--btn{cursor:pointer;background:none;border-left:0;border-right:0;border-top:0;text-align:left;font:inherit}
 .scr-conversation .prow--btn p{margin:0}
-.scr-conversation .prow--btn:hover p:first-child{text-decoration:underline}
+.scr-conversation .prow--btn{border-radius:8px;padding-left:8px;padding-right:8px;transition:background .15s}
+.scr-conversation .prow--btn:hover,.scr-conversation .prow--btn:focus-visible{background:var(--line)}
+.scr-conversation .prow--btn:focus-visible{outline:2px solid var(--blue);outline-offset:1px}
+.scr-conversation .prow--now{background:var(--line)}
+.scr-conversation .prow__right{display:flex;flex-direction:column;align-items:flex-end;gap:2px}
+.scr-conversation .prow__edit{font:500 12px/16px var(--f);color:var(--blue);opacity:.75}
+.scr-conversation .prow--btn:hover .prow__edit,.scr-conversation .prow--btn:focus-visible .prow__edit{opacity:1;text-decoration:underline}
+.scr-conversation .prof__hint{margin:0 0 4px}
 .scr-conversation .prow__val--done{font-weight:600;color:var(--ink)}
 .scr-conversation [data-run][aria-busy="true"]{opacity:.6;cursor:progress}
 .scr-conversation .skip .field__error{padding-bottom:8px}
+.scr-conversation [data-portfolio-form]{display:flex;flex-direction:column;gap:10px}
+.scr-conversation [data-pf-rows]{display:flex;flex-direction:column;gap:8px}

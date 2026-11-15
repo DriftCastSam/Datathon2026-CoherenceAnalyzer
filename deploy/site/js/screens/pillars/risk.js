@@ -46,6 +46,9 @@
   };
   const FIGMA_LEAD = "The portfolio behaves like a moderate-to-high risk mix, two steps above the profile.";
   const STEP_WORDS = ["at the profile", "one step", "two steps", "three steps", "four steps"];
+  const CORRECTABLE_CHECKS = {S1: true, S3: true};
+  /* check.id -> {sending, message, error}; survives re-renders of this screen (module-level). */
+  const correctionState = {};
 
   /* ---------- formatting ---------- */
 
@@ -300,6 +303,19 @@
     return rows;
   }
 
+  /* S1/S3 are soft, LLM-derived behaviour readings; the backend lets the user correct exactly
+     these two via target.kind = "behaviour". H4/H7/H8/H14 are hard checks and stay as plain rows. */
+  function correctionControlHtml(check) {
+    if (App.source.mode !== "live") return "";
+    const info = correctionState[check.id] || {};
+    const note = info.message || info.error;
+    return '<form class="corr" data-correct-ref="' + App.esc(check.id) + '">'
+      + '<textarea name="text" maxlength="500" aria-label="Correction"></textarea>'
+      + '<button class="btn" type="submit"' + (info.sending ? " disabled" : "") + ">Correct</button>"
+      + "</form>"
+      + (note ? '<p class="t-small muted corr__note">' + App.esc(note) + "</p>" : "");
+  }
+
   function detailCard(state) {
     const rows = factRows(state);
     const checks = state.checks.filter(check => check && check.factor === "risque");
@@ -313,7 +329,11 @@
       : "";
     const checkList = checks.length
       ? '<h3 class="detail__sub">Checks</h3><ul class="checks">'
-        + checks.map(check => App.checkRow(check, CHECK_NAMES)).join("") + "</ul>"
+        + checks.map(check => {
+          const row = App.checkRow(check, CHECK_NAMES, narrative);
+          const control = CORRECTABLE_CHECKS[check.id] ? correctionControlHtml(check) : "";
+          return control ? row + '<li class="chk-corr">' + control + "</li>" : row;
+        }).join("") + "</ul>"
       : "";
     const text = narrative.length
       ? '<h3 class="detail__sub">What the analysis says</h3><div class="nar">'
@@ -326,7 +346,7 @@
 
   /* ---------- render ---------- */
 
-  App.renderers.risk = function (section) {
+  function renderInto(section) {
     const root = section.querySelector(".scr");
     if (!root) return;
     const state = readState();
@@ -343,5 +363,40 @@
       '<p class="t-small muted">Figures are computed first, then explained by a language model. '
         + "Illustrative sample data. Simulation only, not financial advice.</p>"
     ].join("");
+  }
+
+  /* ---------- correction control wiring (S1/S3 behaviour checks, live mode only) ---------- */
+
+  function submitCorrection(section, form) {
+    const ref = form.dataset.correctRef;
+    const words = String((form.elements.text && form.elements.text.value) || "").trim();
+    if (!words || (correctionState[ref] && correctionState[ref].sending)) return;
+    correctionState[ref] = {sending: true};
+    renderInto(section);
+    App.source.correction(App.state.persona, "behaviour", ref, words).then(response => {
+      correctionState[ref] = {
+        message: (response.messages && response.messages.length) ? response.messages.join(" ") : ""
+      };
+      App.setReport(response.report);
+    }, error => {
+      correctionState[ref] = {error: "The correction could not be saved (" + error.message + ")."};
+      renderInto(section);
+    });
+  }
+
+  function bindOnce(section) {
+    if (section.dataset.riskBound === "1") return;
+    section.dataset.riskBound = "1";
+    section.addEventListener("submit", event => {
+      const form = event.target.closest("[data-correct-ref]");
+      if (!form) return;
+      event.preventDefault();
+      submitCorrection(section, form);
+    });
+  }
+
+  App.renderers.risk = function (section) {
+    bindOnce(section);
+    renderInto(section);
   };
 })();

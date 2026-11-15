@@ -354,9 +354,19 @@
     }).join("");
   }
 
+  function allSegments(state) {
+    return ["objectif", "horizon"].reduce((all, factor) => {
+      const section = state.sections.find(item => item && item.factor === factor);
+      const segments = section && section.narrative && Array.isArray(section.narrative.segments)
+        ? section.narrative.segments : [];
+      return all.concat(segments);
+    }, []);
+  }
+
   function detailCard(state) {
     const rows = factRows(state);
     const checks = checksFor(state);
+    const segments = allSegments(state);
     const narrative = narrativeBlocks(state);
     const facts = rows.length
       ? '<div class="facts">' + rows.map(row => '<div class="fact"><p class="fact__k">' + App.esc(row.label)
@@ -365,7 +375,7 @@
       : "";
     const checkList = checks.length
       ? '<h3 class="detail__sub">Checks</h3><ul class="checks">'
-        + checks.map(check => App.checkRow(check, CHECK_NAMES)).join("") + "</ul>"
+        + checks.map(check => App.checkRow(check, CHECK_NAMES, segments)).join("") + "</ul>"
       : "";
     return '<section class="card">'
       + '<h2 class="t-h3">Objectives and horizon detail</h2>'
