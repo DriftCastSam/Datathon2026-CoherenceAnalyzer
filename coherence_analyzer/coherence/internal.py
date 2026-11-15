@@ -12,6 +12,7 @@ from ..gate import PROFILE_SECTIONS, gate
 from ..levels import LEVELS
 from ..llm import bedrock, extractors
 from ..rules.limits import LIMITS_TABLE
+from ..rules.registry import is_skipped
 
 RULE_IDS: tuple[str, ...] = ("C1", "C2", "C3", "C4", "C5")
 GROWTH_OBJECTIVES: frozenset[str] = frozenset({"growth", "aggressive_growth"})
@@ -49,7 +50,7 @@ def _dig(profile: dict, *path: str) -> Any:
         if not isinstance(node, dict) or part not in node:
             return None
         node = node[part]
-    return node
+    return None if is_skipped(node) else node       # a skipped answer is no value: the rule is skipped (§20.6)
 
 
 def _is_num(x: object) -> bool:

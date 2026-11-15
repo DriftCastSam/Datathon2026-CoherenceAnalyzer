@@ -10,7 +10,7 @@ from typing import Any
 
 from .. import config
 from ..levels import LEVELS, idx, lower, step
-from .registry import REGISTRY, rule
+from .registry import REGISTRY, is_skipped, rule
 
 DECLARED_KNOWLEDGE_MAP: dict[str, float] = {"novice": 20, "intermediate": 50, "advanced": 78, "expert": 95}
 KNOWLEDGE_W_QUIZ, KNOWLEDGE_W_DECLARED, KNOWLEDGE_W_QQ = 0.4, 0.3, 0.3
@@ -197,28 +197,36 @@ def knowledge_score(quiz: float, declared_level: str, question_quality: float | 
 # ---------------------------------------------------------------- derive_all
 
 def derive_all(profile: dict, *, portfolio_value_cad: float, as_of: str) -> dict:
-    """Recompute every rule: field and return the updated profile (no mutation)."""
+    """Recompute every rule: field and return the updated profile (no mutation).
+
+    A derived field whose input is missing (a skipped intake answer, `{value: null, by: user:skipped}`, or a derived
+    input that is itself null) is `{value: null, by: rule:...}`: never a guessed default (§20.6, SPEC §7.1).
+    """
     p = copy.deepcopy(profile)
     g = lambda path: _val(_get(p, path))  # noqa: E731
 
-    _set(p, "identity.life_stage", _field("identity.life_stage",
-         life_stage(g("identity.age"), g("identity.retirement_target_age"))))
-    _set(p, "situation.income_stability", _field("situation.income_stability",
-         income_stability(g("identity.employment_type"))))
-    _set(p, "situation.emergency_fund_months", _field("situation.emergency_fund_months",
-         emergency_fund_months(g("situation.emergency_fund"), g("situation.monthly_expenses"))))
+    def put(output: str, fn, *args) -> None:
+        missing = any(a is None for a in args)
+        _set(p, output, _field(output, None if missing else fn(*args)))
 
-    withdrawals = list(g("situation.planned_withdrawals") or [])
-    _set(p, "objectives.effective_horizon_years", _field("objectives.effective_horizon_years",
-         effective_horizon_years(g("objectives.horizon_years"), withdrawals, as_of)))
-    _set(p, "risk.capacity", _field("risk.capacity", capacity(
-        effective_horizon_years=g("objectives.effective_horizon_years"),
-        ef_months=g("situation.emergency_fund_months"),
-        income_stability=g("situation.income_stability"),
-        planned_withdrawals=withdrawals, portfolio_value_cad=portfolio_value_cad, as_of=as_of)))
+    put("identity.life_stage", life_stage, g("identity.age"), g("identity.retirement_target_age"))
+    put("situation.income_stability", income_stability, g("identity.employment_type"))
+    put("situation.emergency_fund_months", emergency_fund_months,
+        g("situation.emergency_fund"), g("situation.monthly_expenses"))
+
+    wd_node = _get(p, "situation.planned_withdrawals")
+    # a skipped list is unknown ("no withdrawal" is the user's answer []); a null list that was never skipped is empty
+    withdrawals = None if is_skipped(wd_node) else list(_val(wd_node) or [])
+    put("objectives.effective_horizon_years",
+        lambda h, w: effective_horizon_years(h, w, as_of), g("objectives.horizon_years"), withdrawals)
+    put("risk.capacity",
+        lambda eh, efm, stab, w: capacity(eh, efm, stab, w, portfolio_value_cad, as_of),
+        g("objectives.effective_horizon_years"), g("situation.emergency_fund_months"),
+        g("situation.income_stability"), withdrawals)
     declared = g("risk.declared")
-    idx(declared)  # validate the enum (raises ValueError)
-    _set(p, "risk.effective", _field("risk.effective", effective_risk(declared, g("risk.capacity"))))
+    if declared is not None:
+        idx(declared)  # validate the enum (raises ValueError)
+    put("risk.effective", effective_risk, declared, g("risk.capacity"))
 
     _derive_knowledge_score(p, as_of)
     return p

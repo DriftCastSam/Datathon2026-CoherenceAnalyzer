@@ -25,9 +25,9 @@
       "properties": {
         "age": {"type": "integer", "minimum": 0},
         "dependants": {"type": "integer", "minimum": 0},
-        "retirement_target_age": {"type": "integer", "minimum": 0},
+        "retirement_target_age": {"anyOf": [{"type": "integer", "minimum": 0}, {"$ref": "#/$defs/skipped"}]},
         "employment_type": {"type": "string"},
-        "employer_sector": {"type": "string"},
+        "employer_sector": {"anyOf": [{"type": "string"}, {"$ref": "#/$defs/skipped"}]},
         "life_stage": {"$ref": "#/$defs/ruleField"}
       }
     },
@@ -35,22 +35,25 @@
       "type": "object",
       "required": ["monthly_expenses", "emergency_fund", "planned_withdrawals"],
       "properties": {
-        "monthly_expenses": {"type": "number", "exclusiveMinimum": 0},
-        "emergency_fund": {"type": "number", "minimum": 0},
+        "monthly_expenses": {"anyOf": [{"type": "number", "exclusiveMinimum": 0}, {"$ref": "#/$defs/skipped"}]},
+        "emergency_fund": {"anyOf": [{"type": "number", "minimum": 0}, {"$ref": "#/$defs/skipped"}]},
         "income_stability": {"$ref": "#/$defs/ruleField"},
         "emergency_fund_months": {"$ref": "#/$defs/ruleField"},
-        "planned_withdrawals": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "required": ["date", "amount"],
-            "properties": {
-              "date": {"type": "string", "pattern": "^\\d{4}-\\d{2}(-\\d{2})?$"},
-              "amount": {"type": "number", "minimum": 0},
-              "purpose": {"type": "string"}
+        "planned_withdrawals": {"anyOf": [
+          {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": ["date", "amount"],
+              "properties": {
+                "date": {"type": "string", "pattern": "^\\d{4}-\\d{2}(-\\d{2})?$"},
+                "amount": {"type": "number", "minimum": 0},
+                "purpose": {"type": "string"}
+              }
             }
-          }
-        },
+          },
+          {"$ref": "#/$defs/skipped"}
+        ]},
         "monthly_contribution": {"type": "number", "minimum": 0}
       }
     },
@@ -58,17 +61,17 @@
       "type": "object",
       "required": ["horizon_years"],
       "properties": {
-        "horizon_years": {"type": "number", "minimum": 0},
+        "horizon_years": {"anyOf": [{"type": "number", "minimum": 0}, {"$ref": "#/$defs/skipped"}]},
         "effective_horizon_years": {"$ref": "#/$defs/ruleField"},
-        "goals": {"type": "array", "items": {"type": "object"}}
+        "goals": {"anyOf": [{"type": "array", "items": {"type": "object"}}, {"$ref": "#/$defs/skipped"}]}
       }
     },
     "risk": {
       "type": "object",
       "required": ["declared"],
       "properties": {
-        "declared": {"$ref": "#/$defs/level"},
-        "max_acceptable_drawdown_pct": {"type": "number", "maximum": 0},
+        "declared": {"anyOf": [{"$ref": "#/$defs/level"}, {"$ref": "#/$defs/skipped"}]},
+        "max_acceptable_drawdown_pct": {"anyOf": [{"type": "number", "maximum": 0}, {"$ref": "#/$defs/skipped"}]},
         "capacity": {"$ref": "#/$defs/ruleLevelField"},
         "effective": {"$ref": "#/$defs/ruleLevelField"},
         "behavioural": {
@@ -154,7 +157,7 @@
       "type": "object",
       "properties": {
         "asset_types_allowed": {"type": "array", "items": {"type": "string"}},
-        "asset_types_refused": {"type": "array", "items": {"type": "string"}},
+        "asset_types_refused": {"anyOf": [{"type": "array", "items": {"type": "string"}}, {"$ref": "#/$defs/skipped"}]},
         "max_fee_mer_pct": {"type": "number", "minimum": 0}
       }
     },
@@ -182,7 +185,13 @@
     },
     "ruleLevelField": {
       "allOf": [{"$ref": "#/$defs/ruleField"}],
-      "properties": {"value": {"$ref": "#/$defs/level"}}
+      "properties": {"value": {"anyOf": [{"$ref": "#/$defs/level"}, {"type": "null"}]}}
+    },
+    "skipped": {
+      "description": "A required intake answer the user skipped (docs/spec-factors.md §20.6): checks that need it report unknown.",
+      "type": "object",
+      "required": ["value", "by"],
+      "properties": {"value": {"type": "null"}, "by": {"const": "user:skipped"}}
     },
     "llmField": {
       "type": "object",
