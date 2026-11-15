@@ -1,0 +1,520 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="25" skipped="0" tests="27" time="10.902" timestamp="2026-11-15T04:16:10.468654+00:00" hostname="bomboclat-laptop"><testcase classname="tests.dashboard.test_any_user_dashboard" name="test_new_hooks_are_defined_once_and_used" time="0.002"><failure message="AssertionError: index.html must define `function boot(` exactly once (found 0)">page = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+
+    def test_new_hooks_are_defined_once_and_used(page):
+        """The picker, live review, new-profile, onboarding and portfolio hooks exist as `function`s, each defined exactly
+        once (`whatifNote` is now a function, not an arrow const) and called from elsewhere in the page."""
+        for name in NEW_HOOKS:
+&gt;           function_source(page, name)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:114: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+html = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+name = 'boot'
+
+    def function_source(html: str, name: str) -&gt; tuple[str, list[str]]:
+        """(body source, literal template texts with `${}` slots as '§') of `function &lt;name&gt;(...) {...}`."""
+        found = list(re.finditer(rf"function\s+{re.escape(name)}\s*\(", html))
+&gt;       assert len(found) == 1, f"index.html must define `function {name}(` exactly once (found {len(found)})"
+               ^^^^^^^^^^^^^^^
+E       AssertionError: index.html must define `function boot(` exactly once (found 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_ui_flow_b.py:150: AssertionError</failure></testcase><testcase classname="tests.dashboard.test_any_user_dashboard" name="test_boot_reads_the_api_only_when_one_is_configured" time="0.001"><failure message="AssertionError: index.html must define `function boot(` exactly once (found 0)">page = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+
+    def test_boot_reads_the_api_only_when_one_is_configured(page):
+        """Task (1)/(2): `boot()` tests apiBase() before anything else; with an API it calls loadProfiles(), without it it
+        reads `reports/index.json` exactly as today; the live branch never needs the static index."""
+&gt;       body = _body(page, "boot")
+               ^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:123: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:94: in _body
+    return function_source(page, name)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+html = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+name = 'boot'
+
+    def function_source(html: str, name: str) -&gt; tuple[str, list[str]]:
+        """(body source, literal template texts with `${}` slots as '§') of `function &lt;name&gt;(...) {...}`."""
+        found = list(re.finditer(rf"function\s+{re.escape(name)}\s*\(", html))
+&gt;       assert len(found) == 1, f"index.html must define `function {name}(` exactly once (found {len(found)})"
+               ^^^^^^^^^^^^^^^
+E       AssertionError: index.html must define `function boot(` exactly once (found 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_ui_flow_b.py:150: AssertionError</failure></testcase><testcase classname="tests.dashboard.test_any_user_dashboard" name="test_every_fetch_is_a_reports_file_or_an_api_route" time="0.004" /><testcase classname="tests.dashboard.test_any_user_dashboard" name="test_load_profiles_is_a_plain_get_of_the_profiles_route" time="0.001"><failure message="AssertionError: index.html must define `function loadProfiles(` exactly once (found 0)">page = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+
+    def test_load_profiles_is_a_plain_get_of_the_profiles_route(page):
+        """SPEC §12 / task (1): `GET /profiles` through a plain fetch (the page keeps one fetch with an explicit method:
+        apiPost), only with an API, the picker filled from the answer, failures shown, never swallowed."""
+&gt;       body = _body(page, "loadProfiles")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:149: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:94: in _body
+    return function_source(page, name)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+html = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+name = 'loadProfiles'
+
+    def function_source(html: str, name: str) -&gt; tuple[str, list[str]]:
+        """(body source, literal template texts with `${}` slots as '§') of `function &lt;name&gt;(...) {...}`."""
+        found = list(re.finditer(rf"function\s+{re.escape(name)}\s*\(", html))
+&gt;       assert len(found) == 1, f"index.html must define `function {name}(` exactly once (found {len(found)})"
+               ^^^^^^^^^^^^^^^
+E       AssertionError: index.html must define `function loadProfiles(` exactly once (found 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_ui_flow_b.py:150: AssertionError</failure></testcase><testcase classname="tests.dashboard.test_any_user_dashboard" name="test_live_picker_lists_the_profiles_and_a_new_profile_entry" time="0.001"><failure message="AssertionError: index.html must define `function pickerLive(` exactly once (found 0)">page = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+
+    def test_live_picker_lists_the_profiles_and_a_new_profile_entry(page):
+        """Task (1): the live picker has one entry per `{profile_id, name}` of GET /profiles (id as value, name escaped as
+        label) and a `new-profile` entry; no flow B entry, no persona typed, no report file."""
+&gt;       body, texts = function_source(page, "pickerLive")
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:162: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+html = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+name = 'pickerLive'
+
+    def function_source(html: str, name: str) -&gt; tuple[str, list[str]]:
+        """(body source, literal template texts with `${}` slots as '§') of `function &lt;name&gt;(...) {...}`."""
+        found = list(re.finditer(rf"function\s+{re.escape(name)}\s*\(", html))
+&gt;       assert len(found) == 1, f"index.html must define `function {name}(` exactly once (found {len(found)})"
+               ^^^^^^^^^^^^^^^
+E       AssertionError: index.html must define `function pickerLive(` exactly once (found 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_ui_flow_b.py:150: AssertionError</failure></testcase><testcase classname="tests.dashboard.test_any_user_dashboard" name="test_static_picker_keeps_the_index_entries_and_the_flow_b_entry" time="0.001"><failure message="AssertionError: index.html must define `function pickerStatic(` exactly once (found 0)">page = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+
+    def test_static_picker_keeps_the_index_entries_and_the_flow_b_entry(page):
+        """Task (2): without an API the picker is the 4 index entries (value = file, label from the index) plus the separate flow B
+        report entry, as today, but its label names no persona (task (4): labels come from data)."""
+&gt;       body, texts = function_source(page, "pickerStatic")
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:176: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+html = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+name = 'pickerStatic'
+
+    def function_source(html: str, name: str) -&gt; tuple[str, list[str]]:
+        """(body source, literal template texts with `${}` slots as '§') of `function &lt;name&gt;(...) {...}`."""
+        found = list(re.finditer(rf"function\s+{re.escape(name)}\s*\(", html))
+&gt;       assert len(found) == 1, f"index.html must define `function {name}(` exactly once (found {len(found)})"
+               ^^^^^^^^^^^^^^^
+E       AssertionError: index.html must define `function pickerStatic(` exactly once (found 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_ui_flow_b.py:150: AssertionError</failure></testcase><testcase classname="tests.dashboard.test_any_user_dashboard" name="test_picker_change_routes_to_the_right_loader" time="0.001"><failure message="AssertionError: index.html must define `function onPick(` exactly once (found 0)">page = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+
+    def test_picker_change_routes_to_the_right_loader(page):
+        """`onPick(value)`: `new-profile` -&gt; the form (live only); `flow-b` -&gt; loadFlowB() (static); a report file -&gt; load();
+        a profile id -&gt; loadLiveReview() when an API is set. The #pick change listener calls it."""
+&gt;       body = _body(page, "onPick")
+               ^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:187: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:94: in _body
+    return function_source(page, name)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+html = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+name = 'onPick'
+
+    def function_source(html: str, name: str) -&gt; tuple[str, list[str]]:
+        """(body source, literal template texts with `${}` slots as '§') of `function &lt;name&gt;(...) {...}`."""
+        found = list(re.finditer(rf"function\s+{re.escape(name)}\s*\(", html))
+&gt;       assert len(found) == 1, f"index.html must define `function {name}(` exactly once (found {len(found)})"
+               ^^^^^^^^^^^^^^^
+E       AssertionError: index.html must define `function onPick(` exactly once (found 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_ui_flow_b.py:150: AssertionError</failure></testcase><testcase classname="tests.dashboard.test_any_user_dashboard" name="test_load_live_review_posts_the_review_route_and_builds_the_page_state" time="0.001"><failure message="AssertionError: index.html must define `function loadLiveReview(` exactly once (found 0)">page = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+
+    def test_load_live_review_posts_the_review_route_and_builds_the_page_state(page):
+        """SPEC §12: `POST /profiles/{id}/review` (no body: nothing is sent that could be a limit or an AI field), plus a plain
+        GET of the profile for what the report does not carry (limits, name); `state.rep` gets a `site` block from
+        buildLiveSite; per-report state is reset; the intake checklist is loaded; failures are shown."""
+&gt;       body = _body(page, "loadLiveReview")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:202: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:94: in _body
+    return function_source(page, name)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+html = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+name = 'loadLiveReview'
+
+    def function_source(html: str, name: str) -&gt; tuple[str, list[str]]:
+        """(body source, literal template texts with `${}` slots as '§') of `function &lt;name&gt;(...) {...}`."""
+        found = list(re.finditer(rf"function\s+{re.escape(name)}\s*\(", html))
+&gt;       assert len(found) == 1, f"index.html must define `function {name}(` exactly once (found {len(found)})"
+               ^^^^^^^^^^^^^^^
+E       AssertionError: index.html must define `function loadLiveReview(` exactly once (found 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_ui_flow_b.py:150: AssertionError</failure></testcase><testcase classname="tests.dashboard.test_any_user_dashboard" name="test_build_live_site_gives_the_renderers_what_they_read" time="0.001"><failure message="AssertionError: index.html must define `function buildLiveSite(` exactly once (found 0)">page = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+
+    def test_build_live_site_gives_the_renderers_what_they_read(page):
+        """The renderers read `rep.site` (label, as_of, value_cad, weights_pct, limits, limits_trace, profile_card,
+        portfolio_file, whatif). The static build embeds it; for a live report it is built from the profile and the report: the
+        limits are the profile's own (computed by the API's rules, never by the page), nothing typed, no persona name."""
+&gt;       body, texts = function_source(page, "buildLiveSite")
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:223: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+html = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+name = 'buildLiveSite'
+
+    def function_source(html: str, name: str) -&gt; tuple[str, list[str]]:
+        """(body source, literal template texts with `${}` slots as '§') of `function &lt;name&gt;(...) {...}`."""
+        found = list(re.finditer(rf"function\s+{re.escape(name)}\s*\(", html))
+&gt;       assert len(found) == 1, f"index.html must define `function {name}(` exactly once (found {len(found)})"
+               ^^^^^^^^^^^^^^^
+E       AssertionError: index.html must define `function buildLiveSite(` exactly once (found 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_ui_flow_b.py:150: AssertionError</failure></testcase><testcase classname="tests.dashboard.test_any_user_dashboard" name="test_reset_whatif_clears_every_cache_on_each_report_switch" time="0.001"><failure message="AssertionError: index.html must define `function resetWhatif(` exactly once (found 0)">page = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+
+    def test_reset_whatif_clears_every_cache_on_each_report_switch(page):
+        """What-if files are per report now: switching report must drop the cached universe, scenarios and tickers."""
+&gt;       body = _body(page, "resetWhatif")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:237: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:94: in _body
+    return function_source(page, name)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+html = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+name = 'resetWhatif'
+
+    def function_source(html: str, name: str) -&gt; tuple[str, list[str]]:
+        """(body source, literal template texts with `${}` slots as '§') of `function &lt;name&gt;(...) {...}`."""
+        found = list(re.finditer(rf"function\s+{re.escape(name)}\s*\(", html))
+&gt;       assert len(found) == 1, f"index.html must define `function {name}(` exactly once (found {len(found)})"
+               ^^^^^^^^^^^^^^^
+E       AssertionError: index.html must define `function resetWhatif(` exactly once (found 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_ui_flow_b.py:150: AssertionError</failure></testcase><testcase classname="tests.dashboard.test_any_user_dashboard" name="test_new_profile_form_is_a_locale_and_an_optional_name" time="0.001"><failure message="AssertionError: index.html must define `function renderNewProfileForm(` exactly once (found 0)">page = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+
+    def test_new_profile_form_is_a_locale_and_an_optional_name(page):
+        """`POST /profiles {locale, display_name?}`: the form has a `locale` select (fr-CA / en-CA, the API's two locales), a
+        `display_name` text input that is NOT required, a submit button; empty at start; offered only with an API; bound in render()."""
+&gt;       body, texts = function_source(page, "renderNewProfileForm")
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:249: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+html = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+name = 'renderNewProfileForm'
+
+    def function_source(html: str, name: str) -&gt; tuple[str, list[str]]:
+        """(body source, literal template texts with `${}` slots as '§') of `function &lt;name&gt;(...) {...}`."""
+        found = list(re.finditer(rf"function\s+{re.escape(name)}\s*\(", html))
+&gt;       assert len(found) == 1, f"index.html must define `function {name}(` exactly once (found {len(found)})"
+               ^^^^^^^^^^^^^^^
+E       AssertionError: index.html must define `function renderNewProfileForm(` exactly once (found 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_ui_flow_b.py:150: AssertionError</failure></testcase><testcase classname="tests.dashboard.test_any_user_dashboard" name="test_create_profile_posts_locale_and_the_optional_name_only" time="0.001"><failure message="AssertionError: index.html must define `function createProfile(` exactly once (found 0)">page = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+
+    def test_create_profile_posts_locale_and_the_optional_name_only(page):
+        """inv. 2: the body is `{locale}` or `{locale, display_name}`; nothing else (the API answers 422 for unknown keys, and
+        never accepts limits or llm: fields). A blank name is not sent. The new profile id starts the onboarding; the picker is
+        refreshed; failures are shown."""
+&gt;       body = _body(page, "createProfile")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:270: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:94: in _body
+    return function_source(page, name)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+html = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+name = 'createProfile'
+
+    def function_source(html: str, name: str) -&gt; tuple[str, list[str]]:
+        """(body source, literal template texts with `${}` slots as '§') of `function &lt;name&gt;(...) {...}`."""
+        found = list(re.finditer(rf"function\s+{re.escape(name)}\s*\(", html))
+&gt;       assert len(found) == 1, f"index.html must define `function {name}(` exactly once (found {len(found)})"
+               ^^^^^^^^^^^^^^^
+E       AssertionError: index.html must define `function createProfile(` exactly once (found 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_ui_flow_b.py:150: AssertionError</failure></testcase><testcase classname="tests.dashboard.test_any_user_dashboard" name="test_onboarding_walks_the_intake_then_shows_the_portfolio_form" time="0.001"><failure message="AssertionError: index.html must define `function renderOnboarding(` exactly once (found 0)">page = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+
+    def test_onboarding_walks_the_intake_then_shows_the_portfolio_form(page):
+        """Task (1): after the creation the intake form (P3.UIINTAKE) walks the missing answers, and only then the portfolio form
+        is shown. The intake functions read the profile id through currentProfileId() so they work before any review exists
+        (frozen test_ui_intake_confirm.py still needs the text `profile_id` inside loadIntake's body)."""
+&gt;       body = _body(page, "renderOnboarding")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:292: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:94: in _body
+    return function_source(page, name)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+html = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+name = 'renderOnboarding'
+
+    def function_source(html: str, name: str) -&gt; tuple[str, list[str]]:
+        """(body source, literal template texts with `${}` slots as '§') of `function &lt;name&gt;(...) {...}`."""
+        found = list(re.finditer(rf"function\s+{re.escape(name)}\s*\(", html))
+&gt;       assert len(found) == 1, f"index.html must define `function {name}(` exactly once (found {len(found)})"
+               ^^^^^^^^^^^^^^^
+E       AssertionError: index.html must define `function renderOnboarding(` exactly once (found 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_ui_flow_b.py:150: AssertionError</failure></testcase><testcase classname="tests.dashboard.test_any_user_dashboard" name="test_portfolio_form_has_a_date_a_value_and_weight_rows" time="0.001"><failure message="AssertionError: index.html must define `function renderPortfolioForm(` exactly once (found 0)">page = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+
+    def test_portfolio_form_has_a_date_a_value_and_weight_rows(page):
+        """PUT body fields: `as_of` (date input), `value_cad` (number), weights as rows of `ticker` + `weight_pct` the user can add
+        to; nothing prefilled (no clock, no typed ticker, no typed figure); bound in render()."""
+&gt;       body, texts = function_source(page, "renderPortfolioForm")
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:310: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+html = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+name = 'renderPortfolioForm'
+
+    def function_source(html: str, name: str) -&gt; tuple[str, list[str]]:
+        """(body source, literal template texts with `${}` slots as '§') of `function &lt;name&gt;(...) {...}`."""
+        found = list(re.finditer(rf"function\s+{re.escape(name)}\s*\(", html))
+&gt;       assert len(found) == 1, f"index.html must define `function {name}(` exactly once (found {len(found)})"
+               ^^^^^^^^^^^^^^^
+E       AssertionError: index.html must define `function renderPortfolioForm(` exactly once (found 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_ui_flow_b.py:150: AssertionError</failure></testcase><testcase classname="tests.dashboard.test_any_user_dashboard" name="test_save_portfolio_puts_the_portfolio_route_through_api_post" time="0.001"><failure message="AssertionError: index.html must define `function savePortfolio(` exactly once (found 0)">page = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+
+    def test_save_portfolio_puts_the_portfolio_route_through_api_post(page):
+        """SPEC-AMBIGUITY (P5.USERS): `PUT /profiles/{id}/portfolio {as_of, value_cad, weights_pct}`. Body = exactly those keys,
+        numbers as numbers, weights in percent keyed by ticker; the sum is checked (100 +- 0.01) before anything is sent; the verb
+        goes through apiPost's third argument as the lowercase string "put" (see STALE-ORACLE); then the review is loaded."""
+&gt;       body = _body(page, "savePortfolio")
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:333: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:94: in _body
+    return function_source(page, name)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+html = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+name = 'savePortfolio'
+
+    def function_source(html: str, name: str) -&gt; tuple[str, list[str]]:
+        """(body source, literal template texts with `${}` slots as '§') of `function &lt;name&gt;(...) {...}`."""
+        found = list(re.finditer(rf"function\s+{re.escape(name)}\s*\(", html))
+&gt;       assert len(found) == 1, f"index.html must define `function {name}(` exactly once (found {len(found)})"
+               ^^^^^^^^^^^^^^^
+E       AssertionError: index.html must define `function savePortfolio(` exactly once (found 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_ui_flow_b.py:150: AssertionError</failure></testcase><testcase classname="tests.dashboard.test_any_user_dashboard" name="test_api_post_stays_the_single_request_helper" time="0.001"><failure message="AssertionError: ['path', 'body']&#10;assert 2 == 3&#10; +  where 2 = len(['path', 'body'])">page = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+
+    def test_api_post_stays_the_single_request_helper(page):
+        """The one fetch with an explicit method stays apiPost (frozen): a third parameter selects the verb, default POST; still
+        one `method:` and one quoted \"POST\" in the page."""
+        m = re.search(r"function\s+apiPost\s*\(([^)]*)\)", page)
+        assert m
+        params = [p.strip() for p in m.group(1).split(",") if p.strip()]
+&gt;       assert len(params) == 3, params
+E       AssertionError: ['path', 'body']
+E       assert 2 == 3
+E        +  where 2 = len(['path', 'body'])
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:359: AssertionError</failure></testcase><testcase classname="tests.dashboard.test_any_user_dashboard" name="test_what_if_files_come_from_the_report_site_block" time="0.001"><failure message="AssertionError: loadUniverse reads the report's universe file&#10;assert None&#10; +  where None = &lt;function search at 0x7bcaafb96090&gt;('site\\.whatif\\.universe', ' if (!universe) universe = await (await fetch(&quot;reports/universe.json&quot;)).json(); return universe; ')&#10; +    where &lt;function search at 0x7bcaafb96090&gt; = re.search">page = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+
+    def test_what_if_files_come_from_the_report_site_block(page):
+        """Task (3): the page reads each report's own what-if files (`site.whatif.universe` / `.scenarios`, names relative to
+        reports/), not two fixed files; a report with no precomputed what-if gets the note."""
+        uni, wif = _body(page, "loadUniverse"), _body(page, "loadWhatif")
+&gt;       assert re.search(r"site\.whatif\.universe", uni), "loadUniverse reads the report's universe file"
+E       AssertionError: loadUniverse reads the report's universe file
+E       assert None
+E        +  where None = &lt;function search at 0x7bcaafb96090&gt;('site\\.whatif\\.universe', ' if (!universe) universe = await (await fetch("reports/universe.json")).json(); return universe; ')
+E        +    where &lt;function search at 0x7bcaafb96090&gt; = re.search
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:372: AssertionError</failure></testcase><testcase classname="tests.dashboard.test_any_user_dashboard" name="test_what_if_note_names_no_persona" time="0.001"><failure message="AssertionError: index.html must define `function whatifNote(` exactly once (found 0)">page = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+
+    def test_what_if_note_names_no_persona(page):
+        """Task (3): the note shown for a report without precomputed what-if says nothing about whose profile it is; it is plain
+        wording (SPEC §9.3 blocklist, D10 vocabulary, no typed figure)."""
+&gt;       body, texts = function_source(page, "whatifNote")
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:384: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+html = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+name = 'whatifNote'
+
+    def function_source(html: str, name: str) -&gt; tuple[str, list[str]]:
+        """(body source, literal template texts with `${}` slots as '§') of `function &lt;name&gt;(...) {...}`."""
+        found = list(re.finditer(rf"function\s+{re.escape(name)}\s*\(", html))
+&gt;       assert len(found) == 1, f"index.html must define `function {name}(` exactly once (found {len(found)})"
+               ^^^^^^^^^^^^^^^
+E       AssertionError: index.html must define `function whatifNote(` exactly once (found 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_ui_flow_b.py:150: AssertionError</failure></testcase><testcase classname="tests.dashboard.test_any_user_dashboard" name="test_no_user_facing_string_names_a_persona" time="0.004"><failure message="AssertionError: assert ['ent sur le ...x B)&lt;/option'] == []&#10;  &#10;  Left contains 3 more items, first extra item: 'ent sur le profil et le portefeuille de Robert. Choisissez un rapport de Robert dans l'&#10;  Use -v to get more diff">page = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+
+    def test_no_user_facing_string_names_a_persona(page):
+        """Task (4): outside comments, the page never writes Robert, Amira or Mateo (picker labels, notes, headings, errors): names
+        come from data (index labels, report `site.profile_card.name`, GET /profiles `name`). The flow B file path is a URL."""
+        code = _code(page).replace("reports/robert-nvda.json", "reports/&lt;flow-b-file&gt;")
+        hits = [code[max(0, m.start() - 40):m.end() + 40].replace("\n", " ") for m in PERSONA_RE.finditer(code)]
+&gt;       assert hits == []
+E       AssertionError: assert ['ent sur le ...x B)&lt;/option'] == []
+E         
+E         Left contains 3 more items, first extra item: 'ent sur le profil et le portefeuille de Robert. Choisissez un rapport de Robert dans l'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:395: AssertionError</failure></testcase><testcase classname="tests.dashboard.test_any_user_dashboard" name="test_new_strings_pass_the_blocklist_and_the_d10_vocabulary" time="0.001"><failure message="AssertionError: index.html must define `function boot(` exactly once (found 0)">page = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+
+    def test_new_strings_pass_the_blocklist_and_the_d10_vocabulary(page):
+        """SPEC §9.3 item 3 / D10 items 1, 2, 4: the new functions print no advisory phrase and no word that proposes, ranks or
+        labels a choice (HTML &lt;option&gt; tags are widgets); the templates of the new renderers carry no typed figure."""
+        for name in NEW_HOOKS:
+&gt;           body, texts = function_source(page, name)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:402: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+html = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+name = 'boot'
+
+    def function_source(html: str, name: str) -&gt; tuple[str, list[str]]:
+        """(body source, literal template texts with `${}` slots as '§') of `function &lt;name&gt;(...) {...}`."""
+        found = list(re.finditer(rf"function\s+{re.escape(name)}\s*\(", html))
+&gt;       assert len(found) == 1, f"index.html must define `function {name}(` exactly once (found {len(found)})"
+               ^^^^^^^^^^^^^^^
+E       AssertionError: index.html must define `function boot(` exactly once (found 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_ui_flow_b.py:150: AssertionError</failure></testcase><testcase classname="tests.dashboard.test_any_user_dashboard" name="test_static_demo_branch_is_the_one_of_today" time="0.001"><failure message="AssertionError: index.html must define `function boot(` exactly once (found 0)">page = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+
+    def test_static_demo_branch_is_the_one_of_today(page):
+        """Task (2): without an API the page is unchanged: empty `coherence-api-base` meta, the picker from reports/index.json
+        with the first entry opened, the flow B file loaded by loadFlowB() as its own file, the same load-error messages."""
+        assert re.search(r"&lt;meta\s+name=[\"']coherence-api-base[\"']\s+content=[\"']{2}\s*/?&gt;", page)
+&gt;       body = _body(page, "boot")
+               ^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:416: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:94: in _body
+    return function_source(page, name)[0]
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+html = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...Impossible de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  })();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+name = 'boot'
+
+    def function_source(html: str, name: str) -&gt; tuple[str, list[str]]:
+        """(body source, literal template texts with `${}` slots as '§') of `function &lt;name&gt;(...) {...}`."""
+        found = list(re.finditer(rf"function\s+{re.escape(name)}\s*\(", html))
+&gt;       assert len(found) == 1, f"index.html must define `function {name}(` exactly once (found {len(found)})"
+               ^^^^^^^^^^^^^^^
+E       AssertionError: index.html must define `function boot(` exactly once (found 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_ui_flow_b.py:150: AssertionError</failure></testcase><testcase classname="tests.dashboard.test_any_user_dashboard" name="test_whatif_build_precomputes_for_any_profile_directory[mateo]" time="0.226"><failure message="AssertionError: build(out, profile_dir)&#10;assert (1 &gt;= 2)&#10; +  where 1 = len([&lt;Parameter &quot;out: 'Path'&quot;&gt;])">whatif = &lt;module 'deploy_whatif_any_user' from '/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/deploy/whatif.py'&gt;
+tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-553/test_whatif_build_precomputes_0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7bca80dfc7c0&gt;
+persona = 'mateo'
+
+    @pytest.mark.parametrize("persona", ["mateo", "robert"])
+    def test_whatif_build_precomputes_for_any_profile_directory(whatif, tmp_path, monkeypatch, persona):
+        """Task (3): `build(out, profile_dir)` runs on whatever profile directory it is given (here a copy under a neutral name,
+        outside fixtures/): the base (value, date, weights), the held share of each asset, the funding modes (the user's
+        largest bond holding, if any) and the scenarios all come from that directory's profile + portfolio.json. Two calls in a
+        row (two profiles) share nothing."""
+        from coherence_analyzer import data
+        params = list(inspect.signature(whatif.build).parameters.values())
+&gt;       assert len(params) &gt;= 2 and params[1].kind in (inspect.Parameter.POSITIONAL_ONLY,
+                                                        inspect.Parameter.POSITIONAL_OR_KEYWORD), "build(out, profile_dir)"
+E       AssertionError: build(out, profile_dir)
+E       assert (1 &gt;= 2)
+E        +  where 1 = len([&lt;Parameter "out: 'Path'"&gt;])
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:456: AssertionError</failure></testcase><testcase classname="tests.dashboard.test_any_user_dashboard" name="test_whatif_build_precomputes_for_any_profile_directory[robert]" time="0.001"><failure message="AssertionError: build(out, profile_dir)&#10;assert (1 &gt;= 2)&#10; +  where 1 = len([&lt;Parameter &quot;out: 'Path'&quot;&gt;])">whatif = &lt;module 'deploy_whatif_any_user' from '/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/deploy/whatif.py'&gt;
+tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-553/test_whatif_build_precomputes_1')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7bca80dff930&gt;
+persona = 'robert'
+
+    @pytest.mark.parametrize("persona", ["mateo", "robert"])
+    def test_whatif_build_precomputes_for_any_profile_directory(whatif, tmp_path, monkeypatch, persona):
+        """Task (3): `build(out, profile_dir)` runs on whatever profile directory it is given (here a copy under a neutral name,
+        outside fixtures/): the base (value, date, weights), the held share of each asset, the funding modes (the user's
+        largest bond holding, if any) and the scenarios all come from that directory's profile + portfolio.json. Two calls in a
+        row (two profiles) share nothing."""
+        from coherence_analyzer import data
+        params = list(inspect.signature(whatif.build).parameters.values())
+&gt;       assert len(params) &gt;= 2 and params[1].kind in (inspect.Parameter.POSITIONAL_ONLY,
+                                                        inspect.Parameter.POSITIONAL_OR_KEYWORD), "build(out, profile_dir)"
+E       AssertionError: build(out, profile_dir)
+E       assert (1 &gt;= 2)
+E        +  where 1 = len([&lt;Parameter "out: 'Path'"&gt;])
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:456: AssertionError</failure></testcase><testcase classname="tests.dashboard.test_any_user_dashboard" name="test_whatif_and_build_site_code_has_no_persona_in_its_paths" time="0.003"><failure message="assert ['Precompute ...Wh', 'robert'] == []&#10;  &#10;  Left contains 2 more items, first extra item: 'Precompute the dashboard\'s &quot;Search and ask&quot; universe and &quot;Wh'&#10;  Use -v to get more diff">whatif = &lt;module 'deploy_whatif_any_user' from '/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/deploy/whatif.py'&gt;
+
+    def test_whatif_and_build_site_code_has_no_persona_in_its_paths(whatif):
+        """Task (3): no persona name in whatif.py (constants, names, docstrings: the profile directory is a parameter) and no
+        `WHATIF_PERSONA` / persona comparison in build_site.py (the persona list is data: REPORTS, labels and the flow B file)."""
+        wi_tree = ast.parse((DEPLOY / "whatif.py").read_text(encoding="utf-8"))
+        seen = [n.value for n in ast.walk(wi_tree) if isinstance(n, ast.Constant) and isinstance(n.value, str)]
+        seen += [n.id for n in ast.walk(wi_tree) if isinstance(n, ast.Name)] + [n.attr for n in ast.walk(wi_tree) if isinstance(n, ast.Attribute)]
+&gt;       assert [s[:60] for s in seen if PERSONA_RE.search(s)] == []
+E       assert ['Precompute ...Wh', 'robert'] == []
+E         
+E         Left contains 2 more items, first extra item: 'Precompute the dashboard\'s "Search and ask" universe and "Wh'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:495: AssertionError</failure></testcase><testcase classname="tests.dashboard.test_any_user_dashboard" name="test_static_index_is_still_the_four_flow_c_reviews" time="10.332" /><testcase classname="tests.dashboard.test_any_user_dashboard" name="test_every_built_review_has_the_what_if_of_its_own_profile" time="0.001"><failure message="AssertionError: robert-review-nvda.json&#10;assert (False)&#10; +  where False = isinstance(True, dict)">built = {'out': PosixPath('/tmp/pytest-of-safraa/pytest-553/any_user_site0/site'), 'rdir': PosixPath('/tmp/pytest-of-safraa/py...son': {'run_id': '01M7EPPZNZCEVMF0D258E7ZCGF', 'flow': 'C', 'profile_id': 'persona-mateo', 'profile_version': 1, ...}}}
+
+    def test_every_built_review_has_the_what_if_of_its_own_profile(built):
+        """Task (3): `site.whatif` is `{"universe": f, "scenarios": g}` (files inside reports/) for every review, not only
+        Robert's: the base of each universe file is that report's profile directory (value, date, weights of its
+        portfolio.json), the two reviews of one profile share their files, the three profiles have three different ones, and the
+        legacy reports/universe.json + whatif.json are the first review's."""
+        by_profile: dict[str, tuple[str, str]] = {}
+        for entry in built["index"]:
+            rep = built["reports"][entry["file"]]
+            wf = rep["site"]["whatif"]
+&gt;           assert isinstance(wf, dict) and {"universe", "scenarios"} &lt;= set(wf), entry["file"]
+E           AssertionError: robert-review-nvda.json
+E           assert (False)
+E            +  where False = isinstance(True, dict)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:557: AssertionError</failure></testcase><testcase classname="tests.dashboard.test_any_user_dashboard" name="test_the_reports_list_and_not_a_persona_constant_choose_the_what_if_profile" time="0.002"><failure message="AssertionError: assert not True&#10; +  where True = hasattr(&lt;module 'build_site_any_user_reports' from '/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/deploy/build_site.py'&gt;, 'WHATIF_PERSONA')">tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-553/test_the_reports_list_and_not_0')
+
+    def test_the_reports_list_and_not_a_persona_constant_choose_the_what_if_profile(tmp_path):
+        """Task (3): `build_site` precomputes the what-if of whatever profiles REPORTS names: a REPORTS list holding one profile
+        directory with a neutral name (a copy of a seed, outside the repo) gives a one-entry index whose what-if is that
+        directory's, and the legacy reports/universe.json + whatif.json are its own."""
+        fx = tmp_path / "fx"
+        shutil.copytree(FIXTURES / "robert", fx / "robert")                  # the flow B demo report still reads it
+        shutil.copytree(FIXTURES / "mateo", fx / "someone-new")
+        mod = _load_deploy("build_site_any_user_reports", "build_site.py")
+&gt;       assert not hasattr(mod, "WHATIF_PERSONA")
+E       AssertionError: assert not True
+E        +  where True = hasattr(&lt;module 'build_site_any_user_reports' from '/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/deploy/build_site.py'&gt;, 'WHATIF_PERSONA')
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-dash/tests/dashboard/test_any_user_dashboard.py:581: AssertionError</failure></testcase></testsuite></testsuites>

@@ -221,6 +221,7 @@ details.abadge ul{margin:8px 0 0;padding-left:18px;font-size:13px;color:var(--mu
 .ifm label{display:block;font-size:11.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--soft);margin-bottom:4px}
 .ifm input,.ifm select,.ifm textarea{width:100%;border:1px solid var(--muted);border-radius:4px;padding:9px 12px;font:inherit;font-size:14px;background:var(--surface);color:var(--ink);min-height:40px}
 .ifm .full{grid-column:1/-1}
+.wrow{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:12px;margin-bottom:8px}
 .errbar{border-left:4px solid var(--red);background:var(--red-bg);color:var(--red-ink);padding:10px 14px;border-radius:4px;font-weight:600}
 .primary[disabled]{opacity:.45;cursor:not-allowed}
 footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;color:var(--muted)}
@@ -289,7 +290,7 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
     : typeof v === "object" ? Object.entries(v).map(([k, x]) => `${k}: ${show(x)}`).join(", ") : (LVL[v] || STAGE[v] || OBJ[v] || String(v));
   const KIND = {fact: "fait", assumption: "hypothèse", inference: "inférence", unknown: "inconnu"};
   const PAGES = [["synthese", "Synthèse"], ["facteurs", "Facteurs"], ["profil", "Profil"], ["portefeuille", "Portefeuille"], ["recherche", "Recherche"], ["simulation", "Simulation"], ["sources", "Sources"]];
-  const state = {rep: null, page: "synthese", factor: null, error: "", draft: null, intake: null};
+  const state = {rep: null, page: "synthese", factor: null, error: "", draft: null, intake: null, onboarding: null, creating: false, profiles: []};
 
   /* Flow B reports carry the checks of the trade (`checks_proposed`) next to today's: the sections and the verdict follow the trade. */
   const shownChecks = rep => rep.checks_proposed || rep.checks_current;
@@ -409,10 +410,10 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
     const set = (typeof window !== "undefined" && window.COHERENCE_API_BASE) || (meta ? meta.content : "") || "";
     return String(set).trim().replace(/\/+$/, "");
   }
-  async function apiPost(path, body) {
+  async function apiPost(path, body, verb) {
     const base = apiBase();
     if (!base) throw new Error("Aucune API configurée");
-    const res = await fetch(base + path, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
+    const res = await fetch(base + path, {method: verb || "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
     if (!res.ok) throw new Error("API : HTTP " + res.status);
     return res.json();
   }
@@ -444,10 +445,16 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
     if (!state.error) loadIntake();
   }
   /* ---------- Intake (SPEC §12, §20.6): fixed questions from GET /profiles/{id}/intake; the static demo lists what is missing, read-only ---------- */
+  /* The profile the intake belongs to: the one being set up (no report yet), else the one of the open report. */
+  function currentProfileId() {
+    if (state.onboarding) return state.onboarding.profile_id;
+    return state.rep ? state.rep.profile_id : "";
+  }
   async function loadIntake() {
-    if (!apiBase() || !state.rep) return;
+    const profile_id = currentProfileId();
+    if (!apiBase() || !profile_id) return;
     try {
-      const r = await fetch(apiBase() + "/profiles/" + state.rep.profile_id + "/intake");
+      const r = await fetch(apiBase() + "/profiles/" + profile_id + "/intake");
       if (!r.ok) throw new Error("API : HTTP " + r.status);
       state.intake = await r.json();
     } catch (e) { state.error = "La liste des points à préciser n'a pas été chargée (" + e.message + ")."; }
@@ -467,7 +474,7 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
       given = ["oui", "yes"].includes(given.toLowerCase());
     }
     try {
-      await apiPost(`/profiles/${state.rep.profile_id}/intake/answer`, {path, value: given});
+      await apiPost(`/profiles/${currentProfileId()}/intake/answer`, {path, value: given});
       state.error = "";
     } catch (e) { state.error = "La réponse n'a pas été enregistrée (" + e.message + ")."; }
     await loadIntake();
@@ -476,7 +483,7 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
   async function skipIntake(path) {
     if (!apiBase()) return;
     try {
-      await apiPost(`/profiles/${state.rep.profile_id}/intake/skip`, {path});
+      await apiPost(`/profiles/${currentProfileId()}/intake/skip`, {path});
       state.error = "";
     } catch (e) { state.error = "La question n'a pas été passée (" + e.message + ")."; }
     await loadIntake();
@@ -512,7 +519,168 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
       <p class="lead" style="margin-top:8px">${esc(e.headline)}</p>
       <ul class="segs" style="margin-top:14px">${e.segments.map(g => `<li>${segmentTag(g)}<div>${g.factor ? `<b class="small">${esc(title(g.factor))}</b> ` : ""}${esc(g.text)}<span class="refs">${(g.refs || []).map(esc).join(", ")}</span></div></li>`).join("")}</ul>${hrLine}</section>`;
   }
-  const whatifNote = () => `<div class="page"><section class="card"><h2>Simulation indisponible pour ce rapport</h2><p class="sub" style="margin-top:8px">La recherche et les scénarios précalculés portent sur le profil et le portefeuille de Robert. Choisissez un rapport de Robert dans le sélecteur pour les utiliser.</p></section></div>`;
+  function whatifNote() {
+    return `<div class="page"><section class="card"><h2>Simulation indisponible pour ce rapport</h2><p class="sub" style="margin-top:8px">La recherche et les scénarios précalculés ne sont pas fournis avec ce rapport. Ouvrez un rapport qui les fournit pour les utiliser.</p></section></div>`;
+  }
+
+  /* ---------- Any user (SPEC §12 routes): profile list, live review, new profile, onboarding, portfolio ---------- */
+  function pickerLive(profiles) {
+    return (profiles || []).map(p => `<option value="${esc(p.profile_id)}">${esc(p.name)}</option>`).join("") + `<option value="new-profile">Nouveau profil…</option>`;
+  }
+  function pickerStatic(index) {
+    return index.map(r => `<option value="${esc(r.file)}">${esc(r.label)}</option>`).join("") + `<option value="flow-b">Transaction demandée (flux B)</option>`;
+  }
+  async function loadProfiles() {
+    if (!apiBase()) return;
+    try {
+      const r = await fetch(apiBase() + "/profiles");
+      if (!r.ok) throw new Error("API : HTTP " + r.status);
+      state.profiles = await r.json();
+      $("#pick").innerHTML = pickerLive(state.profiles);
+      const here = state.creating ? "new-profile" : currentProfileId();
+      if (here) $("#pick").value = here;
+    } catch (e) { state.error = "La liste des profils n'a pas été chargée (" + e.message + ")."; render(); }
+  }
+  function resetWhatif() {
+    universe = null;
+    wiAll = null;
+    wi.cache = {};
+    wi.tickers = [];
+    wi.cur = null;
+    wi.funding = null;
+  }
+  /* The `site` block the renderers read, built from the API data only: the report (stress block: portfolio value and date; drivers: weights)
+     and the profile (identity, limits and their trace, computed by the API's rules, never by the page). */
+  function buildLiveSite(rep, profile) {
+    const val = x => x && typeof x === "object" && "value" in x ? x.value : x;
+    const who = profile.identity || {}, risk = profile.risk || {}, obj = profile.objectives || {}, sit = profile.situation || {};
+    const listed = state.profiles.find(p => p.profile_id === rep.profile_id);
+    const name = (listed && listed.name) || who.name || (profile.meta || {}).display_name || rep.profile_id;
+    const weights_pct = {};
+    ((rep.metrics_current || {}).drivers || []).forEach(d => { if (d.weight > 0) weights_pct[d.ticker] = d.weight * 100; });
+    const limits = {};
+    Object.entries(profile.limits || {}).forEach(([k, v]) => { if (!k.startsWith("_") && k !== "by") limits[k] = v; });
+    const held = rep.stress || {};
+    return {
+      label: `${name} · portefeuille actuel`, as_of: held.as_of, value_cad: held.value_cad, portfolio_file: rep.portfolio_id, whatif: false,
+      weights_pct, limits, limits_trace: profile.limits_trace || {},
+      profile_card: {name, age: who.age == null ? "—" : who.age, occupation: who.occupation || "—", life_stage: val(who.life_stage),
+        risk_declared: risk.declared, risk_capacity: val(risk.capacity), risk_effective: val(risk.effective),
+        horizon_years: obj.horizon_years, effective_horizon_years: val(obj.effective_horizon_years),
+        first_withdrawal: (sit.planned_withdrawals || [{}])[0] || {}, emergency_fund_months: val(sit.emergency_fund_months),
+        goals: obj.goals || [], notes: (profile.values || {}).notes || ""},
+    };
+  }
+  /* POST /profiles/{id}/review takes no body: the API reads the profile and the portfolio it holds. */
+  async function loadLiveReview(id) {
+    if (!apiBase()) return;
+    try {
+      const rep = await apiPost(`/profiles/${id}/review`, {});
+      const r = await fetch(apiBase() + "/profiles/" + id);
+      if (!r.ok) throw new Error("API : HTTP " + r.status);
+      rep.site = buildLiveSite(rep, await r.json());
+      state.rep = rep; state.factor = null; state.error = ""; state.draft = null; state.intake = null; state.onboarding = null; state.creating = false;
+      resetWhatif();
+      if ($("#pick").value !== id) $("#pick").value = id;
+      route(); loadIntake();
+    } catch (e) {
+      if (/\b422\b/.test(e.message)) {
+        /* no report yet (the intake or the portfolio is not complete): the same onboarding as a new profile */
+        state.rep = null; state.draft = null; state.intake = null; state.creating = false; state.onboarding = {profile_id: id};
+        state.error = "Ce profil n'a pas encore de rapport : les points ci-dessous, puis le portefeuille, le rendent possible.";
+        resetWhatif();
+        render(); loadIntake();
+        return;
+      }
+      state.error = "Le rapport n'a pas été chargé (" + e.message + ").";
+      render();
+    }
+  }
+  function renderNewProfileForm() {
+    if (!apiBase()) return "";
+    return `<div class="page"><div><p class="eyebrow">Nouveau profil</p><h1 style="margin-top:6px">Créer un profil</h1><p class="sub" style="margin-top:6px">Indiquez la langue des questions et, si vous le souhaitez, un nom. Les réponses viennent ensuite, une question à la fois.</p></div>
+      <section class="card"><form id="new-profile-form" class="ifm">
+        <div><label for="np-locale">Langue</label><select id="np-locale" name="locale" required><option value="fr-CA">Français (Canada)</option><option value="en-CA">English (Canada)</option></select></div>
+        <div><label for="np-name">Nom (facultatif)</label><input id="np-name" name="display_name" type="text" autocomplete="off"></div>
+        <div class="full actions" style="margin-top:0"><button class="primary" type="submit">Créer le profil</button></div></form></section></div>`;
+  }
+  /* The body is `{locale}` or `{locale, display_name}`: a blank name is not sent; nothing else is. */
+  async function createProfile(form) {
+    if (!apiBase()) return;
+    const body = {locale: form.elements.locale.value};
+    const typed = form.elements.display_name.value.trim();
+    if (typed) body.display_name = typed;
+    try {
+      const made = await apiPost("/profiles", body);
+      const profile_id = made.profile_id || (made.meta || {}).profile_id || ((made.profile || {}).meta || {}).profile_id;
+      if (!profile_id) throw new Error("réponse sans identifiant");
+      state.creating = false; state.rep = null; state.draft = null; state.intake = null; state.error = "";
+      state.onboarding = {profile_id};
+      resetWhatif();
+      await loadProfiles();
+      await loadIntake();
+    } catch (e) { state.error = "Le profil n'a pas été créé (" + e.message + ")."; }
+    render();
+  }
+  function renderOnboarding() {
+    const ob = state.onboarding;
+    if (!ob) return "";
+    const left = state.intake ? Object.values(state.intake).reduce((n, x) => n + (x.missing || []).length, 0) : null;
+    const step = left === null ? `<p class="small">Chargement des points à préciser…</p>` : left ? renderIntake(state.rep) : renderPortfolioForm();
+    return `<div class="page"><div><p class="eyebrow">Nouveau profil</p><h1 style="margin-top:6px">${left === null || left ? "Préciser le profil" : "Saisir le portefeuille"}</h1>
+      <p class="sub" style="margin-top:6px">Les points du profil d'abord, une question à la fois; le portefeuille ensuite. Le rapport s'affiche une fois le portefeuille enregistré.</p></div>
+      <section class="card">${step}</section></div>`;
+  }
+  function renderPortfolioForm() {
+    return `<form id="portfolio-form" class="ifm">
+      <p class="small full">Date du portefeuille, valeur en dollars canadiens, puis un titre par ligne avec son poids en pourcentage. Les poids totalisent cent pour cent.</p>
+      <div><label for="pf-as-of">Date du portefeuille</label><input id="pf-as-of" name="as_of" type="date" required></div>
+      <div><label for="pf-value">Valeur (CAD)</label><input id="pf-value" name="value_cad" type="number" step="any" min="0" required></div>
+      <div class="full" id="weight-rows">${["", "", ""].map(() => `<div class="wrow"><input name="ticker" type="text" aria-label="Symbole du titre" autocomplete="off"><input name="weight_pct" type="number" step="any" min="0" aria-label="Poids en pourcentage"></div>`).join("")}</div>
+      <div class="full actions" style="margin-top:0"><button class="btn" type="button" data-portfolio="add-row">Ajouter un titre</button><button class="primary" type="submit">Enregistrer le portefeuille</button></div></form>`;
+  }
+  /* The body is exactly `{as_of, value_cad, weights_pct}` (percent by ticker); the verb goes through apiPost's third argument. */
+  async function savePortfolio(form) {
+    if (!apiBase()) return;
+    const id = currentProfileId();
+    const weights = {};
+    let sum = 0;
+    form.querySelectorAll(".wrow").forEach(row => {
+      const ticker = row.querySelector('[name="ticker"]').value.trim().toUpperCase();
+      const w = Number(String(row.querySelector('[name="weight_pct"]').value).trim().replace(",", "."));
+      if (ticker && Number.isFinite(w) && w > 0) { weights[ticker] = (weights[ticker] || 0) + w; sum += w; }
+    });
+    const value = Number(String(form.elements.value_cad.value).trim().replace(",", "."));
+    const as_of = form.elements.as_of.value;
+    if (!as_of || !Number.isFinite(value) || !(value > 0) || !Object.keys(weights).length || Math.abs(sum - 100) > 0.01) {
+      state.error = "Le portefeuille n'a pas été enregistré : indiquez la date, une valeur supérieure à zéro et des poids qui totalisent 100 %.";
+      render();
+      return;
+    }
+    const portfolio = {as_of, value_cad: value, weights_pct: weights};
+    try {
+      await apiPost(`/profiles/${id}/portfolio`, portfolio, "put");
+      state.onboarding = null;
+      state.error = "";
+    } catch (e) {
+      state.error = "Le portefeuille n'a pas été enregistré (" + e.message + ").";
+      render();
+      return;
+    }
+    await loadLiveReview(id);
+  }
+  function onPick(value) {
+    if (value === "new-profile") {
+      if (!apiBase()) return;
+      state.creating = true; state.onboarding = null; state.error = "";
+      render();
+      return;
+    }
+    state.creating = false; state.onboarding = null;
+    if (value === "flow-b") loadFlowB();
+    else if (apiBase()) loadLiveReview(value);
+    else load(value);
+  }
 
   /* ---------- Flow B (SPEC §4 B2, §12): intent confirmation form, trade report loader ---------- */
   function renderIntentForm(intent) {
@@ -590,7 +758,8 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
         profile_card: {name: c.name, age: c.age, occupation: c.occupation, life_stage: c.life_stage, risk_declared: c.declared, risk_capacity: c.capacity,
           risk_effective: c.effective, horizon_years: c.horizon_years, effective_horizon_years: c.effective_horizon_years, first_withdrawal: c.first_withdrawal,
           emergency_fund_months: c.ef_months, goals: c.goals || [], notes: c.notes || ""}};
-      state.rep = rep; state.factor = null; state.error = ""; state.draft = null; state.intake = null;
+      state.rep = rep; state.factor = null; state.error = ""; state.draft = null; state.intake = null; state.onboarding = null; state.creating = false;
+      resetWhatif();
       route(); loadIntake();
     } catch (e) { $("#app").innerHTML = `<p class="card">Impossible de charger le rapport de la transaction (${esc(e.message)}). Rechargez la page.</p>`; }
   }
@@ -831,7 +1000,7 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
   const askState = {filters: {cls: new Set(), mkt: new Set(), sec: new Set(), ccy: new Set()}, sel: new Set(),
     chat: [{who: "agent", text: "Décrivez ce que vous cherchez (par exemple « actions technologiques américaines » ou « seulement les FNB canadiens ») et j'applique les filtres. Je peux aussi tester un actif que vous choisissez contre le profil. Je ne classe ni ne recommande d'actifs."}]};
   let universe = null;
-  async function loadUniverse() { if (!universe) universe = await (await fetch("reports/universe.json")).json(); return universe; }
+  async function loadUniverse() { if (!universe) universe = await (await fetch("reports/" + state.rep.site.whatif.universe)).json(); return universe; }
   const match = a => { const f = askState.filters;
     return (!f.cls.size || f.cls.has(a.asset_class) || (f.cls.has("etf") && a.asset_class.startsWith("etf"))) && (!f.mkt.size || [...f.mkt].some(k => MKT[k][1](a)))
       && (!f.sec.size || [...f.sec].some(k => SEC[k][1](a))) && (!f.ccy.size || f.ccy.has(a.currency)); };
@@ -906,7 +1075,7 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
   /* ---------- Simulation (what-if) ---------- */
   const wi = {tickers: [], cur: null, target: 10, funding: null, cache: {}};
   let wiAll = null;
-  async function loadWhatif(t) { if (!wiAll) wiAll = await (await fetch("reports/whatif.json")).json(); wi.cache[t] = wiAll[t] || {asset: {ticker: t, name: t, held_pct: 0}, scenarios: {}}; return wi.cache[t]; }
+  async function loadWhatif(t) { if (!wiAll) wiAll = await (await fetch("reports/" + state.rep.site.whatif.scenarios)).json(); wi.cache[t] = wiAll[t] || {asset: {ticker: t, name: t, held_pct: 0}, scenarios: {}}; return wi.cache[t]; }
   const ORDER = ["violation", "warning", "unknown", "info", "pass"];
   function wiCone(base, sc, floor, v0) {
     const n = sc.cone.p50.length, W = 720, H = 300, L = 54, R = 150, T = 16, B = 30;
@@ -987,12 +1156,31 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
 
   /* ---------- shell ---------- */
   function render() {
-    const rep = state.rep;
-    if (!rep) return;
+    const rep = state.rep, setup = state.creating ? renderNewProfileForm() : state.onboarding ? renderOnboarding() : "";
+    const errbar = state.error ? `<p class="errbar" role="alert">${esc(state.error)}</p>` : "";
+    if (!rep && !setup) { if (errbar) $("#app").innerHTML = errbar; return; }
+    if (setup) {
+      $("#pages").innerHTML = "";
+      $("#app").innerHTML = errbar + setup;
+      const newForm = $("#new-profile-form");
+      if (newForm) newForm.addEventListener("submit", e => { e.preventDefault(); createProfile(e.target); });
+      const pfForm = $("#portfolio-form");
+      if (pfForm) pfForm.addEventListener("submit", e => { e.preventDefault(); savePortfolio(e.target); });
+      document.querySelectorAll("[data-portfolio]").forEach(b => b.addEventListener("click", () => {
+        const box = $("#weight-rows"), row = box.firstElementChild.cloneNode(true);
+        row.querySelectorAll("input").forEach(i => { i.value = ""; });
+        box.appendChild(row);
+      }));
+    } else renderReport(rep, errbar);
+    const intakeForm = $("#intake-form");
+    if (intakeForm) intakeForm.addEventListener("submit", e => { e.preventDefault(); answerIntake(e.target.dataset.path, e.target.elements.answer.value); });
+    document.querySelectorAll("[data-intake]").forEach(b => b.addEventListener("click", () => { if (b.dataset.intake === "skip") skipIntake(b.dataset.path); }));
+  }
+  function renderReport(rep, errbar) {
     const bad = rep.sections.some(s => s.status === "violation"), pcBad = rep.profile_coherence && rep.profile_coherence.findings.length;
     $("#pages").innerHTML = PAGES.map(([id, t]) => `<a href="#${id}" ${state.page === id ? 'aria-current="page"' : ""}>${t}${(id === "facteurs" && bad) || (id === "profil" && pcBad) ? '<span class="dot" aria-hidden="true"></span>' : ""}</a>`).join("");
     const body = {synthese: pageSynthese, facteurs: factorPage, profil: pageProfil, portefeuille: pagePortefeuille, recherche: pageRecherche, simulation: pageSimulation, sources: pageSources}[state.page](rep);
-    $("#app").innerHTML = (state.error ? `<p class="errbar" role="alert">${esc(state.error)}</p>` : "") + body;
+    $("#app").innerHTML = errbar + body;
     $("#foot").innerHTML = `<div class="wrap" style="display:flex;flex-direction:column;gap:4px"><b style="color:var(--navy)">${esc(rep.disclaimer)}</b><span>Aucune recommandation d'achat ou de vente. Rapport produit par <span class="mono">pipeline.review</span>, hors ligne, sorties d'IA enregistrées.</span></div>`;
     document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => go(b.dataset.go)));
     document.querySelectorAll("[data-factor]").forEach(b => b.addEventListener("click", () => { state.factor = b.dataset.factor; go("facteurs", true); }));
@@ -1001,9 +1189,6 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
     document.querySelectorAll("[data-action]").forEach(b => b.addEventListener("click", () => { if (apiBase()) decideRule(b.dataset.action, Number(b.dataset.index)); }));
     const draftForm = $("#draft-form");
     if (draftForm) draftForm.addEventListener("submit", e => { e.preventDefault(); requestDraft(e.target.elements.text.value); });
-    const intakeForm = $("#intake-form");
-    if (intakeForm) intakeForm.addEventListener("submit", e => { e.preventDefault(); answerIntake(e.target.dataset.path, e.target.elements.answer.value); });
-    document.querySelectorAll("[data-intake]").forEach(b => b.addEventListener("click", () => { if (b.dataset.intake === "skip") skipIntake(b.dataset.path); }));
     const intentForm = $("#intent-form");
     if (intentForm) intentForm.addEventListener("submit", e => { e.preventDefault(); confirmIntent(e.target); });
     bindChecks(rep);
@@ -1024,7 +1209,9 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
     try {
       const r = await fetch("reports/" + file);
       if (!r.ok) throw new Error("HTTP " + r.status);
-      state.rep = await r.json(); state.factor = null; state.error = ""; state.draft = null; state.intake = null; route(); loadIntake();
+      state.rep = await r.json(); state.factor = null; state.error = ""; state.draft = null; state.intake = null; state.onboarding = null; state.creating = false;
+      resetWhatif();
+      route(); loadIntake();
     } catch (e) { $("#app").innerHTML = `<p class="card">Impossible de charger le rapport ${esc(file)} (${esc(e.message)}). Rechargez la page.</p>`; }
   }
   try { const t = localStorage.getItem("ca-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
@@ -1033,14 +1220,22 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
     document.documentElement.dataset.theme = cur === "dark" ? "light" : "dark";
     try { localStorage.setItem("ca-theme", document.documentElement.dataset.theme); } catch (e) {}
   });
-  (async () => {
+  /* Entry point: with an API base the picker lists GET /profiles (seeds and users); without one it is the static demo (reports/index.json). */
+  async function boot() {
+    $("#pick").addEventListener("change", e => onPick(e.target.value));
+    if (apiBase()) {
+      await loadProfiles();
+      if (state.profiles.length) { $("#pick").value = state.profiles[0].profile_id; loadLiveReview(state.profiles[0].profile_id); }
+      else if (!state.error) onPick("new-profile");
+      return;
+    }
     try {
       const idx = await (await fetch("reports/index.json")).json();
-      $("#pick").innerHTML = idx.map(r => `<option value="${esc(r.file)}">${esc(r.label)}</option>`).join("") + `<option value="flow-b">Robert · transaction demandée (flux B)</option>`;
-      $("#pick").addEventListener("change", e => e.target.value === "flow-b" ? loadFlowB() : load(e.target.value));
+      $("#pick").innerHTML = pickerStatic(idx);
       load(idx[0].file);
     } catch (e) { $("#app").innerHTML = `<p class="card">Impossible de charger la liste des rapports. Rechargez la page.</p>`; }
-  })();
+  }
+  boot();
 })();
 </script>
 </body>

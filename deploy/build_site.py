@@ -5,8 +5,10 @@ Output (<out>, default .cache/site/):
   index.html, design.html   deploy/site/ (the dashboard and the static design board)
   reports/index.json        the reports the dashboard can open (Robert current, Robert + NVDA, Amira, Mateo)
   reports/robert-nvda.json  the Flow B demo report (deploy/preview_report.py, Robert NVDA 10 %): its own file, not in the index
-  reports/universe.json     starter universe + base metrics (Search and ask)
-  reports/whatif.json       precomputed What-if scenarios (deploy/whatif.py)
+  reports/universe.json     starter universe + base metrics (Search and ask) of the first review's profile (legacy file)
+  reports/whatif.json       precomputed What-if scenarios (deploy/whatif.py) of the first review's profile (legacy file)
+  reports/universe-<dir>.json, reports/whatif-<dir>.json   the same for each profile directory REPORTS names; every built review
+                            names its own pair in `site.whatif`
   reports/<name>.json       `pipeline.review(...)` reports (SPEC §13 + §20.4 sections + §20.9 profile_coherence, plus the
                             P2 blocks `stress`, `goals`, `metrics_current.lookthrough`) and `site`: display extras
                             computed by the same rules code (profile card, limits)
@@ -35,15 +37,19 @@ REPORTS = [  # (file name, persona fixture dir, portfolio file, picker label); t
     ("amira-review", "amira", "portfolio.json", "Amira · portefeuille actuel"),
     ("mateo-review", "mateo", "portfolio.json", "Mateo · portefeuille actuel"),
 ]
-WHATIF_PERSONA = "robert"   # deploy/whatif.py precomputes the What-if scenarios for Robert's profile only
+# The Flow B demo report (deploy/preview_report.py output): its own file, and the profile directory it was built from.
+FLOW_B_NAME, FLOW_B_PROFILE = "robert-nvda", "robert"
+
+# The profiles the what-if is precomputed for are the ones REPORTS names (deploy/whatif.py takes the profile directory).
 
 
 def _val(x):
     return x.get("value") if isinstance(x, dict) and "value" in x else x
 
 
-def site_extras(persona: str, portfolio_file: str) -> dict:
-    """Display-only extras from the real rules code (derive + limits); nothing here is a check or a status."""
+def site_extras(persona: str, portfolio_file: str, whatif_files: dict | None = None) -> dict:
+    """Display-only extras from the real rules code (derive + limits); nothing here is a check or a status.
+    `whatif_files` = {"universe": file, "scenarios": file} (names inside reports/) of this profile's precomputed what-if."""
     from coherence_analyzer.rules import derive, limits as limits_mod
     fixture = FIXTURES / persona
     profile = json.loads((fixture / "profile.json").read_text())
@@ -53,7 +59,7 @@ def site_extras(persona: str, portfolio_file: str) -> dict:
     lim, trace = limits_mod.build_limits(p, value)
     first = (p["situation"].get("planned_withdrawals") or [{}])[0]
     return {
-        "as_of": as_of, "value_cad": value, "portfolio_file": portfolio_file, "whatif": persona == WHATIF_PERSONA,
+        "as_of": as_of, "value_cad": value, "portfolio_file": portfolio_file, "whatif": dict(whatif_files) if whatif_files else False,
         "weights_pct": {k: float(v) for k, v in pf["weights_pct"].items() if float(v) > 0},
         "limits": {k: v for k, v in lim.items() if not k.startswith("_") and k != "by"},
         "limits_trace": trace,
@@ -82,13 +88,35 @@ def missing_by_factor(persona: str) -> dict:
     return {f: intake.missing(profile, f) for f in intake.FACTORS}
 
 
-def build_reports(out: Path) -> list[dict]:
+def build_whatif(out: Path) -> dict[str, dict]:
+    """Precompute the what-if (deploy/whatif.py: universe + scenarios, real engine, no LLM) for each profile directory REPORTS
+    names, once per directory. Files: reports/universe-<dir>.json and reports/whatif-<dir>.json; the legacy reports/universe.json
+    and reports/whatif.json are those of the first review. Returns {dir name: {"universe": file, "scenarios": file}}."""
+    import whatif  # deploy/whatif.py
+    out.mkdir(parents=True, exist_ok=True)
+    files: dict[str, dict] = {}
+    for _, persona, _, _ in REPORTS:
+        if persona in files:
+            continue
+        uni, scen = f"universe-{persona}.json", f"whatif-{persona}.json"
+        with tempfile.TemporaryDirectory() as tmp:
+            whatif.build(Path(tmp), FIXTURES / persona)
+            shutil.copyfile(Path(tmp) / "universe.json", out / uni)
+            shutil.copyfile(Path(tmp) / "whatif.json", out / scen)
+        files[persona] = {"universe": uni, "scenarios": scen}
+    first = files[REPORTS[0][1]]
+    shutil.copyfile(out / first["universe"], out / "universe.json")
+    shutil.copyfile(out / first["scenarios"], out / "whatif.json")
+    return files
+
+
+def build_reports(out: Path, whatif_files: dict[str, dict] | None = None) -> list[dict]:
     from coherence_analyzer import pipeline
     out.mkdir(parents=True, exist_ok=True)
     index = []
     for name, persona, pf_file, template in REPORTS:
         rep = pipeline.review(FIXTURES / persona, pf_file)
-        extras = site_extras(persona, pf_file)
+        extras = site_extras(persona, pf_file, (whatif_files or {}).get(persona))
         label = _label(template, extras)
         rep["site"] = {**extras, "label": label, "intake": missing_by_factor(persona)}
         (out / f"{name}.json").write_text(json.dumps(rep, ensure_ascii=False, separators=(",", ":")))
@@ -109,10 +137,10 @@ def build_flow_b(out: Path) -> Path:
     out.mkdir(parents=True, exist_ok=True)
     with tempfile.TemporaryDirectory() as tmp:
         paths = mod.build(Path(tmp))
-        src = next(p for p in paths if p.stem == "robert-nvda")
-        dest = out / "robert-nvda.json"
+        src = next(p for p in paths if p.stem == FLOW_B_NAME)
+        dest = out / f"{FLOW_B_NAME}.json"
         doc = json.loads(src.read_text(encoding="utf-8"))
-        doc["intake"] = missing_by_factor("robert")        # static demo: the missing list, read-only (same persona as the report)
+        doc["intake"] = missing_by_factor(FLOW_B_PROFILE)  # static demo: the missing list, read-only (same profile as the report)
         dest.write_text(json.dumps(doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return dest
 
@@ -128,10 +156,9 @@ def build(out: Path) -> Path:
     try:
         with tempfile.TemporaryDirectory() as store:
             os.environ["COHERENCE_ANALYZER_STORE_DIR"] = store
-            build_reports(out / "reports")
+            files = build_whatif(out / "reports")
+            build_reports(out / "reports", files)
             build_flow_b(out / "reports")
-            import whatif  # deploy/whatif.py: Search-and-ask universe + What-if scenarios (real engine, no LLM)
-            whatif.build(out / "reports")
     finally:
         if saved is None:
             os.environ.pop("COHERENCE_ANALYZER_STORE_DIR", None)
