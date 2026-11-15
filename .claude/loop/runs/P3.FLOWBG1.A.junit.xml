@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="14" skipped="0" tests="19" time="2.969" timestamp="2026-11-15T01:16:21.454750+00:00" hostname="bomboclat-laptop"><testcase classname="tests.flows.test_flow_b_goals_stress" name="test_flow_b_report_carries_goals_and_stress_and_is_schema_valid" time="0.471"><failure message="AssertionError: Flow B report has no `goals` block&#10;assert False&#10; +  where False = isinstance(None, dict)&#10; +    where None = &lt;built-in method get of dict object at 0x73d8c7193c40&gt;('goals')&#10; +      where &lt;built-in method get of dict object at 0x73d8c7193c40&gt; = {'run_id': '01M7ECDP9PEXXYYZJ9WMMWHZ32', 'flow': 'B', 'profile_id': 'persona-robert', 'profile_version': 1, ...}.get">rep = {'run_id': '01M7ECDP9PEXXYYZJ9WMMWHZ32', 'flow': 'B', 'profile_id': 'persona-robert', 'profile_version': 1, ...}
+report_schema = {'$schema': 'https://json-schema.org/draft/2020-12/schema', '$id': 'https://coherence-analyzer.local/schemas/report.js...m = null. Flow B fills them (P2); headroom is the resizer result for the user's own funding only (SPEC §8, D10).", ...}
+
+    def test_flow_b_report_carries_goals_and_stress_and_is_schema_valid(rep, report_schema):
+        """SPEC §13 + P2.14 / P2.16: the Flow B report has the optional `goals` and `stress` blocks, and the whole
+        report validates against schemas/report.json (G1 checks are `info` only, stress `status` const `info`)."""
+        assert rep["flow"] == "B"
+&gt;       assert isinstance(rep.get("goals"), dict), "Flow B report has no `goals` block"
+E       AssertionError: Flow B report has no `goals` block
+E       assert False
+E        +  where False = isinstance(None, dict)
+E        +    where None = &lt;built-in method get of dict object at 0x73d8c7193c40&gt;('goals')
+E        +      where &lt;built-in method get of dict object at 0x73d8c7193c40&gt; = {'run_id': '01M7ECDP9PEXXYYZJ9WMMWHZ32', 'flow': 'B', 'profile_id': 'persona-robert', 'profile_version': 1, ...}.get
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowbg1/tests/flows/test_flow_b_goals_stress.py:183: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_b_goals_stress" name="test_saved_report_carries_the_same_blocks" time="0.001"><failure message="AssertionError: assert ('goals' in {'run_id': '01M7ECDP9PEXXYYZJ9WMMWHZ32', 'flow': 'B', 'profile_id': 'persona-robert', 'profile_version': 1, ...})">run = {'rep': {'run_id': '01M7ECDP9PEXXYYZJ9WMMWHZ32', 'flow': 'B', 'profile_id': 'persona-robert', 'profile_version': 1, .....XYYZJ9WMMWHZ32', 'flow': 'B', 'started_at': '2026-11-15T01:16:21+00:00', 'ended_at': '2026-11-15T01:16:22+00:00', ...}}
+rep = {'run_id': '01M7ECDP9PEXXYYZJ9WMMWHZ32', 'flow': 'B', 'profile_id': 'persona-robert', 'profile_version': 1, ...}
+
+    def test_saved_report_carries_the_same_blocks(run, rep):
+        """SPEC §4 B9: `report.save` writes the report the caller gets: the stored copy has the same goals and stress."""
+        saved = run["saved"]
+&gt;       assert "goals" in saved and "stress" in saved
+E       AssertionError: assert ('goals' in {'run_id': '01M7ECDP9PEXXYYZJ9WMMWHZ32', 'flow': 'B', 'profile_id': 'persona-robert', 'profile_version': 1, ...})
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowbg1/tests/flows/test_flow_b_goals_stress.py:192: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_b_goals_stress" name="test_goals_block_header_is_the_declared_contribution_and_the_horizon" time="0.000"><failure message="KeyError: 'goals'">rep = {'run_id': '01M7ECDP9PEXXYYZJ9WMMWHZ32', 'flow': 'B', 'profile_id': 'persona-robert', 'profile_version': 1, ...}
+
+    def test_goals_block_header_is_the_declared_contribution_and_the_horizon(rep):
+        """SPEC §7.3 G1 + README P2.14: the block names the user-declared contribution and the simulated horizon."""
+&gt;       g = rep["goals"]
+            ^^^^^^^^^^^^
+E       KeyError: 'goals'
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowbg1/tests/flows/test_flow_b_goals_stress.py:201: KeyError</failure></testcase><testcase classname="tests.flows.test_flow_b_goals_stress" name="test_goal_probs_come_from_the_proposed_portfolio_with_the_declared_contribution" time="0.141"><failure message="KeyError: 'goals'">rep = {'run_id': '01M7ECDP9PEXXYYZJ9WMMWHZ32', 'flow': 'B', 'profile_id': 'persona-robert', 'profile_version': 1, ...}
+expected_goals = {'current': {'vol': 0.0727, 'vol_local': 0.0793, 'mdd': -0.077, 'mdd_date': '2022-09', ...}, 'proposed': {'vol': 0.0983, 'vol_local': 0.1075, 'mdd': -0.134, 'mdd_date': '2022-09', ...}}
+
+    def test_goal_probs_come_from_the_proposed_portfolio_with_the_declared_contribution(rep, expected_goals):
+        """SPEC §13 + §7.5 + spec-factors §20.4: a Flow B report is on the proposed side, so the single `goals` block
+        is the engine's `goal_probs` for the proposed weights, with the declared contribution and goals (same seed)."""
+        # SPEC-AMBIGUITY: the schema has one `goals` block; the stricter reading is the proposed side (verdict, sections
+        # and explanation are proposed). The guard below makes sure this assertion can tell the two sides apart.
+        cur, prop = expected_goals["current"]["goal_probs"], expected_goals["proposed"]["goal_probs"]
+        assert [p["prob"] for p in cur] != [p["prob"] for p in prop], "test guard: the two sides must differ"
+&gt;       got = rep["goals"]["goal_probs"]
+              ^^^^^^^^^^^^
+E       KeyError: 'goals'
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowbg1/tests/flows/test_flow_b_goals_stress.py:214: KeyError</failure></testcase><testcase classname="tests.flows.test_flow_b_goals_stress" name="test_g1_checks_one_info_check_per_declared_goal" time="0.000"><failure message="KeyError: 'goals'">rep = {'run_id': '01M7ECDP9PEXXYYZJ9WMMWHZ32', 'flow': 'B', 'profile_id': 'persona-robert', 'profile_version': 1, ...}
+declared_goals = [{'name': 'Retire at 63', 'date': '2030-06', 'amount': 450000, 'priority': 1}, {'name': 'Help children with a down payment', 'date': '2032-01', 'amount': 40000, 'priority': 2}]
+expected_goals = {'current': {'vol': 0.0727, 'vol_local': 0.0793, 'mdd': -0.077, 'mdd_date': '2022-09', ...}, 'proposed': {'vol': 0.0983, 'vol_local': 0.1075, 'mdd': -0.134, 'mdd_date': '2022-09', ...}}
+
+    def test_g1_checks_one_info_check_per_declared_goal(rep, declared_goals, expected_goals):
+        """SPEC §7.3 G1: always `info`, one per declared goal in the profile's order, rule-sourced, assumption labels;
+        a goal outside the horizon has no number (`value` None, `goal_outside_horizon`)."""
+&gt;       checks = rep["goals"]["checks"]
+                 ^^^^^^^^^^^^
+E       KeyError: 'goals'
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowbg1/tests/flows/test_flow_b_goals_stress.py:227: KeyError</failure></testcase><testcase classname="tests.flows.test_flow_b_goals_stress" name="test_g1_derives_from_declared_fields_never_from_limits_or_llm" time="0.000"><failure message="KeyError: 'goals'">rep = {'run_id': '01M7ECDP9PEXXYYZJ9WMMWHZ32', 'flow': 'B', 'profile_id': 'persona-robert', 'profile_version': 1, ...}
+
+    def test_g1_derives_from_declared_fields_never_from_limits_or_llm(rep):
+        """CLAUDE.md invariant 2: the goals block is built from `objectives.goals` and `situation.monthly_contribution`,
+        never from `limits.*` or an `llm:` field."""
+&gt;       for c in rep["goals"]["checks"]:
+                 ^^^^^^^^^^^^
+E       KeyError: 'goals'
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowbg1/tests/flows/test_flow_b_goals_stress.py:247: KeyError</failure></testcase><testcase classname="tests.flows.test_flow_b_goals_stress" name="test_g1_stays_out_of_the_checks_the_diff_the_unknowns_and_the_verdict" time="0.000" /><testcase classname="tests.flows.test_flow_b_goals_stress" name="test_objectif_section_shows_g1_like_flow_c" time="0.001"><failure message="AssertionError: ['checks', 'declared', 'derived', 'evidence_events', 'factor', 'intent', ...]&#10;assert ('goals' in {'factor': 'objectif', 'locale': 'fr-CA', 'question': 'Pourquoi investir?', 'status': 'pass', ...})">rep = {'run_id': '01M7ECDP9PEXXYYZJ9WMMWHZ32', 'flow': 'B', 'profile_id': 'persona-robert', 'profile_version': 1, ...}
+expected_goals = {'current': {'vol': 0.0727, 'vol_local': 0.0793, 'mdd': -0.077, 'mdd_date': '2022-09', ...}, 'proposed': {'vol': 0.0983, 'vol_local': 0.1075, 'mdd': -0.134, 'mdd_date': '2022-09', ...}}
+declared_goals = [{'name': 'Retire at 63', 'date': '2030-06', 'amount': 450000, 'priority': 1}, {'name': 'Help children with a down payment', 'date': '2032-01', 'amount': 40000, 'priority': 2}]
+
+    def test_objectif_section_shows_g1_like_flow_c(rep, expected_goals, declared_goals):
+        """spec-factors §20.3 + README P2.14: the objectif facts carry `goals` / `goal_assumptions` (pre-formatted
+        strings, same shape as Flow C); no other section does, and the section status is untouched by G1."""
+        facts = _section(rep, "objectif")["facts"]
+&gt;       assert "goals" in facts and "goal_assumptions" in facts, sorted(facts)
+E       AssertionError: ['checks', 'declared', 'derived', 'evidence_events', 'factor', 'intent', ...]
+E       assert ('goals' in {'factor': 'objectif', 'locale': 'fr-CA', 'question': 'Pourquoi investir?', 'status': 'pass', ...})
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowbg1/tests/flows/test_flow_b_goals_stress.py:268: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_b_goals_stress" name="test_stress_block_is_the_stress_module_on_the_proposed_portfolio" time="0.022"><failure message="KeyError: 'stress'">rep = {'run_id': '01M7ECDP9PEXXYYZJ9WMMWHZ32', 'flow': 'B', 'profile_id': 'persona-robert', 'profile_version': 1, ...}
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+
+    def test_stress_block_is_the_stress_module_on_the_proposed_portfolio(rep, profile):
+        """README P2.16 + SPEC §13: the block is `stress.stress_block` (same helper as Flow C) on the proposed weights and
+        value, the portfolio as_of, the macro series and the asset_meta; no logic of its own."""
+        # SPEC-AMBIGUITY: one `stress` block; stricter reading = the proposed side, as for `goals`.
+        expected = _expected_stress(engine.ROBERT_NVDA, VALUE, profile)
+        current = _expected_stress(engine.ROBERT, VALUE, profile)
+        assert expected["scenarios"] != current["scenarios"], "test guard: the two sides must differ"
+&gt;       _same(store.plain(rep["stress"]), expected)
+                          ^^^^^^^^^^^^^
+E       KeyError: 'stress'
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowbg1/tests/flows/test_flow_b_goals_stress.py:294: KeyError</failure></testcase><testcase classname="tests.flows.test_flow_b_goals_stress" name="test_stress_is_information_only" time="0.000"><failure message="KeyError: 'stress'">rep = {'run_id': '01M7ECDP9PEXXYYZJ9WMMWHZ32', 'flow': 'B', 'profile_id': 'persona-robert', 'profile_version': 1, ...}
+
+    def test_stress_is_information_only(rep):
+        """README P2.16 + schemas/report.json: `status` info, `kind` rate_scenario, `feeds_limits` false, the four
+        scenarios (-100 / +100 / +200 bp and the historical one), labelled assumptions, `sourced` false (ASSUMED durations)."""
+&gt;       s = rep["stress"]
+            ^^^^^^^^^^^^^
+E       KeyError: 'stress'
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowbg1/tests/flows/test_flow_b_goals_stress.py:300: KeyError</failure></testcase><testcase classname="tests.flows.test_flow_b_goals_stress" name="test_stress_is_never_a_check_an_unknown_or_part_of_the_verdict" time="0.001" /><testcase classname="tests.flows.test_flow_b_goals_stress" name="test_verdict_checks_headroom_and_metrics_are_unchanged" time="0.141" /><testcase classname="tests.flows.test_flow_b_goals_stress" name="test_goal_and_contribution_edits_move_the_goals_block_only" time="0.414"><failure message="KeyError: 'goals'">tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-396/test_goal_and_contribution_edi0')
+rep = {'run_id': '01M7ECDP9PEXXYYZJ9WMMWHZ32', 'flow': 'B', 'profile_id': 'persona-robert', 'profile_version': 1, ...}
+
+    def test_goal_and_contribution_edits_move_the_goals_block_only(tmp_path, rep):
+        """CLAUDE.md invariant 2: a different declared goal amount changes the G1 numbers and nothing that feeds
+        limits: same hard checks, verdict, headroom, section statuses and stress block."""
+        def edit(p):
+            p["objectives"]["goals"][0]["amount"] = 900_000
+    
+        alt = _check(_fixture_copy(tmp_path, edit))
+&gt;       assert alt["goals"]["goal_probs"][0]["prob"] &lt; rep["goals"]["goal_probs"][0]["prob"]
+               ^^^^^^^^^^^^
+E       KeyError: 'goals'
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowbg1/tests/flows/test_flow_b_goals_stress.py:356: KeyError</failure></testcase><testcase classname="tests.flows.test_flow_b_goals_stress" name="test_without_declared_goals_the_blocks_stay_present_and_empty" time="0.415"><failure message="KeyError: 'goals'">tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-396/test_without_declared_goals_th0')
+rep = {'run_id': '01M7ECDP9PEXXYYZJ9WMMWHZ32', 'flow': 'B', 'profile_id': 'persona-robert', 'profile_version': 1, ...}
+
+    def test_without_declared_goals_the_blocks_stay_present_and_empty(tmp_path, rep):
+        """Flow C shape (`pipeline._goals_block`): no goals declared -&gt; `goals` block with empty `goal_probs` / `checks`
+        (the contribution and horizon still stated), no `goals` row in the objectif facts; stress unchanged."""
+        def edit(p):
+            p["objectives"]["goals"] = []
+    
+        alt = _check(_fixture_copy(tmp_path, edit))
+&gt;       g = alt["goals"]
+            ^^^^^^^^^^^^
+E       KeyError: 'goals'
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowbg1/tests/flows/test_flow_b_goals_stress.py:374: KeyError</failure></testcase><testcase classname="tests.flows.test_flow_b_goals_stress" name="test_blocks_describe_and_never_prescribe" time="0.000"><failure message="KeyError: 'goals'">rep = {'run_id': '01M7ECDP9PEXXYYZJ9WMMWHZ32', 'flow': 'B', 'profile_id': 'persona-robert', 'profile_version': 1, ...}
+
+    def test_blocks_describe_and_never_prescribe(rep):
+        """D10 + SPEC §1 inv. 7: every user-facing string of both blocks (and of the objectif goal rows) describes; none
+        tells the user to buy, sell or do anything."""
+&gt;       texts = (_strings(rep["goals"]) + _strings(rep["stress"]["assumptions"]) + _strings(rep["stress"]["facts"])
+                          ^^^^^^^^^^^^
+                 + _strings(_section(rep, "objectif")["facts"].get("goals")))
+E       KeyError: 'goals'
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowbg1/tests/flows/test_flow_b_goals_stress.py:388: KeyError</failure></testcase><testcase classname="tests.flows.test_flow_b_goals_stress" name="test_audit_record_still_has_no_blocks_beyond_the_report" time="0.000" /><testcase classname="tests.flows.test_flow_b_goals_stress" name="test_step_functions_path_carries_the_same_blocks" time="0.422"><failure message="KeyError: 'goals'">rep = {'run_id': '01M7ECDP9PEXXYYZJ9WMMWHZ32', 'flow': 'B', 'profile_id': 'persona-robert', 'profile_version': 1, ...}
+report_schema = {'$schema': 'https://json-schema.org/draft/2020-12/schema', '$id': 'https://coherence-analyzer.local/schemas/report.js...m = null. Flow B fills them (P2); headroom is the resizer result for the user's own funding only (SPEC §8, D10).", ...}
+tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-396/test_step_functions_path_carri0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x73d8c4660a50&gt;
+
+    def test_step_functions_path_carries_the_same_blocks(rep, report_schema, tmp_path, monkeypatch):
+        """P2.15 stays green: the Lambda steps (state through JSON) give a report whose `goals` and `stress` equal
+        those of `pipeline.check`, and that validates against the schema."""
+        monkeypatch.setenv("COHERENCE_ANALYZER_STORE_DIR", str(tmp_path / "sfn_store"))
+        out = _run_steps_through_handler()
+        assert not list(Draft202012Validator(report_schema).iter_errors(out))
+&gt;       _same(store.plain(out["goals"]), store.plain(rep["goals"]))
+                          ^^^^^^^^^^^^
+E       KeyError: 'goals'
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowbg1/tests/flows/test_flow_b_goals_stress.py:429: KeyError</failure></testcase><testcase classname="tests.flows.test_flow_b_goals_stress" name="test_api_confirm_route_returns_the_report_with_both_blocks" time="0.574"><failure message="KeyError: 'goals'">rep = {'run_id': '01M7ECDP9PEXXYYZJ9WMMWHZ32', 'flow': 'B', 'profile_id': 'persona-robert', 'profile_version': 1, ...}
+report_schema = {'$schema': 'https://json-schema.org/draft/2020-12/schema', '$id': 'https://coherence-analyzer.local/schemas/report.js...m = null. Flow B fills them (P2); headroom is the resizer result for the user's own funding only (SPEC §8, D10).", ...}
+tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-396/test_api_confirm_route_returns0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x73d8c4fe9be0&gt;
+
+    def test_api_confirm_route_returns_the_report_with_both_blocks(rep, report_schema, tmp_path, monkeypatch):
+        """SPEC §12: `POST /intents/{id}/confirm` runs the Flow B steps, so its report carries the same `goals` and
+        `stress` as `pipeline.check` for the same trade (NVDA 10 % funded from ZST.TO)."""
+        from fastapi.testclient import TestClient
+        from coherence_analyzer import api
+    
+        monkeypatch.setenv("COHERENCE_ANALYZER_STORE_DIR", str(tmp_path / "api_store"))
+        client = TestClient(api.app)
+        assert client.get("/profiles/persona-robert").status_code == 200
+        r = client.post("/profiles/persona-robert/events", json={
+            "type": "order_intent", "text": "I want to put 10% in NVDA, everyone's talking about it",
+            "ts": "2026-11-15T10:00:00-05:00", "source": "ui_chat"})
+        assert r.status_code in (200, 201), r.text
+        body = r.json()
+        draft = body.get("intent") if isinstance(body.get("intent"), dict) else body.get("draft")
+        confirm = client.post(f"/intents/{draft['intent_id']}/confirm", json={
+            "ticker": "NVDA", "target_weight_pct": 10, "funding": {"kind": "specific", "ticker": "ZST.TO"}})
+        assert confirm.status_code == 200, confirm.text
+        out = confirm.json()
+        assert not list(Draft202012Validator(report_schema).iter_errors(out))
+&gt;       _same(store.plain(out["goals"]), store.plain(rep["goals"]))
+                          ^^^^^^^^^^^^
+E       KeyError: 'goals'
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowbg1/tests/flows/test_flow_b_goals_stress.py:454: KeyError</failure></testcase><testcase classname="tests.flows.test_flow_b_goals_stress" name="test_activity_tags_csv_is_never_written" time="0.002" /></testsuite></testsuites>

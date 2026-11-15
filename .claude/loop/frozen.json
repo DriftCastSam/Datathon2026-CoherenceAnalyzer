@@ -18,6 +18,7 @@
     "tests/flows/test_api_flow_b.py": "99a8271eb3980c7331adb0f9268eeccef9f47876b43991f1390a9eb13053610b",
     "tests/flows/test_cli_disclaimer.py": "bb5a48897006aed5a44b54976ae61607739aaa8bf984862ef8287a9f8e826931",
     "tests/flows/test_flow_b.py": "a0f02e120c32f29afd1cd6b008c4adf54bbca974ae902703e0cf2984cdb45d4c",
+    "tests/flows/test_flow_b_goals_stress.py": "38db3920f94ff835b84c7edf9461db5ed44f4cfb5f061f2b20668bf5e00ee6ec",
     "tests/flows/test_personas.py": "7b90e33fd67b536b552f6152f12aceea5cb1a53eb9fb787c07d5404e3dd58d72",
     "tests/flows/test_pipeline_offline.py": "b909ef122e4b1d21b057478c394b5f217ba412533774e97a9b89fbe94ab1f04c",
     "tests/llm/test_bedrock_mock.py": "8c47b7370c2d4ea446f72035a6fc99f1a187162c9e37389e019d04d6105c9b79",
