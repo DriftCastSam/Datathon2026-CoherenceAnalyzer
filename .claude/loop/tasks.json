@@ -1093,6 +1093,79 @@
     "README.md"
    ],
    "notes": "End-to-end finding (P5.USERS): a user created with POST /profiles who answers every intake question and sets a portfolio still gets risk.capacity, risk.effective and identity.life_stage null, so every risk-table limit is null and horizon / risque / contraintes are all `unknown`. Cause: rules/registry.REGISTRY and rules/limits.LIMIT_INPUTS read user-declared paths that intake.REQUIRED never asks: identity.age, identity.employment_type (both needed for life_stage / income_stability / capacity), knowledge.declared_level, and the optional preferences.max_fee_mer_pct and values.environment|social|governance.exclusions. knowledge.quiz_score (quiz events) and knowledge.question_quality (N2) are not intake questions. Required: (1) intake.REQUIRED (each path under the factor that owns it per §20.2) includes every declared input whose absence makes a derived field or a limit null; optional inputs either get a question whose 'none' answer is an empty list / null meaning 'no constraint' (state which in README) or stay optional with a one-line reason; fixed fr-CA and en-CA question texts for each new path, no LLM, D10 wording; (2) a test computes the declared inputs from REGISTRY and LIMIT_INPUTS (minus rule outputs, llm: fields and event-fed fields) and asserts each is in REQUIRED or in an explicit OPTIONAL list; (3) a test builds a profile from an empty v2 profile by answering every REQUIRED path (plausible values, plus a portfolio) and asserts derive_all + build_limits give no null limit except those whose input was skipped; (4) the three personas' intake.missing stays empty (their fixtures already hold these fields) and every persona report is unchanged. Touch only intake.py (plus README and the new test). No network, no pip install. P5.DASH edits deploy/ in parallel. Do not change frozen tests; if one pins the old REQUIRED tuple exactly, write .claude/loop/BLOCKED.md naming it (owner request 2026-11-14: the app must work for any user, which makes a pinned persona-only checklist stale). OWNER DECISION (2026-11-14, after the phase-A BLOCKED): full fix, the three new paths are skippable like the others. The owner updated the frozen tests: test_skipped_fields now expects 18 REQUIRED paths, employment_type in TABLE_PATHS / _CAP, DERIVED_DEPENDS life_stage <- {retirement_target_age, age}, income_stability <- {employment_type}, knowledge.score <- {declared_level} (null when skipped, never a default); test_new_user_no_portfolio ANSWERS carries the three answers. You now also own schemas/profile.v2.json (add the $defs/skipped alternative for identity.age, identity.employment_type and knowledge.declared_level) and rules/derive.py (a skipped declared_level gives knowledge.score null instead of raising; a skipped employment_type gives income_stability null; P3.SKIP convention). Engine math is untouched."
+  },
+  {
+   "id": "P6.PROVISIONAL",
+   "title": "D11: numeric note rules become provisional limits at once; checks against them capped at warning until approved",
+   "spec": [
+    "docs/spec-decisions.md D11",
+    "§1 inv. 1-3 (as amended in CLAUDE.md)",
+    "§6.2 N3",
+    "§7.2",
+    "§7.3 H13",
+    "§7.4 S4",
+    "§11"
+   ],
+   "tests": [
+    "tests/profile/test_provisional_limits.py"
+   ],
+   "code": [
+    "coherence_analyzer/rules/limits.py",
+    "coherence_analyzer/coherence/hard.py (H13 and the shared status helper only)",
+    "coherence_analyzer/schemas/profile.v2.json",
+    "coherence_analyzer/schemas/report.json",
+    "README.md"
+   ],
+   "notes": "Implement D11 exactly: a gated, unapproved max_theme_weight rule with a numeric max_pct is promoted into limits.max_theme_weight with provisional: true and limits_trace naming values.parsed_notes[provisional]; H13 against a provisional limit is at most `warning` (never violation) and its check says it comes from the user's notes (quote in subject / derived_from); approval (approved_by_user true, via the existing decision route + refresh) makes it full strength (violation possible, trace [approved_by_user]); rejection removes it; rules without a number are unchanged. Amira's fixture: her tech_heavy rule is already approved, so her report is unchanged; write a test on a copy with the rule unapproved. The frozen guard test tests/profile/test_limits_no_llm_inputs.py pins the old rule (unapproved parsed rules never in limits): the owner approved updating it, the orchestrator does that after your phase A; do not touch it. Do not edit pipeline.py, api.py, explain.py (other lanes). These P6 tasks run IN PARALLEL in separate worktrees: edit only the files (and functions) your task owns, plus README.md and new test files. Read docs/spec-decisions.md D11-D18 first: they are new owner decisions and win over SPEC.md. No network, no pip install, no real AWS calls in code paths the tests run. Never write the activity-tags meta CSV. The engine golden test must stay green (no engine math change). D10 applies to every user-facing string. Do not change frozen tests; if one contradicts D11-D18 write .claude/loop/BLOCKED.md naming it (the owner approved updating tests that pin the old behaviour, the orchestrator will do it). Persona fixtures, their reports and the demo keep their current results except where a D-entry changes them on purpose (say which in README)."
+  },
+  {
+   "id": "P6.DATES",
+   "title": "D12 + D15: 'today' is the run date (recorded, pinned for fixtures) and objectives.start_date defers the start",
+   "spec": [
+    "docs/spec-decisions.md D12 D15 (D1 replaced for live use)",
+    "§7.1",
+    "§6.2 N1",
+    "§7.3 G1",
+    "§10 audit",
+    "docs/spec-factors.md §20.6"
+   ],
+   "tests": [
+    "tests/profile/test_reference_date_and_start.py"
+   ],
+   "code": [
+    "coherence_analyzer/config.py (reference-date settings only)",
+    "coherence_analyzer/pipeline.py (where the reference date is resolved and passed; not b9_save / build_trade_check)",
+    "coherence_analyzer/rules/derive.py",
+    "coherence_analyzer/intake.py",
+    "coherence_analyzer/schemas/profile.v2.json",
+    "README.md"
+   ],
+   "notes": "D12: one function resolves the reference date: COHERENCE_ANALYZER_TODAY if set, else for seed persona profiles (meta.origin 'seed' or absent on a fixture) portfolio.as_of, else the run date in the profile's time zone (America/Toronto default; config); every rule that used portfolio.as_of as 'today' uses it (effective horizon, withdrawals within 24 months, N1 30-day window, G1); the audit records reference_date and its source (env | portfolio.as_of | run_date). Persona reports and all existing tests stay identical (they resolve to portfolio.as_of). D15: optional declared objectives.start_date (YYYY-MM) in the schema; horizon end = max(start, reference) + horizon_years; effective horizon = months from the reference date to min(horizon end, first planned withdrawal); absent or past = starts now; an optional intake question for it under `horizon` (empty answer = starts now; add it to intake's OPTIONAL list, not REQUIRED, so the 18-path frozen count holds). Tests freeze the clock (monkeypatch the resolver), never read the wall clock. Do not edit limits.py, hard.py, report.py, explain.py or api.py (other lanes). These P6 tasks run IN PARALLEL in separate worktrees: edit only the files (and functions) your task owns, plus README.md and new test files. Read docs/spec-decisions.md D11-D18 first: they are new owner decisions and win over SPEC.md. No network, no pip install, no real AWS calls in code paths the tests run. Never write the activity-tags meta CSV. The engine golden test must stay green (no engine math change). D10 applies to every user-facing string. Do not change frozen tests; if one contradicts D11-D18 write .claude/loop/BLOCKED.md naming it (the owner approved updating tests that pin the old behaviour, the orchestrator will do it). Persona fixtures, their reports and the demo keep their current results except where a D-entry changes them on purpose (say which in README)."
+  },
+  {
+   "id": "P6.TRADEMSG",
+   "title": "D13 + D16: each limit a trade crosses is one plain statement (facts + the user's own words); two fixed disclaimers by profile origin",
+   "spec": [
+    "docs/spec-decisions.md D13 D16",
+    "§4 Flow B B9",
+    "§8",
+    "§9.4",
+    "§13",
+    "§18",
+    "D10"
+   ],
+   "tests": [
+    "tests/flows/test_trade_statements_and_disclaimers.py"
+   ],
+   "code": [
+    "coherence_analyzer/coherence/report.py",
+    "coherence_analyzer/explain.py (new template functions only)",
+    "coherence_analyzer/config.py (DISCLAIMER only)",
+    "coherence_analyzer/api.py (create-profile route: set meta.origin 'user')",
+    "coherence_analyzer/schemas/report.json",
+    "README.md"
+   ],
+   "notes": "D13: the Flow B report gains a `trade_statements` list: one entry per hard limit the trade crosses (same set the headroom uses: violations added or worsened, D14), each {check_id, text, refs} with FR and EN templates of the D13 form ('Making this trade takes you outside your profile: <limit> (<limit value>). Facts: <value after>[, <value before>]. From what you told us: '<quote>' (<source>).'); the quote part only when the limit traces to a parsed note rule or an event, quoted verbatim; every number comes from the facts payload (explain.numcheck passes); no question, no button, no suggestion (D10 blocklist); status and verdict unchanged. Build it in report.build_trade_check (do not edit pipeline.py). D16: config.DISCLAIMER becomes two fixed texts per locale (seed: current text; user: without the fictional-profiles clause, exact wording in D16); reports pick by profile meta.origin ('user' set by POST /profiles; anything else = seed); persona reports keep the current text byte for byte. Do not edit limits.py, hard.py, derive.py, intake.py (other lanes). These P6 tasks run IN PARALLEL in separate worktrees: edit only the files (and functions) your task owns, plus README.md and new test files. Read docs/spec-decisions.md D11-D18 first: they are new owner decisions and win over SPEC.md. No network, no pip install, no real AWS calls in code paths the tests run. Never write the activity-tags meta CSV. The engine golden test must stay green (no engine math change). D10 applies to every user-facing string. Do not change frozen tests; if one contradicts D11-D18 write .claude/loop/BLOCKED.md naming it (the owner approved updating tests that pin the old behaviour, the orchestrator will do it). Persona fixtures, their reports and the demo keep their current results except where a D-entry changes them on purpose (say which in README)."
   }
  ]
 }
