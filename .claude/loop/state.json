@@ -41,6 +41,7 @@
     "P4.CACHE": "impl",
     "P4.CLIDRAFT": "impl",
     "P4.DECISION": "impl",
+    "P4.N1WIN": "tests",
     "P4.N4GATE": "impl",
     "P4.WARNEN": "impl"
   }
