@@ -18,7 +18,18 @@ pip install -r requirements.txt
 COHERENCE_ANALYZER_LLM=mock pytest -q
 COHERENCE_ANALYZER_LLM=mock python -m coherence_analyzer.cli demo
 COHERENCE_ANALYZER_LLM=record python -m coherence_analyzer.cli demo   # needs AWS creds + BEDROCK_MODEL_ID
+python scripts/loop_lane.py run P2.X [-- <agent_loop args>]   # one build-loop lane (worktree + branch loop/p2.x)
+python scripts/loop_lane.py status                            # all lanes: RUNNING / DETACHED / idle + last log line
 ```
+
+## Parallel build-loop lanes
+- One lane per task, each launched as its own tracked task so it shows in the Claude Code panel:
+  a separate Bash call with `run_in_background: true` running `python scripts/loop_lane.py run <ID>`
+  (all lanes in one message). Never `nohup`, `setsid` or a trailing `&`: that detaches the lane, it
+  disappears from the UI and can't be stopped from it.
+- `loop_lane.py` holds a lock per lane (refuses double launches), appends to `.claude/worktrees/<slug>.log`
+  and stops the loop when its task is stopped. Check progress with `status`, not `sleep` + `tail`.
+- Merge a finished lane into `loop/p0` by hand, like the existing `Merge loop/p2.*` commits.
 
 ## Conventions
 - Python 3.11, type hints, pure functions in `rules/` and `coherence/`.
