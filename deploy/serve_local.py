@@ -16,7 +16,7 @@ import os
 import sys
 import tempfile
 from pathlib import Path
-from types import SimpleNamespace
+from typing import Any
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -38,11 +38,11 @@ API_MOUNT_PATH = "/api"
 SITE_API_PREFIX = "/site-api"
 PORTFOLIO_FILE = "portfolio.json"
 LIVE_LABEL_SUFFIX = " · live analysis"
-STORE_DIR_ENV = "COHERENCE_ANALYZER_STORE_DIR"
+STORE_DIR_ENV = build_site.STORE_DIR_ENV
 STORE_DIR_PREFIX = "coherence-serve-"
 
 
-def live_review(profile_id: str) -> dict:
+def live_review(profile_id: str) -> dict[str, Any]:
     """Run the API review, then attach the display-only `site` block.
 
     The block is computed by `build_site.site_extras` from the persona's
@@ -52,11 +52,10 @@ def live_review(profile_id: str) -> dict:
         HTTPException: 404 for an unknown profile, 422 when the review rejects it.
     """
     report = api.post_review(profile_id)
-    work, fixture = api._workdir(profile_id)
+    work, fixture = api.workdir(profile_id)
     name = build_site.load_persona(fixture.name).name
-    persona = SimpleNamespace(path=work, name=name)
     report["site"] = {
-        **build_site.site_extras(persona, PORTFOLIO_FILE),
+        **build_site.site_extras(work, name, PORTFOLIO_FILE),
         "label": f"{name}{LIVE_LABEL_SUFFIX}",
     }
     return report

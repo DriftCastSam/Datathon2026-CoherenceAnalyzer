@@ -11,6 +11,7 @@ from deploy.serve_local import create_app
 INDEX_HTML = "<!doctype html><title>site</title><p>hello</p>"
 SITE_REVIEW_URL = "/site-api/profiles"
 EDITED_RISK = "high"
+SKIPPABLE_PATH = "risk.reaction_to_20pct_drop"
 PERSONA_IDS = {"persona-robert", "persona-amira", "persona-mateo"}
 
 
@@ -73,3 +74,30 @@ def test_site_review_reflects_edited_risk_answer(client: TestClient) -> None:
 
 def test_site_review_unknown_profile_returns_404(client: TestClient) -> None:
     assert client.post(f"{SITE_REVIEW_URL}/persona-nobody/review").status_code == 404
+
+
+def test_site_review_survives_skipped_answer(client: TestClient) -> None:
+    skip = client.post("/api/profiles/persona-robert/intake/skip", json={"path": SKIPPABLE_PATH})
+    assert skip.status_code == 200
+
+    response = client.post(f"{SITE_REVIEW_URL}/persona-robert/review")
+
+    assert response.status_code == 200
+    card = response.json()["site"]["profile_card"]
+    assert not any(isinstance(value, dict) and "value" in value for value in card.values())
+
+
+def test_intake_skip_rejects_schema_required_path(client: TestClient) -> None:
+    response = client.post(
+        "/api/profiles/persona-robert/intake/skip", json={"path": "situation.planned_withdrawals"}
+    )
+
+    assert response.status_code == 422
+
+
+def test_intake_answer_rejects_non_intake_path(client: TestClient) -> None:
+    response = client.post(
+        "/api/profiles/persona-robert/intake/answer", json={"path": "identity.name", "value": "x"}
+    )
+
+    assert response.status_code == 422
