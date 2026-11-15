@@ -11,7 +11,7 @@ from deploy.serve_local import create_app
 INDEX_HTML = "<!doctype html><title>site</title><p>hello</p>"
 SITE_REVIEW_URL = "/site-api/profiles"
 EDITED_RISK = "high"
-SKIPPABLE_PATH = "risk.reaction_to_20pct_drop"
+SKIPPABLE_PATH = "preferences.prefers_dividends"
 PERSONA_IDS = {"persona-robert", "persona-amira", "persona-mateo"}
 
 
@@ -89,7 +89,7 @@ def test_site_review_survives_skipped_answer(client: TestClient) -> None:
 
 def test_intake_skip_allows_skippable_required_paths(client: TestClient) -> None:
     response = client.post(
-        "/api/profiles/persona-robert/intake/skip", json={"path": "situation.planned_withdrawals"}
+        "/api/profiles/persona-robert/intake/skip", json={"path": "preferences.prefers_dividends"}
     )
 
     assert response.status_code == 200
@@ -207,3 +207,42 @@ def test_whatif_route_reflects_edited_risk_answer(client: TestClient) -> None:
     # The checks dictionary should differ (risk.declared affects limits and checks)
     # At minimum, the risk-related checks should be different
     assert edited_base["checks"] != original_base["checks"]
+
+
+def test_whatif_route_rejects_invalid_ticker_without_building_context(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from deploy import whatif
+
+    def fail_if_called(*args, **kwargs):
+        raise AssertionError("whatif.context should not be called for invalid ticker")
+
+    monkeypatch.setattr(whatif, "context", fail_if_called)
+
+    response = client.post(
+        f"{SITE_REVIEW_URL}/persona-robert/whatif", json={"tickers": ["INVALID_TICKER"]}
+    )
+
+    assert response.status_code == 422
+    assert "not in the universe" in response.text.lower()
+
+
+def test_whatif_route_returns_422_for_invalid_profile(
+    client: TestClient, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from coherence_analyzer import pipeline
+
+    original_load = pipeline._load_profile
+
+    def raise_on_load(fixture_dir):
+        result = original_load(fixture_dir)
+        raise ValueError("profile validation failed: invalid field")
+
+    monkeypatch.setattr(pipeline, "_load_profile", raise_on_load)
+
+    response = client.post(
+        f"{SITE_REVIEW_URL}/persona-robert/whatif", json={"tickers": ["AAPL"]}
+    )
+
+    assert response.status_code == 422
+    assert "profile validation failed" in response.text

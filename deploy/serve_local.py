@@ -28,7 +28,7 @@ from fastapi import FastAPI, HTTPException  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
 from pydantic import BaseModel, Field, field_validator  # noqa: E402
 
-from coherence_analyzer import api  # noqa: E402
+from coherence_analyzer import api, data  # noqa: E402
 from coherence_analyzer.api import app as api_app  # noqa: E402
 from deploy import build_site, whatif  # noqa: E402
 
@@ -46,13 +46,6 @@ MAX_WHATIF_TICKERS = 10
 
 class WhatifRequest(BaseModel):
     tickers: list[str] = Field(..., min_length=1, max_length=MAX_WHATIF_TICKERS)
-
-    @field_validator("tickers")
-    @classmethod
-    def check_tickers(cls, v: list[str]) -> list[str]:
-        if not v:
-            raise ValueError("at least one ticker is required")
-        return v
 
 
 def live_review(profile_id: str) -> dict[str, Any]:
@@ -92,13 +85,18 @@ def live_whatif(profile_id: str, body: WhatifRequest) -> dict[str, Any]:
         HTTPException: 404 for unknown profile, 422 for invalid tickers or count
     """
     work, _ = api.workdir(profile_id)
-    ctx = whatif.context(work, build_site.SITE_LOCALE)
-    univ = whatif.universe(ctx)
-
-    valid_tickers = {a["ticker"] for a in univ["assets"]}
+    assets = data.load_assets()
+    valid_tickers = set(assets.index)
     for ticker in body.tickers:
         if ticker not in valid_tickers:
             raise HTTPException(status_code=422, detail=f"ticker {ticker!r} is not in the universe")
+
+    with api._LOCK:
+        try:
+            ctx = whatif.context(work, build_site.SITE_LOCALE)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+    univ = whatif.universe(ctx)
 
     return {"universe": univ, "whatif": whatif.scenarios(ctx, body.tickers)}
 
