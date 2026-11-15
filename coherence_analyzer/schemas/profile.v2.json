@@ -199,6 +199,7 @@
       "properties": {
         "by": {"type": "string", "pattern": "^llm:"},
         "confidence": {"type": "number", "minimum": 0, "maximum": 1},
+        "warn_enabled": {"type": "boolean"},
         "prompt_version": {"type": "string", "pattern": "v\\d+"},
         "model_id": {"type": "string", "minLength": 1},
         "updated_at": {"type": "string", "minLength": 10},

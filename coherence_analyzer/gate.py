@@ -14,7 +14,7 @@ from datetime import datetime
 from typing import Literal
 
 from . import data
-from .config import BEHAVIOUR_MAX_CONF, BEHAVIOUR_MAX_STEP, META_DIR
+from .config import BEHAVIOUR_MAX_CONF, BEHAVIOUR_MAX_STEP, META_DIR, WARN_MIN_CONF
 from .levels import LEVELS, clamp_move
 from .rules.derive import N2_SUBSCORES, question_quality_confidence, question_quality_ewma, question_score
 
@@ -61,6 +61,11 @@ def _stamp(node: str, context: dict) -> dict:
             "input_hash": context["input_hash"]}
 
 
+def _warn_enabled(confidence: float) -> bool:
+    """SPEC §11 step 5: confidence is stored as-is; warn_enabled = confidence >= WARN_MIN_CONF."""
+    return bool(confidence >= WARN_MIN_CONF)
+
+
 # ---------------------------------------------------------------- N1 behaviour_classifier
 
 def _behaviour(old_field: dict | None, out: dict, context: dict) -> tuple[dict | None, GateStatus]:
@@ -89,7 +94,7 @@ def _behaviour(old_field: dict | None, out: dict, context: dict) -> tuple[dict |
     status: GateStatus = "clamped" if new_value != value else "accepted"
 
     # 5. confidence stored as-is; 6. stamp
-    return {"value": new_value, "confidence": conf, **_stamp(node, context),
+    return {"value": new_value, "confidence": conf, "warn_enabled": _warn_enabled(conf), **_stamp(node, context),
             "evidence": copy.deepcopy(evidence)}, status
 
 
@@ -143,7 +148,7 @@ def _values(old_field: dict | None, out: dict, context: dict) -> tuple[dict | No
     conf = out.get("confidence", (old_field or {}).get("confidence", VALUES_DEFAULT_CONF))
     if not _is_num(conf) or not 0 <= conf <= 1:
         return _kept(old_field, "rejected:schema")
-    return {"value": value, "confidence": conf, **_stamp(node, context)}, "accepted"
+    return {"value": value, "confidence": conf, "warn_enabled": _warn_enabled(conf), **_stamp(node, context)}, "accepted"
 
 
 # ---------------------------------------------------------------- N4 intent_parser (SPEC §6.2 N4, §3.6)
@@ -336,5 +341,6 @@ def _question_rubric(old_field: dict | None, out: dict, context: dict) -> tuple[
     value = question_quality_ewma([i["score"] for i in items])
 
     # 6. stamp. The quote is checked, not stored: evidence items are exactly {event_id, score} (§3.3 item 3).
-    return {"value": round(value, 4), "confidence": question_quality_confidence(len(items)), **_stamp(node, context),
+    conf = question_quality_confidence(len(items))
+    return {"value": round(value, 4), "confidence": conf, "warn_enabled": _warn_enabled(conf), **_stamp(node, context),
             "evidence": items}, "accepted"
