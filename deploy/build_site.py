@@ -11,7 +11,7 @@ Output (<out>, default .cache/site/):
                             computed by the same rules code (profile card, limits)
 
 Runs offline in mock mode (recorded LLM outputs, fixtures/llm_cache/). The store is a temp dir, so building
-the site never writes to reports/ or profiles/. `build(out)` is importable (tests/test_site.py).
+the site never writes to reports/ or profiles/. `build(out)` is importable (tests/dashboard/test_site.py).
 """
 from __future__ import annotations
 

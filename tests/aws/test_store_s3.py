@@ -26,7 +26,7 @@ from botocore.stub import Stubber
 
 from coherence_analyzer import config, store
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 BUCKET = "ca-test-bucket"
 EM_DASH = "\u2014"
 

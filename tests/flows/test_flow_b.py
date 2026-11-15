@@ -36,7 +36,7 @@ from coherence_analyzer.coherence import hard, report as report_mod  # noqa: E40
 from coherence_analyzer.llm import bedrock, extractors  # noqa: E402
 from coherence_analyzer.rules import derive, limits as limits_mod  # noqa: E402
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 FIX = ROOT / "fixtures" / "robert"
 CACHE = ROOT / "fixtures" / "llm_cache"
 AS_OF = "2026-11-12"

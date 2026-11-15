@@ -2,7 +2,7 @@
 
 P0 step 4 implements H1-H10 and H14. H11-H13 read the hand-built meta files (SPEC §3.2, P1.2): a missing file or
 row gives `unknown`, never a guess. G1 (P2.14, `g1`) is separate from `run_all`: it is always `info`, has no limit,
-and the pipeline reports it in its own `goals` block (docs/spec-factors.md §20.8, tests/test_goals.py).
+and the pipeline reports it in its own `goals` block (docs/spec-factors.md §20.8, tests/engine/test_goals.py).
 
 Pure functions. Weights are fractions (0-1). Comparisons tolerate float noise from percent/100
 conversion (EPS), so a weight exactly at a limit never flips the status.

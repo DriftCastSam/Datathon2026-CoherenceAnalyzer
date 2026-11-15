@@ -13,9 +13,9 @@
     "§15 test_rules / test_limits_no_llm_inputs"
    ],
    "tests": [
-    "tests/test_rules.py",
-    "tests/test_limits_no_llm_inputs.py",
-    "tests/test_levels.py"
+    "tests/profile/test_rules.py",
+    "tests/profile/test_limits_no_llm_inputs.py",
+    "tests/profile/test_levels.py"
    ],
    "code": [
     "coherence_analyzer/levels.py",
@@ -35,7 +35,7 @@
     "§16 robert/"
    ],
    "tests": [
-    "tests/test_profile_schema.py"
+    "tests/profile/test_profile_schema.py"
    ],
    "code": [
     "coherence_analyzer/schemas/profile.v2.json",
@@ -55,7 +55,7 @@
     "§15 test_hard (Robert parts only)"
    ],
    "tests": [
-    "tests/test_hard.py"
+    "tests/checks/test_hard.py"
    ],
    "code": [
     "coherence_analyzer/coherence/hard.py",
@@ -72,8 +72,8 @@
     "§15 test_resizer"
    ],
    "tests": [
-    "tests/test_intent.py",
-    "tests/test_resizer.py"
+    "tests/trade/test_intent.py",
+    "tests/trade/test_resizer.py"
    ],
    "code": [
     "coherence_analyzer/intent.py",
@@ -92,8 +92,8 @@
     "§15 test_gate"
    ],
    "tests": [
-    "tests/test_gate.py",
-    "tests/test_bedrock_mock.py"
+    "tests/llm/test_gate.py",
+    "tests/llm/test_bedrock_mock.py"
    ],
    "code": [
     "coherence_analyzer/llm/bedrock.py",
@@ -117,8 +117,8 @@
     "§15 test_numcheck"
    ],
    "tests": [
-    "tests/test_factors.py",
-    "tests/test_numcheck.py"
+    "tests/checks/test_factors.py",
+    "tests/llm/test_numcheck.py"
    ],
    "code": [
     "coherence_analyzer/factors/",
@@ -138,7 +138,7 @@
     "§9.4"
    ],
    "tests": [
-    "tests/test_explain.py"
+    "tests/llm/test_explain.py"
    ],
    "code": [
     "coherence_analyzer/explain.py",
@@ -163,7 +163,7 @@
     "docs/spec-decisions.md D3 D5"
    ],
    "tests": [
-    "tests/test_pipeline_offline.py"
+    "tests/flows/test_pipeline_offline.py"
    ],
    "code": [
     "coherence_analyzer/pipeline.py",
@@ -187,7 +187,7 @@
     "§1 inv. 2"
    ],
    "tests": [
-    "tests/test_intake.py"
+    "tests/profile/test_intake.py"
    ],
    "code": [
     "coherence_analyzer/intake.py",
@@ -209,7 +209,7 @@
     "docs/spec-decisions.md D1, D7 point 1"
    ],
    "tests": [
-    "tests/test_internal.py"
+    "tests/checks/test_internal.py"
    ],
    "code": [
     "coherence_analyzer/coherence/internal.py",
@@ -235,7 +235,7 @@
     "docs/spec-decisions.md D3"
    ],
    "tests": [
-    "tests/test_lanes.py"
+    "tests/checks/test_lanes.py"
    ],
    "code": [
     "coherence_analyzer/explain.py",
@@ -262,7 +262,7 @@
     "docs/spec-factors.md §20.6 (showcase), §20.9"
    ],
    "tests": [
-    "tests/test_personas.py"
+    "tests/flows/test_personas.py"
    ],
    "code": [
     "fixtures/amira/profile.json",
@@ -290,7 +290,7 @@
     "docs/spec-factors.md §20.2"
    ],
    "tests": [
-    "tests/test_meta_checks.py"
+    "tests/checks/test_meta_checks.py"
    ],
    "code": [
     "coherence_analyzer/data.py",
@@ -312,8 +312,8 @@
     "docs/spec-factors.md §20.5"
    ],
    "tests": [
-    "tests/test_store_s3.py",
-    "tests/test_guardrail.py"
+    "tests/aws/test_store_s3.py",
+    "tests/llm/test_guardrail.py"
    ],
    "code": [
     "coherence_analyzer/store.py",
@@ -337,7 +337,7 @@
     "§1 invariants 2, 6"
    ],
    "tests": [
-    "tests/test_api.py"
+    "tests/flows/test_api.py"
    ],
    "code": [
     "coherence_analyzer/api.py",
@@ -359,7 +359,7 @@
     "docs/spec-factors.md"
    ],
    "tests": [
-    "tests/test_lookthrough.py"
+    "tests/engine/test_lookthrough.py"
    ],
    "code": [
     "coherence_analyzer/data.py",
@@ -385,7 +385,7 @@
     "docs/spec-factors.md"
    ],
    "tests": [
-    "tests/test_goals.py"
+    "tests/engine/test_goals.py"
    ],
    "code": [
     "coherence_analyzer/engine.py",
@@ -410,7 +410,7 @@
     "docs/spec-decisions.md"
    ],
    "tests": [
-    "tests/test_stress.py"
+    "tests/engine/test_stress.py"
    ],
    "code": [
     "coherence_analyzer/stress.py",
@@ -436,7 +436,7 @@
     "docs/spec-decisions.md D7"
    ],
    "tests": [
-    "tests/test_question_rubric.py"
+    "tests/llm/test_question_rubric.py"
    ],
    "code": [
     "coherence_analyzer/llm/",
@@ -467,7 +467,7 @@
     "docs/spec-factors.md"
    ],
    "tests": [
-    "tests/test_flow_b.py"
+    "tests/flows/test_flow_b.py"
    ],
    "code": [
     "coherence_analyzer/pipeline.py",
@@ -499,11 +499,11 @@
    ],
    "tests": [
     "tests/test_d10.py",
-    "tests/test_resizer.py",
-    "tests/test_flow_b.py",
-    "tests/test_pipeline_offline.py",
-    "tests/test_numcheck.py",
-    "tests/test_explain.py"
+    "tests/trade/test_resizer.py",
+    "tests/flows/test_flow_b.py",
+    "tests/flows/test_pipeline_offline.py",
+    "tests/llm/test_numcheck.py",
+    "tests/llm/test_explain.py"
    ],
    "code": [
     "coherence_analyzer/resizer.py",
@@ -532,7 +532,7 @@
     "docs/spec-factors.md §20.7"
    ],
    "tests": [
-    "tests/test_d10_site.py"
+    "tests/dashboard/test_d10_site.py"
    ],
    "code": [
     "deploy/site/design.html",
@@ -577,7 +577,7 @@
     "docs/spec-decisions.md D3 D7"
    ],
    "tests": [
-    "tests/test_site.py"
+    "tests/dashboard/test_site.py"
    ],
    "code": [
     "deploy/build_site.py",
@@ -598,7 +598,7 @@
     "docs/spec-decisions.md D6 D7"
    ],
    "tests": [
-    "tests/test_stepfunctions.py"
+    "tests/aws/test_stepfunctions.py"
    ],
    "code": [
     "deploy/aws/flow_b.asl.json",
@@ -618,7 +618,7 @@
     "§17 step 15"
    ],
    "tests": [
-    "tests/test_stepfunctions.py"
+    "tests/aws/test_stepfunctions.py"
    ],
    "code": [
     "coherence_analyzer/lambda_handler.py",
@@ -657,7 +657,7 @@
     "docs/spec-factors.md §20.7"
    ],
    "tests": [
-    "tests/test_ui_flow_b.py"
+    "tests/dashboard/test_ui_flow_b.py"
    ],
    "code": [
     "deploy/site/index.html",

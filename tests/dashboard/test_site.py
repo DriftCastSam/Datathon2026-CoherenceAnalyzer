@@ -24,7 +24,7 @@ from jsonschema import Draft202012Validator
 
 os.environ["COHERENCE_ANALYZER_LLM"] = "mock"
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 DEPLOY = ROOT / "deploy"
 SCHEMA = json.loads((ROOT / "coherence_analyzer" / "schemas" / "report.json").read_text())
 VALIDATOR = Draft202012Validator(SCHEMA)

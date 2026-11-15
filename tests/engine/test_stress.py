@@ -26,7 +26,7 @@ try:                                                # collected (and red) before
 except ImportError:  # pragma: no cover
     stress = None
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 FIX = ROOT / "fixtures" / "robert"
 AS_OF = "2026-11-12"
 BONDS = {"XBB.TO", "ZST.TO", "AGG", "TLT"}           # etf_bond rows of the starter universe

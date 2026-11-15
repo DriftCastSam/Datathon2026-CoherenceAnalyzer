@@ -971,7 +971,7 @@
         "com.aws.cloudformation.Context": {
           "why": "SPEC section 4 Flow B as Step Functions (P2.15).",
           "must": [
-            "Definition is a copy of deploy/aws/flow_b.asl.json (kept equal by tests/test_stepfunctions_sync.py)"
+            "Definition is a copy of deploy/aws/flow_b.asl.json (kept equal by tests/aws/test_stepfunctions_sync.py)"
           ]
         }
       },

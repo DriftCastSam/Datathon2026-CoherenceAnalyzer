@@ -19,7 +19,7 @@ import pytest
 
 os.environ.setdefault("COHERENCE_ANALYZER_LLM", "mock")
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 DESIGN = ROOT / "deploy" / "site" / "design.html"
 WHATIF = ROOT / "deploy" / "whatif.py"
 

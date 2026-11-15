@@ -30,7 +30,7 @@ from coherence_analyzer.llm import bedrock, extractors  # noqa: E402
 from coherence_analyzer.rules import derive, limits as limits_mod  # noqa: E402
 from coherence_analyzer.rules.limits import LIMITS_TABLE  # noqa: E402
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 FIXTURES = ROOT / "fixtures"
 AS_OF = "2026-11-12"                      # portfolio.as_of (D1)
 PERSONAS = ("amira", "mateo")

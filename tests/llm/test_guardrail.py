@@ -25,7 +25,7 @@ from botocore.stub import Stubber
 from coherence_analyzer import config, explain
 from coherence_analyzer.llm import bedrock, extractors
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 MODEL_ID = "test-model-id"
 GR_ID = "gr0abc123def"
 GR_VERSION = "3"

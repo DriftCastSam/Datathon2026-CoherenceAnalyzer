@@ -22,7 +22,7 @@ from coherence_analyzer.gate import gate
 from coherence_analyzer.llm import bedrock, extractors
 from coherence_analyzer.llm.bedrock import LLMCacheMiss, LLMOutputInvalid, cache_key, call_tool
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 ROBERT = ROOT / "fixtures" / "robert"
 SCHEMAS = ROOT / "coherence_analyzer" / "llm" / "schemas"
 PROMPTS = ROOT / "coherence_analyzer" / "llm" / "prompts"

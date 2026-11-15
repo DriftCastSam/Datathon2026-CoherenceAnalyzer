@@ -1,6 +1,6 @@
 """@rule registry (SPEC §7.1). Records each rule's input profile paths.
 
-The registry builds `limits_trace` and lets tests/test_limits_no_llm_inputs.py enforce
+The registry builds `limits_trace` and lets tests/profile/test_limits_no_llm_inputs.py enforce
 invariant 2: no `llm:` field may feed `limits`, directly or transitively.
 """
 from __future__ import annotations

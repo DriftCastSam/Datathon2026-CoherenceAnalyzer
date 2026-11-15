@@ -27,7 +27,7 @@ os.environ["COHERENCE_ANALYZER_LLM"] = "mock"
 
 from coherence_analyzer import api, config, intake, pipeline  # noqa: E402
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 FIXTURES = ROOT / "fixtures"
 ROBERT_FIX = FIXTURES / "robert"
 ROBERT_ID = "persona-robert"

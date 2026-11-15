@@ -30,7 +30,7 @@ from coherence_analyzer.coherence import hard, internal, report as report_mod
 from coherence_analyzer.llm import bedrock, extractors
 from coherence_analyzer.rules import derive, limits as limits_mod
 
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 FIX = ROOT / "fixtures" / "robert"
 AS_OF = "2026-11-12"
 ROBERT_VALUE = 400_000

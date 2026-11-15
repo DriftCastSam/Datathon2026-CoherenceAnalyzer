@@ -38,7 +38,7 @@ INVENTED = " Le repli pourrait atteindre 77,7 %."      # a number that is in no 
 
 
 def robert_sections(weights_pct: dict, locale: str = "fr-CA") -> list[dict]:
-    """The five sections of Robert on `weights_pct` (flow C review), built like tests/test_explain.py and the pipeline."""
+    """The five sections of Robert on `weights_pct` (flow C review), built like tests/llm/test_explain.py and the pipeline."""
     raw = json.loads((ROOT / "fixtures" / "robert" / "profile.json").read_text(encoding="utf-8"))
     profile = derive.derive_all(copy.deepcopy(raw), portfolio_value_cad=VALUE, as_of=AS_OF)
     lim, trace = limits_mod.build_limits(profile, VALUE)

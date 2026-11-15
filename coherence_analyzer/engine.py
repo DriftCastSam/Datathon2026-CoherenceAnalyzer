@@ -1,6 +1,6 @@
 """Risk engine: starter data -> vol, drawdown, bootstrap cone, risk decomposition, drivers (SPEC §5).
 
-Importable refactor of scripts/engine_v0.py. The math is unchanged; tests/test_engine_golden.py
+Importable refactor of scripts/engine_v0.py. The math is unchanged; tests/engine/test_engine_golden.py
 compares against the original script. Don't change the math without updating the golden test.
 """
 from __future__ import annotations
