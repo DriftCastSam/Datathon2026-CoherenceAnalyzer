@@ -2,6 +2,7 @@
 import json
 import os
 import shutil
+import subprocess
 import sys
 import tempfile
 from pathlib import Path
@@ -9,6 +10,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "deploy"))
 
 import build_site  # noqa: E402
+import whatif  # noqa: E402
 
 
 def test_load_persona_returns_name_and_ids():
@@ -145,3 +147,61 @@ def test_build_emits_app_html_and_index_html(tmp_path, monkeypatch):
 
     index_html = (tmp_path / "index.html").read_text(encoding="utf-8")
     assert 'lang="fr"' in index_html
+
+
+def test_whatif_respects_locale_parameter(tmp_path):
+    """Whatif build with en-CA locale produces English labels."""
+    # Build English what-if for Robert
+    whatif.build(tmp_path, build_site.FIXTURES / "robert", locale="en-CA")
+
+    uni = json.loads((tmp_path / "universe.json").read_text(encoding="utf-8"))
+    base = uni["base"]
+
+    # Check that funding labels are English
+    assert any("Pro rata from all holdings" in f["label"] for f in base["fundings"])
+
+    # Build French what-if for comparison
+    tmp_fr = tmp_path / "fr"
+    tmp_fr.mkdir()
+    whatif.build(tmp_fr, build_site.FIXTURES / "robert", locale="fr-CA")
+
+    uni_fr = json.loads((tmp_fr / "universe.json").read_text(encoding="utf-8"))
+    base_fr = uni_fr["base"]
+
+    # Check that funding labels are French
+    assert any("Au prorata de toutes les positions" in f["label"] for f in base_fr["fundings"])
+
+
+def test_build_site_main_rejects_dash_prefix(tmp_path, monkeypatch, capsys):
+    """__main__ refuses arguments starting with dash."""
+    result = subprocess.run(
+        [sys.executable, "-m", "deploy.build_site", "--help"],
+        cwd=str(build_site.ROOT),
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 2
+    assert "usage:" in result.stderr.lower()
+
+
+def test_build_site_main_rejects_root_as_out_dir(tmp_path, monkeypatch):
+    """__main__ refuses ROOT or ancestor of ROOT as out directory."""
+    # Try to build into ROOT itself
+    result = subprocess.run(
+        [sys.executable, "-m", "deploy.build_site", str(build_site.ROOT)],
+        cwd=str(build_site.ROOT),
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 2
+    assert "ROOT or ancestor" in result.stderr
+
+    # Try to build into parent of ROOT
+    result = subprocess.run(
+        [sys.executable, "-m", "deploy.build_site", str(build_site.ROOT.parent)],
+        cwd=str(build_site.ROOT),
+        capture_output=True,
+        text=True,
+    )
+    assert result.returncode == 2
+    assert "ROOT or ancestor" in result.stderr

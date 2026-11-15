@@ -244,6 +244,25 @@ def _workdir(profile_id: str) -> tuple[Path, Path]:
     return work, seed
 
 
+def workdir(profile_id: str) -> Path:
+    """Return the working directory for the profile.
+
+    The working directory is where the profile's mutable state lives (profile.json,
+    events.jsonl, portfolio.json). For seed profiles this is a copy in the store;
+    for user profiles it's the original location in the store.
+
+    Args:
+        profile_id: The profile identifier
+
+    Returns:
+        Path to the working directory
+
+    Raises:
+        HTTPException: 404 if the profile does not exist
+    """
+    return _workdir(profile_id)[0]
+
+
 def _load(work: Path) -> dict:
     return json.loads((work / "profile.json").read_text(encoding="utf-8"))
 

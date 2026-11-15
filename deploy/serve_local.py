@@ -12,6 +12,7 @@ Usage: python deploy/serve_local.py [--no-build] [--port 8000]
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import sys
 import tempfile
@@ -58,13 +59,23 @@ def live_review(profile_id: str) -> dict[str, Any]:
     Raises:
         HTTPException: 404 for an unknown profile, 422 when the review rejects it.
     """
-    report = api.post_review(profile_id, locale=build_site.SITE_LOCALE)
-    work, fixture = api._workdir(profile_id)
-    pers = build_site.load_persona(fixture.name)
-    report["site"] = {
-        **build_site.site_extras(work, pers.name, PORTFOLIO_FILE),
-        "label": f"{pers.name}{LIVE_LABEL_SUFFIX}",
-    }
+    with api._LOCK:
+        report = api.post_review(profile_id, locale=build_site.SITE_LOCALE)
+        work, fixture_or_namespace = api._workdir(profile_id)
+
+        # For fixture profiles, use load_persona for the name (has proper fallback)
+        # For store-only profiles, read name from work dir's profile
+        if fixture_or_namespace.is_dir() and (fixture_or_namespace / "profile.json").exists():
+            pers = build_site.load_persona(fixture_or_namespace.name)
+            name = pers.name
+        else:
+            profile = json.loads((work / "profile.json").read_text(encoding="utf-8"))
+            name = (profile.get("identity") or {}).get("name") or profile["meta"].get("name") or profile_id
+
+        report["site"] = {
+            **build_site.site_extras(work, str(name), PORTFOLIO_FILE),
+            "label": f"{name}{LIVE_LABEL_SUFFIX}",
+        }
     return report
 
 
@@ -85,7 +96,6 @@ def live_whatif(profile_id: str, body: WhatifRequest) -> dict[str, Any]:
     Raises:
         HTTPException: 404 for unknown profile, 422 for invalid tickers or count
     """
-    work, _ = api._workdir(profile_id)
     assets = data.load_assets()
     valid_tickers = set(assets.index)
     for ticker in body.tickers:
@@ -93,13 +103,15 @@ def live_whatif(profile_id: str, body: WhatifRequest) -> dict[str, Any]:
             raise HTTPException(status_code=422, detail=f"ticker {ticker!r} is not in the universe")
 
     with api._LOCK:
+        work = api.workdir(profile_id)
         try:
             ctx = whatif.context(work, build_site.SITE_LOCALE)
-        except ValueError as exc:
+            univ = whatif.universe(ctx)
+            scen = whatif.scenarios(ctx, body.tickers)
+        except (ValueError, TypeError) as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
-    univ = whatif.universe(ctx)
 
-    return {"universe": univ, "whatif": whatif.scenarios(ctx, body.tickers)}
+    return {"universe": univ, "whatif": scen}
 
 
 def create_app(site_dir: Path) -> FastAPI:

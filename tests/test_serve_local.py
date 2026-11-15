@@ -85,8 +85,14 @@ def test_site_review_unknown_profile_returns_404(client: TestClient) -> None:
     assert client.post(f"{SITE_REVIEW_URL}/persona-nobody/review").status_code == 404
 
 
-def test_site_review_survives_skipped_answer(client: TestClient) -> None:
-    skip = client.post("/api/profiles/persona-robert/intake/skip", json={"path": SKIPPABLE_PATH})
+@pytest.mark.parametrize("path", [
+    "preferences.prefers_dividends",
+    "objectives.horizon_years",
+    "risk.declared",
+    "identity.age",
+])
+def test_site_review_survives_skipped_answer(client: TestClient, path: str) -> None:
+    skip = client.post("/api/profiles/persona-robert/intake/skip", json={"path": path})
     assert skip.status_code == 200
 
     response = client.post(f"{SITE_REVIEW_URL}/persona-robert/review")
@@ -245,3 +251,17 @@ def test_whatif_route_returns_422_for_invalid_profile(
 
     assert response.status_code == 422
     assert "profile validation failed" in response.text
+
+
+def test_whatif_route_survives_skipped_horizon(client: TestClient) -> None:
+    skip = client.post("/api/profiles/persona-robert/intake/skip", json={"path": "objectives.horizon_years"})
+    assert skip.status_code == 200
+
+    response = client.post(
+        f"{SITE_REVIEW_URL}/persona-robert/whatif", json={"tickers": ["AAPL"]}
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert "universe" in data
+    assert "whatif" in data

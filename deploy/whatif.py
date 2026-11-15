@@ -68,7 +68,7 @@ def context(profile_dir: Path, locale: str) -> dict:
     profile_in = pipeline._load_profile(profile_dir)
     pf = pipeline._load_portfolio(profile_dir, None, profile_in, assets)
     profile = pipeline._refresh(profile_in, pf, pipeline._events(profile_dir))["profile"]
-    horizon_m = int(round(float(_val(profile["objectives"]["horizon_years"])) * 12))
+    horizon_m = pipeline._horizon_months(profile)
     market = engine.load_market(str(config.DATA_DIR))
     meta = {n: data.load_meta(n) for n in pipeline.META_NAMES}
     w0, value = pf["weights_pct"], pf["value_cad"]
@@ -176,11 +176,11 @@ def scenarios(ctx: dict, tickers: list[str]) -> dict:
     return all_scen
 
 
-def build(out: Path, profile_dir: Path | None = None) -> dict:
+def build(out: Path, profile_dir: Path | None = None, locale: str = "fr-CA") -> dict:
     """Write universe.json and whatif.json into `out` for the profile directory `profile_dir` (its profile.json,
     events.jsonl and portfolio.json). Nothing is shared between two calls."""
     fixture = Path(profile_dir) if profile_dir is not None else default_profile_dir()
-    ctx = context(fixture, "fr-CA")
+    ctx = context(fixture, locale)
     univ = universe(ctx)
     (out / "universe.json").write_text(json.dumps(univ, ensure_ascii=False), encoding="utf-8")
     all_tickers = [a["ticker"] for a in univ["assets"]]
