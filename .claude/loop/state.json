@@ -47,6 +47,7 @@
     "P5.DASH": "impl",
     "P5.INTAKEFULL": "impl",
     "P5.NOPF": "impl",
-    "P5.USERS": "impl"
+    "P5.USERS": "impl",
+    "P6.CORRECT": "tests"
   }
 }
