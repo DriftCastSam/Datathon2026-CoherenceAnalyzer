@@ -41,12 +41,20 @@ N6_NODE = extractors.N6_NODE
 
 # Flow C assumptions on top of the engine's own list (README -> Assumptions).
 FLOW_C_ASSUMPTIONS = (
-    "Review of the current portfolio only: no trade is simulated, no resizer, no before/after diff (Flow B is P2).",
+    "Review of the current portfolio only: no trade is simulated, no headroom, no before/after diff (that is Flow B).",
     "Horizon for the simulation = the declared objectives.horizon_years x 12 months; limits use the effective horizon.",
     "Soft checks S1 and S3 are not run (they need the behaviour classifier, which is not in this pipeline); "
     "S2 and S4 are.",
-    "ETF look-through is not available: employer-sector and sector-share checks on ETFs are reported as unknown.",
 )
+# Only when the engine could not look through every held equity ETF (engine `lookthrough` false). When it could, the
+# engine's own assumption line (sector weights file + as_of) says so and this one would contradict it.
+NO_LOOKTHROUGH = ("ETF look-through is not available for every held equity ETF (data/meta/etf_sector_weights.csv "
+                  "missing or not covering them): employer-sector and sector-share checks on the uncovered ETF weight "
+                  "are reported as unknown.")
+
+
+def _lookthrough_notes(*metrics: dict | None) -> list[str]:
+    return [] if all(m.get("lookthrough") for m in metrics if m is not None) else [NO_LOOKTHROUGH]
 
 
 def _now() -> str:
@@ -532,7 +540,7 @@ def review(fixture_dir: Path, portfolio: str | Path | None = None) -> dict:
         run_id=run_id, profile_id=profile["meta"]["profile_id"], profile_version=res["version_out"],
         portfolio_id=pf["portfolio_id"], checks=tagged, metrics=metrics, sections=sections,
         explanation={k: explanation[k] for k in ("mode", "headline", "segments", "disclaimer")},
-        assumptions=list(metrics["assumptions"]) + list(FLOW_C_ASSUMPTIONS), data_window=list(market.window),
+        assumptions=list(metrics["assumptions"]) + list(FLOW_C_ASSUMPTIONS) + _lookthrough_notes(metrics), data_window=list(market.window),
         disclaimer=config.DISCLAIMER[locale], profile_coherence=profile_coherence, goals=goals_block)
     rep["stress"] = stress.stress_block(pf["weights"], pf["value_cad"], assets, data.load_macro(), as_of=pf["as_of"],
                                         asset_meta=meta["asset_meta"], locale=locale)    # P2.16: info only
@@ -614,7 +622,8 @@ def b8_explain(state: dict) -> dict:
 def b9_save(state: dict) -> dict:
     """B9: the report and the audit record (model id, as_of, every call with its gate decision) go to the store."""
     profile, pf, refresh_ = state["profile"], state["portfolio"], state["refresh"]
-    notes = list(state["metrics_current"]["assumptions"]) + list(FLOW_B_ASSUMPTIONS)
+    notes = (list(state["metrics_current"]["assumptions"]) + list(FLOW_B_ASSUMPTIONS)
+             + _lookthrough_notes(state["metrics_current"], state.get("metrics_proposed")))
     res = state.get("headroom")
     if res:      # the headroom line is template text (SPEC §8), stated in the report so the CLI and the UI show it as is
         res = {**res, "line": resizer.headroom_text(res, state["intent"]["funding"],
