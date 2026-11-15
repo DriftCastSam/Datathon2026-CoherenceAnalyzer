@@ -1,0 +1,195 @@
+{
+  "cache_key": "d53700a1830b9c5d1fbc5060dbbf1d515bccc6a6df1c98cfdf6aff96066d156e",
+  "call_log": {
+    "cache_hit": false,
+    "guardrail_id": "j85vlkrhs5xz",
+    "guardrail_intervened": false,
+    "guardrail_version": "2",
+    "input_hash": "sha256:5cbc0f8eff377e06415406d1c69a728d7f3d9d811dbd90d03a4304a6469e90fa",
+    "latency_ms": 9237.4,
+    "model_id": "us.anthropic.claude-haiku-5-5",
+    "node": "explainer",
+    "prompt_version": "explainer.v2",
+    "tokens_in": 8563,
+    "tokens_out": 1642
+  },
+  "input_hash": "sha256:5cbc0f8eff377e06415406d1c69a728d7f3d9d811dbd90d03a4304a6469e90fa",
+  "model_id": "us.anthropic.claude-haiku-5-5",
+  "node": "explainer",
+  "output": {
+    "segments": [
+      {
+        "kind": "fact",
+        "refs": [
+          "derived.risk.capacity",
+          "derived.risk.effective",
+          "declared.risk.declared"
+        ],
+        "text": "La capacité au risque est low_moderate : horizon effectif de 3,6 ans, fonds d'urgence de 4,6 mois, stabilité des revenus élevée, et un retrait prévu de 60 000 $ en 2030-06 (revenu de retraite). Le risque effectif est low_moderate, comme le risque déclaré."
+      },
+      {
+        "kind": "fact",
+        "refs": [
+          "H7",
+          "H8",
+          "metrics.current.vol",
+          "metrics.current.mdd",
+          "declared.risk.max_acceptable_drawdown_pct"
+        ],
+        "text": "Volatilité de 9,8 % contre une limite de 9,0 % (H7), dérivée du risque effectif. Perte maximale de -13,4 % contre une limite de -12,0 % (H8), dérivée de la perte maximale acceptable déclarée de -12 %."
+      },
+      {
+        "kind": "fact",
+        "refs": [
+          "H4",
+          "metrics.current.loss_prob"
+        ],
+        "text": "Poids des titres à revenu fixe de 25,0 % contre un minimum de 30,0 % (H4), dérivé du risque effectif. Probabilité de perte de 21,3 %, indicative et fondée sur des hypothèses de modélisation."
+      },
+      {
+        "kind": "inference",
+        "refs": [
+          "derived.risk.behavioural",
+          "declared.risk.reaction_to_20pct_drop"
+        ],
+        "text": "Selon le classificateur comportemental (confiance 0,55), le profil de risque comportemental est moderate_high ; la réaction déclarée à une baisse est sell_some. Il s'agit d'une inférence, non d'un fait déclaré."
+      }
+    ]
+  },
+  "prompt_version": "explainer.v2",
+  "user_payload": {
+    "checks": [
+      {
+        "derived_from": [
+          "limits.min_fixed_income_weight",
+          "risk.effective",
+          "risk.declared",
+          "risk.capacity",
+          "objectives.effective_horizon_years",
+          "objectives.horizon_years",
+          "situation.planned_withdrawals",
+          "situation.emergency_fund_months",
+          "situation.emergency_fund",
+          "situation.monthly_expenses",
+          "situation.income_stability",
+          "identity.employment_type"
+        ],
+        "id": "H4",
+        "limit": "30,0 %",
+        "message_key": "fixed_income_under",
+        "source": "rule:min_fixed_income",
+        "status": "violation",
+        "subject": null,
+        "value": "25,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.vol_band_annual",
+          "risk.effective",
+          "risk.declared",
+          "risk.capacity",
+          "objectives.effective_horizon_years",
+          "objectives.horizon_years",
+          "situation.planned_withdrawals",
+          "situation.emergency_fund_months",
+          "situation.emergency_fund",
+          "situation.monthly_expenses",
+          "situation.income_stability",
+          "identity.employment_type"
+        ],
+        "id": "H7",
+        "limit": "9,0 %",
+        "message_key": "vol_above_band",
+        "source": "rule:vol_band",
+        "status": "violation",
+        "subject": null,
+        "value": "9,8 %"
+      },
+      {
+        "derived_from": [
+          "limits.max_drawdown_pct",
+          "risk.effective",
+          "risk.declared",
+          "risk.capacity",
+          "objectives.effective_horizon_years",
+          "objectives.horizon_years",
+          "situation.planned_withdrawals",
+          "situation.emergency_fund_months",
+          "situation.emergency_fund",
+          "situation.monthly_expenses",
+          "situation.income_stability",
+          "identity.employment_type",
+          "risk.max_acceptable_drawdown_pct"
+        ],
+        "id": "H8",
+        "limit": "-12,0 %",
+        "message_key": "drawdown_over",
+        "source": "rule:max_drawdown",
+        "status": "violation",
+        "subject": null,
+        "value": "-13,4 %"
+      }
+    ],
+    "declared": {
+      "risk.declared": "low_moderate",
+      "risk.max_acceptable_drawdown_pct": "-12 %",
+      "risk.reaction_to_20pct_drop": "sell_some"
+    },
+    "derived": {
+      "risk.behavioural": {
+        "because": [
+          "ev_robert_0007 = hype_chasing",
+          "ev_robert_0004 = hype_chasing"
+        ],
+        "by": "llm:behaviour_classifier",
+        "confidence": "0,55",
+        "value": "moderate_high"
+      },
+      "risk.capacity": {
+        "because": [
+          "objectives.effective_horizon_years = 3,6",
+          "situation.emergency_fund_months = 4,6",
+          "situation.income_stability = high",
+          "situation.planned_withdrawals = date: 2030-06, amount: 60 000 $, purpose: retirement income, year 1"
+        ],
+        "by": "rule:capacity",
+        "confidence": "1",
+        "value": "low_moderate"
+      },
+      "risk.effective": {
+        "because": [
+          "risk.declared = low_moderate",
+          "risk.capacity = low_moderate"
+        ],
+        "by": "rule:effective_risk",
+        "confidence": "1",
+        "value": "low_moderate"
+      }
+    },
+    "evidence_events": [],
+    "factor": "risque",
+    "intent": null,
+    "locale": "fr-CA",
+    "metrics": {
+      "current": {
+        "loss_prob": "21,3 %",
+        "mdd": "-13,4 %",
+        "vol": "9,8 %"
+      },
+      "proposed": {}
+    },
+    "question": "Quelle perte peut être absorbée?",
+    "retry_failures": [
+      "V1: segment 1 ref 'objectives.effective_horizon_years' is no check id, key path or event_id of the facts",
+      "V1: segment 1 ref 'situation.planned_withdrawals' is no check id, key path or event_id of the facts",
+      "V1: segment 1 ref 'situation.emergency_fund_months' is no check id, key path or event_id of the facts",
+      "V1: segment 2 ref 'limits.vol_band_annual' is no check id, key path or event_id of the facts",
+      "V1: segment 2 ref 'limits.max_drawdown_pct' is no check id, key path or event_id of the facts",
+      "V1: segment 3 ref 'limits.min_fixed_income_weight' is no check id, key path or event_id of the facts",
+      "V2: segment 4 has number(s) not in the facts: 20 %"
+    ],
+    "status": "violation",
+    "unknowns": [],
+    "verdict": "incoherent"
+  }
+}

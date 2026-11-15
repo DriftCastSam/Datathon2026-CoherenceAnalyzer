@@ -1,0 +1,125 @@
+{
+  "cache_key": "ca8638706cc5687eee2697e9cff38e2574285d2c0e3cdd6dae08b0cb69b0c5f1",
+  "call_log": {
+    "cache_hit": false,
+    "input_hash": "sha256:2d909238f816ec329a124fae2c54bb5119227e00971adc19192d66f1b8468e54",
+    "latency_ms": 8064.2,
+    "model_id": "us.anthropic.claude-haiku-5-5",
+    "node": "profile_consistency",
+    "prompt_version": "profile_consistency.v1",
+    "tokens_in": 5088,
+    "tokens_out": 1292
+  },
+  "input_hash": "sha256:2d909238f816ec329a124fae2c54bb5119227e00971adc19192d66f1b8468e54",
+  "model_id": "us.anthropic.claude-haiku-5-5",
+  "node": "profile_consistency",
+  "output": {
+    "abstain": false,
+    "findings": [
+      {
+        "fields": [
+          "values.notes",
+          "preferences.interests"
+        ],
+        "kind": "tension",
+        "quotes": [
+          "I don't want everything in tech.",
+          "ai"
+        ],
+        "reason": "The notes say the person does not want everything in tech, while the declared interests list is built around AI and new tech, which may pull holdings toward one theme."
+      },
+      {
+        "fields": [
+          "identity.employer_sector",
+          "preferences.interests"
+        ],
+        "kind": "tension",
+        "quotes": [
+          "Information Technology",
+          "new_tech"
+        ],
+        "reason": "Income comes from the technology sector and the declared interests also centre on new tech, so career and investment exposure to one sector may overlap."
+      }
+    ]
+  },
+  "prompt_version": "profile_consistency.v1",
+  "user_payload": {
+    "profile": {
+      "identity": {
+        "age": 26,
+        "dependants": 0,
+        "employer_sector": "Information Technology",
+        "employment_type": "salaried",
+        "marital_status": "single",
+        "occupation": "Software engineer",
+        "retirement_target_age": 65
+      },
+      "knowledge": {
+        "declared_level": "intermediate",
+        "products_used": [
+          "stocks",
+          "etf",
+          "crypto"
+        ],
+        "quiz_score": 0.75,
+        "years_investing": 3
+      },
+      "objectives": {
+        "goals": [
+          {
+            "amount": 500000,
+            "date": "2046-06",
+            "name": "Financial independence fund",
+            "priority": 1
+          }
+        ],
+        "horizon_years": 20,
+        "primary": "growth",
+        "secondary": []
+      },
+      "preferences": {
+        "asset_types_allowed": [
+          "stocks",
+          "etf",
+          "bonds",
+          "gold",
+          "crypto"
+        ],
+        "asset_types_refused": [
+          "options",
+          "leveraged_etf",
+          "margin"
+        ],
+        "home_bias_ok": true,
+        "interests": [
+          "ai",
+          "new_tech",
+          "crypto"
+        ],
+        "max_fee_mer_pct": 0.5,
+        "prefers_dividends": false,
+        "prefers_large_caps": false
+      },
+      "risk": {
+        "declared": "high",
+        "max_acceptable_drawdown_pct": -35,
+        "reaction_to_20pct_drop": "buy_more"
+      },
+      "situation": {
+        "annual_income_band": "90k-120k",
+        "debt": {
+          "consumer": 0,
+          "student_loan": 6000
+        },
+        "emergency_fund": 16000,
+        "monthly_contribution": 900,
+        "monthly_expenses": 3200,
+        "planned_withdrawals": []
+      },
+      "values": {
+        "notes": "I love AI and new tech but I don't want everything in tech."
+      }
+    },
+    "rule_hits": []
+  }
+}

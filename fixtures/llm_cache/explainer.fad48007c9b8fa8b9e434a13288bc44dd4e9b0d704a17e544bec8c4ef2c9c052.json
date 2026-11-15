@@ -1,0 +1,117 @@
+{
+  "cache_key": "fad48007c9b8fa8b9e434a13288bc44dd4e9b0d704a17e544bec8c4ef2c9c052",
+  "call_log": {
+    "cache_hit": false,
+    "guardrail_id": "j85vlkrhs5xz",
+    "guardrail_intervened": false,
+    "guardrail_version": "2",
+    "input_hash": "sha256:a331ba431d955c6d1dfb8ae19355f83af4c4395ce2ee09f06f51854eca534164",
+    "latency_ms": 8319.5,
+    "model_id": "us.anthropic.claude-haiku-5-5",
+    "node": "explainer",
+    "prompt_version": "explainer.v2",
+    "tokens_in": 6924,
+    "tokens_out": 1443
+  },
+  "input_hash": "sha256:a331ba431d955c6d1dfb8ae19355f83af4c4395ce2ee09f06f51854eca534164",
+  "model_id": "us.anthropic.claude-haiku-5-5",
+  "node": "explainer",
+  "output": {
+    "segments": [
+      {
+        "kind": "fact",
+        "refs": [
+          "declared.objectives.horizon_years",
+          "declared.situation.planned_withdrawals",
+          "derived.objectives.effective_horizon_years"
+        ],
+        "text": "Horizon déclaré : 4 ans. Retrait planifié de 60 000 $ en 2030-06 (retraite, année 1) : l'horizon effectif ressort à 3,6 ans."
+      },
+      {
+        "kind": "fact",
+        "refs": [
+          "H9",
+          "verdict",
+          "derived.objectives.effective_horizon_years"
+        ],
+        "text": "Contrôle H9 en violation : en scénario bas (p5_T), la valeur de 316 971 $ est sous le plancher de 360 000 $ calculé à l'horizon effectif de 3,6 ans. Verdict : incohérent."
+      },
+      {
+        "kind": "assumption",
+        "refs": [
+          "metrics.current.p50_T",
+          "metrics.current.p95_T",
+          "metrics.current.p5_T"
+        ],
+        "text": "Les scénarios reposent sur des hypothèses : médiane p50_T de 487 578 $, borne haute p95_T de 670 173 $. Ces résultats sont indicatifs."
+      }
+    ]
+  },
+  "prompt_version": "explainer.v2",
+  "user_payload": {
+    "checks": [
+      {
+        "derived_from": [
+          "limits.floor_at_horizon",
+          "risk.effective",
+          "risk.declared",
+          "risk.capacity",
+          "objectives.effective_horizon_years",
+          "objectives.horizon_years",
+          "situation.planned_withdrawals",
+          "situation.emergency_fund_months",
+          "situation.emergency_fund",
+          "situation.monthly_expenses",
+          "situation.income_stability",
+          "identity.employment_type"
+        ],
+        "id": "H9",
+        "limit": "360 000 $",
+        "message_key": "floor_breached",
+        "source": "rule:floor_at_horizon",
+        "status": "violation",
+        "subject": null,
+        "value": "316 971 $"
+      }
+    ],
+    "declared": {
+      "identity.retirement_target_age": "63",
+      "objectives.horizon_years": "4",
+      "situation.planned_withdrawals": [
+        {
+          "amount": "60 000 $",
+          "date": "2030-06",
+          "purpose": "retirement income, year 1"
+        }
+      ]
+    },
+    "derived": {
+      "objectives.effective_horizon_years": {
+        "because": [
+          "objectives.horizon_years = 4",
+          "situation.planned_withdrawals = date: 2030-06, amount: 60 000 $, purpose: retirement income, year 1"
+        ],
+        "by": "rule:effective_horizon",
+        "confidence": "1",
+        "value": "3,6"
+      }
+    },
+    "evidence_events": [],
+    "factor": "horizon",
+    "intent": null,
+    "locale": "fr-CA",
+    "metrics": {
+      "current": {
+        "p50_T": "487 578 $",
+        "p5_T": "316 971 $",
+        "p95_T": "670 173 $",
+        "width": "353 202 $"
+      },
+      "proposed": {}
+    },
+    "question": "Quand l'argent sera-t-il requis?",
+    "status": "violation",
+    "unknowns": [],
+    "verdict": "incoherent"
+  }
+}

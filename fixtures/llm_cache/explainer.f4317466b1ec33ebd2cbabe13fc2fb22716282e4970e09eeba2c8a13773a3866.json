@@ -1,0 +1,119 @@
+{
+  "cache_key": "f4317466b1ec33ebd2cbabe13fc2fb22716282e4970e09eeba2c8a13773a3866",
+  "call_log": {
+    "cache_hit": false,
+    "guardrail_id": "j85vlkrhs5xz",
+    "guardrail_intervened": false,
+    "guardrail_version": "2",
+    "input_hash": "sha256:bbbec08e26e80b763023b255e57d6a522dd802ab39e894ea4be764967f5601c0",
+    "latency_ms": 8134.1,
+    "model_id": "us.anthropic.claude-haiku-5-5",
+    "node": "explainer",
+    "prompt_version": "explainer.v2",
+    "tokens_in": 6790,
+    "tokens_out": 1529
+  },
+  "input_hash": "sha256:bbbec08e26e80b763023b255e57d6a522dd802ab39e894ea4be764967f5601c0",
+  "model_id": "us.anthropic.claude-haiku-5-5",
+  "node": "explainer",
+  "output": {
+    "segments": [
+      {
+        "kind": "fact",
+        "refs": [
+          "H9",
+          "metrics.current.p5_T"
+        ],
+        "text": "Le contrôle H9 est en violation : le scénario bas (p5_T) de 18 379 $ est sous le plancher de 36 000 $ fixé pour l'horizon."
+      },
+      {
+        "kind": "fact",
+        "refs": [
+          "declared.objectives.horizon_years",
+          "declared.situation.planned_withdrawals",
+          "derived.objectives.effective_horizon_years"
+        ],
+        "text": "Horizon déclaré : 20 ans. Aucun retrait planifié (liste vide), donc l'horizon effectif est de 20 ans, avec une confiance de 1."
+      },
+      {
+        "kind": "fact",
+        "refs": [
+          "H9",
+          "derived.objectives.effective_horizon_years",
+          "metrics.current.p50_T"
+        ],
+        "text": "Le plancher de 36 000 $ découle de l'horizon effectif, du risque effectif, de la capacité de risque, du fonds d'urgence et de la stabilité du revenu. Le scénario médian (p50_T) est de 119 844 $."
+      },
+      {
+        "kind": "assumption",
+        "refs": [
+          "metrics.current.p5_T",
+          "metrics.current.p50_T",
+          "metrics.current.p95_T"
+        ],
+        "text": "Les résultats p5_T, p50_T et p95_T sont indicatifs et reposent sur des hypothèses de simulation, non sur une garantie de rendement."
+      }
+    ]
+  },
+  "prompt_version": "explainer.v2",
+  "user_payload": {
+    "checks": [
+      {
+        "derived_from": [
+          "limits.floor_at_horizon",
+          "risk.effective",
+          "risk.declared",
+          "risk.capacity",
+          "objectives.effective_horizon_years",
+          "objectives.horizon_years",
+          "situation.planned_withdrawals",
+          "situation.emergency_fund_months",
+          "situation.emergency_fund",
+          "situation.monthly_expenses",
+          "situation.income_stability",
+          "identity.employment_type"
+        ],
+        "id": "H9",
+        "limit": "36 000 $",
+        "message_key": "floor_breached",
+        "source": "rule:floor_at_horizon",
+        "status": "violation",
+        "subject": null,
+        "value": "18 379 $"
+      }
+    ],
+    "declared": {
+      "identity.retirement_target_age": "65",
+      "objectives.horizon_years": "20",
+      "situation.planned_withdrawals": []
+    },
+    "derived": {
+      "objectives.effective_horizon_years": {
+        "because": [
+          "objectives.horizon_years = 20",
+          "situation.planned_withdrawals = "
+        ],
+        "by": "rule:effective_horizon",
+        "confidence": "1",
+        "value": "20"
+      }
+    },
+    "evidence_events": [],
+    "factor": "horizon",
+    "intent": null,
+    "locale": "fr-CA",
+    "metrics": {
+      "current": {
+        "p50_T": "119 844 $",
+        "p5_T": "18 379 $",
+        "p95_T": "640 170 $",
+        "width": "621 791 $"
+      },
+      "proposed": {}
+    },
+    "question": "Quand l'argent sera-t-il requis?",
+    "status": "violation",
+    "unknowns": [],
+    "verdict": "incoherent"
+  }
+}

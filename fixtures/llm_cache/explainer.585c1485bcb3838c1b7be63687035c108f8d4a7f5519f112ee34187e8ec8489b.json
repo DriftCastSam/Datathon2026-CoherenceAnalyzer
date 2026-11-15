@@ -1,0 +1,273 @@
+{
+  "cache_key": "585c1485bcb3838c1b7be63687035c108f8d4a7f5519f112ee34187e8ec8489b",
+  "call_log": {
+    "cache_hit": false,
+    "guardrail_id": "j85vlkrhs5xz",
+    "guardrail_intervened": false,
+    "guardrail_version": "2",
+    "input_hash": "sha256:1b46706fc615f54e654b399646abdf4451ce5597f026400331b4330cb991045e",
+    "latency_ms": 9846.4,
+    "model_id": "us.anthropic.claude-haiku-5-5",
+    "node": "explainer",
+    "prompt_version": "explainer.v2",
+    "tokens_in": 9362,
+    "tokens_out": 1581
+  },
+  "input_hash": "sha256:1b46706fc615f54e654b399646abdf4451ce5597f026400331b4330cb991045e",
+  "model_id": "us.anthropic.claude-haiku-5-5",
+  "node": "explainer",
+  "output": {
+    "segments": [
+      {
+        "kind": "fact",
+        "refs": [
+          "H2",
+          "situation.emergency_fund_months",
+          "situation.income_stability"
+        ],
+        "text": "Cryptomonnaies : 15,0 % du portefeuille, limite de 10,0 %. La limite découle de limits.max_crypto_weight, calculée à partir du risque effectif et de la capacité, elle-même liée à l'horizon, au fonds d'urgence (5 mois) et à la stabilité du revenu (élevée)."
+      },
+      {
+        "kind": "fact",
+        "refs": [
+          "H5",
+          "situation.emergency_fund_months",
+          "situation.income_stability"
+        ],
+        "text": "Devises étrangères : 76,0 % du portefeuille, limite de 70,0 %. La limite découle de limits.max_foreign_currency_weight, avec la même chaîne de risque, d'horizon et de capacité que H2."
+      },
+      {
+        "kind": "fact",
+        "refs": [
+          "H6",
+          "identity.employer_sector"
+        ],
+        "text": "Secteur de l'employeur (Information Technology) : 16,0 % du portefeuille, limite de 15,0 %, tirée de identity.employer_sector. La part de ce secteur détenue par les FNB n'est pas décomposée, donc H6 reste non vérifiée à 47,0 %."
+      },
+      {
+        "kind": "unknown",
+        "refs": [
+          "H10"
+        ],
+        "text": "Part du secteur Broad market à 30,7 % contre une limite de 45,0 % (H10) : ce secteur de risque ne peut pas être vérifié, car la répartition sectorielle n'est pas connue pour cette part."
+      }
+    ]
+  },
+  "prompt_version": "explainer.v2",
+  "user_payload": {
+    "checks": [
+      {
+        "derived_from": [
+          "limits.max_crypto_weight",
+          "risk.effective",
+          "risk.declared",
+          "risk.capacity",
+          "objectives.effective_horizon_years",
+          "objectives.horizon_years",
+          "situation.planned_withdrawals",
+          "situation.emergency_fund_months",
+          "situation.emergency_fund",
+          "situation.monthly_expenses",
+          "situation.income_stability",
+          "identity.employment_type"
+        ],
+        "id": "H2",
+        "limit": "10,0 %",
+        "message_key": "crypto_over",
+        "source": "rule:max_crypto",
+        "status": "violation",
+        "subject": null,
+        "value": "15,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.max_foreign_currency_weight",
+          "risk.effective",
+          "risk.declared",
+          "risk.capacity",
+          "objectives.effective_horizon_years",
+          "objectives.horizon_years",
+          "situation.planned_withdrawals",
+          "situation.emergency_fund_months",
+          "situation.emergency_fund",
+          "situation.monthly_expenses",
+          "situation.income_stability",
+          "identity.employment_type"
+        ],
+        "id": "H5",
+        "limit": "70,0 %",
+        "message_key": "foreign_currency_over",
+        "source": "rule:max_foreign_currency",
+        "status": "violation",
+        "subject": null,
+        "value": "76,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.max_employer_sector_weight",
+          "identity.employer_sector"
+        ],
+        "id": "H6",
+        "limit": "15,0 %",
+        "message_key": "employer_sector_over",
+        "source": "rule:max_employer_sector",
+        "status": "violation",
+        "subject": "Information Technology",
+        "value": "16,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.max_employer_sector_weight",
+          "identity.employer_sector"
+        ],
+        "id": "H6",
+        "limit": "15,0 %",
+        "message_key": "employer_sector_etf_part_unknown",
+        "source": "rule:max_employer_sector",
+        "status": "unknown",
+        "subject": "Information Technology",
+        "value": "47,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.max_sector_risk_share",
+          "risk.effective",
+          "risk.declared",
+          "risk.capacity",
+          "objectives.effective_horizon_years",
+          "objectives.horizon_years",
+          "situation.planned_withdrawals",
+          "situation.emergency_fund_months",
+          "situation.emergency_fund",
+          "situation.monthly_expenses",
+          "situation.income_stability",
+          "identity.employment_type"
+        ],
+        "id": "H10",
+        "limit": "45,0 %",
+        "message_key": "sector_risk_broad_market_unknown",
+        "source": "rule:max_sector_risk",
+        "status": "unknown",
+        "subject": "Broad market",
+        "value": "30,7 %"
+      },
+      {
+        "derived_from": [
+          "knowledge.score",
+          "knowledge.quiz_score",
+          "knowledge.declared_level",
+          "knowledge.question_quality"
+        ],
+        "id": "S2",
+        "limit": "50",
+        "message_key": "knowledge_below_complexity",
+        "source": "rule:knowledge_vs_complexity",
+        "status": "warning",
+        "subject": "BTC-USD, CNR.TO, ETH-USD, NVDA, SHOP.TO",
+        "value": "45"
+      }
+    ],
+    "declared": {
+      "identity.employer_sector": "Information Technology",
+      "preferences.asset_types_refused": [
+        "options",
+        "leveraged_etf",
+        "margin"
+      ],
+      "preferences.max_fee_mer_pct": "0,5 %"
+    },
+    "derived": {
+      "knowledge.score": {
+        "because": [
+          "knowledge.quiz_score = 0,75",
+          "knowledge.declared_level = intermediate"
+        ],
+        "by": "rule:knowledge_score",
+        "confidence": "0,85",
+        "value": "45"
+      },
+      "situation.emergency_fund_months": {
+        "because": [
+          "situation.emergency_fund = 16 000 $",
+          "situation.monthly_expenses = 3 200 $"
+        ],
+        "by": "rule:emergency_fund_months",
+        "confidence": "1",
+        "value": "5"
+      },
+      "situation.income_stability": {
+        "because": [
+          "identity.employment_type = salaried"
+        ],
+        "by": "rule:income_stability",
+        "confidence": "1",
+        "value": "high"
+      },
+      "values.parsed_notes": {
+        "because": [],
+        "by": "llm:values_parser",
+        "value": [
+          {
+            "applies_to": "all",
+            "approved_by_user": true,
+            "params": {
+              "max_pct": "50 %",
+              "theme": "tech_heavy"
+            },
+            "quote": "I don't want everything in tech.",
+            "rule_kind": "max_theme_weight"
+          }
+        ]
+      }
+    },
+    "evidence_events": [],
+    "factor": "contraintes",
+    "intent": null,
+    "locale": "fr-CA",
+    "metrics": {
+      "current": {},
+      "proposed": {}
+    },
+    "question": "Quelles limites s'appliquent?",
+    "status": "violation",
+    "unknowns": [
+      {
+        "derived_from": [
+          "limits.max_employer_sector_weight",
+          "identity.employer_sector"
+        ],
+        "id": "H6",
+        "limit": "15,0 %",
+        "message_key": "employer_sector_etf_part_unknown",
+        "source": "rule:max_employer_sector",
+        "status": "unknown",
+        "subject": "Information Technology",
+        "value": "47,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.max_sector_risk_share",
+          "risk.effective",
+          "risk.declared",
+          "risk.capacity",
+          "objectives.effective_horizon_years",
+          "objectives.horizon_years",
+          "situation.planned_withdrawals",
+          "situation.emergency_fund_months",
+          "situation.emergency_fund",
+          "situation.monthly_expenses",
+          "situation.income_stability",
+          "identity.employment_type"
+        ],
+        "id": "H10",
+        "limit": "45,0 %",
+        "message_key": "sector_risk_broad_market_unknown",
+        "source": "rule:max_sector_risk",
+        "status": "unknown",
+        "subject": "Broad market",
+        "value": "30,7 %"
+      }
+    ],
+    "verdict": "incoherent"
+  }
+}

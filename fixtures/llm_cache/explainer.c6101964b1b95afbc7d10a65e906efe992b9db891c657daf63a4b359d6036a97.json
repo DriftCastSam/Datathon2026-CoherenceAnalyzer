@@ -1,0 +1,518 @@
+{
+  "cache_key": "c6101964b1b95afbc7d10a65e906efe992b9db891c657daf63a4b359d6036a97",
+  "call_log": {
+    "cache_hit": false,
+    "guardrail_id": "j85vlkrhs5xz",
+    "guardrail_intervened": false,
+    "guardrail_version": "2",
+    "input_hash": "sha256:8b9999baf8a6f8f856f4f087f4f6909006f60646dc54389b2b6174e1ff4ee88c",
+    "latency_ms": 9700.7,
+    "model_id": "us.anthropic.claude-haiku-5-5",
+    "node": "explainer",
+    "prompt_version": "explainer.v2",
+    "tokens_in": 13598,
+    "tokens_out": 1723
+  },
+  "input_hash": "sha256:8b9999baf8a6f8f856f4f087f4f6909006f60646dc54389b2b6174e1ff4ee88c",
+  "model_id": "us.anthropic.claude-haiku-5-5",
+  "node": "explainer",
+  "output": {
+    "segments": [
+      {
+        "kind": "unknown",
+        "refs": [
+          "H6",
+          "limits.max_employer_sector_weight",
+          "identity.employer_sector"
+        ],
+        "text": "Secteur de l'employeur Health Care : 30,0 % du portefeuille contre une limite de 15,0 % (limits.max_employer_sector_weight, identity.employer_sector). La part détenue par l'entremise de FNB ne peut pas être vérifiée, donc ce dépassement apparent n'est pas confirmé."
+      },
+      {
+        "kind": "unknown",
+        "refs": [
+          "H10",
+          "risk.effective",
+          "risk.capacity",
+          "objectives.effective_horizon_years",
+          "situation.planned_withdrawals"
+        ],
+        "text": "Risque sectoriel Broad market : 44,0 % contre une limite de 30,0 %. La limite découle du risque effectif, de la capacité de risque, de l'horizon effectif et des retraits prévus. Ce calcul ne peut pas être vérifié pour ce titre."
+      },
+      {
+        "kind": "unknown",
+        "refs": [
+          "H11",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.environment.exclusions"
+        ],
+        "text": "Exclusions non vérifiables : ENB.TO 6,0 %, FTS.TO 7,0 %, JNJ 5,0 %, PG 5,0 %, RY.TO 7,0 %, GLD 5,0 %, SPY 12,0 %, XBB.TO 22,0 %, XIU.TO 18,0 %, ZST.TO 13,0 %. Aucune donnée d'activité ne permet de confirmer l'exclusion pour ces titres ou FNB."
+      },
+      {
+        "kind": "fact",
+        "refs": [
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.environment.exclusions"
+        ],
+        "text": "Exclusions déclarées : tabac (values.social.exclusions) et fraude comptable des 5 dernières années (values.governance.exclusions). Aucune exclusion environnementale n'est déclarée."
+      }
+    ]
+  },
+  "prompt_version": "explainer.v2",
+  "user_payload": {
+    "checks": [
+      {
+        "derived_from": [
+          "limits.max_employer_sector_weight",
+          "identity.employer_sector"
+        ],
+        "id": "H6",
+        "limit": "15,0 %",
+        "message_key": "employer_sector_etf_part_unknown",
+        "source": "rule:max_employer_sector",
+        "status": "unknown",
+        "subject": "Health Care",
+        "value": "30,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "ENB.TO",
+        "value": "6,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "FTS.TO",
+        "value": "7,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_etf_no_lookthrough",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "GLD",
+        "value": "5,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "JNJ",
+        "value": "5,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "PG",
+        "value": "5,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "RY.TO",
+        "value": "7,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_etf_no_lookthrough",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "SPY",
+        "value": "12,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_etf_no_lookthrough",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "XBB.TO",
+        "value": "22,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_etf_no_lookthrough",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "XIU.TO",
+        "value": "18,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_etf_no_lookthrough",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "ZST.TO",
+        "value": "13,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.max_sector_risk_share",
+          "risk.effective",
+          "risk.declared",
+          "risk.capacity",
+          "objectives.effective_horizon_years",
+          "objectives.horizon_years",
+          "situation.planned_withdrawals",
+          "situation.emergency_fund_months",
+          "situation.emergency_fund",
+          "situation.monthly_expenses",
+          "situation.income_stability",
+          "identity.employment_type"
+        ],
+        "id": "H10",
+        "limit": "30,0 %",
+        "message_key": "sector_risk_broad_market_unknown",
+        "source": "rule:max_sector_risk",
+        "status": "unknown",
+        "subject": "Broad market",
+        "value": "44,0 %"
+      }
+    ],
+    "declared": {
+      "identity.employer_sector": "Health Care",
+      "preferences.asset_types_refused": [
+        "crypto",
+        "options",
+        "leveraged_etf",
+        "margin"
+      ],
+      "preferences.max_fee_mer_pct": "0,5 %",
+      "values.environment.exclusions": [],
+      "values.governance.exclusions": [
+        "accounting_fraud_last_5y"
+      ],
+      "values.social.exclusions": [
+        "tobacco"
+      ]
+    },
+    "derived": {
+      "knowledge.score": {
+        "because": [
+          "knowledge.quiz_score = 0,8",
+          "knowledge.declared_level = advanced",
+          "knowledge.question_quality = 0,62"
+        ],
+        "by": "rule:knowledge_score",
+        "confidence": "0,85",
+        "value": "74"
+      },
+      "situation.emergency_fund_months": {
+        "because": [
+          "situation.emergency_fund = 30 000 $",
+          "situation.monthly_expenses = 6 500 $"
+        ],
+        "by": "rule:emergency_fund_months",
+        "confidence": "1",
+        "value": "4,6"
+      },
+      "situation.income_stability": {
+        "because": [
+          "identity.employment_type = salaried"
+        ],
+        "by": "rule:income_stability",
+        "confidence": "1",
+        "value": "high"
+      }
+    },
+    "evidence_events": [],
+    "factor": "contraintes",
+    "intent": null,
+    "locale": "fr-CA",
+    "metrics": {
+      "current": {},
+      "proposed": {}
+    },
+    "question": "Quelles limites s'appliquent?",
+    "status": "unknown",
+    "unknowns": [
+      {
+        "derived_from": [
+          "limits.max_employer_sector_weight",
+          "identity.employer_sector"
+        ],
+        "id": "H6",
+        "limit": "15,0 %",
+        "message_key": "employer_sector_etf_part_unknown",
+        "source": "rule:max_employer_sector",
+        "status": "unknown",
+        "subject": "Health Care",
+        "value": "30,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "ENB.TO",
+        "value": "6,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "FTS.TO",
+        "value": "7,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_etf_no_lookthrough",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "GLD",
+        "value": "5,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "JNJ",
+        "value": "5,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "PG",
+        "value": "5,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "RY.TO",
+        "value": "7,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_etf_no_lookthrough",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "SPY",
+        "value": "12,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_etf_no_lookthrough",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "XBB.TO",
+        "value": "22,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_etf_no_lookthrough",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "XIU.TO",
+        "value": "18,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_etf_no_lookthrough",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "ZST.TO",
+        "value": "13,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.max_sector_risk_share",
+          "risk.effective",
+          "risk.declared",
+          "risk.capacity",
+          "objectives.effective_horizon_years",
+          "objectives.horizon_years",
+          "situation.planned_withdrawals",
+          "situation.emergency_fund_months",
+          "situation.emergency_fund",
+          "situation.monthly_expenses",
+          "situation.income_stability",
+          "identity.employment_type"
+        ],
+        "id": "H10",
+        "limit": "30,0 %",
+        "message_key": "sector_risk_broad_market_unknown",
+        "source": "rule:max_sector_risk",
+        "status": "unknown",
+        "subject": "Broad market",
+        "value": "44,0 %"
+      }
+    ],
+    "verdict": "coherent"
+  }
+}

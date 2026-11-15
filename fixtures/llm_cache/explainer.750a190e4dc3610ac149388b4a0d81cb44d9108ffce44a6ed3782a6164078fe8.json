@@ -1,0 +1,113 @@
+{
+  "cache_key": "750a190e4dc3610ac149388b4a0d81cb44d9108ffce44a6ed3782a6164078fe8",
+  "call_log": {
+    "cache_hit": false,
+    "guardrail_id": "j85vlkrhs5xz",
+    "guardrail_intervened": false,
+    "guardrail_version": "2",
+    "input_hash": "sha256:17a25c1cf9a635205a47be488029f93fe726b69a62546bf4fc234ae8cc078b03",
+    "latency_ms": 8671.7,
+    "model_id": "us.anthropic.claude-haiku-5-5",
+    "node": "explainer",
+    "prompt_version": "explainer.v2",
+    "tokens_in": 6674,
+    "tokens_out": 1485
+  },
+  "input_hash": "sha256:17a25c1cf9a635205a47be488029f93fe726b69a62546bf4fc234ae8cc078b03",
+  "model_id": "us.anthropic.claude-haiku-5-5",
+  "node": "explainer",
+  "output": {
+    "segments": [
+      {
+        "kind": "fact",
+        "refs": [
+          "declared.preferences.interests",
+          "declared.preferences.prefers_dividends",
+          "declared.preferences.prefers_large_caps",
+          "declared.preferences.home_bias_ok"
+        ],
+        "text": "Intérêts déclarés : IA, nouvelles technologies et cryptomonnaies. Préférence pour les dividendes : false. Préférence pour les grandes capitalisations : false. Biais domestique jugé acceptable : true."
+      },
+      {
+        "kind": "fact",
+        "refs": [
+          "declared.values.notes"
+        ],
+        "text": "Notes de l'utilisateur : « I love AI and new tech but I don't want everything in tech. »"
+      },
+      {
+        "kind": "inference",
+        "refs": [
+          "derived.values.parsed_notes",
+          "S4"
+        ],
+        "text": "Inférence : l'analyseur des notes (llm) lit une préférence pour l'IA et les nouvelles technologies, applicable à l'ensemble du portefeuille, non approuvée par l'utilisateur."
+      },
+      {
+        "kind": "unknown",
+        "refs": [
+          "S4"
+        ],
+        "text": "Cette règle ne peut pas être vérifiée automatiquement et n'est pas approuvée : elle ne crée aucune violation et aucune comparaison avec le portefeuille n'est présentée ici."
+      }
+    ]
+  },
+  "prompt_version": "explainer.v2",
+  "user_payload": {
+    "checks": [
+      {
+        "derived_from": [
+          "values.parsed_notes",
+          "values.notes"
+        ],
+        "id": "S4",
+        "limit": "—",
+        "message_key": "parsed_rule_not_approved",
+        "source": "rule:unapproved_parsed_rule",
+        "status": "info",
+        "subject": "I love AI and new tech",
+        "value": "—"
+      }
+    ],
+    "declared": {
+      "preferences.home_bias_ok": true,
+      "preferences.interests": [
+        "ai",
+        "new_tech",
+        "crypto"
+      ],
+      "preferences.prefers_dividends": false,
+      "preferences.prefers_large_caps": false,
+      "values.notes": "I love AI and new tech but I don't want everything in tech."
+    },
+    "derived": {
+      "values.parsed_notes": {
+        "because": [],
+        "by": "llm:values_parser",
+        "value": [
+          {
+            "applies_to": "all",
+            "approved_by_user": false,
+            "params": {
+              "attribute": "ai_and_new_tech"
+            },
+            "quote": "I love AI and new tech",
+            "rule_kind": "prefer_attribute"
+          }
+        ]
+      }
+    },
+    "evidence_events": [],
+    "factor": "preferences",
+    "intent": null,
+    "locale": "fr-CA",
+    "metrics": {
+      "current": {},
+      "proposed": {}
+    },
+    "question": "Qu'est-ce qui oriente les choix?",
+    "status": "info",
+    "unknowns": [],
+    "verdict": "incoherent"
+  }
+}
