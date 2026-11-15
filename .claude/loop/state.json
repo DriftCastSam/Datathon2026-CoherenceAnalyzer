@@ -45,6 +45,7 @@
     "P4.N4GATE": "impl",
     "P4.WARNEN": "impl",
     "P5.DASH": "impl",
+    "P5.INTAKEFULL": "impl",
     "P5.NOPF": "impl",
     "P5.USERS": "impl"
   }

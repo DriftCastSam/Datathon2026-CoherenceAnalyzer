@@ -23,10 +23,10 @@
       "type": "object",
       "required": ["age", "retirement_target_age", "employment_type"],
       "properties": {
-        "age": {"anyOf": [{"type": "integer", "minimum": 0}, {"$ref": "#/$defs/unanswered"}]},
+        "age": {"anyOf": [{"type": "integer", "minimum": 0}, {"$ref": "#/$defs/skipped"}, {"$ref": "#/$defs/unanswered"}]},
         "dependants": {"type": "integer", "minimum": 0},
         "retirement_target_age": {"anyOf": [{"type": "integer", "minimum": 0}, {"$ref": "#/$defs/skipped"}, {"$ref": "#/$defs/unanswered"}]},
-        "employment_type": {"anyOf": [{"type": "string"}, {"$ref": "#/$defs/unanswered"}]},
+        "employment_type": {"anyOf": [{"type": "string"}, {"$ref": "#/$defs/skipped"}, {"$ref": "#/$defs/unanswered"}]},
         "employer_sector": {"anyOf": [{"type": "string"}, {"$ref": "#/$defs/skipped"}, {"$ref": "#/$defs/unanswered"}]},
         "life_stage": {"$ref": "#/$defs/ruleField"}
       }
@@ -102,7 +102,7 @@
     "knowledge": {
       "type": "object",
       "properties": {
-        "declared_level": {"enum": ["novice", "intermediate", "advanced", "expert"]},
+        "declared_level": {"anyOf": [{"enum": ["novice", "intermediate", "advanced", "expert"]}, {"$ref": "#/$defs/skipped"}, {"$ref": "#/$defs/unanswered"}]},
         "quiz_score": {"type": "number", "minimum": 0, "maximum": 1},
         "question_quality": {
           "allOf": [{"$ref": "#/$defs/llmField"}],
@@ -126,7 +126,7 @@
         "score": {
           "allOf": [{"$ref": "#/$defs/ruleField"}],
           "properties": {
-            "value": {"type": "number", "minimum": 0, "maximum": 100},
+            "value": {"type": ["number", "null"], "minimum": 0, "maximum": 100},
             "history": {
               "type": "array",
               "items": {
