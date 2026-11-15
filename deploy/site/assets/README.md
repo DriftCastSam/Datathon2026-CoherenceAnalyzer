@@ -34,8 +34,6 @@ Figma colour regardless of CSS.
 | `icon-warn-circle.svg` | `icon/warn`, 26×26 filled grey circle with exclamation (`#4d6a87`) | round status badge: `constraints`, `preferences`, `coherence` |
 | `icon-check-white.svg` | `icon/check`, white 12×12 check on transparent | `search` — checked row checkbox (CSS background) |
 | `icon-x-blue.svg` | `icon/x`, blue 12×12 cross | `search` — remove-filter chips |
-| `plot-projection-fan.svg` | `Plot` (`4:167`), 744×300 fan chart: P5–P95 band, P25–P75 band, median, pessimistic line, floor | `summary` — projected portfolio value |
-| `plot-whatif.svg` | `Plot`, 744×300 fan chart: current median and median with the asset added | `whatif` — adjusted projection |
 | `swatch-band.svg` | `Swatch`, 20×10 ink at 8% (P5 to P95 band) | `summary` — chart legend |
 | `swatch-iqr.svg` | `Swatch`, 20×10 ink at 22% (P25 to P75 band) | `summary` — chart legend |
 | `swatch-line-ink.svg` | `Swatch`, 20×4 ink line (`#172b3f`, median) | `summary` — chart legend |

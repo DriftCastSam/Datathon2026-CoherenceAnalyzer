@@ -1,0 +1,7 @@
+/* Shared projection fan chart (App.charts.fan). */
+.fan{width:100%}
+.fan svg{display:block;width:100%;height:auto}
+.fan text{font-family:var(--f)}
+.fan__grid{stroke:#e6ebf1;stroke-width:1}
+.fan__tick,.fan__x{font-size:12px;fill:var(--label)}
+.fan__series{font-size:14px;font-weight:600}

@@ -146,15 +146,6 @@ h3{font:600 16px/24px var(--f)}
   .scr-summary .sum__projection{display:flex;flex-direction:column;gap:14px}
   .scr-summary .sum__head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
   .scr-summary .sum__head-note{font:400 12px/18px var(--f);color:var(--label);white-space:nowrap}
-  .scr-summary .sum__plot-scroll{overflow-x:auto}
-  .scr-summary .sum__plot{position:relative;width:744px;height:300px}
-  .scr-summary .sum__plot-img{position:absolute;left:0;top:0;display:block;width:744px;height:300px}
-  .scr-summary .sum__ax{position:absolute;font:400 12px/18px var(--f);color:var(--label);white-space:nowrap}
-  .scr-summary .sum__ax--v{font:600 14px/22px var(--f)}
-  .scr-summary .sum__ax--muted{color:var(--muted)}
-  .scr-summary .sum__ax--ink{color:var(--ink)}
-  .scr-summary .sum__ax--red{color:var(--red)}
-  .scr-summary .sum__ax--floor{font:600 12px/18px var(--f);color:var(--red)}
   .scr-summary .sum__legend{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
   .scr-summary .sum__legend-item{display:flex;align-items:center;gap:6px;font:400 12px/18px var(--f);color:var(--muted);white-space:nowrap}
   .scr-summary .sum__legend-item img{display:block;flex:none}
@@ -231,12 +222,6 @@ h3{font:600 16px/24px var(--f)}
 
   /* Projected value: inline fan chart, legend, three tiles. */
   .scr-objectives .fan-head{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap}
-  .scr-objectives .fan{width:100%}
-  .scr-objectives .fan svg{display:block;width:100%;height:auto}
-  .scr-objectives .fan text{font-family:var(--f)}
-  .scr-objectives .fan__grid{stroke:#e6ebf1;stroke-width:1}
-  .scr-objectives .fan__tick,.scr-objectives .fan__x{font-size:12px;fill:var(--label)}
-  .scr-objectives .fan__series{font-size:14px;font-weight:600}
   .scr-objectives .legend{display:flex;flex-wrap:wrap;gap:20px}
   .scr-objectives .legend__item{display:flex;align-items:center;gap:6px}
   .scr-objectives .legend__txt{font:400 12px/18px var(--f);color:var(--muted)}

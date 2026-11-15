@@ -3,6 +3,7 @@
 
   const OPTION_SEPARATOR = "|";
   const CAD_SIGN = "$";
+  const MONTHS_PER_YEAR = 12;
   const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const PALETTE = ["var(--navy)", "var(--alloc-steel)", "var(--brand)", "var(--alloc-sky)", "var(--blue)", "var(--alloc-grey)"];
   const LIVE_PALETTE = ["var(--navy)", "var(--alloc-steel)", "var(--alloc-sky)", "var(--blue)", "var(--alloc-grey)"];
@@ -70,10 +71,6 @@
     if (!match) return text;
     const month = MONTHS[Number(match[2]) - 1];
     return month ? Number(match[3]) + " " + month + " " + match[1] : text;
-  }
-
-  function kValue(value) {
-    return Math.round(value / 1000) + "k";
   }
 
   function relativeTo(value, base) {
@@ -362,15 +359,17 @@
 
   /* ---------- projection ---------- */
 
-  function chartLabelsHtml(ctx) {
-    const p5 = num(ctx.metrics && ctx.metrics.p5_T, SAMPLE.p5);
-    const p50 = num(ctx.metrics && ctx.metrics.p50_T, SAMPLE.p50);
-    const p95 = num(ctx.metrics && ctx.metrics.p95_T, SAMPLE.p95);
-    const floor = num(ctx.site && ctx.site.limits && ctx.site.limits.floor_at_horizon, SAMPLE.floor);
-    return '<span class="sum__ax sum__ax--v sum__ax--muted" style="left:608px;top:43.08px">Optimistic ' + App.esc(kValue(p95)) + '</span>'
-      + '<span class="sum__ax sum__ax--v sum__ax--ink" style="left:608px;top:128.85px">Median ' + App.esc(kValue(p50)) + '</span>'
-      + '<span class="sum__ax sum__ax--v sum__ax--red" style="left:608px;top:227.55px">Pessimistic ' + App.esc(kValue(p5)) + '</span>'
-      + '<span class="sum__ax sum__ax--floor" style="left:529px;top:200.25px">Floor ' + App.esc(kValue(floor)) + '</span>';
+  function renderChart(screen, ctx) {
+    const cone = ctx.metrics && ctx.metrics.cone;
+    const limits = ctx.site && ctx.site.limits;
+    const months = cone && Array.isArray(cone.p50) ? cone.p50.length - 1 : 0;
+    const asOf = ctx.site && typeof ctx.site.as_of === "string" ? ctx.site.as_of : undefined;
+    App.charts.fan(screen.querySelector('[data-chart="summary"]'), {
+      cone,
+      floor: limits ? limits.floor_at_horizon : undefined,
+      years: months / MONTHS_PER_YEAR,
+      asOf
+    });
   }
 
   function tilesHtml(ctx) {
@@ -392,7 +391,10 @@
 
   function chartNoteHtml(ctx) {
     const asOf = ctx.site && typeof ctx.site.as_of === "string" && ctx.site.as_of ? ctx.site.as_of : "2026-11-12";
-    return "5 years, CAD, as of " + asOf;
+    const cone = ctx.metrics && ctx.metrics.cone;
+    const length = cone && Array.isArray(cone.p50) ? cone.p50.length - 1 : 0;
+    const years = length > 0 ? Math.max(1, Math.round(length / MONTHS_PER_YEAR)) : 5;
+    return years + (years === 1 ? " year" : " years") + ", CAD, as of " + asOf;
   }
 
   /* ---------- persona select ---------- */
@@ -479,7 +481,7 @@
     screen.querySelector("[data-totals]").innerHTML = totalsHtml(ctx);
     screen.querySelector("[data-profile]").innerHTML = profileHtml(ctx);
     screen.querySelector("[data-exec]").innerHTML = execHtml(ctx);
-    screen.querySelector("[data-chart-labels]").innerHTML = chartLabelsHtml(ctx);
+    renderChart(screen, ctx);
     screen.querySelector("[data-chart-note]").textContent = chartNoteHtml(ctx);
     screen.querySelector("[data-tiles]").innerHTML = tilesHtml(ctx);
     screen.querySelector("[data-keydata]").innerHTML = App._summary.keyDataHtml(ctx);

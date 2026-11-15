@@ -280,7 +280,7 @@
     return '<section class="card card--tight">'
       + '<div class="fan-head"><h2 class="t-h3">Projected portfolio value</h2>'
       + '<p class="t-small label">' + App.esc(heading) + "</p></div>"
-      + App._objectivesChart.fanChart(state, {compact, amount})
+      + '<div data-chart="objectives"><p class="t-small muted">Chart unavailable</p></div>'
       + legend()
       + projectionTiles(state)
       + '<p class="t-small muted">' + App.esc(projectionNote(state)) + "</p>"
@@ -404,5 +404,8 @@
       '<p class="t-small muted">Figures are computed first, then explained by a language model. '
         + "Illustrative sample data. Simulation only, not financial advice.</p>"
     ].join("");
+    App.charts.fan(root.querySelector('[data-chart="objectives"]'), {
+      cone: state.cone, floor: state.floor, years, asOf: state.asOf || undefined
+    });
   };
 })();
