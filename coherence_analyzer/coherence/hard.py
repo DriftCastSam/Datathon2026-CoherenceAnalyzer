@@ -12,6 +12,7 @@ from __future__ import annotations
 from typing import Literal, TypedDict
 
 from ..data import ASSET_CLASS_MAP, etf_sector_shares
+from ..rules.registry import is_skipped
 
 Status = Literal["pass", "violation", "info", "unknown"]
 
@@ -78,9 +79,23 @@ def _held(weights: dict[str, float]) -> list[str]:
     return sorted(t for t, w in weights.items() if w > 0)
 
 
+def _lim(profile: dict, name: str):
+    """The limit's value, None when it could not be computed (a skipped input, docs/spec-factors.md §20.6)."""
+    return profile["limits"].get(name)
+
+
+def _no_limit(cid: str, profile: dict, limit_name: str, unit: str, source: str) -> list[Check]:
+    """`unknown`: the limit is not computable (its input was skipped; `derived_from` names the path). Never a pass,
+    never a violation (invariant 3), and no number is invented."""
+    return [_check(cid, "unknown", None, None, None, unit, _derived(profile, limit_name), source,
+                   "limit_not_computable")]
+
+
 # ---------------------------------------------------------------- cheap checks
 
 def _h1(weights, profile, assets) -> list[Check]:
+    if _lim(profile, "excluded_asset_types") is None:
+        return _no_limit("H1", profile, "excluded_asset_types", "weight", "rule:excluded_asset_types")
     lim = profile["limits"]
     excluded = set(lim["excluded_asset_types"])
     der = _derived(profile, "excluded_asset_types")
@@ -101,7 +116,9 @@ def _sum_class(weights, assets, cls: str) -> float:
 
 
 def _h2(weights, profile, assets) -> list[Check]:
-    lim = profile["limits"]["max_crypto_weight"]
+    lim = _lim(profile, "max_crypto_weight")
+    if lim is None:
+        return _no_limit("H2", profile, "max_crypto_weight", "weight", "rule:max_crypto")
     v = _sum_class(weights, assets, "crypto")
     status = "violation" if _gt(v, lim) else "pass"
     return [_check("H2", status, None, _r(v), lim, "weight", _derived(profile, "max_crypto_weight"),
@@ -109,7 +126,9 @@ def _h2(weights, profile, assets) -> list[Check]:
 
 
 def _h3(weights, profile, assets) -> list[Check]:
-    lim = profile["limits"]["max_single_stock_weight"]
+    lim = _lim(profile, "max_single_stock_weight")
+    if lim is None:
+        return _no_limit("H3", profile, "max_single_stock_weight", "weight", "rule:max_single_stock")
     der = _derived(profile, "max_single_stock_weight")
     out: list[Check] = []
     for t in _held(weights):
@@ -125,7 +144,9 @@ def _h3(weights, profile, assets) -> list[Check]:
 
 
 def _h4(weights, profile, assets) -> list[Check]:
-    lim = profile["limits"]["min_fixed_income_weight"]
+    lim = _lim(profile, "min_fixed_income_weight")
+    if lim is None:
+        return _no_limit("H4", profile, "min_fixed_income_weight", "weight", "rule:min_fixed_income")
     v = sum(weights[t] for t in _held(weights) if ASSET_CLASS_MAP[assets.loc[t, "asset_class"]][1])
     status = "violation" if _lt(v, lim) else "pass"
     return [_check("H4", status, None, _r(v), lim, "weight", _derived(profile, "min_fixed_income_weight"),
@@ -133,7 +154,9 @@ def _h4(weights, profile, assets) -> list[Check]:
 
 
 def _h5(weights, profile, assets) -> list[Check]:
-    lim = profile["limits"]["max_foreign_currency_weight"]
+    lim = _lim(profile, "max_foreign_currency_weight")
+    if lim is None:
+        return _no_limit("H5", profile, "max_foreign_currency_weight", "weight", "rule:max_foreign_currency")
     v = sum(weights[t] for t in _held(weights) if assets.loc[t, "currency"] != "CAD")
     status = "violation" if _gt(v, lim) else "pass"
     return [_check("H5", status, None, _r(v), lim, "weight", _derived(profile, "max_foreign_currency_weight"),
@@ -276,7 +299,10 @@ def run_cheap(weights: dict[str, float], profile: dict, assets, meta: dict) -> l
 # ---------------------------------------------------------------- engine checks
 
 def _h7(m, profile) -> list[Check]:
-    lo, hi = profile["limits"]["vol_band_annual"]
+    band = _lim(profile, "vol_band_annual")
+    if band is None:
+        return _no_limit("H7", profile, "vol_band_annual", "annual_vol", "rule:vol_band")
+    lo, hi = band
     v = m["vol"]
     if _gt(v, hi):
         status, limit, key = "violation", hi, "vol_above_band"
@@ -289,7 +315,10 @@ def _h7(m, profile) -> list[Check]:
 
 
 def _h8(m, profile) -> list[Check]:
-    lim = profile["limits"]["max_drawdown_pct"] / 100   # limits keep drawdown in percent (§7.2)
+    pct = _lim(profile, "max_drawdown_pct")
+    if pct is None:
+        return _no_limit("H8", profile, "max_drawdown_pct", "drawdown", "rule:max_drawdown")
+    lim = pct / 100   # limits keep drawdown in percent (§7.2)
     v = m["mdd"]
     status = "violation" if _lt(v, lim) else "pass"
     return [_check("H8", status, None, v, _r(lim), "drawdown", _derived(profile, "max_drawdown_pct"),
@@ -297,7 +326,9 @@ def _h8(m, profile) -> list[Check]:
 
 
 def _h9(m, profile) -> list[Check]:
-    lim = profile["limits"]["floor_at_horizon"]
+    lim = _lim(profile, "floor_at_horizon")
+    if lim is None:
+        return _no_limit("H9", profile, "floor_at_horizon", "cad", "rule:floor_at_horizon")
     v = m["p5_T"]
     status = "violation" if v < lim else "pass"
     return [_check("H9", status, None, v, lim, "cad", _derived(profile, "floor_at_horizon"),
@@ -305,7 +336,9 @@ def _h9(m, profile) -> list[Check]:
 
 
 def _h10(m, profile) -> list[Check]:
-    lim = profile["limits"]["max_sector_risk_share"]
+    lim = _lim(profile, "max_sector_risk_share")
+    if lim is None:
+        return _no_limit("H10", profile, "max_sector_risk_share", "risk_share", "rule:max_sector_risk")
     der = _derived(profile, "max_sector_risk_share")
     groups = m["groups"]["sector"]
     broad = [g for g in groups if g["name"].startswith(BROAD)]
@@ -323,7 +356,12 @@ def _h10(m, profile) -> list[Check]:
 
 
 def _h14(m, profile) -> list[Check]:
-    reaction = _val(profile.get("risk", {}).get("reaction_to_20pct_drop"))
+    node = profile.get("risk", {}).get("reaction_to_20pct_drop")
+    reaction = _val(node)
+    if is_skipped(node):
+        # the stated reaction is unknown: nothing to compare with the historical drawdown
+        return [_check("H14", "unknown", None, None, H14_DRAWDOWN, "drawdown", ["risk.reaction_to_20pct_drop"],
+                       "rule:stated_reaction_vs_history", "stated_reaction_skipped")]
     triggered = reaction in SELL_REACTIONS and m["mdd"] < H14_DRAWDOWN
     c = _check("H14", "info" if triggered else "pass", None, m["mdd"], H14_DRAWDOWN, "drawdown",
                ["risk.reaction_to_20pct_drop"], "rule:stated_reaction_vs_history",
@@ -358,7 +396,7 @@ def g1(m: dict, profile: dict) -> list[Check]:
     """G1: one `info` check per declared goal (SPEC §7.3), in the profile's order. G1 compares to no limit, never
     reads `limits` and never changes the verdict. `m` = engine.analyse output computed with the user-declared
     monthly contribution and goals. A goal outside the simulated horizon has value None (no number is invented)."""
-    goals = list((profile.get("objectives") or {}).get("goals") or [])
+    goals = list(_val((profile.get("objectives") or {}).get("goals")) or [])
     probs = list(m.get("goal_probs") or [])
     labels = [*(m.get("assumptions") or []), *G1_LABELS]
     out: list[Check] = []

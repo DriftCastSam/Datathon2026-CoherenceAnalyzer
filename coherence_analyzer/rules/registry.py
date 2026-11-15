@@ -41,3 +41,32 @@ def expand(path: str, seen: set[str] | None = None) -> list[str]:
         out.append(p)
         out.extend(expand(p, seen))
     return out
+
+
+# ---------------------------------------------------------------- skipped intake answers (docs/spec-factors.md §20.6)
+
+SKIPPED_BY = "user:skipped"      # same marker as intake.SKIPPED_BY: {value: None, by: 'user:skipped'}
+
+
+def is_skipped(node: Any) -> bool:
+    """True for a skipped intake answer. A skip is never a value: whatever needs it is unknown, not defaulted."""
+    return isinstance(node, dict) and node.get("by") == SKIPPED_BY
+
+
+def node_at(profile: dict, path: str) -> Any:
+    """Raw node at a dotted path; None when any part is absent."""
+    node: Any = profile
+    for part in path.split("."):
+        if not isinstance(node, dict) or part not in node:
+            return None
+        node = node[part]
+    return node
+
+
+def skipped_paths(profile: dict, paths: list[str] | tuple[str, ...]) -> list[str]:
+    """The paths among `paths` (order kept, no duplicates) whose node is a skipped answer."""
+    out: list[str] = []
+    for p in paths:
+        if p not in out and is_skipped(node_at(profile, p)):
+            out.append(p)
+    return out

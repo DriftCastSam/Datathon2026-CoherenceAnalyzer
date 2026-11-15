@@ -90,24 +90,51 @@ def _dedupe(items: list[str]) -> list[str]:
     return out
 
 
+def _skip_trace(profile: dict, trace: dict[str, list[str]]) -> tuple[dict[str, list[str]], dict[str, list[str]]]:
+    """Add `<path> (skipped)` to the trace of every limit that reads a skipped answer (directly or through a rule:
+    field). Returns (trace, {limit: skipped paths}); a limit without a skipped input keeps its trace unchanged."""
+    out: dict[str, list[str]] = {}
+    skipped: dict[str, list[str]] = {}
+    for name, paths in trace.items():
+        hit = registry.skipped_paths(profile, paths)
+        skipped[name] = hit
+        out[name] = list(paths) + [f"{p} (skipped)" for p in hit]
+    return out, skipped
+
+
 def build_limits(profile: dict, portfolio_value_cad: float) -> tuple[dict, dict[str, list[str]]]:
     """Return (limits, limits_trace). Only approved parsed rules are promoted.
 
     Reads `risk.effective` (rule:) and user-declared values only (invariant 2). Weights are fractions;
     drawdown and MER stay in percent, like the profile fields they come from.
+
+    A limit whose input is skipped or null (`{value: null, by: user:skipped}`, docs/spec-factors.md §20.6) is
+    None, never a default; `limits_trace` names the skipped input ("<path> (skipped)") and the checks that need
+    the limit report `unknown`.
     """
     level = _rule_value(profile, "risk", "effective")
-    row = LIMITS_TABLE[level]
+    row = LIMITS_TABLE[level] if level is not None else None
     risk, prefs, values = profile["risk"], profile.get("preferences", {}), profile.get("values", {})
 
-    max_dd = row["max_dd_pct"]
-    user_dd = risk.get("max_acceptable_drawdown_pct")
-    if user_dd is not None:
+    def table(key: str) -> Any:
+        return row[key] if row is not None else None
+
+    max_dd = table("max_dd_pct")
+    user_dd_node = risk.get("max_acceptable_drawdown_pct")
+    user_dd = _val(user_dd_node)
+    if registry.is_skipped(user_dd_node):
+        max_dd = None            # the user's own drawdown is unknown: the limit is not computable
+    elif user_dd is not None and max_dd is not None:
         max_dd = max(max_dd, user_dd)   # the less negative one
 
-    excluded_types = _dedupe(list(prefs.get("asset_types_refused", [])))
-    if row["max_crypto"] == 0 and "crypto" not in excluded_types:
-        excluded_types.append("crypto")
+    refused_node = prefs.get("asset_types_refused", [])
+    excluded_types: list[str] | None
+    if registry.is_skipped(refused_node) or row is None:
+        excluded_types = None
+    else:
+        excluded_types = _dedupe(list(_val(refused_node) or []))
+        if row["max_crypto"] == 0 and "crypto" not in excluded_types:
+            excluded_types.append("crypto")
 
     activities: list[str] = []
     for pillar in PILLARS:
@@ -126,14 +153,14 @@ def build_limits(profile: dict, portfolio_value_cad: float) -> tuple[dict, dict[
     limits: dict[str, Any] = {
         "_note": LIMITS_NOTE,
         "by": "rule:limits_table[risk.effective] + goals + preferences",
-        "vol_band_annual": list(row["vol_band"]),
-        "floor_at_horizon": round(portfolio_value_cad * row["floor_ratio"], 2),
+        "vol_band_annual": list(row["vol_band"]) if row is not None else None,
+        "floor_at_horizon": round(portfolio_value_cad * row["floor_ratio"], 2) if row is not None else None,
         "max_drawdown_pct": max_dd,
-        "min_fixed_income_weight": row["min_fixed_income"],
-        "max_single_stock_weight": row["max_single_stock"],
-        "max_sector_risk_share": row["max_sector_risk_share"],
-        "max_crypto_weight": row["max_crypto"],
-        "max_foreign_currency_weight": row["max_foreign_ccy"],
+        "min_fixed_income_weight": table("min_fixed_income"),
+        "max_single_stock_weight": table("max_single_stock"),
+        "max_sector_risk_share": table("max_sector_risk_share"),
+        "max_crypto_weight": table("max_crypto"),
+        "max_foreign_currency_weight": table("max_foreign_ccy"),
         "max_employer_sector_weight": MAX_EMPLOYER_SECTOR_WEIGHT,
         "excluded_asset_types": excluded_types,
         "excluded_activities": _dedupe(activities),
@@ -142,4 +169,5 @@ def build_limits(profile: dict, portfolio_value_cad: float) -> tuple[dict, dict[
         limits["max_fee_mer_pct"] = prefs["max_fee_mer_pct"]
     if themes:
         limits["max_theme_weight"] = {k: themes[k] for k in sorted(themes)}
-    return limits, build_trace()
+    trace, _ = _skip_trace(profile, build_trace())
+    return limits, trace

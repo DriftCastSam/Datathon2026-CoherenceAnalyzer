@@ -420,8 +420,17 @@ def b4_apply(state: dict) -> dict:
     return {**state, "proposed": {"weights_pct": weights, "value_cad": value}}
 
 
+UNKNOWN_HORIZON_SIM_MONTHS = 60   # P3.SKIP: simulation window when objectives.horizon_years is skipped (README Assumptions)
+
+
 def _horizon_months(profile: dict) -> int:
-    return int(round(float(_val(profile["objectives"]["horizon_years"])) * 12))
+    """Simulation horizon in months = the declared horizon_years x 12. A skipped horizon has no number: the engine
+    still needs a window for the descriptive metrics, so it uses UNKNOWN_HORIZON_SIM_MONTHS; every limit and check
+    that depends on the horizon stays `unknown` (rules/limits.py, coherence/hard.py)."""
+    years = _val(profile["objectives"]["horizon_years"])
+    if years is None:
+        return UNKNOWN_HORIZON_SIM_MONTHS
+    return int(round(float(years) * 12))
 
 
 def _b5_side(state: dict, side: str) -> dict:
@@ -483,7 +492,7 @@ def _goals_block(market, pf: dict, profile: dict, horizon_m: int, metrics: dict)
     `objectives.goals` (never `limits`, invariant 2). `metrics` (no contribution) stays the basis of H7-H10 and H14.
     Returns the report's `goals` block and the tagged G1 checks (shown in objectif facts, outside the verdict)."""
     contribution = float(_val((profile.get("situation") or {}).get("monthly_contribution")) or 0.0)
-    goals = list((profile.get("objectives") or {}).get("goals") or [])
+    goals = list(_val((profile.get("objectives") or {}).get("goals")) or [])      # a skipped list -> null -> none
     block = {"monthly_contribution": contribution, "horizon_months": horizon_m, "goal_probs": [], "checks": [],
              "assumptions": list(metrics["assumptions"])}
     if not goals:
@@ -511,7 +520,7 @@ def review(fixture_dir: Path, portfolio: str | Path | None = None) -> dict:
     res = _refresh(profile_in, pf, events)                       # Flow A: rules + N3 (only if the notes changed)
     profile = res["profile"]
     locale = profile["meta"].get("locale", DEFAULT_LOCALE)
-    horizon_m = int(round(float(_val(profile["objectives"]["horizon_years"])) * 12))
+    horizon_m = _horizon_months(profile)
     market = engine.load_market(str(config.DATA_DIR))
     metrics = store.plain(engine.analyse(market, pf["weights_pct"], horizon_m, pf["value_cad"]))
     goals_block, goal_checks = _goals_block(market, pf, profile, horizon_m, metrics)
