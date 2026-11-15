@@ -1,0 +1,51 @@
+{
+  "duration_s": 142.3,
+  "guard_cancellations": [
+    {
+      "reason": "'_flow_a\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'_flow_a\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'^import\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'approved_by_user\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'/decision\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'cut' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'approved_parsed\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'limits.by' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'^(FAILED' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    }
+  ],
+  "is_error": false,
+  "model_id": "us.anthropic.claude-sonnet-5-5",
+  "num_turns": 30,
+  "result": "still `0.5` after a reject, and the version doesn't change. None are import or setup errors.\n\nThe 7 that pass are the five refused-decision cases, the fixtures check and the \"other fields untouched\" test. Those hold today, and the first two guard against regressions once the refresh is added.\n\n- `test_rejecting_amiras_approved_tech_rule_removes_the_theme_limit_from_response_and_get`: rejecting Amira's approved `tech_heavy` rule (index 1) drops `limits.max_theme_weight` from both the POST response and `GET /profiles` (D7, \u00a76.2 N3, \u00a71 inv. 2).\n- `test_response_equals_get_and_limits_and_trace_are_rebuilt_from_the_decided_profile`: the response equals GET. `limits` and `limits_trace` equal `build_limits(profile)`, and `limits.by` stays a `rule:` stamp (\u00a74 A5, \u00a77.2, inv. 2).\n- `test_decision_bumps_the_profile_version_once`: `meta.version` goes up by exactly 1 in the response and in GET (\u00a74 A6).\n- `test_decision_appends_one_profile_edit_event_with_path_old_new_and_ui_source`: one new event is appended, with these fields (\u00a73.4, D7):\n  - type `profile_edit`\n  - payload `{path: \"values.parsed_notes.value[1].approved_by_user\", old: True, new: False}`\n  - source `ui`\n  - a fresh `ev_amira_*` id\n  - earlier events untouched\n- `test_decision_runs_flow_a_and_leaves_an_audit_record_without_llm_calls`: exactly one new audit record with flow `A`. It has version in/out of N and N+1, no LLM calls or errors (N3 doesn't run because the notes are unchanged), and the new event listed in `events_considered`. Its diff includes `limits.max_theme_weight*` (\u00a74 A6, \u00a710, A2).\n- `test_approving_the_rule_again_restores_the_theme_limit_and_logs_both_decisions`: reject then approve restores `0.5`. The version goes up by 2, there are two decision events with `old`/`new` of (True, False) then (False, True), and limits and trace match the rebuild (D7).\n- `test_approving_a_theme_rule_with_the_users_number_promotes_it_at_once`: Robert with a seeded unnumbered theme rule, then approve with `max_pct=15`. `limits.max_theme_weight` becomes `{\"tech_heavy\": 0.15}` immediately, with no `/review` call, and the version goes up by 1. The approval event is logged (\u00a76.2 N3, inv. 2).\n- `test_approving_a_theme_rule_without_a_number_changes_no_limit_but_is_still_recorded`: an approved theme rule with no number promotes nothing. The decision is still one event and one version bump (\u00a77.2).\n- `test_approving_and_rejecting_an_exclusion_rule_moves_excluded_activities`: approving a seeded `exclude_activity` rule (tag `fossil_fuel_producer`) adds the tag to `excluded_activities` and keeps the declared exclusions. Rejecting removes it again. Version goes up by 2 (\u00a76.2 N3, \u00a77.2).\n- `test_deciding_a_preference_rule_changes_no_limit_but_is_recorded`: approving Amira's `prefer_attribute` rule leaves limits and trace unchanged. It still records one event with the exact payload and bumps the version (\u00a76.2 N3).\n- `test_decision_changes_only_the_flag_the_limit_it_feeds_and_the_version`: the `parsed_notes` llm stamp fields are untouched, only the one rule's flag changes, and the user's own sections and every other limit stay as they were (inv. 1, inv. 2).\n- `test_refused_decisions_write_no_event_no_audit_and_do_not_change_the_profile` (5 cases): a bad index, `max_pct` on a non-theme rule, `max_pct` on a rule that already has a number, a non-boolean `approved`, and an extra `limits` key all leave `events.jsonl`, the audit directory and the profile unchanged (\u00a73.4, \u00a74).\n- `test_decision_never_writes_under_fixtures`: after two decisions, the SHA-256 hashes of everything under `fixtures/` are unchanged (\u00a710).\n\n**Ambiguity:** with `max_pct`, I assert only that the approval event is logged. Whether the number gets its own event is not pinned down (marked `# SPEC-AMBIGUITY:` in the file).\n\n**Assumption:** the audit tests find the new record by diffing the `audit/` directory in the store. They assume the implementation saves it there, as `pipeline.refresh` does.\n\nI made no code changes outside `tests/`.\n",
+  "stop_reason": "end_turn",
+  "usage": {
+    "inputTokens": 1051923,
+    "outputTokens": 20632,
+    "totalTokens": 1072555
+  }
+}

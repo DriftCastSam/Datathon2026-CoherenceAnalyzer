@@ -26,6 +26,7 @@
     "tests/flows/test_intake_events.py": "fbb329589a51a3304394ce2f4137c9c0d1c60e08bac265cefb559e4dac2b97f5",
     "tests/flows/test_personas.py": "7b90e33fd67b536b552f6152f12aceea5cb1a53eb9fb787c07d5404e3dd58d72",
     "tests/flows/test_pipeline_offline.py": "b909ef122e4b1d21b057478c394b5f217ba412533774e97a9b89fbe94ab1f04c",
+    "tests/flows/test_rule_decision_refresh.py": "2364e870e2b7bed18aab7b623d446f94dc7bbbd897659c4bd3950a865ba2e833",
     "tests/llm/test_bedrock_mock.py": "8c47b7370c2d4ea446f72035a6fc99f1a187162c9e37389e019d04d6105c9b79",
     "tests/llm/test_explain.py": "06e06df10a8add30eeb0ca90c8b2d953146b9684ed724d956986d0460a9eaf99",
     "tests/llm/test_gate.py": "bda0a80906c40a42d1c96360ea5544934341a83919ba5afbfa1f68d4cfc849a7",
