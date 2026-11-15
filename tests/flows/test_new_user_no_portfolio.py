@@ -481,7 +481,7 @@ def test_full_order_create_answer_put_review_gives_a_valid_report(client, store_
     assert errors == [], errors[:3]
     assert rep["flow"] == "C" and rep["profile_id"] == pid and rep["verdict"] in VERDICTS
     assert [s["factor"] for s in rep["sections"]] == list(FACTORS)
-    assert rep["disclaimer"] == config.DISCLAIMER[locale]                       # fixed text (SPEC §9.4)
+    assert rep["disclaimer"] == config.DISCLAIMER_USER[locale]                  # fixed text, user-made profile (D16)
     assert client.get(f"/reports/{rep['run_id']}").json() == rep
     audit = client.get(f"/audit/{rep['run_id']}").json()
     assert audit["flow"] == "C" and audit["as_of"] == PF["as_of"] and audit["verdict"] == rep["verdict"]

@@ -304,6 +304,7 @@ def _new_user_profile(profile_id: str, body: ProfileIn) -> dict:
     if body.display_name is not None:
         identity["name"] = body.display_name
     return {"meta": {"profile_id": profile_id, "schema_version": 2, "version": 1, "locale": body.locale,
+                     "origin": "user",      # D16: a user-made profile (seeds carry no origin or "seed"): user disclaimer
                      "updated_at": pipeline._now()[:10]},
             "identity": identity,
             "situation": {"monthly_expenses": None, "emergency_fund": None, "planned_withdrawals": None},
