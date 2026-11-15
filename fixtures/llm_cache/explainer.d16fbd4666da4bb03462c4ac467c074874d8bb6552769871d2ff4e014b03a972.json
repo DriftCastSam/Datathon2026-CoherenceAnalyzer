@@ -1,0 +1,90 @@
+{
+  "cache_key": "d16fbd4666da4bb03462c4ac467c074874d8bb6552769871d2ff4e014b03a972",
+  "call_log": {
+    "hand_written": true,
+    "latency_ms": 0,
+    "tokens_in": 0,
+    "tokens_out": 0
+  },
+  "input_hash": "sha256:17a25c1cf9a635205a47be488029f93fe726b69a62546bf4fc234ae8cc078b03",
+  "model_id": "fixture:hand-written",
+  "node": "explainer",
+  "output": {
+    "segments": [
+      {
+        "kind": "fact",
+        "refs": [
+          "declared.preferences.interests",
+          "declared.values.notes"
+        ],
+        "text": "Vos intérêts déclarés sont ai, new_tech, crypto; vos notes disent: « I love AI and new tech but I don't want everything in tech. »"
+      },
+      {
+        "kind": "inference",
+        "refs": [
+          "S4",
+          "derived.values.parsed_notes"
+        ],
+        "text": "Inférence: la phrase « I love AI and new tech » a été lue comme une préférence (prefer_attribute) que vous n'avez pas approuvée; S4 la signale sans la vérifier automatiquement."
+      }
+    ]
+  },
+  "prompt_version": "explainer.v2",
+  "user_payload": {
+    "checks": [
+      {
+        "derived_from": [
+          "values.parsed_notes",
+          "values.notes"
+        ],
+        "id": "S4",
+        "limit": "—",
+        "message_key": "parsed_rule_not_approved",
+        "source": "rule:unapproved_parsed_rule",
+        "status": "info",
+        "subject": "I love AI and new tech",
+        "value": "—"
+      }
+    ],
+    "declared": {
+      "preferences.home_bias_ok": true,
+      "preferences.interests": [
+        "ai",
+        "new_tech",
+        "crypto"
+      ],
+      "preferences.prefers_dividends": false,
+      "preferences.prefers_large_caps": false,
+      "values.notes": "I love AI and new tech but I don't want everything in tech."
+    },
+    "derived": {
+      "values.parsed_notes": {
+        "because": [],
+        "by": "llm:values_parser",
+        "value": [
+          {
+            "applies_to": "all",
+            "approved_by_user": false,
+            "params": {
+              "attribute": "ai_and_new_tech"
+            },
+            "quote": "I love AI and new tech",
+            "rule_kind": "prefer_attribute"
+          }
+        ]
+      }
+    },
+    "evidence_events": [],
+    "factor": "preferences",
+    "intent": null,
+    "locale": "fr-CA",
+    "metrics": {
+      "current": {},
+      "proposed": {}
+    },
+    "question": "Qu'est-ce qui oriente les choix?",
+    "status": "info",
+    "unknowns": [],
+    "verdict": "incoherent"
+  }
+}

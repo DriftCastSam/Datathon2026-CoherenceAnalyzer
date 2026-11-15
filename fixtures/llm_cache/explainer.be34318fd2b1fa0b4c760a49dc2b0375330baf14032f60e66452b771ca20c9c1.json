@@ -1,0 +1,557 @@
+{
+  "cache_key": "be34318fd2b1fa0b4c760a49dc2b0375330baf14032f60e66452b771ca20c9c1",
+  "call_log": {
+    "hand_written": true,
+    "latency_ms": 0,
+    "tokens_in": 0,
+    "tokens_out": 0
+  },
+  "input_hash": "sha256:00bea1db5997d69f149294ac356fb2a43316ac7653101032b10a186e886ef3e3",
+  "model_id": "fixture:hand-written",
+  "node": "explainer",
+  "output": {
+    "segments": [
+      {
+        "kind": "fact",
+        "refs": [
+          "declared.preferences.asset_types_refused",
+          "declared.preferences.max_fee_mer_pct",
+          "declared.values.environment.exclusions",
+          "declared.values.social.exclusions"
+        ],
+        "text": "Vos limites déclarées: types d'actifs refusés (crypto, options, leveraged_etf, margin), frais maximaux de 0,5 %, exclusion des controverses environnementales et sociales importantes."
+      },
+      {
+        "kind": "unknown",
+        "refs": [
+          "H6"
+        ],
+        "text": "H6: la part des FNB (45,0 %) n'est pas ventilée par secteur; le plafond de 15,0 % pour le secteur de votre employeur (Industrials) ne peut pas être vérifié."
+      },
+      {
+        "kind": "unknown",
+        "refs": [
+          "H10"
+        ],
+        "text": "H10: la part « Broad market » (59,8 % du risque) n'est pas ventilée par secteur; le plafond de 35,0 % ne peut pas être vérifié pour cette part."
+      },
+      {
+        "kind": "unknown",
+        "refs": [
+          "H11"
+        ],
+        "text": "H11: les activités exclues ne peuvent pas être vérifiées pour les FNB sans ventilation (AGG, ESGV, SPY, XBB.TO, XIU.TO) ni pour les titres sans ligne d'activité dans les données (CNR.TO, ENB.TO, FTS.TO, MSFT, RY.TO, XOM)."
+      }
+    ]
+  },
+  "prompt_version": "explainer.v2",
+  "user_payload": {
+    "checks": [
+      {
+        "derived_from": [
+          "limits.max_employer_sector_weight",
+          "identity.employer_sector"
+        ],
+        "id": "H6",
+        "limit": "15,0 %",
+        "message_key": "employer_sector_etf_part_unknown",
+        "source": "rule:max_employer_sector",
+        "status": "unknown",
+        "subject": "Industrials",
+        "value": "45,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_etf_no_lookthrough",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "AGG",
+        "value": "5,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "CNR.TO",
+        "value": "5,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "ENB.TO",
+        "value": "5,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_etf_no_lookthrough",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "ESGV",
+        "value": "20,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "FTS.TO",
+        "value": "5,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "MSFT",
+        "value": "5,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "RY.TO",
+        "value": "5,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_etf_no_lookthrough",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "SPY",
+        "value": "10,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_etf_no_lookthrough",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "XBB.TO",
+        "value": "20,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_etf_no_lookthrough",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "XIU.TO",
+        "value": "15,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "XOM",
+        "value": "5,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.max_sector_risk_share",
+          "risk.effective",
+          "risk.declared",
+          "risk.capacity",
+          "objectives.effective_horizon_years",
+          "objectives.horizon_years",
+          "situation.planned_withdrawals",
+          "situation.emergency_fund_months",
+          "situation.emergency_fund",
+          "situation.monthly_expenses",
+          "situation.income_stability",
+          "identity.employment_type"
+        ],
+        "id": "H10",
+        "limit": "35,0 %",
+        "message_key": "sector_risk_broad_market_unknown",
+        "source": "rule:max_sector_risk",
+        "status": "unknown",
+        "subject": "Broad market",
+        "value": "59,8 %"
+      }
+    ],
+    "declared": {
+      "identity.employer_sector": "Industrials",
+      "preferences.asset_types_refused": [
+        "crypto",
+        "options",
+        "leveraged_etf",
+        "margin"
+      ],
+      "preferences.max_fee_mer_pct": "0,5 %",
+      "values.environment.exclusions": [
+        "significant_environmental_controversy"
+      ],
+      "values.social.exclusions": [
+        "significant_social_controversy"
+      ]
+    },
+    "derived": {
+      "knowledge.score": {
+        "because": [
+          "knowledge.quiz_score = 0,7",
+          "knowledge.declared_level = intermediate"
+        ],
+        "by": "rule:knowledge_score",
+        "confidence": "0,85",
+        "value": "43"
+      },
+      "situation.emergency_fund_months": {
+        "because": [
+          "situation.emergency_fund = 31 200 $",
+          "situation.monthly_expenses = 5 200 $"
+        ],
+        "by": "rule:emergency_fund_months",
+        "confidence": "1",
+        "value": "6"
+      },
+      "situation.income_stability": {
+        "because": [
+          "identity.employment_type = salaried"
+        ],
+        "by": "rule:income_stability",
+        "confidence": "1",
+        "value": "high"
+      },
+      "values.parsed_notes": {
+        "because": [],
+        "by": "llm:values_parser",
+        "value": [
+          {
+            "applies_to": "all",
+            "approved_by_user": true,
+            "params": {
+              "tag": "significant_environmental_controversy"
+            },
+            "quote": "Avoid companies with major environmental or social controversies.",
+            "rule_kind": "exclude_activity"
+          },
+          {
+            "applies_to": "all",
+            "approved_by_user": true,
+            "params": {
+              "tag": "significant_social_controversy"
+            },
+            "quote": "Avoid companies with major environmental or social controversies.",
+            "rule_kind": "exclude_activity"
+          }
+        ]
+      }
+    },
+    "evidence_events": [],
+    "factor": "contraintes",
+    "intent": null,
+    "locale": "fr-CA",
+    "metrics": {
+      "current": {},
+      "proposed": {}
+    },
+    "question": "Quelles limites s'appliquent?",
+    "status": "unknown",
+    "unknowns": [
+      {
+        "derived_from": [
+          "limits.max_employer_sector_weight",
+          "identity.employer_sector"
+        ],
+        "id": "H6",
+        "limit": "15,0 %",
+        "message_key": "employer_sector_etf_part_unknown",
+        "source": "rule:max_employer_sector",
+        "status": "unknown",
+        "subject": "Industrials",
+        "value": "45,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_etf_no_lookthrough",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "AGG",
+        "value": "5,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "CNR.TO",
+        "value": "5,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "ENB.TO",
+        "value": "5,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_etf_no_lookthrough",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "ESGV",
+        "value": "20,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "FTS.TO",
+        "value": "5,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "MSFT",
+        "value": "5,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "RY.TO",
+        "value": "5,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_etf_no_lookthrough",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "SPY",
+        "value": "10,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_etf_no_lookthrough",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "XBB.TO",
+        "value": "20,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_etf_no_lookthrough",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "XIU.TO",
+        "value": "15,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "XOM",
+        "value": "5,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.max_sector_risk_share",
+          "risk.effective",
+          "risk.declared",
+          "risk.capacity",
+          "objectives.effective_horizon_years",
+          "objectives.horizon_years",
+          "situation.planned_withdrawals",
+          "situation.emergency_fund_months",
+          "situation.emergency_fund",
+          "situation.monthly_expenses",
+          "situation.income_stability",
+          "identity.employment_type"
+        ],
+        "id": "H10",
+        "limit": "35,0 %",
+        "message_key": "sector_risk_broad_market_unknown",
+        "source": "rule:max_sector_risk",
+        "status": "unknown",
+        "subject": "Broad market",
+        "value": "59,8 %"
+      }
+    ],
+    "verdict": "coherent"
+  }
+}

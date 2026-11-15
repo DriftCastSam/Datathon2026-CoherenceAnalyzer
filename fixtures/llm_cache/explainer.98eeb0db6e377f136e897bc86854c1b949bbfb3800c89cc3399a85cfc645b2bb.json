@@ -1,0 +1,114 @@
+{
+  "cache_key": "98eeb0db6e377f136e897bc86854c1b949bbfb3800c89cc3399a85cfc645b2bb",
+  "call_log": {
+    "hand_written": true,
+    "latency_ms": 0,
+    "tokens_in": 0,
+    "tokens_out": 0
+  },
+  "input_hash": "sha256:3e281e8eeb16de6054d855bfce53139beb3715d0212740bd0ed91eeae27b8226",
+  "model_id": "fixture:hand-written",
+  "node": "explainer",
+  "output": {
+    "segments": [
+      {
+        "kind": "fact",
+        "refs": [
+          "declared.preferences.prefers_dividends",
+          "declared.preferences.prefers_large_caps",
+          "declared.preferences.interests"
+        ],
+        "text": "Vous indiquez préférer les dividendes et les grandes capitalisations; vos intérêts déclarés sont esg_funds, dividend_income. Importance déclarée: environnement 5, social 4."
+      },
+      {
+        "kind": "inference",
+        "refs": [
+          "S4",
+          "derived.values.parsed_notes"
+        ],
+        "text": "Inférence: deux phrases de vos notes, « Open to new tech if it fits » et « nothing speculative. », ont été lues comme des règles que vous n'avez pas approuvées; S4 les signale sans les vérifier automatiquement."
+      }
+    ]
+  },
+  "prompt_version": "explainer.v2",
+  "user_payload": {
+    "checks": [
+      {
+        "derived_from": [
+          "values.parsed_notes",
+          "values.notes"
+        ],
+        "id": "S4",
+        "limit": "—",
+        "message_key": "parsed_rule_not_approved",
+        "source": "rule:unapproved_parsed_rule",
+        "status": "info",
+        "subject": "Open to new tech if it fits",
+        "value": "—"
+      },
+      {
+        "derived_from": [
+          "values.parsed_notes",
+          "values.notes"
+        ],
+        "id": "S4",
+        "limit": "—",
+        "message_key": "parsed_rule_not_approved",
+        "source": "rule:unapproved_parsed_rule",
+        "status": "info",
+        "subject": "nothing speculative.",
+        "value": "—"
+      }
+    ],
+    "declared": {
+      "preferences.home_bias_ok": true,
+      "preferences.interests": [
+        "esg_funds",
+        "dividend_income"
+      ],
+      "preferences.prefers_dividends": true,
+      "preferences.prefers_large_caps": true,
+      "values.environment.importance": "5",
+      "values.notes": "Avoid companies with major environmental or social controversies. Open to new tech if it fits, nothing speculative.",
+      "values.social.importance": "4"
+    },
+    "derived": {
+      "values.parsed_notes": {
+        "because": [],
+        "by": "llm:values_parser",
+        "value": [
+          {
+            "applies_to": "all",
+            "approved_by_user": false,
+            "params": {
+              "note": "open to new tech if it fits"
+            },
+            "quote": "Open to new tech if it fits",
+            "rule_kind": "other"
+          },
+          {
+            "applies_to": "all",
+            "approved_by_user": false,
+            "params": {
+              "attribute": "speculative"
+            },
+            "quote": "nothing speculative.",
+            "rule_kind": "avoid_attribute"
+          }
+        ]
+      }
+    },
+    "evidence_events": [],
+    "factor": "preferences",
+    "intent": null,
+    "locale": "fr-CA",
+    "metrics": {
+      "current": {},
+      "proposed": {}
+    },
+    "question": "Qu'est-ce qui oriente les choix?",
+    "status": "info",
+    "unknowns": [],
+    "verdict": "coherent"
+  }
+}

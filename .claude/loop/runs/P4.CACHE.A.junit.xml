@@ -1,0 +1,785 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="36" skipped="0" tests="44" time="1.851" timestamp="2026-11-15T01:59:31.101576+00:00" hostname="bomboclat-laptop"><testcase classname="tests.llm.test_persona_narration_cache" name="test_demo_section_statuses_are_the_audited_ones[amira-None]" time="1.359" /><testcase classname="tests.llm.test_persona_narration_cache" name="test_demo_section_statuses_are_the_audited_ones[mateo-None]" time="0.001" /><testcase classname="tests.llm.test_persona_narration_cache" name="test_every_non_pass_persona_section_ends_in_llm[amira-None-horizon]" time="0.001"><failure message="AssertionError: ('amira', 'horizon', 'template')&#10;assert 'template' == 'llm'&#10;  &#10;  - llm&#10;  + template">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'amira', portfolio = None, factor = 'horizon'
+
+    @pytest.mark.parametrize("persona,portfolio,factor", _non_pass_cases())
+    def test_every_non_pass_persona_section_ends_in_llm(demo_runs, persona, portfolio, factor):
+        """SPEC §16 / §20.5: the hand-written entry is accepted on the first attempt: mode `llm`, verifier passed."""
+        sec = _sections(demo_runs[(persona, portfolio)])[factor]
+        nar = sec["narrative"]
+&gt;       assert nar["mode"] == "llm", (persona, factor, nar["mode"])
+E       AssertionError: ('amira', 'horizon', 'template')
+E       assert 'template' == 'llm'
+E         
+E         - llm
+E         + template
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:105: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_every_non_pass_persona_section_ends_in_llm[amira-None-contraintes]" time="0.001"><failure message="AssertionError: ('amira', 'contraintes', 'template')&#10;assert 'template' == 'llm'&#10;  &#10;  - llm&#10;  + template">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'amira', portfolio = None, factor = 'contraintes'
+
+    @pytest.mark.parametrize("persona,portfolio,factor", _non_pass_cases())
+    def test_every_non_pass_persona_section_ends_in_llm(demo_runs, persona, portfolio, factor):
+        """SPEC §16 / §20.5: the hand-written entry is accepted on the first attempt: mode `llm`, verifier passed."""
+        sec = _sections(demo_runs[(persona, portfolio)])[factor]
+        nar = sec["narrative"]
+&gt;       assert nar["mode"] == "llm", (persona, factor, nar["mode"])
+E       AssertionError: ('amira', 'contraintes', 'template')
+E       assert 'template' == 'llm'
+E         
+E         - llm
+E         + template
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:105: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_every_non_pass_persona_section_ends_in_llm[amira-None-preferences]" time="0.001"><failure message="AssertionError: ('amira', 'preferences', 'template')&#10;assert 'template' == 'llm'&#10;  &#10;  - llm&#10;  + template">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'amira', portfolio = None, factor = 'preferences'
+
+    @pytest.mark.parametrize("persona,portfolio,factor", _non_pass_cases())
+    def test_every_non_pass_persona_section_ends_in_llm(demo_runs, persona, portfolio, factor):
+        """SPEC §16 / §20.5: the hand-written entry is accepted on the first attempt: mode `llm`, verifier passed."""
+        sec = _sections(demo_runs[(persona, portfolio)])[factor]
+        nar = sec["narrative"]
+&gt;       assert nar["mode"] == "llm", (persona, factor, nar["mode"])
+E       AssertionError: ('amira', 'preferences', 'template')
+E       assert 'template' == 'llm'
+E         
+E         - llm
+E         + template
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:105: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_every_non_pass_persona_section_ends_in_llm[mateo-None-contraintes]" time="0.001"><failure message="AssertionError: ('mateo', 'contraintes', 'template')&#10;assert 'template' == 'llm'&#10;  &#10;  - llm&#10;  + template">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'mateo', portfolio = None, factor = 'contraintes'
+
+    @pytest.mark.parametrize("persona,portfolio,factor", _non_pass_cases())
+    def test_every_non_pass_persona_section_ends_in_llm(demo_runs, persona, portfolio, factor):
+        """SPEC §16 / §20.5: the hand-written entry is accepted on the first attempt: mode `llm`, verifier passed."""
+        sec = _sections(demo_runs[(persona, portfolio)])[factor]
+        nar = sec["narrative"]
+&gt;       assert nar["mode"] == "llm", (persona, factor, nar["mode"])
+E       AssertionError: ('mateo', 'contraintes', 'template')
+E       assert 'template' == 'llm'
+E         
+E         - llm
+E         + template
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:105: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_every_non_pass_persona_section_ends_in_llm[mateo-None-preferences]" time="0.001"><failure message="AssertionError: ('mateo', 'preferences', 'template')&#10;assert 'template' == 'llm'&#10;  &#10;  - llm&#10;  + template">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'mateo', portfolio = None, factor = 'preferences'
+
+    @pytest.mark.parametrize("persona,portfolio,factor", _non_pass_cases())
+    def test_every_non_pass_persona_section_ends_in_llm(demo_runs, persona, portfolio, factor):
+        """SPEC §16 / §20.5: the hand-written entry is accepted on the first attempt: mode `llm`, verifier passed."""
+        sec = _sections(demo_runs[(persona, portfolio)])[factor]
+        nar = sec["narrative"]
+&gt;       assert nar["mode"] == "llm", (persona, factor, nar["mode"])
+E       AssertionError: ('mateo', 'preferences', 'template')
+E       assert 'template' == 'llm'
+E         
+E         - llm
+E         + template
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:105: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_pass_sections_stay_template_and_never_reach_the_writer[amira-None]" time="0.000" /><testcase classname="tests.llm.test_persona_narration_cache" name="test_pass_sections_stay_template_and_never_reach_the_writer[mateo-None]" time="0.000" /><testcase classname="tests.llm.test_persona_narration_cache" name="test_report_and_audit_modes_agree_and_explanation_is_llm[amira-None]" time="0.000"><failure message="AssertionError: assert 'template' == 'llm'&#10;  &#10;  - llm&#10;  + template">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'amira', portfolio = None
+
+    @pytest.mark.parametrize("persona,portfolio", PERSONA_CASES)
+    def test_report_and_audit_modes_agree_and_explanation_is_llm(demo_runs, persona, portfolio):
+        """§10 / §20.5: audit.section_modes mirrors the report; the report mode is the worst non-pass mode (`llm`)."""
+        run = demo_runs[(persona, portfolio)]
+        expected = {f: s["narrative"]["mode"] for f, s in _sections(run).items()}
+        assert run["audit"]["section_modes"] == expected
+&gt;       assert run["rep"]["explanation"]["mode"] == "llm"
+E       AssertionError: assert 'template' == 'llm'
+E         
+E         - llm
+E         + template
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:128: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_report_and_audit_modes_agree_and_explanation_is_llm[mateo-None]" time="0.001"><failure message="AssertionError: assert 'template' == 'llm'&#10;  &#10;  - llm&#10;  + template">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'mateo', portfolio = None
+
+    @pytest.mark.parametrize("persona,portfolio", PERSONA_CASES)
+    def test_report_and_audit_modes_agree_and_explanation_is_llm(demo_runs, persona, portfolio):
+        """§10 / §20.5: audit.section_modes mirrors the report; the report mode is the worst non-pass mode (`llm`)."""
+        run = demo_runs[(persona, portfolio)]
+        expected = {f: s["narrative"]["mode"] for f, s in _sections(run).items()}
+        assert run["audit"]["section_modes"] == expected
+&gt;       assert run["rep"]["explanation"]["mode"] == "llm"
+E       AssertionError: assert 'template' == 'llm'
+E         
+E         - llm
+E         + template
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:128: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_no_explainer_cache_miss_left_in_the_audit[amira-None]" time="0.001"><failure message="AssertionError: assert [{'node': 'ex..._LLM=record'}] == []&#10;  &#10;  Left contains 3 more items, first extra item: {'node': 'explainer', 'section': 'horizon', 'error': 'LLMCacheMiss: explainer explainer.v2: no recorded response in /h...ixtures/llm_cache for this input (model us.anthropic.claude-sonnet-5-5); record it with COHERENCE_ANALYZER_LLM=record'}&#10;  Use -v to get more diff">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'amira', portfolio = None
+
+    @pytest.mark.parametrize("persona,portfolio", PERSONA_CASES)
+    def test_no_explainer_cache_miss_left_in_the_audit(demo_runs, persona, portfolio):
+        """The audit gap: `llm_errors` no longer lists LLMCacheMiss for explainer.v2 (SPEC §10, §6.1)."""
+        errors = demo_runs[(persona, portfolio)]["audit"]["llm_errors"]
+&gt;       assert [e for e in errors if e.get("node") == NODE] == []
+E       AssertionError: assert [{'node': 'ex..._LLM=record'}] == []
+E         
+E         Left contains 3 more items, first extra item: {'node': 'explainer', 'section': 'horizon', 'error': 'LLMCacheMiss: explainer explainer.v2: no recorded response in /h...ixtures/llm_cache for this input (model us.anthropic.claude-sonnet-5-5); record it with COHERENCE_ANALYZER_LLM=record'}
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:136: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_no_explainer_cache_miss_left_in_the_audit[mateo-None]" time="0.001"><failure message="AssertionError: assert [{'node': 'ex..._LLM=record'}] == []&#10;  &#10;  Left contains 2 more items, first extra item: {'node': 'explainer', 'section': 'contraintes', 'error': 'LLMCacheMiss: explainer explainer.v2: no recorded response i...ixtures/llm_cache for this input (model us.anthropic.claude-sonnet-5-5); record it with COHERENCE_ANALYZER_LLM=record'}&#10;  Use -v to get more diff">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'mateo', portfolio = None
+
+    @pytest.mark.parametrize("persona,portfolio", PERSONA_CASES)
+    def test_no_explainer_cache_miss_left_in_the_audit(demo_runs, persona, portfolio):
+        """The audit gap: `llm_errors` no longer lists LLMCacheMiss for explainer.v2 (SPEC §10, §6.1)."""
+        errors = demo_runs[(persona, portfolio)]["audit"]["llm_errors"]
+&gt;       assert [e for e in errors if e.get("node") == NODE] == []
+E       AssertionError: assert [{'node': 'ex..._LLM=record'}] == []
+E         
+E         Left contains 2 more items, first extra item: {'node': 'explainer', 'section': 'contraintes', 'error': 'LLMCacheMiss: explainer explainer.v2: no recorded response i...ixtures/llm_cache for this input (model us.anthropic.claude-sonnet-5-5); record it with COHERENCE_ANALYZER_LLM=record'}
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:136: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_one_hand_written_call_per_non_pass_section[amira-None]" time="0.001"><failure message="AssertionError: assert [] == ['contraintes...'preferences']&#10;  &#10;  Right contains 3 more items, first extra item: 'contraintes'&#10;  Use -v to get more diff">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'amira', portfolio = None
+
+    @pytest.mark.parametrize("persona,portfolio", PERSONA_CASES)
+    def test_one_hand_written_call_per_non_pass_section(demo_runs, persona, portfolio):
+        """First attempt only: exactly one N5 call per non-pass section, from the hand-written model (§6.1, §9.3)."""
+        run = demo_runs[(persona, portfolio)]
+        calls = [c for c in run["audit"]["llm_calls"] if c["node"] == NODE]
+&gt;       assert sorted(c["section"] for c in calls) == sorted(NON_PASS[(persona, portfolio)])
+E       AssertionError: assert [] == ['contraintes...'preferences']
+E         
+E         Right contains 3 more items, first extra item: 'contraintes'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:145: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_one_hand_written_call_per_non_pass_section[mateo-None]" time="0.001"><failure message="AssertionError: assert [] == ['contraintes', 'preferences']&#10;  &#10;  Right contains 2 more items, first extra item: 'contraintes'&#10;  Use -v to get more diff">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'mateo', portfolio = None
+
+    @pytest.mark.parametrize("persona,portfolio", PERSONA_CASES)
+    def test_one_hand_written_call_per_non_pass_section(demo_runs, persona, portfolio):
+        """First attempt only: exactly one N5 call per non-pass section, from the hand-written model (§6.1, §9.3)."""
+        run = demo_runs[(persona, portfolio)]
+        calls = [c for c in run["audit"]["llm_calls"] if c["node"] == NODE]
+&gt;       assert sorted(c["section"] for c in calls) == sorted(NON_PASS[(persona, portfolio)])
+E       AssertionError: assert [] == ['contraintes', 'preferences']
+E         
+E         Right contains 2 more items, first extra item: 'contraintes'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:145: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_entry_is_keyed_like_robert_on_the_exact_section_facts[amira-None-horizon]" time="0.001"><failure message="AssertionError: no hand-written explainer entry explainer.95a8e33c3051cd745c017344e8b8d0fa7af64db992a8a9a4ff7e30a395f283bf.json for these section facts&#10;assert (False or not True)&#10; +  where False = exists()&#10; +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.95a8e33c3051cd745c017344e8b8d0fa7af64db992a8a9a4ff7e30a395f283bf.json').exists">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'amira', portfolio = None, factor = 'horizon'
+
+    @pytest.mark.parametrize("persona,portfolio,factor", _non_pass_cases())
+    def test_entry_is_keyed_like_robert_on_the_exact_section_facts(demo_runs, persona, portfolio, factor):
+        """Same `cache_key` function as Robert's entries; payload = the section facts unchanged (no retry_failures)."""
+        facts = _sections(demo_runs[(persona, portfolio)])[factor]["facts"]
+&gt;       entry = _cache_entry(facts)
+                ^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+facts = {'factor': 'horizon', 'locale': 'fr-CA', 'question': "Quand l'argent sera-t-il requis?", 'status': 'violation', ...}
+required = True
+
+    def _cache_entry(facts: dict, required: bool = True) -&gt; dict | None:
+        key = bedrock.cache_key(NODE, extractors.prompt_version(NODE), bedrock.MOCK_MODEL_ID, facts)
+        p = Path(config.LLM_CACHE_DIR) / f"{NODE}.{key}.json"
+&gt;       assert p.exists() or not required, f"no hand-written {NODE} entry {p.name} for these section facts"
+E       AssertionError: no hand-written explainer entry explainer.95a8e33c3051cd745c017344e8b8d0fa7af64db992a8a9a4ff7e30a395f283bf.json for these section facts
+E       assert (False or not True)
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.95a8e33c3051cd745c017344e8b8d0fa7af64db992a8a9a4ff7e30a395f283bf.json').exists
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:79: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_entry_is_keyed_like_robert_on_the_exact_section_facts[amira-None-contraintes]" time="0.001"><failure message="AssertionError: no hand-written explainer entry explainer.21c7b04b539856bb8a841e9cebed94a4cbe7af5dd22821b7360bd13505639377.json for these section facts&#10;assert (False or not True)&#10; +  where False = exists()&#10; +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.21c7b04b539856bb8a841e9cebed94a4cbe7af5dd22821b7360bd13505639377.json').exists">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'amira', portfolio = None, factor = 'contraintes'
+
+    @pytest.mark.parametrize("persona,portfolio,factor", _non_pass_cases())
+    def test_entry_is_keyed_like_robert_on_the_exact_section_facts(demo_runs, persona, portfolio, factor):
+        """Same `cache_key` function as Robert's entries; payload = the section facts unchanged (no retry_failures)."""
+        facts = _sections(demo_runs[(persona, portfolio)])[factor]["facts"]
+&gt;       entry = _cache_entry(facts)
+                ^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+facts = {'factor': 'contraintes', 'locale': 'fr-CA', 'question': "Quelles limites s'appliquent?", 'status': 'violation', ...}
+required = True
+
+    def _cache_entry(facts: dict, required: bool = True) -&gt; dict | None:
+        key = bedrock.cache_key(NODE, extractors.prompt_version(NODE), bedrock.MOCK_MODEL_ID, facts)
+        p = Path(config.LLM_CACHE_DIR) / f"{NODE}.{key}.json"
+&gt;       assert p.exists() or not required, f"no hand-written {NODE} entry {p.name} for these section facts"
+E       AssertionError: no hand-written explainer entry explainer.21c7b04b539856bb8a841e9cebed94a4cbe7af5dd22821b7360bd13505639377.json for these section facts
+E       assert (False or not True)
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.21c7b04b539856bb8a841e9cebed94a4cbe7af5dd22821b7360bd13505639377.json').exists
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:79: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_entry_is_keyed_like_robert_on_the_exact_section_facts[amira-None-preferences]" time="0.001"><failure message="AssertionError: no hand-written explainer entry explainer.d16fbd4666da4bb03462c4ac467c074874d8bb6552769871d2ff4e014b03a972.json for these section facts&#10;assert (False or not True)&#10; +  where False = exists()&#10; +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.d16fbd4666da4bb03462c4ac467c074874d8bb6552769871d2ff4e014b03a972.json').exists">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'amira', portfolio = None, factor = 'preferences'
+
+    @pytest.mark.parametrize("persona,portfolio,factor", _non_pass_cases())
+    def test_entry_is_keyed_like_robert_on_the_exact_section_facts(demo_runs, persona, portfolio, factor):
+        """Same `cache_key` function as Robert's entries; payload = the section facts unchanged (no retry_failures)."""
+        facts = _sections(demo_runs[(persona, portfolio)])[factor]["facts"]
+&gt;       entry = _cache_entry(facts)
+                ^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+facts = {'factor': 'preferences', 'locale': 'fr-CA', 'question': "Qu'est-ce qui oriente les choix?", 'status': 'info', ...}
+required = True
+
+    def _cache_entry(facts: dict, required: bool = True) -&gt; dict | None:
+        key = bedrock.cache_key(NODE, extractors.prompt_version(NODE), bedrock.MOCK_MODEL_ID, facts)
+        p = Path(config.LLM_CACHE_DIR) / f"{NODE}.{key}.json"
+&gt;       assert p.exists() or not required, f"no hand-written {NODE} entry {p.name} for these section facts"
+E       AssertionError: no hand-written explainer entry explainer.d16fbd4666da4bb03462c4ac467c074874d8bb6552769871d2ff4e014b03a972.json for these section facts
+E       assert (False or not True)
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.d16fbd4666da4bb03462c4ac467c074874d8bb6552769871d2ff4e014b03a972.json').exists
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:79: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_entry_is_keyed_like_robert_on_the_exact_section_facts[mateo-None-contraintes]" time="0.001"><failure message="AssertionError: no hand-written explainer entry explainer.be34318fd2b1fa0b4c760a49dc2b0375330baf14032f60e66452b771ca20c9c1.json for these section facts&#10;assert (False or not True)&#10; +  where False = exists()&#10; +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.be34318fd2b1fa0b4c760a49dc2b0375330baf14032f60e66452b771ca20c9c1.json').exists">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'mateo', portfolio = None, factor = 'contraintes'
+
+    @pytest.mark.parametrize("persona,portfolio,factor", _non_pass_cases())
+    def test_entry_is_keyed_like_robert_on_the_exact_section_facts(demo_runs, persona, portfolio, factor):
+        """Same `cache_key` function as Robert's entries; payload = the section facts unchanged (no retry_failures)."""
+        facts = _sections(demo_runs[(persona, portfolio)])[factor]["facts"]
+&gt;       entry = _cache_entry(facts)
+                ^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+facts = {'factor': 'contraintes', 'locale': 'fr-CA', 'question': "Quelles limites s'appliquent?", 'status': 'unknown', ...}
+required = True
+
+    def _cache_entry(facts: dict, required: bool = True) -&gt; dict | None:
+        key = bedrock.cache_key(NODE, extractors.prompt_version(NODE), bedrock.MOCK_MODEL_ID, facts)
+        p = Path(config.LLM_CACHE_DIR) / f"{NODE}.{key}.json"
+&gt;       assert p.exists() or not required, f"no hand-written {NODE} entry {p.name} for these section facts"
+E       AssertionError: no hand-written explainer entry explainer.be34318fd2b1fa0b4c760a49dc2b0375330baf14032f60e66452b771ca20c9c1.json for these section facts
+E       assert (False or not True)
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.be34318fd2b1fa0b4c760a49dc2b0375330baf14032f60e66452b771ca20c9c1.json').exists
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:79: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_entry_is_keyed_like_robert_on_the_exact_section_facts[mateo-None-preferences]" time="0.001"><failure message="AssertionError: no hand-written explainer entry explainer.98eeb0db6e377f136e897bc86854c1b949bbfb3800c89cc3399a85cfc645b2bb.json for these section facts&#10;assert (False or not True)&#10; +  where False = exists()&#10; +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.98eeb0db6e377f136e897bc86854c1b949bbfb3800c89cc3399a85cfc645b2bb.json').exists">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'mateo', portfolio = None, factor = 'preferences'
+
+    @pytest.mark.parametrize("persona,portfolio,factor", _non_pass_cases())
+    def test_entry_is_keyed_like_robert_on_the_exact_section_facts(demo_runs, persona, portfolio, factor):
+        """Same `cache_key` function as Robert's entries; payload = the section facts unchanged (no retry_failures)."""
+        facts = _sections(demo_runs[(persona, portfolio)])[factor]["facts"]
+&gt;       entry = _cache_entry(facts)
+                ^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:163: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+facts = {'factor': 'preferences', 'locale': 'fr-CA', 'question': "Qu'est-ce qui oriente les choix?", 'status': 'info', ...}
+required = True
+
+    def _cache_entry(facts: dict, required: bool = True) -&gt; dict | None:
+        key = bedrock.cache_key(NODE, extractors.prompt_version(NODE), bedrock.MOCK_MODEL_ID, facts)
+        p = Path(config.LLM_CACHE_DIR) / f"{NODE}.{key}.json"
+&gt;       assert p.exists() or not required, f"no hand-written {NODE} entry {p.name} for these section facts"
+E       AssertionError: no hand-written explainer entry explainer.98eeb0db6e377f136e897bc86854c1b949bbfb3800c89cc3399a85cfc645b2bb.json for these section facts
+E       assert (False or not True)
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.98eeb0db6e377f136e897bc86854c1b949bbfb3800c89cc3399a85cfc645b2bb.json').exists
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:79: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_entry_output_is_schema_valid_and_passes_v1_to_v5[amira-None-horizon]" time="0.001"><failure message="AssertionError: no hand-written explainer entry explainer.95a8e33c3051cd745c017344e8b8d0fa7af64db992a8a9a4ff7e30a395f283bf.json for these section facts&#10;assert (False or not True)&#10; +  where False = exists()&#10; +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.95a8e33c3051cd745c017344e8b8d0fa7af64db992a8a9a4ff7e30a395f283bf.json').exists">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'amira', portfolio = None, factor = 'horizon'
+
+    @pytest.mark.parametrize("persona,portfolio,factor", _non_pass_cases())
+    def test_entry_output_is_schema_valid_and_passes_v1_to_v5(demo_runs, persona, portfolio, factor):
+        """SPEC §9.2 schema + §9.3 V1-V5 on the first attempt: refs resolve, numbers in the facts, size limits."""
+        facts = _sections(demo_runs[(persona, portfolio)])[factor]["facts"]
+&gt;       out = _cache_entry(facts)["output"]
+              ^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:179: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+facts = {'factor': 'horizon', 'locale': 'fr-CA', 'question': "Quand l'argent sera-t-il requis?", 'status': 'violation', ...}
+required = True
+
+    def _cache_entry(facts: dict, required: bool = True) -&gt; dict | None:
+        key = bedrock.cache_key(NODE, extractors.prompt_version(NODE), bedrock.MOCK_MODEL_ID, facts)
+        p = Path(config.LLM_CACHE_DIR) / f"{NODE}.{key}.json"
+&gt;       assert p.exists() or not required, f"no hand-written {NODE} entry {p.name} for these section facts"
+E       AssertionError: no hand-written explainer entry explainer.95a8e33c3051cd745c017344e8b8d0fa7af64db992a8a9a4ff7e30a395f283bf.json for these section facts
+E       assert (False or not True)
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.95a8e33c3051cd745c017344e8b8d0fa7af64db992a8a9a4ff7e30a395f283bf.json').exists
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:79: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_entry_output_is_schema_valid_and_passes_v1_to_v5[amira-None-contraintes]" time="0.001"><failure message="AssertionError: no hand-written explainer entry explainer.21c7b04b539856bb8a841e9cebed94a4cbe7af5dd22821b7360bd13505639377.json for these section facts&#10;assert (False or not True)&#10; +  where False = exists()&#10; +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.21c7b04b539856bb8a841e9cebed94a4cbe7af5dd22821b7360bd13505639377.json').exists">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'amira', portfolio = None, factor = 'contraintes'
+
+    @pytest.mark.parametrize("persona,portfolio,factor", _non_pass_cases())
+    def test_entry_output_is_schema_valid_and_passes_v1_to_v5(demo_runs, persona, portfolio, factor):
+        """SPEC §9.2 schema + §9.3 V1-V5 on the first attempt: refs resolve, numbers in the facts, size limits."""
+        facts = _sections(demo_runs[(persona, portfolio)])[factor]["facts"]
+&gt;       out = _cache_entry(facts)["output"]
+              ^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:179: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+facts = {'factor': 'contraintes', 'locale': 'fr-CA', 'question': "Quelles limites s'appliquent?", 'status': 'violation', ...}
+required = True
+
+    def _cache_entry(facts: dict, required: bool = True) -&gt; dict | None:
+        key = bedrock.cache_key(NODE, extractors.prompt_version(NODE), bedrock.MOCK_MODEL_ID, facts)
+        p = Path(config.LLM_CACHE_DIR) / f"{NODE}.{key}.json"
+&gt;       assert p.exists() or not required, f"no hand-written {NODE} entry {p.name} for these section facts"
+E       AssertionError: no hand-written explainer entry explainer.21c7b04b539856bb8a841e9cebed94a4cbe7af5dd22821b7360bd13505639377.json for these section facts
+E       assert (False or not True)
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.21c7b04b539856bb8a841e9cebed94a4cbe7af5dd22821b7360bd13505639377.json').exists
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:79: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_entry_output_is_schema_valid_and_passes_v1_to_v5[amira-None-preferences]" time="0.001"><failure message="AssertionError: no hand-written explainer entry explainer.d16fbd4666da4bb03462c4ac467c074874d8bb6552769871d2ff4e014b03a972.json for these section facts&#10;assert (False or not True)&#10; +  where False = exists()&#10; +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.d16fbd4666da4bb03462c4ac467c074874d8bb6552769871d2ff4e014b03a972.json').exists">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'amira', portfolio = None, factor = 'preferences'
+
+    @pytest.mark.parametrize("persona,portfolio,factor", _non_pass_cases())
+    def test_entry_output_is_schema_valid_and_passes_v1_to_v5(demo_runs, persona, portfolio, factor):
+        """SPEC §9.2 schema + §9.3 V1-V5 on the first attempt: refs resolve, numbers in the facts, size limits."""
+        facts = _sections(demo_runs[(persona, portfolio)])[factor]["facts"]
+&gt;       out = _cache_entry(facts)["output"]
+              ^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:179: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+facts = {'factor': 'preferences', 'locale': 'fr-CA', 'question': "Qu'est-ce qui oriente les choix?", 'status': 'info', ...}
+required = True
+
+    def _cache_entry(facts: dict, required: bool = True) -&gt; dict | None:
+        key = bedrock.cache_key(NODE, extractors.prompt_version(NODE), bedrock.MOCK_MODEL_ID, facts)
+        p = Path(config.LLM_CACHE_DIR) / f"{NODE}.{key}.json"
+&gt;       assert p.exists() or not required, f"no hand-written {NODE} entry {p.name} for these section facts"
+E       AssertionError: no hand-written explainer entry explainer.d16fbd4666da4bb03462c4ac467c074874d8bb6552769871d2ff4e014b03a972.json for these section facts
+E       assert (False or not True)
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.d16fbd4666da4bb03462c4ac467c074874d8bb6552769871d2ff4e014b03a972.json').exists
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:79: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_entry_output_is_schema_valid_and_passes_v1_to_v5[mateo-None-contraintes]" time="0.001"><failure message="AssertionError: no hand-written explainer entry explainer.be34318fd2b1fa0b4c760a49dc2b0375330baf14032f60e66452b771ca20c9c1.json for these section facts&#10;assert (False or not True)&#10; +  where False = exists()&#10; +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.be34318fd2b1fa0b4c760a49dc2b0375330baf14032f60e66452b771ca20c9c1.json').exists">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'mateo', portfolio = None, factor = 'contraintes'
+
+    @pytest.mark.parametrize("persona,portfolio,factor", _non_pass_cases())
+    def test_entry_output_is_schema_valid_and_passes_v1_to_v5(demo_runs, persona, portfolio, factor):
+        """SPEC §9.2 schema + §9.3 V1-V5 on the first attempt: refs resolve, numbers in the facts, size limits."""
+        facts = _sections(demo_runs[(persona, portfolio)])[factor]["facts"]
+&gt;       out = _cache_entry(facts)["output"]
+              ^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:179: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+facts = {'factor': 'contraintes', 'locale': 'fr-CA', 'question': "Quelles limites s'appliquent?", 'status': 'unknown', ...}
+required = True
+
+    def _cache_entry(facts: dict, required: bool = True) -&gt; dict | None:
+        key = bedrock.cache_key(NODE, extractors.prompt_version(NODE), bedrock.MOCK_MODEL_ID, facts)
+        p = Path(config.LLM_CACHE_DIR) / f"{NODE}.{key}.json"
+&gt;       assert p.exists() or not required, f"no hand-written {NODE} entry {p.name} for these section facts"
+E       AssertionError: no hand-written explainer entry explainer.be34318fd2b1fa0b4c760a49dc2b0375330baf14032f60e66452b771ca20c9c1.json for these section facts
+E       assert (False or not True)
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.be34318fd2b1fa0b4c760a49dc2b0375330baf14032f60e66452b771ca20c9c1.json').exists
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:79: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_entry_output_is_schema_valid_and_passes_v1_to_v5[mateo-None-preferences]" time="0.001"><failure message="AssertionError: no hand-written explainer entry explainer.98eeb0db6e377f136e897bc86854c1b949bbfb3800c89cc3399a85cfc645b2bb.json for these section facts&#10;assert (False or not True)&#10; +  where False = exists()&#10; +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.98eeb0db6e377f136e897bc86854c1b949bbfb3800c89cc3399a85cfc645b2bb.json').exists">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'mateo', portfolio = None, factor = 'preferences'
+
+    @pytest.mark.parametrize("persona,portfolio,factor", _non_pass_cases())
+    def test_entry_output_is_schema_valid_and_passes_v1_to_v5(demo_runs, persona, portfolio, factor):
+        """SPEC §9.2 schema + §9.3 V1-V5 on the first attempt: refs resolve, numbers in the facts, size limits."""
+        facts = _sections(demo_runs[(persona, portfolio)])[factor]["facts"]
+&gt;       out = _cache_entry(facts)["output"]
+              ^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:179: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+facts = {'factor': 'preferences', 'locale': 'fr-CA', 'question': "Qu'est-ce qui oriente les choix?", 'status': 'info', ...}
+required = True
+
+    def _cache_entry(facts: dict, required: bool = True) -&gt; dict | None:
+        key = bedrock.cache_key(NODE, extractors.prompt_version(NODE), bedrock.MOCK_MODEL_ID, facts)
+        p = Path(config.LLM_CACHE_DIR) / f"{NODE}.{key}.json"
+&gt;       assert p.exists() or not required, f"no hand-written {NODE} entry {p.name} for these section facts"
+E       AssertionError: no hand-written explainer entry explainer.98eeb0db6e377f136e897bc86854c1b949bbfb3800c89cc3399a85cfc645b2bb.json for these section facts
+E       assert (False or not True)
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.98eeb0db6e377f136e897bc86854c1b949bbfb3800c89cc3399a85cfc645b2bb.json').exists
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:79: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_entry_describes_never_prescribes[amira-None-horizon]" time="0.001"><failure message="AssertionError: no hand-written explainer entry explainer.95a8e33c3051cd745c017344e8b8d0fa7af64db992a8a9a4ff7e30a395f283bf.json for these section facts&#10;assert (False or not True)&#10; +  where False = exists()&#10; +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.95a8e33c3051cd745c017344e8b8d0fa7af64db992a8a9a4ff7e30a395f283bf.json').exists">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'amira', portfolio = None, factor = 'horizon'
+
+    @pytest.mark.parametrize("persona,portfolio,factor", _non_pass_cases())
+    def test_entry_describes_never_prescribes(demo_runs, persona, portfolio, factor):
+        """D10 / SPEC inv. 7 / §9.3 item 3: no advisory wording, no option-style segment kind."""
+        facts = _sections(demo_runs[(persona, portfolio)])[factor]["facts"]
+&gt;       out = _cache_entry(facts)["output"]
+              ^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:193: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+facts = {'factor': 'horizon', 'locale': 'fr-CA', 'question': "Quand l'argent sera-t-il requis?", 'status': 'violation', ...}
+required = True
+
+    def _cache_entry(facts: dict, required: bool = True) -&gt; dict | None:
+        key = bedrock.cache_key(NODE, extractors.prompt_version(NODE), bedrock.MOCK_MODEL_ID, facts)
+        p = Path(config.LLM_CACHE_DIR) / f"{NODE}.{key}.json"
+&gt;       assert p.exists() or not required, f"no hand-written {NODE} entry {p.name} for these section facts"
+E       AssertionError: no hand-written explainer entry explainer.95a8e33c3051cd745c017344e8b8d0fa7af64db992a8a9a4ff7e30a395f283bf.json for these section facts
+E       assert (False or not True)
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.95a8e33c3051cd745c017344e8b8d0fa7af64db992a8a9a4ff7e30a395f283bf.json').exists
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:79: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_entry_describes_never_prescribes[amira-None-contraintes]" time="0.001"><failure message="AssertionError: no hand-written explainer entry explainer.21c7b04b539856bb8a841e9cebed94a4cbe7af5dd22821b7360bd13505639377.json for these section facts&#10;assert (False or not True)&#10; +  where False = exists()&#10; +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.21c7b04b539856bb8a841e9cebed94a4cbe7af5dd22821b7360bd13505639377.json').exists">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'amira', portfolio = None, factor = 'contraintes'
+
+    @pytest.mark.parametrize("persona,portfolio,factor", _non_pass_cases())
+    def test_entry_describes_never_prescribes(demo_runs, persona, portfolio, factor):
+        """D10 / SPEC inv. 7 / §9.3 item 3: no advisory wording, no option-style segment kind."""
+        facts = _sections(demo_runs[(persona, portfolio)])[factor]["facts"]
+&gt;       out = _cache_entry(facts)["output"]
+              ^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:193: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+facts = {'factor': 'contraintes', 'locale': 'fr-CA', 'question': "Quelles limites s'appliquent?", 'status': 'violation', ...}
+required = True
+
+    def _cache_entry(facts: dict, required: bool = True) -&gt; dict | None:
+        key = bedrock.cache_key(NODE, extractors.prompt_version(NODE), bedrock.MOCK_MODEL_ID, facts)
+        p = Path(config.LLM_CACHE_DIR) / f"{NODE}.{key}.json"
+&gt;       assert p.exists() or not required, f"no hand-written {NODE} entry {p.name} for these section facts"
+E       AssertionError: no hand-written explainer entry explainer.21c7b04b539856bb8a841e9cebed94a4cbe7af5dd22821b7360bd13505639377.json for these section facts
+E       assert (False or not True)
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.21c7b04b539856bb8a841e9cebed94a4cbe7af5dd22821b7360bd13505639377.json').exists
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:79: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_entry_describes_never_prescribes[amira-None-preferences]" time="0.001"><failure message="AssertionError: no hand-written explainer entry explainer.d16fbd4666da4bb03462c4ac467c074874d8bb6552769871d2ff4e014b03a972.json for these section facts&#10;assert (False or not True)&#10; +  where False = exists()&#10; +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.d16fbd4666da4bb03462c4ac467c074874d8bb6552769871d2ff4e014b03a972.json').exists">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'amira', portfolio = None, factor = 'preferences'
+
+    @pytest.mark.parametrize("persona,portfolio,factor", _non_pass_cases())
+    def test_entry_describes_never_prescribes(demo_runs, persona, portfolio, factor):
+        """D10 / SPEC inv. 7 / §9.3 item 3: no advisory wording, no option-style segment kind."""
+        facts = _sections(demo_runs[(persona, portfolio)])[factor]["facts"]
+&gt;       out = _cache_entry(facts)["output"]
+              ^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:193: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+facts = {'factor': 'preferences', 'locale': 'fr-CA', 'question': "Qu'est-ce qui oriente les choix?", 'status': 'info', ...}
+required = True
+
+    def _cache_entry(facts: dict, required: bool = True) -&gt; dict | None:
+        key = bedrock.cache_key(NODE, extractors.prompt_version(NODE), bedrock.MOCK_MODEL_ID, facts)
+        p = Path(config.LLM_CACHE_DIR) / f"{NODE}.{key}.json"
+&gt;       assert p.exists() or not required, f"no hand-written {NODE} entry {p.name} for these section facts"
+E       AssertionError: no hand-written explainer entry explainer.d16fbd4666da4bb03462c4ac467c074874d8bb6552769871d2ff4e014b03a972.json for these section facts
+E       assert (False or not True)
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.d16fbd4666da4bb03462c4ac467c074874d8bb6552769871d2ff4e014b03a972.json').exists
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:79: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_entry_describes_never_prescribes[mateo-None-contraintes]" time="0.001"><failure message="AssertionError: no hand-written explainer entry explainer.be34318fd2b1fa0b4c760a49dc2b0375330baf14032f60e66452b771ca20c9c1.json for these section facts&#10;assert (False or not True)&#10; +  where False = exists()&#10; +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.be34318fd2b1fa0b4c760a49dc2b0375330baf14032f60e66452b771ca20c9c1.json').exists">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'mateo', portfolio = None, factor = 'contraintes'
+
+    @pytest.mark.parametrize("persona,portfolio,factor", _non_pass_cases())
+    def test_entry_describes_never_prescribes(demo_runs, persona, portfolio, factor):
+        """D10 / SPEC inv. 7 / §9.3 item 3: no advisory wording, no option-style segment kind."""
+        facts = _sections(demo_runs[(persona, portfolio)])[factor]["facts"]
+&gt;       out = _cache_entry(facts)["output"]
+              ^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:193: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+facts = {'factor': 'contraintes', 'locale': 'fr-CA', 'question': "Quelles limites s'appliquent?", 'status': 'unknown', ...}
+required = True
+
+    def _cache_entry(facts: dict, required: bool = True) -&gt; dict | None:
+        key = bedrock.cache_key(NODE, extractors.prompt_version(NODE), bedrock.MOCK_MODEL_ID, facts)
+        p = Path(config.LLM_CACHE_DIR) / f"{NODE}.{key}.json"
+&gt;       assert p.exists() or not required, f"no hand-written {NODE} entry {p.name} for these section facts"
+E       AssertionError: no hand-written explainer entry explainer.be34318fd2b1fa0b4c760a49dc2b0375330baf14032f60e66452b771ca20c9c1.json for these section facts
+E       assert (False or not True)
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.be34318fd2b1fa0b4c760a49dc2b0375330baf14032f60e66452b771ca20c9c1.json').exists
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:79: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_entry_describes_never_prescribes[mateo-None-preferences]" time="0.001"><failure message="AssertionError: no hand-written explainer entry explainer.98eeb0db6e377f136e897bc86854c1b949bbfb3800c89cc3399a85cfc645b2bb.json for these section facts&#10;assert (False or not True)&#10; +  where False = exists()&#10; +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.98eeb0db6e377f136e897bc86854c1b949bbfb3800c89cc3399a85cfc645b2bb.json').exists">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'mateo', portfolio = None, factor = 'preferences'
+
+    @pytest.mark.parametrize("persona,portfolio,factor", _non_pass_cases())
+    def test_entry_describes_never_prescribes(demo_runs, persona, portfolio, factor):
+        """D10 / SPEC inv. 7 / §9.3 item 3: no advisory wording, no option-style segment kind."""
+        facts = _sections(demo_runs[(persona, portfolio)])[factor]["facts"]
+&gt;       out = _cache_entry(facts)["output"]
+              ^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:193: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+facts = {'factor': 'preferences', 'locale': 'fr-CA', 'question': "Qu'est-ce qui oriente les choix?", 'status': 'info', ...}
+required = True
+
+    def _cache_entry(facts: dict, required: bool = True) -&gt; dict | None:
+        key = bedrock.cache_key(NODE, extractors.prompt_version(NODE), bedrock.MOCK_MODEL_ID, facts)
+        p = Path(config.LLM_CACHE_DIR) / f"{NODE}.{key}.json"
+&gt;       assert p.exists() or not required, f"no hand-written {NODE} entry {p.name} for these section facts"
+E       AssertionError: no hand-written explainer entry explainer.98eeb0db6e377f136e897bc86854c1b949bbfb3800c89cc3399a85cfc645b2bb.json for these section facts
+E       assert (False or not True)
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.98eeb0db6e377f136e897bc86854c1b949bbfb3800c89cc3399a85cfc645b2bb.json').exists
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:79: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_entry_covers_every_failing_or_unknown_check[amira-None-horizon]" time="0.001"><failure message="AssertionError: no hand-written explainer entry explainer.95a8e33c3051cd745c017344e8b8d0fa7af64db992a8a9a4ff7e30a395f283bf.json for these section facts&#10;assert (False or not True)&#10; +  where False = exists()&#10; +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.95a8e33c3051cd745c017344e8b8d0fa7af64db992a8a9a4ff7e30a395f283bf.json').exists">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'amira', portfolio = None, factor = 'horizon'
+
+    @pytest.mark.parametrize("persona,portfolio,factor", _non_pass_cases())
+    def test_entry_covers_every_failing_or_unknown_check(demo_runs, persona, portfolio, factor):
+        """V3 (SPEC §9.3): each violation / warning check id is cited; `unknown` checks are named by `unknown` segments."""
+        facts = _sections(demo_runs[(persona, portfolio)])[factor]["facts"]
+&gt;       out = _cache_entry(facts)["output"]
+              ^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:204: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+facts = {'factor': 'horizon', 'locale': 'fr-CA', 'question': "Quand l'argent sera-t-il requis?", 'status': 'violation', ...}
+required = True
+
+    def _cache_entry(facts: dict, required: bool = True) -&gt; dict | None:
+        key = bedrock.cache_key(NODE, extractors.prompt_version(NODE), bedrock.MOCK_MODEL_ID, facts)
+        p = Path(config.LLM_CACHE_DIR) / f"{NODE}.{key}.json"
+&gt;       assert p.exists() or not required, f"no hand-written {NODE} entry {p.name} for these section facts"
+E       AssertionError: no hand-written explainer entry explainer.95a8e33c3051cd745c017344e8b8d0fa7af64db992a8a9a4ff7e30a395f283bf.json for these section facts
+E       assert (False or not True)
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.95a8e33c3051cd745c017344e8b8d0fa7af64db992a8a9a4ff7e30a395f283bf.json').exists
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:79: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_entry_covers_every_failing_or_unknown_check[amira-None-contraintes]" time="0.001"><failure message="AssertionError: no hand-written explainer entry explainer.21c7b04b539856bb8a841e9cebed94a4cbe7af5dd22821b7360bd13505639377.json for these section facts&#10;assert (False or not True)&#10; +  where False = exists()&#10; +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.21c7b04b539856bb8a841e9cebed94a4cbe7af5dd22821b7360bd13505639377.json').exists">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'amira', portfolio = None, factor = 'contraintes'
+
+    @pytest.mark.parametrize("persona,portfolio,factor", _non_pass_cases())
+    def test_entry_covers_every_failing_or_unknown_check(demo_runs, persona, portfolio, factor):
+        """V3 (SPEC §9.3): each violation / warning check id is cited; `unknown` checks are named by `unknown` segments."""
+        facts = _sections(demo_runs[(persona, portfolio)])[factor]["facts"]
+&gt;       out = _cache_entry(facts)["output"]
+              ^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:204: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+facts = {'factor': 'contraintes', 'locale': 'fr-CA', 'question': "Quelles limites s'appliquent?", 'status': 'violation', ...}
+required = True
+
+    def _cache_entry(facts: dict, required: bool = True) -&gt; dict | None:
+        key = bedrock.cache_key(NODE, extractors.prompt_version(NODE), bedrock.MOCK_MODEL_ID, facts)
+        p = Path(config.LLM_CACHE_DIR) / f"{NODE}.{key}.json"
+&gt;       assert p.exists() or not required, f"no hand-written {NODE} entry {p.name} for these section facts"
+E       AssertionError: no hand-written explainer entry explainer.21c7b04b539856bb8a841e9cebed94a4cbe7af5dd22821b7360bd13505639377.json for these section facts
+E       assert (False or not True)
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.21c7b04b539856bb8a841e9cebed94a4cbe7af5dd22821b7360bd13505639377.json').exists
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:79: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_entry_covers_every_failing_or_unknown_check[amira-None-preferences]" time="0.001"><failure message="AssertionError: no hand-written explainer entry explainer.d16fbd4666da4bb03462c4ac467c074874d8bb6552769871d2ff4e014b03a972.json for these section facts&#10;assert (False or not True)&#10; +  where False = exists()&#10; +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.d16fbd4666da4bb03462c4ac467c074874d8bb6552769871d2ff4e014b03a972.json').exists">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'amira', portfolio = None, factor = 'preferences'
+
+    @pytest.mark.parametrize("persona,portfolio,factor", _non_pass_cases())
+    def test_entry_covers_every_failing_or_unknown_check(demo_runs, persona, portfolio, factor):
+        """V3 (SPEC §9.3): each violation / warning check id is cited; `unknown` checks are named by `unknown` segments."""
+        facts = _sections(demo_runs[(persona, portfolio)])[factor]["facts"]
+&gt;       out = _cache_entry(facts)["output"]
+              ^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:204: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+facts = {'factor': 'preferences', 'locale': 'fr-CA', 'question': "Qu'est-ce qui oriente les choix?", 'status': 'info', ...}
+required = True
+
+    def _cache_entry(facts: dict, required: bool = True) -&gt; dict | None:
+        key = bedrock.cache_key(NODE, extractors.prompt_version(NODE), bedrock.MOCK_MODEL_ID, facts)
+        p = Path(config.LLM_CACHE_DIR) / f"{NODE}.{key}.json"
+&gt;       assert p.exists() or not required, f"no hand-written {NODE} entry {p.name} for these section facts"
+E       AssertionError: no hand-written explainer entry explainer.d16fbd4666da4bb03462c4ac467c074874d8bb6552769871d2ff4e014b03a972.json for these section facts
+E       assert (False or not True)
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.d16fbd4666da4bb03462c4ac467c074874d8bb6552769871d2ff4e014b03a972.json').exists
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:79: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_entry_covers_every_failing_or_unknown_check[mateo-None-contraintes]" time="0.001"><failure message="AssertionError: no hand-written explainer entry explainer.be34318fd2b1fa0b4c760a49dc2b0375330baf14032f60e66452b771ca20c9c1.json for these section facts&#10;assert (False or not True)&#10; +  where False = exists()&#10; +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.be34318fd2b1fa0b4c760a49dc2b0375330baf14032f60e66452b771ca20c9c1.json').exists">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'mateo', portfolio = None, factor = 'contraintes'
+
+    @pytest.mark.parametrize("persona,portfolio,factor", _non_pass_cases())
+    def test_entry_covers_every_failing_or_unknown_check(demo_runs, persona, portfolio, factor):
+        """V3 (SPEC §9.3): each violation / warning check id is cited; `unknown` checks are named by `unknown` segments."""
+        facts = _sections(demo_runs[(persona, portfolio)])[factor]["facts"]
+&gt;       out = _cache_entry(facts)["output"]
+              ^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:204: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+facts = {'factor': 'contraintes', 'locale': 'fr-CA', 'question': "Quelles limites s'appliquent?", 'status': 'unknown', ...}
+required = True
+
+    def _cache_entry(facts: dict, required: bool = True) -&gt; dict | None:
+        key = bedrock.cache_key(NODE, extractors.prompt_version(NODE), bedrock.MOCK_MODEL_ID, facts)
+        p = Path(config.LLM_CACHE_DIR) / f"{NODE}.{key}.json"
+&gt;       assert p.exists() or not required, f"no hand-written {NODE} entry {p.name} for these section facts"
+E       AssertionError: no hand-written explainer entry explainer.be34318fd2b1fa0b4c760a49dc2b0375330baf14032f60e66452b771ca20c9c1.json for these section facts
+E       assert (False or not True)
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.be34318fd2b1fa0b4c760a49dc2b0375330baf14032f60e66452b771ca20c9c1.json').exists
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:79: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_entry_covers_every_failing_or_unknown_check[mateo-None-preferences]" time="0.001"><failure message="AssertionError: no hand-written explainer entry explainer.98eeb0db6e377f136e897bc86854c1b949bbfb3800c89cc3399a85cfc645b2bb.json for these section facts&#10;assert (False or not True)&#10; +  where False = exists()&#10; +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.98eeb0db6e377f136e897bc86854c1b949bbfb3800c89cc3399a85cfc645b2bb.json').exists">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'mateo', portfolio = None, factor = 'preferences'
+
+    @pytest.mark.parametrize("persona,portfolio,factor", _non_pass_cases())
+    def test_entry_covers_every_failing_or_unknown_check(demo_runs, persona, portfolio, factor):
+        """V3 (SPEC §9.3): each violation / warning check id is cited; `unknown` checks are named by `unknown` segments."""
+        facts = _sections(demo_runs[(persona, portfolio)])[factor]["facts"]
+&gt;       out = _cache_entry(facts)["output"]
+              ^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:204: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+facts = {'factor': 'preferences', 'locale': 'fr-CA', 'question': "Qu'est-ce qui oriente les choix?", 'status': 'info', ...}
+required = True
+
+    def _cache_entry(facts: dict, required: bool = True) -&gt; dict | None:
+        key = bedrock.cache_key(NODE, extractors.prompt_version(NODE), bedrock.MOCK_MODEL_ID, facts)
+        p = Path(config.LLM_CACHE_DIR) / f"{NODE}.{key}.json"
+&gt;       assert p.exists() or not required, f"no hand-written {NODE} entry {p.name} for these section facts"
+E       AssertionError: no hand-written explainer entry explainer.98eeb0db6e377f136e897bc86854c1b949bbfb3800c89cc3399a85cfc645b2bb.json for these section facts
+E       assert (False or not True)
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.98eeb0db6e377f136e897bc86854c1b949bbfb3800c89cc3399a85cfc645b2bb.json').exists
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:79: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_entry_is_a_hand_written_narration_not_the_template[amira-None-horizon]" time="0.001"><failure message="AssertionError: no hand-written explainer entry explainer.95a8e33c3051cd745c017344e8b8d0fa7af64db992a8a9a4ff7e30a395f283bf.json for these section facts&#10;assert (False or not True)&#10; +  where False = exists()&#10; +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.95a8e33c3051cd745c017344e8b8d0fa7af64db992a8a9a4ff7e30a395f283bf.json').exists">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'amira', portfolio = None, factor = 'horizon'
+
+    @pytest.mark.parametrize("persona,portfolio,factor", _non_pass_cases())
+    def test_entry_is_a_hand_written_narration_not_the_template(demo_runs, persona, portfolio, factor):
+        """SPEC §16: plausible hand-written responses; the stored answer is not a copy of the deterministic template."""
+        facts = _sections(demo_runs[(persona, portfolio)])[factor]["facts"]
+&gt;       out = _cache_entry(facts)["output"]
+              ^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:219: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+facts = {'factor': 'horizon', 'locale': 'fr-CA', 'question': "Quand l'argent sera-t-il requis?", 'status': 'violation', ...}
+required = True
+
+    def _cache_entry(facts: dict, required: bool = True) -&gt; dict | None:
+        key = bedrock.cache_key(NODE, extractors.prompt_version(NODE), bedrock.MOCK_MODEL_ID, facts)
+        p = Path(config.LLM_CACHE_DIR) / f"{NODE}.{key}.json"
+&gt;       assert p.exists() or not required, f"no hand-written {NODE} entry {p.name} for these section facts"
+E       AssertionError: no hand-written explainer entry explainer.95a8e33c3051cd745c017344e8b8d0fa7af64db992a8a9a4ff7e30a395f283bf.json for these section facts
+E       assert (False or not True)
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.95a8e33c3051cd745c017344e8b8d0fa7af64db992a8a9a4ff7e30a395f283bf.json').exists
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:79: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_entry_is_a_hand_written_narration_not_the_template[amira-None-contraintes]" time="0.001"><failure message="AssertionError: no hand-written explainer entry explainer.21c7b04b539856bb8a841e9cebed94a4cbe7af5dd22821b7360bd13505639377.json for these section facts&#10;assert (False or not True)&#10; +  where False = exists()&#10; +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.21c7b04b539856bb8a841e9cebed94a4cbe7af5dd22821b7360bd13505639377.json').exists">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'amira', portfolio = None, factor = 'contraintes'
+
+    @pytest.mark.parametrize("persona,portfolio,factor", _non_pass_cases())
+    def test_entry_is_a_hand_written_narration_not_the_template(demo_runs, persona, portfolio, factor):
+        """SPEC §16: plausible hand-written responses; the stored answer is not a copy of the deterministic template."""
+        facts = _sections(demo_runs[(persona, portfolio)])[factor]["facts"]
+&gt;       out = _cache_entry(facts)["output"]
+              ^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:219: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+facts = {'factor': 'contraintes', 'locale': 'fr-CA', 'question': "Quelles limites s'appliquent?", 'status': 'violation', ...}
+required = True
+
+    def _cache_entry(facts: dict, required: bool = True) -&gt; dict | None:
+        key = bedrock.cache_key(NODE, extractors.prompt_version(NODE), bedrock.MOCK_MODEL_ID, facts)
+        p = Path(config.LLM_CACHE_DIR) / f"{NODE}.{key}.json"
+&gt;       assert p.exists() or not required, f"no hand-written {NODE} entry {p.name} for these section facts"
+E       AssertionError: no hand-written explainer entry explainer.21c7b04b539856bb8a841e9cebed94a4cbe7af5dd22821b7360bd13505639377.json for these section facts
+E       assert (False or not True)
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.21c7b04b539856bb8a841e9cebed94a4cbe7af5dd22821b7360bd13505639377.json').exists
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:79: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_entry_is_a_hand_written_narration_not_the_template[amira-None-preferences]" time="0.001"><failure message="AssertionError: no hand-written explainer entry explainer.d16fbd4666da4bb03462c4ac467c074874d8bb6552769871d2ff4e014b03a972.json for these section facts&#10;assert (False or not True)&#10; +  where False = exists()&#10; +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.d16fbd4666da4bb03462c4ac467c074874d8bb6552769871d2ff4e014b03a972.json').exists">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'amira', portfolio = None, factor = 'preferences'
+
+    @pytest.mark.parametrize("persona,portfolio,factor", _non_pass_cases())
+    def test_entry_is_a_hand_written_narration_not_the_template(demo_runs, persona, portfolio, factor):
+        """SPEC §16: plausible hand-written responses; the stored answer is not a copy of the deterministic template."""
+        facts = _sections(demo_runs[(persona, portfolio)])[factor]["facts"]
+&gt;       out = _cache_entry(facts)["output"]
+              ^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:219: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+facts = {'factor': 'preferences', 'locale': 'fr-CA', 'question': "Qu'est-ce qui oriente les choix?", 'status': 'info', ...}
+required = True
+
+    def _cache_entry(facts: dict, required: bool = True) -&gt; dict | None:
+        key = bedrock.cache_key(NODE, extractors.prompt_version(NODE), bedrock.MOCK_MODEL_ID, facts)
+        p = Path(config.LLM_CACHE_DIR) / f"{NODE}.{key}.json"
+&gt;       assert p.exists() or not required, f"no hand-written {NODE} entry {p.name} for these section facts"
+E       AssertionError: no hand-written explainer entry explainer.d16fbd4666da4bb03462c4ac467c074874d8bb6552769871d2ff4e014b03a972.json for these section facts
+E       assert (False or not True)
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.d16fbd4666da4bb03462c4ac467c074874d8bb6552769871d2ff4e014b03a972.json').exists
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:79: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_entry_is_a_hand_written_narration_not_the_template[mateo-None-contraintes]" time="0.001"><failure message="AssertionError: no hand-written explainer entry explainer.be34318fd2b1fa0b4c760a49dc2b0375330baf14032f60e66452b771ca20c9c1.json for these section facts&#10;assert (False or not True)&#10; +  where False = exists()&#10; +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.be34318fd2b1fa0b4c760a49dc2b0375330baf14032f60e66452b771ca20c9c1.json').exists">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'mateo', portfolio = None, factor = 'contraintes'
+
+    @pytest.mark.parametrize("persona,portfolio,factor", _non_pass_cases())
+    def test_entry_is_a_hand_written_narration_not_the_template(demo_runs, persona, portfolio, factor):
+        """SPEC §16: plausible hand-written responses; the stored answer is not a copy of the deterministic template."""
+        facts = _sections(demo_runs[(persona, portfolio)])[factor]["facts"]
+&gt;       out = _cache_entry(facts)["output"]
+              ^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:219: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+facts = {'factor': 'contraintes', 'locale': 'fr-CA', 'question': "Quelles limites s'appliquent?", 'status': 'unknown', ...}
+required = True
+
+    def _cache_entry(facts: dict, required: bool = True) -&gt; dict | None:
+        key = bedrock.cache_key(NODE, extractors.prompt_version(NODE), bedrock.MOCK_MODEL_ID, facts)
+        p = Path(config.LLM_CACHE_DIR) / f"{NODE}.{key}.json"
+&gt;       assert p.exists() or not required, f"no hand-written {NODE} entry {p.name} for these section facts"
+E       AssertionError: no hand-written explainer entry explainer.be34318fd2b1fa0b4c760a49dc2b0375330baf14032f60e66452b771ca20c9c1.json for these section facts
+E       assert (False or not True)
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.be34318fd2b1fa0b4c760a49dc2b0375330baf14032f60e66452b771ca20c9c1.json').exists
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:79: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_entry_is_a_hand_written_narration_not_the_template[mateo-None-preferences]" time="0.001"><failure message="AssertionError: no hand-written explainer entry explainer.98eeb0db6e377f136e897bc86854c1b949bbfb3800c89cc3399a85cfc645b2bb.json for these section facts&#10;assert (False or not True)&#10; +  where False = exists()&#10; +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.98eeb0db6e377f136e897bc86854c1b949bbfb3800c89cc3399a85cfc645b2bb.json').exists">demo_runs = {('amira', None): {'rep': {'run_id': '01M7EEWQ8YY82Q359QYRC9WAQC', 'flow': 'C', 'profile_id': 'persona-amira', 'profil...VCJ4KZ0TR3CQW', 'flow': 'C', 'started_at': '2026-11-15T01:59:32+00:00', 'ended_at': '2026-11-15T01:59:32+00:00', ...}}}
+persona = 'mateo', portfolio = None, factor = 'preferences'
+
+    @pytest.mark.parametrize("persona,portfolio,factor", _non_pass_cases())
+    def test_entry_is_a_hand_written_narration_not_the_template(demo_runs, persona, portfolio, factor):
+        """SPEC §16: plausible hand-written responses; the stored answer is not a copy of the deterministic template."""
+        facts = _sections(demo_runs[(persona, portfolio)])[factor]["facts"]
+&gt;       out = _cache_entry(facts)["output"]
+              ^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:219: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+facts = {'factor': 'preferences', 'locale': 'fr-CA', 'question': "Qu'est-ce qui oriente les choix?", 'status': 'info', ...}
+required = True
+
+    def _cache_entry(facts: dict, required: bool = True) -&gt; dict | None:
+        key = bedrock.cache_key(NODE, extractors.prompt_version(NODE), bedrock.MOCK_MODEL_ID, facts)
+        p = Path(config.LLM_CACHE_DIR) / f"{NODE}.{key}.json"
+&gt;       assert p.exists() or not required, f"no hand-written {NODE} entry {p.name} for these section facts"
+E       AssertionError: no hand-written explainer entry explainer.98eeb0db6e377f136e897bc86854c1b949bbfb3800c89cc3399a85cfc645b2bb.json for these section facts
+E       assert (False or not True)
+E        +  where False = exists()
+E        +    where exists = PosixPath('/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/fixtures/llm_cache/explainer.98eeb0db6e377f136e897bc86854c1b949bbfb3800c89cc3399a85cfc645b2bb.json').exists
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-cache/tests/llm/test_persona_narration_cache.py:79: AssertionError</failure></testcase><testcase classname="tests.llm.test_persona_narration_cache" name="test_no_entry_exists_for_a_pass_section" time="0.001" /><testcase classname="tests.llm.test_persona_narration_cache" name="test_robert_modes_are_unchanged[None]" time="0.000" /><testcase classname="tests.llm.test_persona_narration_cache" name="test_robert_modes_are_unchanged[portfolio_review.json]" time="0.000" /><testcase classname="tests.llm.test_persona_narration_cache" name="test_robert_nvda_contraintes_keeps_its_failure_trail" time="0.000" /></testsuite></testsuites>
