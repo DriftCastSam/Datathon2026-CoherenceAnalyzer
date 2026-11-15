@@ -1046,6 +1046,29 @@
     "README.md"
    ],
    "notes": "Owner request: the dashboard must not be Robert / persona specific. Today the picker is the 4 static reports + a hard-coded 'Robert · transaction demandée (flux B)' option, fetches reports/robert-nvda.json directly, and whatif is precomputed for Robert only (build_site.WHATIF_PERSONA, the 'Simulation indisponible ... profil de Robert' note). Required: (1) with an API base configured, the picker lists GET /profiles (seeds + store users, P5.USERS adds create routes in parallel: code against POST /profiles {locale, display_name?} -> profile, PUT /profiles/{id}/portfolio {as_of, value_cad, weights_pct}, POST /profiles/{id}/review -> report) and renders the live review; a 'new profile' form creates a user, then the intake form P3.UIINTAKE added walks the missing answers, then a portfolio form; (2) without an API (static demo) the page stays exactly as today (frozen P2.D10C constraint: reports/index.json is exactly the 4 flow C reviews; the flow B demo report stays a separate file); (3) whatif.py precomputes for any profile directory passed to it (no persona name in code paths, persona choice comes from build_site's REPORTS list), and the page's what-if note names no persona; (4) no user-facing string names Robert, Amira or Mateo except labels read from data (report index labels, profile display names). All strings pass the SPEC §9.3 blocklist apart from the fixed disclaimer. Tests run offline (no browser, no network): parse the HTML / JS as the existing dashboard tests do. These P5 tasks run IN PARALLEL in separate worktrees (P4.N1WIN edits the N1 gate context in pipeline.py at the same time): edit only the files your task owns, plus README.md and new test files. No network, no pip install, no real AWS calls in code paths the tests run. Never write the activity-tags meta CSV (humans only). The engine golden test must stay green. D10 (describe, never prescribe) and the fixed disclaimer apply to every user-facing string. Do not change frozen tests; if one contradicts the spec write .claude/loop/BLOCKED.md naming the test and the spec line. Product decision (owner request, 2026-11-14): the app must work for any user, not only the three personas; the personas stay as seed data and every existing persona behaviour, report and test stays identical."
+  },
+  {
+   "id": "P5.NOPF",
+   "title": "A new user can answer the intake before setting a portfolio; setting the portfolio runs the Flow A refresh",
+   "spec": [
+    "§4 Flow A",
+    "docs/spec-factors.md §20.6",
+    "docs/spec-decisions.md D1 D3",
+    "§7.1",
+    "§7.2",
+    "§1 inv. 1"
+   ],
+   "tests": [
+    "tests/flows/test_new_user_no_portfolio.py"
+   ],
+   "code": [
+    "coherence_analyzer/pipeline.py (refresh, _refresh, _load_portfolio only)",
+    "coherence_analyzer/rules/derive.py",
+    "coherence_analyzer/rules/limits.py",
+    "coherence_analyzer/api.py (put_portfolio only)",
+    "README.md"
+   ],
+   "notes": "Integration bug found end to end (P5.USERS + P3.FREETEXT): POST /profiles creates a user with no portfolio.json; every intake answer runs pipeline.refresh, which calls _load_portfolio and raises FileNotFoundError -> HTTP 500 on the first answer, so the natural order create -> answer intake -> PUT portfolio is impossible. derive.derive_all(portfolio_value_cad=None) and limits.build_limits(.., None) raise TypeError. Required: (1) Flow A (refresh) runs when the profile has no portfolio yet: every derived field and limit that needs the portfolio value or the reference date (D1: as_of = portfolio.as_of) is null with a limits_trace / derived `by` entry naming the missing input (P3.SKIP convention: never a default, never today's clock); everything else is derived as usual; the audit record has as_of null. (2) PUT /profiles/{id}/portfolio, after writing portfolio.json and its event, runs the same refresh so GET /profiles/{id} shows limits computed from the new value. (3) Test the full order through the API TestClient: create -> answer every intake.REQUIRED path -> PUT portfolio -> review gives a schema-valid report with a verdict, in mock mode, in a tmp store; also review before any portfolio is a clear 4xx, not a 500. Every persona behaviour, report and frozen test stays identical (personas always have a portfolio). Touch only the functions listed. No network, no pip install. P5.DASH edits deploy/ in parallel. Do not change frozen tests; if one contradicts the spec write .claude/loop/BLOCKED.md. D10 applies to every user-facing string."
   }
  ]
 }
