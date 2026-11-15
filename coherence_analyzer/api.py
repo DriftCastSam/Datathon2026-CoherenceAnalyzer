@@ -600,9 +600,46 @@ def confirm_intent(intent_id: str, body: ConfirmIn) -> dict:
 
 # ---------------------------------------------------------------- parsed-rule decisions (D7 point 1)
 
+def _record_decision(work: Path, profile_id: str, fixture: Path, index: int, edited: dict, old: bool,
+                     new: bool) -> dict:
+    """D7 + §3.4 + §4: the decision is one `profile_edit` event (path, old, new; source `ui`), then Flow A runs on the
+    working copy with the decided profile (`pipeline.refresh(edited=...)`): limits and limits_trace are rebuilt from
+    rule: fields, declared values and approved rules only, the version is bumped and an audit record is stored. A
+    failure after the append restores events.jsonl and profile.json. Returns the refreshed profile."""
+    try:
+        pipeline.validate_profile(edited, "edited profile")
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    path = f"{intake.PARSED_RULES_PATH}[{index}].approved_by_user"
+    events_path = work / "events.jsonl"
+    state = "approved" if new else "rejected"
+    event = {"event_id": _next_event_id(store.read_events(events_path), fixture), "profile_id": profile_id,
+             "ts": pipeline._now(), "type": "profile_edit",
+             "text": f"The user {state} parsed rule {index} of their notes.",
+             "payload": {"path": path, "old": old, "new": new}, "source": "ui"}
+    events_before = events_path.read_bytes() if events_path.exists() else b""
+    profile_before = (work / "profile.json").read_bytes()
+    try:
+        _append_event(work, event)
+        try:
+            res = pipeline.refresh(work, edited=edited)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        final = {**edited, **{k: res["profile"][k] for k in _DECISION_REFRESHED if k in res["profile"]}}
+        _save(work, final)
+    except BaseException:
+        events_path.write_bytes(events_before)
+        (work / "profile.json").write_bytes(profile_before)
+        raise
+    return final
+
+
+_DECISION_REFRESHED = ("limits", "limits_trace", "meta")     # what a rule decision moves (the rest is left as stored)
+
+
 @app.post("/profiles/{profile_id}/parsed-rules/{index}/decision")
 def post_decision(profile_id: str, index: int, body: DecisionIn) -> dict:
-    work, _ = _workdir(profile_id)
+    work, fixture = _workdir(profile_id)
     with _LOCK:
         profile = _load(work)
         rules = ((profile.get("values") or {}).get("parsed_notes") or {}).get("value")
@@ -617,9 +654,9 @@ def post_decision(profile_id: str, index: int, body: DecisionIn) -> dict:
             if isinstance(current, (int, float)) and not isinstance(current, bool):
                 raise HTTPException(status_code=409, detail="this rule already has a number")
             rule["params"] = {**params, intake.THEME_NUMBER_KEY: body.max_pct}
+        old = rule.get("approved_by_user") is True
         rule["approved_by_user"] = body.approved
-        _save(work, profile)
-    return profile
+        return _record_decision(work, profile_id, fixture, index, profile, old, body.approved)
 
 
 # ---------------------------------------------------------------- review, reports, audit
