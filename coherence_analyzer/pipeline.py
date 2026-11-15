@@ -349,24 +349,6 @@ def _universe(assets) -> list[dict]:
     return [{"ticker": t, "name": r["name"]} for t, r in assets.iterrows()]
 
 
-def _gate_intent(draft: dict, universe: list[dict]) -> str:
-    """Gate for the N4 draft (SPEC §6.2 N4, §11 vocabulary): the ticker (and a specific funding ticker) must be in the
-    universe, the action a buy, the weight in (0, 100], the funding kind known with its parameter. Anything else is
-    `rejected:schema` and the draft is dropped; the draft is never used as a value, the user confirms at B2."""
-    tickers = {u["ticker"] for u in universe}
-    f = draft.get("funding")
-    try:
-        ok = (draft.get("action") == "buy" and draft.get("ticker") in tickers
-              and isinstance(draft.get("target_weight_pct"), (int, float)) and 0 < draft["target_weight_pct"] <= 100
-              and isinstance(f, dict) and f.get("kind") in intent_mod.FUNDING_KINDS
-              and (f["kind"] != "specific" or f.get("ticker") in tickers)
-              and (f["kind"] != "pro_rata_class" or bool(f.get("asset_class")))
-              and (f["kind"] != "cash_contribution" or float(f.get("amount_cad", 0)) > 0))
-    except (TypeError, ValueError):
-        ok = False
-    return "accepted" if ok else "rejected:schema"
-
-
 # ---------------------------------------------------------------- Flow B steps (each: dict in, dict out, JSON only)
 
 def b1_parse_intent(fixture_dir: Path | str, intent_id: str) -> dict:
@@ -389,8 +371,9 @@ def b1_parse_intent(fixture_dir: Path | str, intent_id: str) -> dict:
     except (bedrock.LLMCacheMiss, bedrock.LLMOutputInvalid) as exc:
         errors.append({"node": N4_NODE, "error": f"{type(exc).__name__}: {exc}"})
     else:
-        status = _gate_intent(result["output"], universe)
-        draft = copy.deepcopy(result["output"]) if status == "accepted" else None
+        # N4 has no previous value to protect (a draft is not a profile field): old_field is None.
+        new, status = gate.gate(N4_NODE, None, result["output"], {"universe": universe})
+        draft = copy.deepcopy(new) if status == "accepted" else None
         calls.append(_call_entry(result["call_log"], status))
     return {"fixture_dir": str(fixture_dir), "intent_id": intent_id, "run_id": store.new_run_id(),
             "started_at": started, "event": {"event_id": event["event_id"], "text": event["text"]},
