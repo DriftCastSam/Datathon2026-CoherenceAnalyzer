@@ -5,6 +5,7 @@
      shown as `warning` at most. Card titles and captions follow the design; the figures come from the report. */
   const ROUTE = "preferences";
   const FACTOR = "preferences";
+  const FIRST_INTAKE_PATH = "preferences.prefers_dividends";
   const CRYPTO_METER_SCALE = 0.3;
   const SHARE_METER_SCALE = 1;
   const MAX_HOLDINGS_SHOWN = 12;
@@ -187,7 +188,11 @@
   function detailHtml(section, report) {
     if (!section) return "";
     return '<section class="card detail" aria-label="Declared preferences and explanation">'
-      + '<div class="detail__col"><h2 class="t-h3">Declared preferences</h2>'
+      + '<div class="detail__col">'
+      + '<div class="detail__header">'
+      + '<h2 class="t-h3">Declared preferences</h2>'
+      + '<button class="btn btn--outline-dark" type="button" data-edit-preferences aria-label="Edit declared preferences">Edit</button>'
+      + '</div>'
       + factsHtml(section.facts && section.facts.declared) + "</div>"
       + '<div class="detail__col"><h2 class="t-h3">Explanation</h2>' + segmentsHtml(section) + "</div>"
       + remindersHtml(report)
@@ -212,6 +217,16 @@
     if (list) list.innerHTML = rules.map(rule => App.ruleCardHtml(rule, iconFor)).join("");
 
     const detail = section.querySelector("[data-detail]");
-    if (detail) detail.innerHTML = live ? detailHtml(sectionData, report) : "";
+    if (detail) {
+      detail.innerHTML = live ? detailHtml(sectionData, report) : "";
+      /* Wire the Edit button after rendering. */
+      const editBtn = detail.querySelector("[data-edit-preferences]");
+      if (editBtn && !editBtn.dataset.wired) {
+        editBtn.dataset.wired = "true";
+        editBtn.addEventListener("click", () => {
+          App.go("#/conversation?path=" + encodeURIComponent(FIRST_INTAKE_PATH));
+        });
+      }
+    }
   };
 })();

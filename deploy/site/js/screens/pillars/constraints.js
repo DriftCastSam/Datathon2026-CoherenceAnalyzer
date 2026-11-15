@@ -5,6 +5,7 @@
      measures the portfolio against it, so the sample content only shows when the report is missing. */
   const ROUTE = "constraints";
   const FACTOR = "contraintes";
+  const FIRST_INTAKE_PATH = "situation.emergency_fund";
   const METER_STEPS = [0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.4, 0.5, 0.75, 1];
   const METER_HEADROOM = 1.35;
   const HORIZON_WINDOW_YEARS = 1;
@@ -174,7 +175,11 @@
   function detailHtml(section) {
     if (!section) return "";
     return '<section class="card detail" aria-label="Declared constraints and explanation">'
-      + '<div class="detail__col"><h2 class="t-h3">Declared constraints</h2>'
+      + '<div class="detail__col">'
+      + '<div class="detail__header">'
+      + '<h2 class="t-h3">Declared constraints</h2>'
+      + '<button class="btn btn--outline-dark" type="button" data-edit-constraints aria-label="Edit declared constraints">Edit</button>'
+      + '</div>'
       + App.factsHtml(section.facts && section.facts.declared, FIELD_LABEL, VALUE_LABEL,
         "No constraint field is declared for this profile.") + "</div>"
       + '<div class="detail__col"><h2 class="t-h3">Explanation</h2>' + App.segmentsHtml(section) + "</div>"
@@ -202,6 +207,16 @@
     if (list) list.innerHTML = rules.map(rule => App.ruleCardHtml(rule, iconFor)).join("");
 
     const detail = section.querySelector("[data-detail]");
-    if (detail) detail.innerHTML = live ? detailHtml(sectionData) : "";
+    if (detail) {
+      detail.innerHTML = live ? detailHtml(sectionData) : "";
+      /* Wire the Edit button after rendering. */
+      const editBtn = detail.querySelector("[data-edit-constraints]");
+      if (editBtn && !editBtn.dataset.wired) {
+        editBtn.dataset.wired = "true";
+        editBtn.addEventListener("click", () => {
+          App.go("#/conversation?path=" + encodeURIComponent(FIRST_INTAKE_PATH));
+        });
+      }
+    }
   };
 })();
