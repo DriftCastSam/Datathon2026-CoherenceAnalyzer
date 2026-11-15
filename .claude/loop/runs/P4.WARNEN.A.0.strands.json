@@ -1,0 +1,39 @@
+{
+  "duration_s": 97.9,
+  "guard_cancellations": [
+    {
+      "reason": "'^###' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'WARN_MIN_CONF\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'WARN_MIN_CONF\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'events_by_id\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'behavioural\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'the' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    }
+  ],
+  "is_error": false,
+  "model_id": "us.anthropic.claude-sonnet-5-5",
+  "num_turns": 22,
+  "result": " edit it) or `pipeline.py`.\n\n- `test_n1_warn_enabled_is_confidence_at_least_warn_min_conf`: N1 stamps `warn_enabled = confidence >= WARN_MIN_CONF` (0.5), true at exactly 0.5 and false at 0.4999. Confidence is still stored as-is (\u00a711 step 5).\n- `test_n1_clamped_output_is_stamped_too`: a `clamped` N1 output gets the flag from its own confidence (\u00a711 steps 5\u20136).\n- `test_n1_first_value_without_previous_field_is_stamped`: the first N1 value, with no previous field, is stamped (\u00a711).\n- `test_n1_output_is_otherwise_identical_apart_from_the_new_key`: an accepted N1 field has exactly the old keys plus `warn_enabled`, with unchanged values and stamp (\u00a711 step 6, \u00a73.3).\n- `test_n1_stale_warn_enabled_on_the_old_field_is_recomputed_not_inherited`: an old `warn_enabled` is recomputed from the new confidence, never inherited (\u00a711 step 5).\n- `test_n1_kept_and_rejected_outputs_return_the_previous_field_untouched`: `kept:abstain`, `rejected:evidence` and `rejected:schema` return the previous field unchanged, and nothing is stamped or added (\u00a71 inv. 4, \u00a711).\n- `test_n1_rejection_with_no_previous_field_stays_none`: a rejection with no previous field returns `None` (\u00a711).\n- `test_n2_warn_enabled_follows_the_code_computed_confidence`: N2's flag is a bool equal to its code-computed confidence >= 0.5 (\u00a76.2 N2, \u00a711 step 5).\n- `test_n2_flag_flips_as_scored_questions_accumulate`: with more scored questions the N2 flag goes from false to true and never flips back, and each stamp matches its own confidence (\u00a76.2 N2, \u00a711).\n- `test_n2_output_is_otherwise_identical_apart_from_the_new_key`: N2 keeps its keys plus `warn_enabled`; evidence stays `{event_id, score}` and confidence stays within the cap (\u00a73.3 item 3, \u00a76.2 N2).\n- `test_n2_non_investing_question_is_ignored_without_a_new_stamp`: a non-investing question leaves the field unchanged, with no flag added (\u00a76.2 N2).\n- `test_n2_rejections_keep_the_previous_field_untouched`: invented event, bad quote, out-of-range score and abstain all return the old field exactly (\u00a71 inv. 4, \u00a711 steps 1\u20133).\n- `test_n3_warn_enabled_uses_the_stored_confidence`: N3 inherits the previous confidence when it emits none, and the flag follows it, including the 0.5 boundary (\u00a76.2 N3, \u00a711 step 5).\n- `test_n3_first_parse_without_previous_field_is_stamped_from_its_confidence`: a first N3 parse is stamped from its stored confidence (\u00a711).\n- `test_n3_output_confidence_when_present_drives_the_flag`: if the N3 output carries a confidence, it drives the flag (\u00a711 step 5).\n- `test_n3_output_is_otherwise_identical_apart_from_the_new_key`: N3 keys are `value`, `confidence`, the stamp keys and the flag; rules start unapproved; an old flag is recomputed (\u00a73.3 #4, \u00a76.2 N3).\n- `test_n3_kept_and_rejected_outputs_return_the_previous_field_untouched`: N3 abstain, bad quote and bad `rule_kind` keep the previous field exactly (\u00a71 inv. 4, \u00a711).\n- `test_gate_does_not_mutate_its_inputs_when_stamping`: the gate doesn't mutate the old field, the output or the context (\u00a711).\n- `test_schema_declares_warn_enabled_as_a_boolean_on_llm_fields`: `llmField` declares `warn_enabled` as `{\"type\": \"boolean\"}` and does not require it (\u00a73.3).\n- `test_robert_fixture_without_the_key_still_validates`: Robert's profile without the key still validates (\u00a73.3, backward compatibility).\n- `test_profile_with_boolean_warn_enabled_validates`: a boolean `warn_enabled` validates on `risk.behavioural` and `knowledge.question_quality`.\n- `test_profile_with_non_boolean_warn_enabled_is_rejected`: non-boolean values are rejected on `risk.behavioural`, `knowledge.question_quality` and `values.parsed_notes`.\n- `test_gated_outputs_for_all_three_nodes_validate_inside_the_profile`: real N1, N2 and N3 gate outputs, each carrying the flag, validate inside the Robert profile.\n\nN2's confidence ramp (0.45 for one question, 0.6 for two) comes from the README assumption and `derive.py`, not from SPEC \u00a711. The flip test therefore assumes the first question is below 0.5 and the sixth is at or above it.\n",
+  "stop_reason": "end_turn",
+  "usage": {
+    "inputTokens": 473557,
+    "outputTokens": 15857,
+    "totalTokens": 489414
+  }
+}
