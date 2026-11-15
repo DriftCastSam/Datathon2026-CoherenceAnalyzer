@@ -142,7 +142,7 @@ h3{font:600 16px/24px var(--f)}
   .scr-summary .sum__table{table-layout:fixed;min-width:900px}
   .scr-summary .sum__link{font:600 14px/22px var(--f);color:var(--blue);text-decoration:none}
   .scr-summary .sum__link:hover{text-decoration:underline}
-  .scr-summary .sum__split{display:grid;grid-template-columns:minmax(0,1fr) 440px;gap:16px;align-items:start}
+  .scr-summary .sum__split{display:grid;grid-template-columns:minmax(0,1fr) 440px;gap:16px;align-items:stretch}
   .scr-summary .sum__projection{display:flex;flex-direction:column;gap:14px}
   .scr-summary .sum__head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
   .scr-summary .sum__head-note{font:400 12px/18px var(--f);color:var(--label);white-space:nowrap}
@@ -349,6 +349,7 @@ h3{font:600 16px/24px var(--f)}
   :is(.scr-constraints,.scr-preferences) .holds__sq--flag{background:var(--label)}
   :is(.scr-constraints,.scr-preferences) .note{max-width:140ch}
   :is(.scr-constraints,.scr-preferences) .detail__col{display:flex;flex-direction:column;gap:8px;min-width:0}
+  :is(.scr-constraints,.scr-preferences) .detail__header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
   :is(.scr-constraints,.scr-preferences) .facts{display:flex;flex-direction:column;margin:0}
   :is(.scr-constraints,.scr-preferences) .facts__row{display:flex;align-items:baseline;justify-content:space-between;gap:16px;padding:9px 0;border-bottom:1px solid var(--line)}
   :is(.scr-constraints,.scr-preferences) .facts__row:last-child{border-bottom:0}
@@ -417,6 +418,7 @@ h3{font:600 16px/24px var(--f)}
 /* Search and ask (Figma node 8:552). Layout: query card, then a fixed 400px
    conversation column beside the results card, then the footnote. The chip fill
    uses the shell's --bluetint token (the Figma bluetint). */
+.scr-search{--sq-card-height:497px}
 .scr-search .sq-inner{display:flex;flex-direction:column;gap:16px;min-width:0}
 .scr-search .sq-titlerow{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
 .scr-search .sq-note{color:var(--label)}
@@ -429,7 +431,7 @@ h3{font:600 16px/24px var(--f)}
 .scr-search .sq-scope{display:flex;align-items:center;gap:6px}
 .scr-search .sq-scope__icon{display:block;flex:none}
 .scr-search .sq-panes{display:flex;align-items:stretch;gap:16px;min-width:0}
-.scr-search .sq-chat{display:flex;flex-direction:column;flex:0 0 400px;max-width:400px;height:497px}
+.scr-search .sq-chat{display:flex;flex-direction:column;flex:0 0 400px;max-width:400px;height:var(--sq-card-height)}
 .scr-search .sq-thread{display:flex;flex-direction:column;gap:6px;flex:1;min-height:0;overflow-y:auto;padding-top:8px}
 .scr-search .sq-msg{display:flex;flex-direction:column;gap:2px;max-width:320px;padding:8px 12px;overflow-wrap:anywhere}
 .scr-search .sq-msg--you{margin-left:auto;background:var(--blue);color:var(--surface);border-radius:14px 4px 14px 14px}
@@ -443,8 +445,9 @@ h3{font:600 16px/24px var(--f)}
 .scr-search .sq-suggest{padding:2px 8px;border:1px solid var(--ink);border-radius:999px;background:var(--surface);font:600 13px/18px var(--f);color:var(--ink);cursor:pointer}
 .scr-search .sq-composer__row{display:flex;align-items:center;gap:8px}
 .scr-search .sq-send{height:44px}
-.scr-search .sq-results{display:flex;flex:1;flex-direction:column;gap:10px;min-width:0}
+.scr-search .sq-results{display:flex;flex:1;flex-direction:column;gap:10px;min-width:0;height:var(--sq-card-height)}
 .scr-search .sq-results__head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.scr-search .sq-results__table-wrapper{flex:1;min-height:0;overflow-y:auto}
 .scr-search .sq-link{border:0;background:none;padding:0;color:var(--blue);font:400 14px/22px var(--f);cursor:pointer}
 .scr-search .sq-chips{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .scr-search .sq-chips__list{display:contents}
@@ -467,6 +470,7 @@ h3{font:600 16px/24px var(--f)}
 @media (max-width:1000px){
   .scr-search .sq-panes{flex-direction:column}
   .scr-search .sq-chat{flex:1 1 auto;max-width:none;height:auto}
+  .scr-search .sq-results{height:auto}
   .scr-search .sq-thread{max-height:420px}
 }
 
@@ -488,7 +492,7 @@ h3{font:600 16px/24px var(--f)}
   .scr-whatif .wf-verdict__item{display:flex;flex-direction:column;gap:4px}
   .scr-whatif .wf-verdict__label{font:400 12px/18px var(--f);color:var(--label)}
 
-  .scr-whatif .wf-cols{display:flex;align-items:flex-start;gap:16px;width:100%;min-width:0}
+  .scr-whatif .wf-cols{display:flex;align-items:stretch;gap:16px;width:100%;min-width:0}
   .scr-whatif .wf-proj{display:flex;flex:1 1 0;flex-direction:column;gap:14px;min-width:0}
   .scr-whatif .wf-proj__head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;width:100%}
   .scr-whatif .wf-proj__meta{font:400 12px/18px var(--f);color:var(--label)}
@@ -557,8 +561,8 @@ h3{font:600 16px/24px var(--f)}
 
   .scr-conversation{padding-top:32px;}
   .scr-conversation .lead{display:flex;flex-direction:column;gap:4px;min-width:0}
-  .scr-conversation .cols{display:flex;align-items:flex-start;gap:16px;min-width:0}
-  .scr-conversation .conv{flex:1 1 0;display:flex;flex-direction:column;min-width:0;min-height:572px}
+  .scr-conversation .cols{display:flex;align-items:stretch;gap:16px;min-width:0}
+  .scr-conversation .conv{flex:1 1 0;display:flex;flex-direction:column;min-width:0}
   .scr-conversation .agent{font:600 12px/18px var(--f);color:var(--label)}
   .scr-conversation .answered{display:flex;flex-direction:column;width:100%;margin-top:12px;border-top:1px solid var(--line)}
   .scr-conversation .qa{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;width:100%;padding:12px 0;border-bottom:1px solid var(--line)}
