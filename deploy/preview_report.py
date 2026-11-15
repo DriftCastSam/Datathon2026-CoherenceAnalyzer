@@ -449,7 +449,10 @@ def build(out_dir: Path) -> list[Path]:
             "behavioural": prof["risk"]["behavioural"]["value"], "behavioural_conf": prof["risk"]["behavioural"]["confidence"],
             "effective_horizon_years": _val(prof["objectives"]["effective_horizon_years"]),
             "ef_months": _val(prof["situation"]["emergency_fund_months"]), "knowledge_score": _val(prof["knowledge"]["score"]),
-            "value_cad": value, "as_of": as_of, "first_withdrawal": prof["situation"]["planned_withdrawals"][0]}
+            "value_cad": value, "as_of": as_of, "first_withdrawal": prof["situation"]["planned_withdrawals"][0],
+            # display fields of the dashboard's profile strip / Profil page (declared values, copied as is)
+            "objective_primary": prof["objectives"]["primary"], "horizon_years": prof["objectives"]["horizon_years"],
+            "goals": prof["objectives"].get("goals", []), "notes": prof["values"].get("notes", "")}
     preview = {"real": ["engine.analyse", "rules.derive", "rules.limits", "limits_trace", "hard checks H1-H10, H14"],
                "preview": ["what-if grid for the funding the user gave + headroom (stand-in for intent.apply + resizer)",
                            "factor sections + template text (P0.7)", "LLM narration (P0.8, not run)", "report assembly (P0.9)",

@@ -4,6 +4,7 @@
 Output (<out>, default .cache/site/):
   index.html, design.html   deploy/site/ (the dashboard and the static design board)
   reports/index.json        the reports the dashboard can open (Robert current, Robert + NVDA, Amira, Mateo)
+  reports/robert-nvda.json  the Flow B demo report (deploy/preview_report.py, Robert NVDA 10 %): its own file, not in the index
   reports/universe.json     starter universe + base metrics (Search and ask)
   reports/whatif.json       precomputed What-if scenarios (deploy/whatif.py)
   reports/<name>.json       `pipeline.review(...)` reports (SPEC §13 + §20.4 sections + §20.9 profile_coherence, plus the
@@ -89,6 +90,23 @@ def build_reports(out: Path) -> list[dict]:
     return index
 
 
+def build_flow_b(out: Path) -> Path:
+    """Flow B demo report (Robert, NVDA 10 %, funding specific ZST.TO): `deploy/preview_report.py` `build()` into a temp dir,
+    then ONLY `robert-nvda.json` is published, as its own file. It is not listed in reports/index.json (that index stays the
+    four flow C reviews, tests/dashboard/test_ui_flow_b.py); the page loads it with loadFlowB()."""
+    import importlib.util
+    spec = importlib.util.spec_from_file_location("preview_report_site", ROOT / "deploy" / "preview_report.py")
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    out.mkdir(parents=True, exist_ok=True)
+    with tempfile.TemporaryDirectory() as tmp:
+        paths = mod.build(Path(tmp))
+        src = next(p for p in paths if p.stem == "robert-nvda")
+        dest = out / "robert-nvda.json"
+        dest.write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
+    return dest
+
+
 def build(out: Path) -> Path:
     """Write the whole site into `out` (replaced if it exists) and return it. The store is a temp dir that is
     removed afterwards and the previous COHERENCE_ANALYZER_STORE_DIR is restored."""
@@ -101,6 +119,7 @@ def build(out: Path) -> Path:
         with tempfile.TemporaryDirectory() as store:
             os.environ["COHERENCE_ANALYZER_STORE_DIR"] = store
             build_reports(out / "reports")
+            build_flow_b(out / "reports")
             import whatif  # deploy/whatif.py: Search-and-ask universe + What-if scenarios (real engine, no LLM)
             whatif.build(out / "reports")
     finally:

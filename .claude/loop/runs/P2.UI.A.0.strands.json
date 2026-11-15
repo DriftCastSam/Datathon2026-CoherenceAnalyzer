@@ -1,0 +1,67 @@
+{
+  "duration_s": 249.9,
+  "guard_cancellations": [
+    {
+      "reason": "'^###' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'D10\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'subprocess\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'subprocess\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'subprocess' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'D7' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'Affichage' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'^##' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'which' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'print(shutil.which('node'),' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'robert-nvda\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'print(shutil.which('node'))\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'PASSED' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    }
+  ],
+  "is_error": false,
+  "model_id": "us.anthropic.claude-sonnet-5-5",
+  "num_turns": 39,
+  "result": "opy `robert-nvda.json` into the site. The page will need that file next to `index.json`, which is outside my write scope, so no test covers it.\n\nOne line per test function:\n- `test_api_base_is_configured_not_hard_coded`: the API base comes from an empty `<meta name=\"coherence-api-base\">`, with no hard-coded host or absolute fetch URL (\u00a712).\n- `test_post_requests_go_through_one_helper`: `apiPost` is the only POST; it uses `apiBase()` and a JSON body, and no other HTTP verbs appear (\u00a712).\n- `test_rule_buttons_stay_disabled_with_the_current_note_when_no_api`: `disabled` and \u00ab Affichage seulement \u00bb depend on `apiBase()`, the `data-action` buttons remain, and the renderer makes no request (\u00a712 N3).\n- `test_rule_buttons_are_bound_to_decide_rule`: the `[data-action]` buttons call `decideRule`, and only when an API is configured (\u00a712 N3).\n- `test_decide_rule_posts_the_decision_route_and_rerenders`: `decideRule` posts `/profiles/${profile_id}/parsed-rules/${index}/decision` with `approved`, re-renders, shows errors with `role=alert`, and sends no `limits` or `llm` (\u00a712, inv. 2).\n- `test_rejecting_never_sends_approval`: reject maps to `approved` false, never a hard-coded true (N3).\n- `test_intent_form_has_the_editable_draft_fields`: `#intent-form` has ticker, target weight and funding kind/ticker/class/amount fields, all read from the intent, with the four funding kinds, no `readonly` or disabled inputs, and no typed digits (\u00a74 B2, \u00a73.6).\n- `test_intent_form_prefills_nothing_the_user_did_not_state`: input values are slots, there is no `selected`, `checked` or `||` default, the funding kind starts empty and `required`, and no NVDA, ZST or `in_0001` is typed in the form (D10).\n- `test_confirm_posts_the_intent_route_with_the_edited_values`: `confirmIntent` posts `/intents/${intent_id}/confirm` with the edited fields as numbers, makes no request without an API, takes the response as the new report, and shows errors (\u00a712 B2).\n- `test_intent_form_is_wired_into_the_page`: the form and `loadFlowB` are used, `loadFlowB` fetches `reports/robert-nvda.json` and not `index.json`, and the form gets `rep.intent` (D10C constraint).\n- `test_index_listing_stays_the_four_flow_c_reviews`: `build_site.REPORTS` stays at the 4 flow C reviews without `robert-nvda` (frozen D10C oracle).\n- `test_cone_overlays_current_and_proposed_when_the_report_has_both`: `cone()` draws `metrics_current`, and `metrics_proposed` only when present, with both cones' p5 and p95 on the axis (\u00a712, \u00a720.7).\n- `test_cone_overlay_is_labelled_before_and_after`: the cone and projection text carry \u00ab Avant \u00bb and \u00ab Apr\u00e8s \u00bb, an `aria-label`, and no D10 vocabulary.\n- `test_flow_b_report_gets_the_display_block_the_page_needs`: `loadFlowB` builds `rep.site` from `profile_card` and `limits`, then renders.\n- `test_flow_b_report_carries_robert_in_0001_for_the_static_demo`: the preview report is flow B with intent `in_0001`, NVDA, 10 %, funding specific ZST.TO (\u00a73.6).\n- `test_flow_b_report_has_before_and_after_cones_on_one_grid`: both cones have the same keys and length, are ordered p5 to p95 at every step, and differ (\u00a713).\n- `test_flow_b_report_before_after_sides_follow_decisions_d2_d7`: Robert's current P5 at horizon is at or above the floor and the trade's is below it, so the verdict is incoherent (D2, D7).\n- `test_flow_b_report_has_no_site_block_so_the_loader_builds_it`: the report has the fields `site` is built from and no `site` of its own.\n- `test_page_passes_the_blocklist_apart_from_the_fixed_disclaimer`: no \u00a79.3 blocklist phrase in the whole page, exempting the disclaimer and the Recherche refusal sentence (\u00a79.3, D10).\n- `test_new_ui_code_passes_the_blocklist_and_d10_vocabulary`: the new functions' strings pass the blocklist and contain no best/option/alternative/suggest/rank wording (D10).\n- `test_flow_b_report_text_passes_the_blocklist`: the Flow B report's strings pass the blocklist apart from the disclaimer, and the printed text blocks have no option or alternative wording (\u00a79.3, D10).\n",
+  "stop_reason": "end_turn",
+  "usage": {
+    "inputTokens": 2383274,
+    "outputTokens": 31026,
+    "totalTokens": 2414300
+  }
+}

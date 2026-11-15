@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="coherence-api-base" content="">
 <title>CoherenceAnalyzer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500&display=swap">
@@ -215,6 +216,13 @@ details.abadge ul{margin:8px 0 0;padding-left:18px;font-size:13px;color:var(--mu
 .limits li{padding:8px 0;border-top:1px solid var(--line-2);font-size:14px}
 .limits li ul{margin:4px 0 0;padding-left:18px;list-style:disc;font-size:13px;color:var(--muted)}
 .lt{border-left:4px solid var(--unk)}
+/* Flow B (SPEC §4 B2): intent confirmation form, status line, error banner */
+.ifm{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px 18px;margin-top:14px;align-items:end}
+.ifm label{display:block;font-size:11.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--soft);margin-bottom:4px}
+.ifm input,.ifm select{width:100%;border:1px solid var(--muted);border-radius:4px;padding:9px 12px;font:inherit;font-size:14px;background:var(--surface);color:var(--ink);min-height:40px}
+.ifm .full{grid-column:1/-1}
+.errbar{border-left:4px solid var(--red);background:var(--red-bg);color:var(--red-ink);padding:10px 14px;border-radius:4px;font-weight:600}
+.primary[disabled]{opacity:.45;cursor:not-allowed}
 footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;color:var(--muted)}
 </style>
 </head>
@@ -280,9 +288,11 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
     : typeof v === "object" ? Object.entries(v).map(([k, x]) => `${k}: ${show(x)}`).join(", ") : (LVL[v] || STAGE[v] || OBJ[v] || String(v));
   const KIND = {fact: "fait", assumption: "hypothèse", inference: "inférence", unknown: "inconnu"};
   const PAGES = [["synthese", "Synthèse"], ["facteurs", "Facteurs"], ["profil", "Profil"], ["portefeuille", "Portefeuille"], ["recherche", "Recherche"], ["simulation", "Simulation"], ["sources", "Sources"]];
-  const state = {rep: null, page: "synthese", factor: null};
+  const state = {rep: null, page: "synthese", factor: null, error: ""};
 
-  const checksOf = (rep, f) => rep.checks_current.filter(c => c.factor === f).sort((a, b) => RANK[b.status] - RANK[a.status]);
+  /* Flow B reports carry the checks of the trade (`checks_proposed`) next to today's: the sections and the verdict follow the trade. */
+  const shownChecks = rep => rep.checks_proposed || rep.checks_current;
+  const checksOf = (rep, f) => shownChecks(rep).filter(c => c.factor === f).sort((a, b) => RANK[b.status] - RANK[a.status]);
   const worst = (rep, f) => checksOf(rep, f)[0];
   function pillarLine(rep, s) {
     const cs = checksOf(rep, s.factor), bad = cs.filter(c => c.status === "violation" || c.status === "warning");
@@ -308,7 +318,7 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
       ${chain.length ? `<ol class="chainlist">${chain.map(f => `<li><span>${esc(fieldName(f) === f ? f : fieldName(f))}</span>${fieldName(f) === f ? "" : `<span class="mono">${esc(f)}</span>`}</li>`).join("")}</ol>` : `<p class="small">Aucune entrée déclarée.</p>`}</div>`;
   }
   function bindChecks(rep) {
-    const src = {c: rep.checks_current || [], u: rep.unknowns || [], g: (rep.goals || {}).checks || []};
+    const src = {c: shownChecks(rep) || [], u: rep.unknowns || [], g: (rep.goals || {}).checks || []};
     document.querySelectorAll("[data-check]").forEach(row => {
       const toggle = () => {
         const [k, i] = row.dataset.check.split(":"), slot = document.getElementById(`chain-${k}-${i}`);
@@ -382,14 +392,38 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
     return `<section class="card limits" id="limits"><h3>Limites connues</h3><ul>${groups.map(([t, lines, note]) => `<li><b>${esc(t)}</b><div class="small">${esc(note)}</div>${lines.length ? `<ul>${lines.map(a => `<li>${esc(a)}</li>`).join("")}</ul>` : ""}</li>`).join("")}</ul></section>`;
   }
   function renderValuesRules(rep) {
-    const seen = new Set(), rules = [];
+    const seen = new Set(), rules = [], live = Boolean(apiBase());
+    const lock = live ? "" : 'disabled title="Affichage seulement : la décision passe par l’API"';
     rep.sections.forEach(s => { const d = (s.facts.derived || {})["values.parsed_notes"];
-      ((d && d.value) || []).forEach(r => { const k = [r.quote, r.rule_kind, JSON.stringify(r.params)].join("|"); if (!seen.has(k)) { seen.add(k); rules.push(r); } }); });
+      ((d && d.value) || []).forEach((r, i) => { const k = [r.quote, r.rule_kind, JSON.stringify(r.params)].join("|"); if (!seen.has(k)) { seen.add(k); rules.push(Object.assign({}, r, {_idx: i})); } }); });
     const rows = rules.map(r => `<li class="vr"><div><span class="q">« ${esc(r.quote)} »</span><div class="small"><span class="mono">${esc(r.rule_kind)}</span> · ${esc(show(r.params))}</div></div>
-      <div class="acts">${r.approved_by_user ? st("pass", "Approuvée") : st("info", "En attente d'approbation")}<button class="btn" type="button" data-action="approve" disabled title="Affichage seulement : la décision passe par l'API">Approuver</button><button class="btn" type="button" data-action="reject" disabled title="Affichage seulement : la décision passe par l'API">Rejeter</button></div></li>`).join("");
+      <div class="acts">${r.approved_by_user ? st("pass", "Approuvée") : st("info", "En attente d'approbation")}<button class="btn" type="button" data-action="approve" data-index="${r._idx}" ${lock}>Approuver</button><button class="btn" type="button" data-action="reject" data-index="${r._idx}" ${lock}>Rejeter</button></div></li>`).join("");
     return `<section class="card" id="values-rules"><h3>Règles tirées de vos notes</h3>
-      <p class="small" style="margin-top:6px">Le texte de vos notes est lu par l'IA, puis chaque règle attend votre approbation. Une règle non approuvée n'entre dans aucune limite : elle ne produit qu'un rappel d'information. Les boutons sont en affichage seulement, la décision passe par l'API.</p>
+      <p class="small" style="margin-top:6px">Le texte de vos notes est lu par l'IA, puis chaque règle attend votre approbation. Une règle non approuvée n'entre dans aucune limite : elle ne produit qu'un rappel d'information. ${live ? "Chaque bouton envoie votre décision à l'API, puis la page se met à jour." : "Affichage seulement : la décision passe par l'API."}</p>
       ${rules.length ? `<ul class="vrules">${rows}</ul>` : `<p class="small" style="margin-top:10px">Aucune règle tirée de vos notes.</p>`}</section>`;
+  }
+  /* ---------- SPEC §12 routes: the one POST helper, N3 decision, B2 intent form (nothing here sends a limit or an AI output) ---------- */
+  function apiBase() {
+    const meta = document.querySelector('meta[name="coherence-api-base"]');
+    const set = (typeof window !== "undefined" && window.COHERENCE_API_BASE) || (meta ? meta.content : "") || "";
+    return String(set).trim().replace(/\/+$/, "");
+  }
+  async function apiPost(path, body) {
+    const base = apiBase();
+    if (!base) throw new Error("Aucune API configurée");
+    const res = await fetch(base + path, {method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
+    if (!res.ok) throw new Error("API : HTTP " + res.status);
+    return res.json();
+  }
+  async function decideRule(action, index) {
+    if (!apiBase() || (action !== "approve" && action !== "reject")) return;
+    const approved = action === "approve";
+    try {
+      await apiPost(`/profiles/${state.rep.profile_id}/parsed-rules/${index}/decision`, {approved});
+      state.rep.sections.forEach(s => { const d = (s.facts.derived || {})["values.parsed_notes"], r = d && d.value ? d.value[index] : null; if (r) r.approved_by_user = approved; });
+      state.error = "";
+    } catch (e) { state.error = "La décision n'a pas été enregistrée (" + e.message + ")."; }
+    render();
   }
   function explanationCard(rep) {
     const e = rep.explanation, title = f => (rep.sections.find(s => s.factor === f) || {}).title || f;
@@ -403,6 +437,63 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
       <ul class="segs" style="margin-top:14px">${e.segments.map(g => `<li>${segmentTag(g)}<div>${g.factor ? `<b class="small">${esc(title(g.factor))}</b> ` : ""}${esc(g.text)}<span class="refs">${(g.refs || []).map(esc).join(", ")}</span></div></li>`).join("")}</ul>${hrLine}</section>`;
   }
   const whatifNote = () => `<div class="page"><section class="card"><h2>Simulation indisponible pour ce rapport</h2><p class="sub" style="margin-top:8px">La recherche et les scénarios précalculés portent sur le profil et le portefeuille de Robert. Choisissez un rapport de Robert dans le sélecteur pour les utiliser.</p></section></div>`;
+
+  /* ---------- Flow B (SPEC §4 B2, §12): intent confirmation form, trade report loader ---------- */
+  function renderIntentForm(intent) {
+    const live = Boolean(apiBase()), f = intent.funding || {}, kind = f.kind || "";
+    const v = x => x == null ? "" : esc(x);
+    const pick = k => kind === k ? "selected" : "";
+    const kinds = [["specific", "Un titre que vous indiquez"], ["pro_rata_all", "Au prorata de tout le portefeuille"], ["pro_rata_class", "Au prorata d'une classe d'actifs"], ["cash_contribution", "Un apport en argent"]];
+    return `<form id="intent-form" class="ifm" data-intent-id="${v(intent.intent_id)}">
+      <p class="small full">Brouillon <span class="mono">${v(intent.intent_id)}</span> : seuls les champs que vous avez indiqués sont remplis. Chaque champ se corrige avant la confirmation.</p>
+      <div><label for="if-ticker">Titre</label><input id="if-ticker" name="ticker" type="text" required autocomplete="off" value="${v(intent.ticker)}"></div>
+      <div><label for="if-weight">Part visée (%)</label><input id="if-weight" name="target_weight_pct" type="number" step="any" min="0" required value="${v(intent.target_weight_pct)}"></div>
+      <div><label for="if-kind">Financement</label><select id="if-kind" name="funding_kind" required><option value="">Choisir…</option>${kinds.map(([k, label]) => `<option value="${k}" ${pick(k)}>${label}</option>`).join("")}</select></div>
+      <div><label for="if-fticker">Financé par le titre</label><input id="if-fticker" name="funding_ticker" type="text" autocomplete="off" value="${v(f.ticker)}"></div>
+      <div><label for="if-fclass">Classe d'actifs</label><input id="if-fclass" name="funding_asset_class" type="text" autocomplete="off" value="${v(f.asset_class)}"></div>
+      <div><label for="if-famount">Apport (CAD)</label><input id="if-famount" name="funding_amount_cad" type="number" step="any" min="0" value="${v(f.amount_cad)}"></div>
+      <div class="full actions" style="margin-top:0"><button class="primary" type="submit" ${live ? "" : "disabled"}>Confirmer l'intention</button>
+        <span id="intent-msg" class="small" role="status">${live ? "La confirmation envoie ces valeurs à l'API, qui renvoie le rapport de la transaction." : "Aucune API configurée : le formulaire montre le brouillon et n'envoie rien."}</span></div></form>`;
+  }
+  async function confirmIntent(form) {
+    if (!apiBase()) return;
+    const val = name => form.elements[name] ? form.elements[name].value.trim() : "";
+    const funding = {kind: val("funding_kind")};
+    if (funding.kind === "specific") funding.ticker = val("funding_ticker");
+    if (funding.kind === "pro_rata_class") funding.asset_class = val("funding_asset_class");
+    if (funding.kind === "cash_contribution") funding.amount_cad = Number(val("funding_amount_cad"));
+    const edited = Object.assign({}, state.rep.intent, {ticker: val("ticker"), target_weight_pct: Number(val("target_weight_pct")), funding});
+    try {
+      const rep = await apiPost(`/intents/${form.dataset.intentId}/confirm`, edited);
+      state.rep = Object.assign({}, rep, {site: rep.site || state.rep.site});
+      state.factor = null; state.error = "";
+    } catch (e) { state.error = "L'intention n'a pas été confirmée (" + e.message + ")."; }
+    render();
+  }
+  const intentCard = rep => rep.intent ? `<section class="card" id="intent"><h3>Transaction demandée</h3>
+    <p class="small" style="margin-top:6px">Brouillon lu dans vos propres mots. La page décrit l'effet de cette transaction sur vos limites, sans rien exécuter.</p>${renderIntentForm(rep.intent)}</section>` : "";
+  /* The trade report is a separate file (deploy/preview_report.py output), never listed in the reports index: the display block
+     `site` and the section facts the renderers read are built here from its own profile_card and limits. */
+  async function loadFlowB() {
+    try {
+      const r = await fetch("reports/robert-nvda.json");
+      if (!r.ok) throw new Error("HTTP " + r.status);
+      const rep = await r.json(), c = rep.profile_card;
+      rep.sections = rep.sections.map(s => {
+        const declared = {}, derived = {};
+        (Array.isArray(s.facts) ? s.facts : []).forEach(f => { if (f.kind === "declared") declared[f.label] = f.value; else derived[f.label] = {value: f.value, by: f.kind === "inference" ? "llm:behaviour" : ""}; });
+        if (s.factor === "objectif") declared["objectives.primary"] = c.objective_primary;
+        return Object.assign({}, s, {facts: Array.isArray(s.facts) ? {declared, derived} : s.facts});
+      });
+      rep.site = {as_of: c.as_of, value_cad: c.value_cad, portfolio_file: rep.portfolio_id, whatif: false, weights_pct: rep.weights_current,
+        limits: rep.limits, limits_trace: rep.limits_trace, label: `${c.name} · transaction demandée : ${rep.intent.ticker} à ${rep.intent.target_weight_pct} %`,
+        profile_card: {name: c.name, age: c.age, occupation: c.occupation, life_stage: c.life_stage, risk_declared: c.declared, risk_capacity: c.capacity,
+          risk_effective: c.effective, horizon_years: c.horizon_years, effective_horizon_years: c.effective_horizon_years, first_withdrawal: c.first_withdrawal,
+          emergency_fund_months: c.ef_months, goals: c.goals || [], notes: c.notes || ""}};
+      state.rep = rep; state.factor = null; state.error = "";
+      route();
+    } catch (e) { $("#app").innerHTML = `<p class="card">Impossible de charger le rapport de la transaction (${esc(e.message)}). Rechargez la page.</p>`; }
+  }
 
   /* ---------- Synthèse ---------- */
   function strip(rep) {
@@ -441,9 +532,10 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
   const pillars = rep => `<div class="pillars">${rep.sections.map(s => `<button class="pillar c-${s.status}" type="button" data-factor="${s.factor}"><span class="n">${esc(s.title)}</span><span class="v tx-${s.status}">${s.status === "pass" && !checksOf(rep, s.factor).length ? "Aucun écart" : PILLAR[s.status]}</span><span class="d">${esc(pillarLine(rep, s))}</span></button>`).join("")}</div>`;
 
   function cone(rep) {
-    const c = rep.metrics_current.cone, floor = rep.site.limits.floor_at_horizon, v0 = rep.site.value_cad, n = c.p50.length;
-    const W = 720, H = 300, L = 54, R = 120, T = 16, B = 30;
-    const all = [...c.p5, ...c.p95, floor, v0];
+    const c = rep.metrics_current.cone, q = rep.metrics_proposed ? rep.metrics_proposed.cone : null;
+    const floor = rep.site.limits.floor_at_horizon, v0 = rep.site.value_cad, n = c.p50.length;
+    const W = 720, H = 300, L = 54, R = q ? 150 : 120, T = 16, B = 30;
+    const all = [...c.p5, ...c.p95, ...(q ? [...q.p5, ...q.p95] : []), floor, v0];
     const lo = Math.floor(Math.min(...all) / 50000) * 50000, hi = Math.ceil(Math.max(...all) / 50000) * 50000;
     const x = i => L + (i / n) * (W - L - R), y = v => T + (1 - (v - lo) / (hi - lo)) * (H - T - B);
     const line = a => [`${x(0)},${y(v0)}`, ...a.map((v, i) => `${x(i + 1).toFixed(1)},${y(v).toFixed(1)}`)];
@@ -452,28 +544,43 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
     for (let v = lo; v <= hi; v += 50000) g += `<line x1="${L}" x2="${W - R}" y1="${y(v)}" y2="${y(v)}" stroke="var(--line-2)"/><text x="${L - 8}" y="${y(v) + 4}" text-anchor="end">${kcad(v)}</text>`;
     const yrs = Math.round(n / 12);
     for (let k = 0; k <= yrs; k++) g += `<text x="${x(Math.min(k * 12, n))}" y="${H - 8}" text-anchor="middle">${k ? "An " + k : "Auj."}</text>`;
-    g += `<path d="${band(c.p95, c.p5)}" fill="var(--band)"/><path d="${band(c.p75, c.p25)}" fill="var(--band-2)"/>`;
+    g += `<path d="${band(c.p95, c.p5)}" fill="var(--band)"/>`;
+    if (!q) g += `<path d="${band(c.p75, c.p25)}" fill="var(--band-2)"/>`;
     g += `<line x1="${L}" x2="${W - R}" y1="${y(floor)}" y2="${y(floor)}" stroke="var(--red)" stroke-width="1.5" stroke-dasharray="6 5"/>`;
     g += `<text x="${L + 6}" y="${y(floor) - 7}" style="fill:var(--red-ink);font-weight:700">Plancher ${kcad(floor)}</text>`;
-    g += `<polyline points="${line(c.p50).join(" ")}" fill="none" stroke="var(--navy)" stroke-width="2.5"/>`;
-    g += `<polyline points="${line(c.p5).join(" ")}" fill="none" stroke="var(--red)" stroke-width="1.5"/>`;
-    const end = (v, lab, col) => `<circle cx="${x(n)}" cy="${y(v)}" r="4" fill="${col}"/><text x="${x(n) + 10}" y="${y(v) + 4}" style="fill:${col};font-weight:700">${lab} ${kcad(v)}</text>`;
-    g += end(c.p95[n - 1], "Optimiste", "var(--muted)") + end(c.p50[n - 1], "Médiane", "var(--navy)") + end(c.p5[n - 1], "Pessimiste", "var(--red-ink)");
-    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="Valeur projetée du portefeuille : pessimiste ${cad(c.p5[n - 1])}, médiane ${cad(c.p50[n - 1])}, optimiste ${cad(c.p95[n - 1])}">${g}</svg>`;
+    /* Avant (metrics_current): dashed when an Après (metrics_proposed) is drawn over it; Après: the P5 to P95 outline, median and P5 */
+    const dash = q ? ` stroke-dasharray="5 4"` : "";
+    g += `<polyline points="${line(c.p50).join(" ")}" fill="none" stroke="${q ? "var(--muted)" : "var(--navy)"}" stroke-width="${q ? 2 : 2.5}"${dash}/>`;
+    g += `<polyline points="${line(c.p5).join(" ")}" fill="none" stroke="${q ? "var(--muted)" : "var(--red)"}" stroke-width="1.5"${dash}/>`;
+    if (q) {
+      g += `<path d="${band(q.p95, q.p5)}" fill="none" stroke="var(--info)" stroke-width="1.5"/>`;
+      g += `<polyline points="${line(q.p50).join(" ")}" fill="none" stroke="var(--navy)" stroke-width="2.5"/>`;
+      g += `<polyline points="${line(q.p5).join(" ")}" fill="none" stroke="var(--red)" stroke-width="1.5"/>`;
+    }
+    const end = (v, lab, col, dy = 4) => `<circle cx="${x(n)}" cy="${y(v)}" r="4" fill="${col}"/><text x="${x(n) + 10}" y="${y(v) + dy}" style="fill:${col};font-weight:700">${lab} ${kcad(v)}</text>`;
+    const pair = (a, b, lab, col) => { const close = Math.abs(y(a) - y(b)) < 14, up = a >= b; return end(a, "Avant " + lab, col, close ? (up ? -4 : 12) : 4) + end(b, "Après " + lab, col, close ? (up ? 12 : -4) : 4); };
+    const last = a => a[n - 1];
+    g += q ? end(last(q.p95), "Après optimiste", "var(--muted)") + pair(last(c.p50), last(q.p50), "médiane", "var(--navy)") + pair(last(c.p5), last(q.p5), "pessimiste", "var(--red-ink)")
+      : end(last(c.p95), "Optimiste", "var(--muted)") + end(last(c.p50), "Médiane", "var(--navy)") + end(last(c.p5), "Pessimiste", "var(--red-ink)");
+    const sum = (k, a) => `${k} : pessimiste ${cad(last(a.p5))}, médiane ${cad(last(a.p50))}, optimiste ${cad(last(a.p95))}`;
+    const label = q ? `Valeur projetée du portefeuille. ${sum("Avant", c)}. ${sum("Après", q)}` : `Valeur projetée du portefeuille : pessimiste ${cad(last(c.p5))}, médiane ${cad(last(c.p50))}, optimiste ${cad(last(c.p95))}`;
+    return `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="${esc(label)}">${g}</svg>`;
   }
   function projection(rep) {
-    const m = rep.metrics_current, v0 = rep.site.value_cad;
+    const m = rep.metrics_current, a = rep.metrics_proposed, v0 = rep.site.value_cad;
     const rel = v => `${v >= v0 ? "+" : "−"}${Math.abs((v / v0 - 1) * 100).toFixed(0)} % vs aujourd'hui`;
-    return `<section class="card chart"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline"><h3>Valeur projetée du portefeuille</h3><span class="small">${Math.round(m.cone.p50.length / 12)} ans, CAD, au ${esc(rep.site.as_of)}</span></div>
+    const tiles = (k, t, cls) => `<div class="scen">${k ? `<p class="small" style="grid-column:1/-1;margin:0"><b>${k}</b></p>` : ""}<div><span>Pessimiste (P5)</span><b class="${cls}">${cad(t.p5_T)}</b><span>${rel(t.p5_T)}</span></div><div><span>Médiane</span><b>${cad(t.p50_T)}</b><span>${rel(t.p50_T)}</span></div><div><span>Optimiste (P95)</span><b class="tx-pass">${cad(t.p95_T)}</b><span>${rel(t.p95_T)}</span></div></div>`;
+    const flowB = a ? `<span><i style="border-top:2px dashed var(--muted);height:0"></i>Avant : portefeuille actuel (médiane et P5)</span><span><i style="background:var(--navy);height:3px"></i>Après : avec la transaction demandée (médiane)</span><span><i style="border-top:2px solid var(--info);height:0"></i>Après : P5 à P95</span>` : "";
+    return `<section class="card chart"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:baseline"><h3>${a ? "Valeur projetée : avant et après la transaction demandée" : "Valeur projetée du portefeuille"}</h3><span class="small">${Math.round(m.cone.p50.length / 12)} ans, CAD, au ${esc(rep.site.as_of)}</span></div>
       <div style="margin-top:10px">${cone(rep)}</div>
-      <div class="legend"><span><i style="background:var(--band)"></i>P5 à P95</span><span><i style="background:var(--band-2)"></i>P25 à P75</span><span><i style="background:var(--navy);height:3px"></i>Médiane</span><span><i style="background:var(--red);height:3px"></i>Scénario pessimiste (P5)</span><span><i style="border-top:2px dashed var(--red);height:0"></i>Plancher</span></div>
-      <div class="scen"><div><span>Pessimiste (P5)</span><b class="tx-violation">${cad(m.p5_T)}</b><span>${rel(m.p5_T)}</span></div><div><span>Médiane</span><b>${cad(m.p50_T)}</b><span>${rel(m.p50_T)}</span></div><div><span>Optimiste (P95)</span><b class="tx-pass">${cad(m.p95_T)}</b><span>${rel(m.p95_T)}</span></div></div>
+      <div class="legend"><span><i style="background:var(--band)"></i>P5 à P95${a ? " (avant)" : ""}</span>${a ? "" : `<span><i style="background:var(--band-2)"></i>P25 à P75</span>`}${a ? "" : `<span><i style="background:var(--navy);height:3px"></i>Médiane</span><span><i style="background:var(--red);height:3px"></i>Scénario pessimiste (P5)</span>`}${flowB}<span><i style="border-top:2px dashed var(--red);height:0"></i>Plancher</span></div>
+      ${a ? tiles("Avant", m, m.p5_T < rep.site.limits.floor_at_horizon ? "tx-violation" : "") + tiles("Après", a, a.p5_T < rep.site.limits.floor_at_horizon ? "tx-violation" : "") : tiles("", m, "tx-violation")}
       <p class="small" style="margin-top:12px">Simulation par blocs de mois consécutifs sur les rendements mensuels ${esc(rep.data_window.join(" → "))}, rendements attendus fixés par l'équipe (détails dans les hypothèses). Ce n'est pas une prévision.</p></section>`;
   }
   const PAL = ["#0B2A4A", "#4A6A8F", "#8AA3BF", "#C9A227", "#8A5A00", "#2F7D6B", "#7A8899", "#B9C3CF", "#5B4A8A", "#A0522D", "#3E7CB1"];
   function holdings(rep) {
     const d = (rep.metrics_current.drivers || []).slice().sort((a, b) => b.weight - a.weight), v0 = rep.site.value_cad;
-    const flagged = new Set(rep.checks_current.filter(c => c.status === "violation" && c.subject).map(c => c.subject));
+    const flagged = new Set(shownChecks(rep).filter(c => c.status === "violation" && c.subject).map(c => c.subject));
     const top = (rep.metrics_current.drivers || []).slice().sort((a, b) => b.risk - a.risk)[0];
     return {d, flagged, top, bar: `<div class="allocbar" aria-hidden="true">${d.map((h, i) => `<span style="width:${h.weight * 100}%;background:${flagged.has(h.ticker) ? "var(--red)" : PAL[i % PAL.length]}"></span>`).join("")}</div>`,
       rows: d.map((h, i) => `<tr class="${flagged.has(h.ticker) ? "flag" : ""}"><td><span class="sw" style="background:${flagged.has(h.ticker) ? "var(--red)" : PAL[i % PAL.length]}"></span>${esc(h.name)} <span class="mono">${esc(h.ticker)}</span>${flagged.has(h.ticker) ? ` <b class="tx-violation small">signalé</b>` : ""}</td><td class="r">${pct(h.weight, 0)}</td><td class="r">${cad(h.weight * v0)}</td><td class="r">${pct(h.risk)}</td></tr>`).join("")};
@@ -490,13 +597,13 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
   }
   const pageSynthese = rep => `<div class="page">
     <div><p class="eyebrow">Analyse de cohérence</p><h1 style="margin-top:6px">Ce portefeuille convient-il à ${esc(rep.site.profile_card.name)}?</h1><p class="sub" style="margin-top:6px">${esc(rep.site.label)}</p></div>
-    ${strip(rep)}${summary(rep)}${pillars(rep)}${explanationCard(rep)}
+    ${strip(rep)}${intentCard(rep)}${summary(rep)}${pillars(rep)}${explanationCard(rep)}
     <div class="grid2">${projection(rep)}${keyData(rep, false)}</div>
     <div class="half">${renderUnknowns(rep)}${renderLookthrough(rep)}</div></div>`;
 
   /* ---------- Facteurs ---------- */
   function meters(rep, s) {
-    const m = rep.metrics_current, L = rep.site.limits, out = [];
+    const m = rep.metrics_proposed || rep.metrics_current, L = rep.site.limits, out = [];
     const mtr = (a, av, b, bv, ratio, bad) => `<div class="meter"><div class="row"><span>${a}</span><span>${av}</span></div><div class="bar"><div style="width:${Math.min(100, ratio * 100)}%;background:var(--navy)"></div></div><div class="row"><span>${b}</span><span class="${bad ? "tx-violation" : ""}">${bv}</span></div><div class="bar"><div style="width:100%;background:${bad ? "var(--red)" : "var(--ok)"}"></div></div></div>`;
     if (s.factor === "risque") out.push(mtr("Repli que le profil tolère", pct(L.max_drawdown_pct / 100, 0), "Pire repli historique du portefeuille", pct(m.mdd), Math.abs(L.max_drawdown_pct / 100 / m.mdd), m.mdd < L.max_drawdown_pct / 100));
     if (s.factor === "horizon") out.push(mtr("Plancher tiré du profil", cad(L.floor_at_horizon), "Valeur pessimiste à l'horizon", cad(m.p5_T), Math.min(1, L.floor_at_horizon / Math.max(m.p5_T, L.floor_at_horizon)), m.p5_T < L.floor_at_horizon));
@@ -518,7 +625,7 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
           <p class="sub" style="margin-top:4px">${esc(s.question)}</p>
           ${hard ? `<p class="small" style="margin-top:10px">${hard}</p>` : ""}
           <div style="margin-top:12px">${meters(rep, s)}</div>
-          ${cs.length ? cs.map(c => { const [t, sub] = CHECK[c.id] || [c.id, ""], ix = rep.checks_current.indexOf(c); return `<div class="chk"><div class="rule" data-check="c:${ix}" tabindex="0" role="button" aria-expanded="false" title="Voir d'où vient ce contrôle"><span class="ic tx-${c.status}" aria-label="${CHECK_ST[c.status]}">${ICON[c.status]}</span><div><b>${esc(t)}${c.subject ? " · " + esc(c.subject) : ""}</b><span class="id">${esc(c.id)}</span> ${st(c.status)}<div class="small">${esc(sub)}</div></div><div class="v">${fv(c, c.value)}${c.limit == null ? "" : `<small>limite ${fv(c, c.limit)}</small>`}</div></div><div class="chainslot" id="chain-c-${ix}" hidden></div></div>`; }).join("")
+          ${cs.length ? cs.map(c => { const [t, sub] = CHECK[c.id] || [c.id, ""], ix = shownChecks(rep).indexOf(c); return `<div class="chk"><div class="rule" data-check="c:${ix}" tabindex="0" role="button" aria-expanded="false" title="Voir d'où vient ce contrôle"><span class="ic tx-${c.status}" aria-label="${CHECK_ST[c.status]}">${ICON[c.status]}</span><div><b>${esc(t)}${c.subject ? " · " + esc(c.subject) : ""}</b><span class="id">${esc(c.id)}</span> ${st(c.status)}<div class="small">${esc(sub)}</div></div><div class="v">${fv(c, c.value)}${c.limit == null ? "" : `<small>limite ${fv(c, c.limit)}</small>`}</div></div><div class="chainslot" id="chain-c-${ix}" hidden></div></div>`; }).join("")
             : `<p class="small" style="margin-top:12px">Aucune vérification chiffrée pour ce facteur${s.not_covered && s.not_covered.length ? " (pas encore couvert : " + s.not_covered.join(", ") + ")" : ""}.</p>`}
         </section>
         <section class="card"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap"><h3>Explication</h3><span class="mode">texte : ${esc(n.mode)}</span></div>
@@ -785,12 +892,15 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
     const bad = rep.sections.some(s => s.status === "violation"), pcBad = rep.profile_coherence && rep.profile_coherence.findings.length;
     $("#pages").innerHTML = PAGES.map(([id, t]) => `<a href="#${id}" ${state.page === id ? 'aria-current="page"' : ""}>${t}${(id === "facteurs" && bad) || (id === "profil" && pcBad) ? '<span class="dot" aria-hidden="true"></span>' : ""}</a>`).join("");
     const body = {synthese: pageSynthese, facteurs: factorPage, profil: pageProfil, portefeuille: pagePortefeuille, recherche: pageRecherche, simulation: pageSimulation, sources: pageSources}[state.page](rep);
-    $("#app").innerHTML = body;
+    $("#app").innerHTML = (state.error ? `<p class="errbar" role="alert">${esc(state.error)}</p>` : "") + body;
     $("#foot").innerHTML = `<div class="wrap" style="display:flex;flex-direction:column;gap:4px"><b style="color:var(--navy)">${esc(rep.disclaimer)}</b><span>Aucune recommandation d'achat ou de vente. Rapport produit par <span class="mono">pipeline.review</span>, hors ligne, sorties d'IA enregistrées.</span></div>`;
     document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => go(b.dataset.go)));
     document.querySelectorAll("[data-factor]").forEach(b => b.addEventListener("click", () => { state.factor = b.dataset.factor; go("facteurs", true); }));
     if (state.page === "recherche" && rep.site.whatif) bindRecherche();
     if (state.page === "simulation" && rep.site.whatif) bindSimulation();
+    document.querySelectorAll("[data-action]").forEach(b => b.addEventListener("click", () => { if (apiBase()) decideRule(b.dataset.action, Number(b.dataset.index)); }));
+    const intentForm = $("#intent-form");
+    if (intentForm) intentForm.addEventListener("submit", e => { e.preventDefault(); confirmIntent(e.target); });
     bindChecks(rep);
   }
   function go(page, keepFocus) {
@@ -809,7 +919,7 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
     try {
       const r = await fetch("reports/" + file);
       if (!r.ok) throw new Error("HTTP " + r.status);
-      state.rep = await r.json(); state.factor = null; route();
+      state.rep = await r.json(); state.factor = null; state.error = ""; route();
     } catch (e) { $("#app").innerHTML = `<p class="card">Impossible de charger le rapport ${esc(file)} (${esc(e.message)}). Rechargez la page.</p>`; }
   }
   try { const t = localStorage.getItem("ca-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}
@@ -821,8 +931,8 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
   (async () => {
     try {
       const idx = await (await fetch("reports/index.json")).json();
-      $("#pick").innerHTML = idx.map(r => `<option value="${esc(r.file)}">${esc(r.label)}</option>`).join("");
-      $("#pick").addEventListener("change", e => load(e.target.value));
+      $("#pick").innerHTML = idx.map(r => `<option value="${esc(r.file)}">${esc(r.label)}</option>`).join("") + `<option value="flow-b">Robert · transaction demandée (flux B)</option>`;
+      $("#pick").addEventListener("change", e => e.target.value === "flow-b" ? loadFlowB() : load(e.target.value));
       load(idx[0].file);
     } catch (e) { $("#app").innerHTML = `<p class="card">Impossible de charger la liste des rapports. Rechargez la page.</p>`; }
   })();
