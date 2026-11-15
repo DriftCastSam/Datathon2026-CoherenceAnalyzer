@@ -7,5 +7,6 @@ fastapi
 uvicorn
 mangum
 pytest
+pytest-xdist
 python-dotenv
 strands-agents

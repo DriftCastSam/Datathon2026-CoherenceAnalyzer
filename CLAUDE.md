@@ -15,7 +15,7 @@ Then read `docs/spec-decisions.md`: team-approved resolutions of SPEC ambiguitie
 ## Commands
 ```
 pip install -r requirements.txt
-COHERENCE_ANALYZER_LLM=mock pytest -q              # full suite (~5 min): before every commit and merge
+COHERENCE_ANALYZER_LLM=mock pytest -q -n auto --dist loadfile   # full suite (~50 s; ~3 min serial): before every commit and merge
 python scripts/quick_tests.py                       # while iterating: only tests the working-tree change can break
 python scripts/quick_tests.py --base loop/p0 --list # what a branch's changes would run; --heavy adds the site builds
 COHERENCE_ANALYZER_LLM=mock python -m coherence_analyzer.cli demo
@@ -32,6 +32,9 @@ python scripts/loop_lane.py status                            # all lanes: RUNNI
 - `loop_lane.py` holds a lock per lane (refuses double launches), appends to `.claude/worktrees/<slug>.log`
   and stops the loop when its task is stopped. Check progress with `status`, not `sleep` + `tail`.
 - Merge a finished lane into `loop/p0` by hand, like the existing `Merge loop/p2.*` commits.
+- Frozen oracle tests are locked only inside the loop (`COHERENCE_ANALYZER_LOOP=1`). After an approved
+  interactive edit, re-hash with `python scripts/agent_loop.py --refreeze <file>`. The loop's phase B runs
+  acceptance + affected tests; the full suite runs at merge (`--full` restores the old behaviour).
 
 ## Conventions
 - Python 3.11, type hints, pure functions in `rules/` and `coherence/`.
