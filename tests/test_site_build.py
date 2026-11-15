@@ -66,16 +66,21 @@ def test_intake_payload_covers_required_paths_in_order():
     assert all(q["text"] for q in payload["questions"])
 
 
-def test_intake_payload_marks_horizon_not_skippable():
+def test_intake_payload_marks_not_skippable_paths_correctly():
     from coherence_analyzer import intake
 
     payload = build_site.intake_payload()
     questions_by_path = {q["path"]: q for q in payload["questions"]}
 
-    assert not questions_by_path["objectives.horizon_years"]["skippable"]
+    # All NOT_SKIPPABLE paths should have skippable=False
+    for path in intake.NOT_SKIPPABLE:
+        if path in questions_by_path:
+            assert not questions_by_path[path]["skippable"], f"{path} should not be skippable"
+
+    # All other paths should have skippable=True
     for path in questions_by_path:
-        if path != "objectives.horizon_years":
-            assert questions_by_path[path]["skippable"]
+        if path not in intake.NOT_SKIPPABLE:
+            assert questions_by_path[path]["skippable"], f"{path} should be skippable"
 
 
 def test_store_dir_env_restores_previous_value(monkeypatch):
