@@ -244,6 +244,25 @@ def _workdir(profile_id: str) -> tuple[Path, Path]:
     return work, seed
 
 
+def workdir(profile_id: str) -> Path:
+    """Return the working directory for the profile.
+
+    The working directory is where the profile's mutable state lives (profile.json,
+    events.jsonl, portfolio.json). For seed profiles this is a copy in the store;
+    for user profiles it's the original location in the store.
+
+    Args:
+        profile_id: The profile identifier
+
+    Returns:
+        Path to the working directory
+
+    Raises:
+        HTTPException: 404 if the profile does not exist
+    """
+    return _workdir(profile_id)[0]
+
+
 def _load(work: Path) -> dict:
     return json.loads((work / "profile.json").read_text(encoding="utf-8"))
 
@@ -888,14 +907,14 @@ def _adopt_refreshed_profile(work: Path, report: dict) -> None:
 
 
 @app.post("/profiles/{profile_id}/review")
-def post_review(profile_id: str) -> dict:
+def post_review(profile_id: str, locale: str | None = Query(None)) -> dict:
     work, _ = _workdir(profile_id)
     if not (work / "portfolio.json").is_file():
         raise HTTPException(status_code=409, detail="this profile holds no portfolio yet: "
                             f"PUT /profiles/{profile_id}/portfolio first")
     with _LOCK:
         try:
-            report = pipeline.review(work)
+            report = pipeline.review(work, locale=locale)
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
         _adopt_refreshed_profile(work, report)

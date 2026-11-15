@@ -101,7 +101,7 @@ def _c2(profile: dict) -> list[dict]:
 
 def _c3(profile: dict) -> list[dict]:
     primary, declared = _dig(profile, "objectives", "primary"), _dig(profile, "risk", "declared")
-    if primary in GROWTH_OBJECTIVES and declared in ("low", "low_moderate"):
+    if isinstance(primary, str) and isinstance(declared, str) and primary in GROWTH_OBJECTIVES and declared in ("low", "low_moderate"):
         return [_finding("C3", ["objectives.primary", "risk.declared"], [primary, declared])]
     return []
 

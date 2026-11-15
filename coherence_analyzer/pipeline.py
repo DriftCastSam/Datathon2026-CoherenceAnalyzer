@@ -25,7 +25,7 @@ from typing import Any
 
 from jsonschema import Draft202012Validator
 
-from . import config, data, engine, explain, factors, gate, intent as intent_mod, resizer, store, stress
+from . import config, data, engine, explain, factors, gate, intake, intent as intent_mod, resizer, store, stress
 from .coherence import hard, internal, report as report_mod, soft
 from .llm import bedrock, extractors
 from .rules import derive, limits as limits_mod
@@ -516,10 +516,11 @@ def _goals_block(market, pf: dict, profile: dict, horizon_m: int, metrics: dict)
     return block, checks
 
 
-def review(fixture_dir: Path, portfolio: str | Path | None = None) -> dict:
+def review(fixture_dir: Path, portfolio: str | Path | None = None, locale: str | None = None) -> dict:
     """Flow C: baseline coherence report for the current portfolio (B5-B9 without an intent). Writes the report and
     the audit record to the store and returns the report. `portfolio` = file name inside the fixture directory
-    (default `portfolio.json`)."""
+    (default `portfolio.json`). `locale` = language for the explanation (default: profile `meta.locale`, or fr-CA),
+    validated against `intake.LOCALES`."""
     fixture_dir = Path(fixture_dir)
     started = _now()
     run_id = store.new_run_id()
@@ -530,7 +531,10 @@ def review(fixture_dir: Path, portfolio: str | Path | None = None) -> dict:
 
     res = _refresh(profile_in, pf, events)                       # Flow A: rules + N3 (only if the notes changed)
     profile = res["profile"]
-    locale = profile["meta"].get("locale", DEFAULT_LOCALE)
+    loc = locale if locale is not None else profile["meta"].get("locale", DEFAULT_LOCALE)
+    if loc not in intake.LOCALES:
+        raise ValueError(f"locale must be one of {intake.LOCALES}, got {loc!r}")
+    locale = loc
     horizon_m = _horizon_months(profile)
     market = engine.load_market(str(config.DATA_DIR))
     metrics = store.plain(engine.analyse(market, pf["weights_pct"], horizon_m, pf["value_cad"]))

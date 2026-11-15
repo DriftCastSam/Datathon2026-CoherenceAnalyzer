@@ -1,0 +1,512 @@
+<!doctype html>
+<html lang="en-CA">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Profile Coherence — Datathon Polyfinance</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="css/app.css">
+<link rel="stylesheet" href="css/whatif.css">
+<link rel="stylesheet" href="css/charts.css">
+<link rel="stylesheet" href="css/conversation.css">
+</head>
+<body>
+
+<header class="hdr">
+  <div class="wrap hdr__inner">
+    <div class="brand">
+      <img class="brand__img" src="assets/brand.png" alt="National Bank Direct Brokerage">
+    </div>
+    <div class="util">
+      <button class="iconbtn" type="button" aria-label="Help"><img class="i30" src="assets/icon-help.svg" alt="" width="30" height="30"></button>
+      <button class="iconbtn" type="button" aria-label="Messages"><img class="i30" src="assets/icon-mail.svg" alt="" width="30" height="30"></button>
+      <button class="user-chip" type="button"><img class="i18" src="assets/icon-user.svg" alt="" width="18" height="18"><span>Robert</span></button>
+      <button class="signout" type="button"><img class="i16" src="assets/icon-out.svg" alt="" width="16" height="16"><span>Sign out</span></button>
+    </div>
+  </div>
+</header>
+
+<nav class="nav" id="app-nav" aria-label="Primary">
+  <div class="wrap">
+    <div class="nav__inner">
+      <div class="tabs" id="app-tabs"></div>
+      <div class="nav-actions">
+        <button class="btn btn--outline-dark" type="button">Edit profile</button>
+        <button class="btn btn--outline-blue" type="button">Export report</button>
+        <button class="btn btn--primary" type="button">Re-run analysis</button>
+      </div>
+    </div>
+    <div class="nav-rule" aria-hidden="true"></div>
+  </div>
+</nav>
+
+<main id="app-main">
+  <section data-route="summary" hidden>
+<div class="scr scr-summary wrap">
+  <div class="sum__title-row">
+    <h1 class="t-title">Summary</h1>
+    <select class="select" data-persona aria-label="Persona">
+      <option value="">Persona: Robert</option>
+    </select>
+    <div class="sum__lastrun">
+      <img class="i22" src="assets/icon-refresh.svg" alt="" width="22" height="22">
+      <div class="sum__stamp">
+        <b data-run-at>14 Nov 2026, 17:40</b>
+        <span data-mode-stamp>Sample data</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card sum__totals" data-totals>
+    <div class="sum__figures">
+      <div class="sum__figure">
+        <p class="sum__figure-label">Portfolio value (CAD)</p>
+        <p class="sum__figure-value num">250,000.00</p>
+      </div>
+      <div class="sum__figure">
+        <p class="sum__figure-label sum__figure-label--blue">Median projection, year 5</p>
+        <p class="sum__figure-value sum__figure-value--l num">298,000.00 (+19.2%)</p>
+      </div>
+    </div>
+    <div class="sum__verdicts">
+      <div class="sum__verdict">
+        <p class="sum__verdict-label">Is the profile coherent?</p>
+        <span class="st st--pass"><img class="st__icon" src="assets/icon-check.svg" alt="" width="16" height="16"><span class="st__label">Aligned</span></span>
+      </div>
+      <div class="sum__verdict">
+        <p class="sum__verdict-label">Does the portfolio fit the profile?</p>
+        <span class="st st--violation"><img class="st__icon" src="assets/icon-x.svg" alt="" width="16" height="16"><span class="st__label">Misaligned</span></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card sum__profile" data-profile>
+    <div class="sum__figure"><p class="sum__figure-label">Age, occupation</p><p class="sum__figure-value">59, healthcare professional</p></div>
+    <div class="sum__figure"><p class="sum__figure-label">Objective</p><p class="sum__figure-value">Preserve capital, some growth</p></div>
+    <div class="sum__figure"><p class="sum__figure-label">Horizon</p><p class="sum__figure-value">3 to 5 years</p></div>
+    <div class="sum__figure"><p class="sum__figure-label">Risk profile</p><p class="sum__figure-value">Low to moderate</p></div>
+    <div class="sum__figure"><p class="sum__figure-label">Experience</p><p class="sum__figure-value">Advanced</p></div>
+  </div>
+
+  <div class="card sum__exec">
+    <h2 class="t-h3">Executive summary</h2>
+    <div class="sum__exec-body" data-exec>
+      <p class="sum__summary-text">Robert's profile holds together: a short horizon, a capital-preservation goal and a low-to-moderate risk level point the same way. The portfolio does not fully match it. A 22% position in one high-volatility technology stock breaks the concentration constraint and pushes the bad-scenario loss well past what the profile tolerates.</p>
+      <div class="tbl">
+        <table class="table sum__table">
+          <colgroup><col style="width:250px"><col style="width:210px"><col style="width:290px"><col></colgroup>
+          <thead><tr><th>Check</th><th>Status</th><th>Key figure</th><th>Finding</th></tr></thead>
+          <tbody>
+            <tr><td><a class="sum__link" href="#/coherence">Profile coherence</a></td><td><span class="st st--pass"><img class="st__icon" src="assets/icon-check.svg" alt="" width="16" height="16"><span class="st__label">Aligned</span></span></td><td>3 of 4 checks consistent</td><td>Interest in publicized stocks pulls against a low-to-moderate risk level.</td></tr>
+            <tr><td><a class="sum__link" href="#/objectives">Objectives and horizon</a></td><td><span class="st st--pass"><img class="st__icon" src="assets/icon-check.svg" alt="" width="16" height="16"><span class="st__label">Aligned</span></span></td><td>Median 298,000 vs goal 250,000</td><td>Median and optimistic scenarios preserve the capital over 3 to 5 years.</td></tr>
+            <tr><td><a class="sum__link" href="#/risk">Risk</a></td><td><span class="st st--violation"><img class="st__icon" src="assets/icon-x.svg" alt="" width="16" height="16"><span class="st__label">Misaligned</span></span></td><td>Loss 60,000 vs tolerance 25,000</td><td>Bad-scenario loss is 2.4× what the profile tolerates.</td></tr>
+            <tr><td><a class="sum__link" href="#/constraints">Constraints</a></td><td><span class="st st--violation"><img class="st__icon" src="assets/icon-x.svg" alt="" width="16" height="16"><span class="st__label">Misaligned</span></span></td><td>1 of 3 violated</td><td>One stock holds 22% of the portfolio; the limit is 10%.</td></tr>
+            <tr><td><a class="sum__link" href="#/preferences">Preferences</a></td><td><span class="st st--warning"><img class="st__icon" src="assets/icon-warn.svg" alt="" width="16" height="16"><span class="st__label">Warning</span></span></td><td>2 of 3 not met</td><td>Bitcoin is held, and one stock is a recent, highly publicized name.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="sum__split">
+    <div class="card sum__projection">
+      <div class="sum__head">
+        <h2 class="t-h3">Projected portfolio value</h2>
+        <p class="sum__head-note" data-chart-note>5 years, CAD, as of 2026-11-12</p>
+      </div>
+      <div data-chart="summary"><p class="t-small muted">Chart unavailable</p></div>
+      <div class="sum__legend">
+        <span class="sum__legend-item"><img src="assets/swatch-band.svg" alt="" width="20" height="10">P5 to P95</span>
+        <span class="sum__legend-item"><img src="assets/swatch-iqr.svg" alt="" width="20" height="10">P25 to P75</span>
+        <span class="sum__legend-item"><img src="assets/swatch-line-ink.svg" alt="" width="20" height="4">Median</span>
+        <span class="sum__legend-item"><img src="assets/swatch-line-red.svg" alt="" width="20" height="4">Pessimistic scenario (P5)</span>
+        <span class="sum__legend-item"><img src="assets/swatch-line-floor.svg" alt="" width="20" height="4">Floor</span>
+      </div>
+      <div class="sum__tiles" data-tiles>
+        <div class="sum__tile"><p class="sum__tile-label">Pessimistic (P5)</p><p class="sum__tile-value sum__tile-value--down num">$214,000</p><p class="sum__tile-note">−14% vs today</p></div>
+        <div class="sum__tile"><p class="sum__tile-label">Median</p><p class="sum__tile-value num">$298,000</p><p class="sum__tile-note">+19% vs today</p></div>
+        <div class="sum__tile"><p class="sum__tile-label">Optimistic (P95)</p><p class="sum__tile-value sum__tile-value--up num">$371,000</p><p class="sum__tile-note">+48% vs today</p></div>
+      </div>
+      <p data-mode-stamp class="sum__note">12-month block simulation on monthly returns, 2022-01-31 to 2026-10-31, 5,000 paths, expected returns set by the team. This is not a forecast. Figures on this draft are illustrative sample data.</p>
+    </div>
+
+    <div class="card sum__keydata">
+      <h2 class="t-h3">Portfolio key data</h2>
+      <div class="sum__kbody" data-keydata>
+        <div class="sum__kv">
+          <div><p class="sum__kv-label">Current value</p><p class="sum__kv-value num">$250,000</p></div>
+          <div><p class="sum__kv-label">Annual volatility</p><p class="sum__kv-value num">16.8%</p></div>
+        </div>
+        <div class="sum__kv">
+          <div><p class="sum__kv-label">Max drawdown</p><p class="sum__kv-value num">−24%</p></div>
+          <div><p class="sum__kv-label">Holdings</p><p class="sum__kv-value num">6</p></div>
+        </div>
+        <div class="sum__alloc">
+          <p class="sum__alloc-title">Allocation</p>
+          <div class="sum__bar" aria-hidden="true">
+            <span class="sum__bar-seg" style="flex-grow:35;background:var(--navy)"></span>
+            <span class="sum__bar-seg" style="flex-grow:25;background:var(--alloc-steel)"></span>
+            <span class="sum__bar-seg" style="flex-grow:22;background:var(--brand)"></span>
+            <span class="sum__bar-seg" style="flex-grow:8;background:var(--alloc-sky)"></span>
+            <span class="sum__bar-seg" style="flex-grow:5;background:var(--blue)"></span>
+            <span class="sum__bar-seg" style="flex-grow:5;background:var(--alloc-grey)"></span>
+          </div>
+        </div>
+        <table class="table sum__hold-table">
+          <colgroup><col><col style="width:48px"><col style="width:72px"></colgroup>
+          <thead><tr><th>Holding</th><th class="r">Weight</th><th class="r">Value</th></tr></thead>
+          <tbody>
+            <tr><td><span class="sum__hold"><span class="sum__dot" style="background:var(--navy)"></span><span class="sum__hold-row"><span class="sum__hold-text">Aggregate bond ETF</span></span></span></td><td class="r sum__weight">35%</td><td class="r">$87,500</td></tr>
+            <tr><td><span class="sum__hold"><span class="sum__dot" style="background:var(--alloc-steel)"></span><span class="sum__hold-row"><span class="sum__hold-text">Canadian equities</span></span></span></td><td class="r sum__weight">25%</td><td class="r">$62,500</td></tr>
+            <tr class="is-flag"><td><span class="sum__hold"><span class="sum__dot" style="background:var(--brand)"></span><span class="sum__hold-name"><span class="sum__hold-text">US technology stock [TICKER]</span><span class="sum__tag sum__tag--flag">Flagged</span></span></span></td><td class="r sum__weight">22%</td><td class="r">$55,000</td></tr>
+            <tr><td><span class="sum__hold"><span class="sum__dot" style="background:var(--alloc-sky)"></span><span class="sum__hold-row"><span class="sum__hold-text">Gold ETF</span></span></span></td><td class="r sum__weight">8%</td><td class="r">$20,000</td></tr>
+            <tr><td><span class="sum__hold"><span class="sum__dot" style="background:var(--blue)"></span><span class="sum__hold-row"><span class="sum__hold-text">Bitcoin</span><span class="sum__tag sum__tag--warn">Warning</span></span></span></td><td class="r sum__weight">5%</td><td class="r">$12,500</td></tr>
+            <tr><td><span class="sum__hold"><span class="sum__dot" style="background:var(--alloc-grey)"></span><span class="sum__hold-row"><span class="sum__hold-text">Cash</span></span></span></td><td class="r sum__weight">5%</td><td class="r">$12,500</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="sum__menu" id="summary-analysis-menu" role="menu" aria-label="Analysis">
+    <a class="sum__menu-item sum__menu-item--active" role="menuitem" href="#/summary">Summary</a>
+    <a class="sum__menu-item" role="menuitem" href="#/objectives">Objectives and horizon</a>
+    <a class="sum__menu-item" role="menuitem" href="#/risk">Risk</a>
+    <a class="sum__menu-item" role="menuitem" href="#/constraints">Constraints</a>
+    <a class="sum__menu-item" role="menuitem" href="#/preferences">Preferences</a>
+    <a class="sum__menu-item" role="menuitem" href="#/coherence">Profile coherence</a>
+  </div>
+</div>
+</section>
+  <section data-route="objectives" hidden>
+<div class="scr scr-objectives wrap">
+  <a class="back" href="#/summary"><img class="i16" src="assets/icon-back.svg" alt="" width="16" height="16"><span>Accounts summary</span></a>
+  <div class="title-row">
+    <h1 class="t-title">Objectives and horizon</h1>
+  </div>
+  <p class="t-body muted">Loading the objectives and horizon analysis…</p>
+</div>
+</section>
+  <section data-route="risk" hidden>
+<div class="scr scr-risk wrap">
+  <a class="back" href="#/summary"><img class="i16" src="assets/icon-back.svg" alt="" width="16" height="16"><span>Accounts summary</span></a>
+  <div class="title-row">
+    <h1 class="t-title">Risk</h1>
+  </div>
+  <p class="t-body muted">Loading the risk analysis…</p>
+</div>
+</section>
+  <section data-route="constraints" hidden>
+<div class="scr scr-constraints wrap">
+  <a class="back" href="#/summary">
+    <img class="i16" src="assets/icon-back.svg" alt="" width="16" height="16">
+    <span class="t-body-strong">Accounts summary</span>
+  </a>
+  <div class="title-row">
+    <h1 class="t-title">Constraints</h1>
+    <span data-title-chip></span>
+  </div>
+  <p class="t-body muted intro" data-intro>One of three hard rules is broken, which fails the pillar.</p>
+  <div class="rules" data-rules></div>
+  <p class="t-small muted note">Figures are computed first, then explained by a language model. Illustrative sample data. Simulation only, not financial advice.</p>
+  <div data-detail></div>
+</div>
+</section>
+  <section data-route="preferences" hidden>
+<div class="scr scr-preferences wrap">
+  <a class="back" href="#/summary">
+    <img class="i16" src="assets/icon-back.svg" alt="" width="16" height="16">
+    <span class="t-body-strong">Accounts summary</span>
+  </a>
+  <div class="title-row">
+    <h1 class="t-title">Preferences</h1>
+    <span data-title-chip></span>
+  </div>
+  <p class="t-body muted intro" data-intro>Two of three preferences are not met. Preferences are soft, so this is a warning and not a failure.</p>
+  <div class="rules" data-rules></div>
+  <p class="t-small muted note">Figures are computed first, then explained by a language model. Illustrative sample data. Simulation only, not financial advice.</p>
+  <div data-detail></div>
+</div>
+</section>
+  <section data-route="coherence" hidden>
+<div class="scr scr-coherence wrap">
+  <a class="back" href="#/summary"><img class="i16" src="assets/icon-back.svg" alt="" width="16" height="16"><span>Accounts summary</span></a>
+  <div class="coh-title">
+    <h1 class="t-title">Profile coherence</h1>
+    <span data-coh-verdict><span class="st st--pass"><img class="st__icon" src="assets/icon-check.svg" alt="" width="16" height="16"><span class="st__label">Aligned</span></span></span>
+  </div>
+  <p class="t-body coh-summary" data-coh-summary>Risk level, horizon and objective point the same way. One tension: an interest in publicized stocks.</p>
+  <div class="card coh-score">
+    <p class="t-num-xl coh-score__num" data-coh-score>3 of 4</p>
+    <div class="coh-score__detail">
+      <p class="t-body coh-score__label">internal checks are consistent</p>
+      <div class="coh-dots" aria-hidden="true" data-coh-dots>
+        <span class="coh-dot"></span><span class="coh-dot"></span><span class="coh-dot"></span><span class="coh-dot coh-dot--warning"></span>
+      </div>
+    </div>
+  </div>
+  <div class="coh-checks" data-coh-checks></div>
+  <p class="coh-note">Figures are computed first, then explained by a language model. Illustrative sample data. Simulation only, not financial advice.</p>
+</div>
+</section>
+  <section data-route="search" hidden>
+<div class="scr scr-search">
+  <div class="wrap sq-inner">
+    <a class="back" href="#/summary"><img class="i16" src="assets/icon-back.svg" alt="" width="16" height="16"><span class="t-body-strong">Accounts summary</span></a>
+    <div class="sq-titlerow">
+      <h1 class="t-title">Search and ask</h1>
+      <p class="sq-note t-small" data-note></p>
+    </div>
+    <div class="sq-panes">
+      <section class="card sq-chat" aria-label="Conversation">
+        <h2 class="t-h3">Conversation</h2>
+        <div class="sq-thread" data-thread aria-live="polite"></div>
+        <div class="sq-composer">
+          <div class="sq-suggests">
+            <button class="sq-suggest" type="button" data-say="Only ETFs">Only ETFs</button>
+            <button class="sq-suggest" type="button" data-say="Add Canadian listings">Add Canadian listings</button>
+          </div>
+          <form class="sq-composer__row" data-message-form novalidate>
+            <label class="sq-field sq-field--message">
+              <span class="sr-only">Ask about an asset, or describe what to search for</span>
+              <input class="sq-input" type="text" name="message" data-message-input autocomplete="off" placeholder="Ask or describe a search">
+            </label>
+            <button class="btn btn--primary sq-send" type="submit">Send</button>
+          </form>
+          <p class="sq-scope">
+            <img class="sq-scope__icon i14" src="assets/icon-info.svg" alt="" width="14" height="14">
+            <span class="t-small label">The agent applies filters and analyzes the assets you pick. It never ranks or recommends assets.</span>
+          </p>
+        </div>
+      </section>
+      <section class="card sq-results" aria-label="Results">
+        <div class="sq-results__head">
+          <h2 class="t-h3">Filters applied from your request</h2>
+          <button class="sq-link" type="button" data-clear>Clear all</button>
+        </div>
+        <div class="sq-chips">
+          <span class="sq-chips__list" data-chips></span>
+          <select class="sq-add" data-add aria-label="Add a filter">
+            <option value="">+ Add filter</option>
+          </select>
+        </div>
+        <div class="sq-countrow">
+          <p class="t-body-strong" data-count></p>
+          <p class="t-small label">Sorted A to Z. Order carries no ranking.</p>
+        </div>
+        <div class="tbl sq-results__table-wrapper">
+          <table class="table sq-tbl">
+            <colgroup>
+              <col class="sq-col--select"><col><col class="sq-col--ticker"><col class="sq-col--class"><col class="sq-col--sector"><col class="sq-col--currency">
+            </colgroup>
+            <thead>
+              <tr><th scope="col">Select</th><th scope="col">Name</th><th scope="col">Ticker</th><th scope="col">Asset class</th><th scope="col">Sector</th><th scope="col">Currency</th></tr>
+            </thead>
+            <tbody data-rows></tbody>
+          </table>
+        </div>
+        <div class="sq-selection">
+          <p class="t-body-strong" data-selected>2 assets selected</p>
+          <button class="btn btn--primary" type="button" data-analyze>Analyze coherence of selected</button>
+        </div>
+      </section>
+    </div>
+    <p data-mode-stamp class="t-small muted">This list is the result of your filters only. Your profile is not used to choose or order assets. Asset names on this draft are illustrative sample data. Simulation only, not financial advice.</p>
+  </div>
+</div>
+</section>
+  <section data-route="whatif" hidden>
+<div class="wrap scr scr-whatif">
+  <a class="back" href="#/search"><img class="wf-back__icon" src="assets/icon-back.svg" alt="" width="16" height="16"><span>Back to search results</span></a>
+
+  <section class="card wf-empty" data-wf="empty" hidden aria-label="No assets selected">
+    <p class="t-body-strong" data-wf="empty-title">No assets selected</p>
+    <p class="t-body" data-wf="empty-text">Choose one or more assets in the search results to see how the portfolio changes with each of them.</p>
+    <a class="btn btn--primary" href="#/search">Go to search</a>
+  </section>
+
+  <div data-wf="content">
+  <div class="wf-title">
+    <h1 class="t-title">What-if report</h1>
+    <select class="select wf-asset" id="whatif-asset" aria-label="Asset">
+      <option></option>
+    </select>
+    <p class="wf-meta" data-wf="meta"></p>
+  </div>
+
+  <section class="card wf-scn" aria-label="Scenario">
+    <div class="wf-scn__fig">
+      <span class="wf-scn__label">Scenario</span>
+      <span class="wf-scn__value">Add to current portfolio</span>
+    </div>
+    <div class="wf-scn__fig">
+      <label class="wf-scn__label" for="whatif-amount">Amount</label>
+      <select class="wf-scn__select" id="whatif-amount">
+        <option></option>
+      </select>
+    </div>
+    <div class="wf-scn__fig">
+      <label class="wf-scn__label" for="whatif-funding">Funded from</label>
+      <select class="wf-scn__select" id="whatif-funding">
+        <option></option>
+      </select>
+    </div>
+    <div class="wf-scn__fig">
+      <span class="wf-scn__label">Profile</span>
+      <span class="wf-scn__value" data-wf="profile"></span>
+    </div>
+  </section>
+  <p class="wf-note" data-wf="profile-note" hidden></p>
+
+  <p class="t-body-strong wf-error" data-wf="error" role="alert" hidden></p>
+
+  <div data-wf="results">
+  <section class="card wf-verdict" aria-label="Verdict">
+    <div class="wf-verdict__main">
+      <p class="wf-verdict__label">Does this asset fit the profile?</p>
+      <div data-wf="verdict-chip"><span class="st st--violation"><img class="st__icon" src="assets/icon-x.svg" alt="" width="16" height="16"><span class="st__label">Misaligned</span></span></div>
+      <p class="t-body" data-wf="finding">Adding this stock raises the median projection slightly, but it moves the portfolio further from Robert&rsquo;s low-to-moderate risk level. The estimated bad-scenario loss grows from 60,000 to 72,500, against a tolerance of 25,000. The position itself stays within the 10% single-stock limit. This is an analysis of the asset you chose, not a suggestion to buy or avoid it.</p>
+    </div>
+    <div class="wf-verdict__side">
+      <div class="wf-verdict__item">
+        <p class="wf-verdict__label">Portfolio today</p>
+        <div data-wf="today-verdict"><span class="st st--violation"><img class="st__icon" src="assets/icon-x.svg" alt="" width="16" height="16"><span class="st__label">Misaligned</span></span></div>
+      </div>
+      <div class="wf-verdict__item">
+        <p class="wf-verdict__label">With this asset</p>
+        <div data-wf="with-verdict"><span class="st st--violation"><img class="st__icon" src="assets/icon-x.svg" alt="" width="16" height="16"><span class="st__label">Misaligned</span></span></div>
+      </div>
+    </div>
+  </section>
+
+  <div class="wf-cols">
+    <section class="card wf-proj" aria-label="Adjusted projection">
+      <div class="wf-proj__head">
+        <h3>Adjusted projection</h3>
+        <p class="wf-proj__meta" data-wf="as-of">5 years, CAD, as of 2026-11-12</p>
+      </div>
+      <div class="wf-fan">
+        <div data-chart="whatif"><p class="t-small muted">Chart unavailable</p></div>
+      </div>
+      <div class="wf-legend">
+        <span class="wf-legend__item"><span class="wf-legend__swatch wf-legend__swatch--band"></span><span class="wf-legend__text">P5 to P95</span></span>
+        <span class="wf-legend__item"><span class="wf-legend__swatch wf-legend__swatch--iqr"></span><span class="wf-legend__text">P25 to P75</span></span>
+        <span class="wf-legend__item"><span class="wf-legend__swatch wf-legend__swatch--ink"></span><span class="wf-legend__text">Median with asset</span></span>
+        <span class="wf-legend__item"><span class="wf-legend__swatch wf-legend__swatch--blue"></span><span class="wf-legend__text">Current median</span></span>
+        <span class="wf-legend__item"><span class="wf-legend__swatch wf-legend__swatch--red"></span><span class="wf-legend__text">Pessimistic (P5)</span></span>
+        <span class="wf-legend__item"><span class="wf-legend__swatch wf-legend__swatch--floor"></span><span class="wf-legend__text">Floor</span></span>
+      </div>
+      <div class="wf-tiles">
+        <div class="wf-tile">
+          <p class="wf-tile__label">Pessimistic (P5)</p>
+          <p class="wf-tile__value wf-tile__value--bad" data-wf="tile-p5">$201,000</p>
+          <p class="wf-tile__delta" data-wf="tile-p5-delta">−$13,000 vs current portfolio</p>
+        </div>
+        <div class="wf-tile">
+          <p class="wf-tile__label">Median</p>
+          <p class="wf-tile__value wf-tile__value--mid" data-wf="tile-p50">$309,000</p>
+          <p class="wf-tile__delta" data-wf="tile-p50-delta">+$11,000 vs current portfolio</p>
+        </div>
+        <div class="wf-tile">
+          <p class="wf-tile__label">Optimistic (P95)</p>
+          <p class="wf-tile__value wf-tile__value--good" data-wf="tile-p95">$392,000</p>
+          <p class="wf-tile__delta" data-wf="tile-p95-delta">+$21,000 vs current portfolio</p>
+        </div>
+      </div>
+      <p data-mode-stamp class="wf-note">12-month block simulation on monthly returns, 2022-01-31 to 2026-10-31, 5,000 paths, recomputed with the new weights. This is not a forecast. Figures on this draft are illustrative sample data.</p>
+    </section>
+
+    <section class="card wf-ba" aria-label="Before and after">
+      <h3>Before and after</h3>
+      <table class="table wf-ba__table">
+        <thead><tr><th>Measure</th><th class="r">Today</th><th class="r">With asset</th></tr></thead>
+        <tbody data-wf="ba-rows"></tbody>
+      </table>
+    </section>
+  </div>
+
+  <section class="card wf-coh" aria-label="Coherence with this asset added">
+    <h3>Coherence with this asset added</h3>
+    <div class="wf-tbl">
+      <table class="table">
+        <thead><tr><th>Pillar</th><th>Today</th><th>With asset</th><th>Finding</th></tr></thead>
+        <tbody data-wf="coh-rows"></tbody>
+      </table>
+    </div>
+  </section>
+
+  </div>
+  </div>
+
+  <a class="btn btn--outline-blue wf-another" href="#/search">Ask about another asset</a>
+
+  <p data-mode-stamp class="wf-note">Method: the portfolio is recomputed with the new weights, then the same four pillar checks are run again. All values on this draft are illustrative sample data. Simulation only, not financial advice.</p>
+</div>
+</section>
+  <section data-route="conversation" hidden>
+<div class="wrap scr scr-conversation">
+  <div class="lead">
+    <p class="t-small label">Step 1 of 2</p>
+    <h1 class="t-title">Build your profile</h1>
+    <p class="t-body muted">Pick a suggestion or type an answer. The questions are fixed; your answers are saved to the fictional profile before the analysis is run. Any question can be skipped.</p>
+  </div>
+
+  <div class="cols">
+    <section class="card conv" aria-label="Conversation">
+      <p class="agent">Agent</p>
+      <p class="t-body">Hello. I will ask a few questions to build your investor profile, then check that it holds together before looking at your portfolio.</p>
+      <p class="t-small muted" data-conversation-notice hidden></p>
+
+      <div class="current" data-conversation-current></div>
+    </section>
+
+    <aside class="card prof" aria-label="Profile summary">
+      <h2 class="t-h3">Your profile so far</h2>
+      <p class="t-small label" data-profile-count></p>
+      <div class="prog" aria-hidden="true" data-profile-progress></div>
+      <div class="rule" aria-hidden="true"></div>
+      <div data-profile-rows></div>
+      <div class="skip">
+        <p class="field__error" data-run-error role="alert" hidden></p>
+        <button class="btn btn--outline-blue" type="button" data-run>Run analysis</button>
+      </div>
+    </aside>
+  </div>
+
+  <div class="footnote">
+    <p class="t-small muted">Simulation only. Fictional profiles and portfolios, not personalized financial advice.</p>
+  </div>
+</div>
+</section>
+</main>
+
+<footer class="foot">
+  <div class="wrap foot__inner">
+    <p data-mode-stamp class="foot__line">Data: starter dataset, 12 Nov 2021 to 12 Nov 2026. Figures are computed deterministically; explanations and constraint checks are written by a language model from those figures. All values on this draft are illustrative sample data. Simulation only, not financial advice.</p>
+    <p class="foot__line foot__line--disclaimer">Educational simulation with fictional profiles. This is not personalised financial advice. No transaction is executed.</p>
+    <p class="foot__line">No buy/sell recommendations.</p>
+  </div>
+</footer>
+
+<a class="fab" href="#/search" aria-label="Ask about this profile"><img class="fab__icon" src="assets/icon-ask.svg" alt="" width="28" height="28"></a>
+
+<script src="js/core/shell.js"></script>
+<script src="js/core/format.js"></script>
+<script src="js/core/charts.js"></script>
+<script src="js/core/data_source.js"></script>
+<script src="js/core/intake_questions.js"></script>
+<script src="js/screens/summary/summary.js"></script>
+<script src="js/screens/summary/summary_holdings.js"></script>
+<script src="js/screens/pillars/objectives.js"></script>
+<script src="js/screens/pillars/risk.js"></script>
+<script src="js/screens/pillars/constraints.js"></script>
+<script src="js/screens/pillars/preferences.js"></script>
+<script src="js/screens/pillars/coherence.js"></script>
+<script src="js/screens/search.js"></script>
+<script src="js/screens/whatif/whatif_view.js"></script>
+<script src="js/screens/whatif/whatif.js"></script>
+<script src="js/screens/conversation.js"></script>
+</body>
+</html>

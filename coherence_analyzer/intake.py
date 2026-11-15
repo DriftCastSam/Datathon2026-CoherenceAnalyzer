@@ -142,14 +142,15 @@ def _lookup(profile: dict, path: str) -> Any:
     return node
 
 
-def _is_skipped(node: Any) -> bool:
+def is_skipped(node: Any) -> bool:
+    """True if the node is the skipped marker {value: None, by: 'user:skipped'}."""
     return isinstance(node, dict) and node.get("by") == SKIPPED_BY
 
 
 def _is_answered(node: Any) -> bool:
     if node is _ABSENT or node is None:
         return False
-    if _is_skipped(node):
+    if is_skipped(node):
         return True
     if isinstance(node, dict) and "value" in node:      # {value, by, ...} wrapper
         return _is_answered(node["value"])
@@ -167,7 +168,7 @@ def _theme_rules_without_number(profile: dict) -> list[tuple[str, dict]]:
         if isinstance(r, dict) and r.get("rule_kind") == "max_theme_weight":
             params = r.get("params") if isinstance(r.get("params"), dict) else {}
             number = params.get(THEME_NUMBER_KEY, _ABSENT)
-            if not _is_skipped(number) and not (isinstance(number, (int, float)) and not isinstance(number, bool)):
+            if not is_skipped(number) and not (isinstance(number, (int, float)) and not isinstance(number, bool)):
                 out.append((f"{PARSED_RULES_PATH}[{i}].params.{THEME_NUMBER_KEY}", r))
     return out
 
