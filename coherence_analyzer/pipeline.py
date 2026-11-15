@@ -249,10 +249,14 @@ def profile_diff(old: dict, new: dict) -> list[dict]:
     return out
 
 
-def _refresh(profile_in: dict, pf: dict, events: list[dict], *, with_n1: bool = False) -> dict:
+def _refresh(profile_in: dict, pf: dict, events: list[dict], *, with_n1: bool = False,
+             baseline: dict | None = None) -> dict:
     """A1-A6 on an in-memory profile: N3 if the notes changed (gated), N2 per question when its flag is on (gated),
     N1 when `with_n1` (Flow B only, gated), derive, limits + trace, validate, version. Saves the new profile version
-    only when a value changed. Flow A and C: rules and N3 by default, N2 opt-in (config.N2_QUESTION_RUBRIC); no N1 (D7)."""
+    only when a value changed. Flow A and C: rules and N3 by default, N2 opt-in (config.N2_QUESTION_RUBRIC); no N1 (D7).
+    `baseline` (P3.FLOWA): the stored profile when `profile_in` already carries a declared edit (quiz score, a
+    profile_edit); the diff and the version are taken against it, so the edit itself shows in the diff."""
+    base = baseline if baseline is not None else profile_in
     p, calls, errors = _run_n3(profile_in, events)
     p, n2_calls, n2_errors = _run_n2(p, events)
     calls, errors = calls + n2_calls, errors + n2_errors
@@ -265,8 +269,8 @@ def _refresh(profile_in: dict, pf: dict, events: list[dict], *, with_n1: bool = 
     lim, trace = limits_mod.build_limits(p, pf["value_cad"])
     p["limits"], p["limits_trace"] = lim, trace
     p = store.plain(p)      # plain JSON types (tuples -> lists)
-    diff = profile_diff(profile_in, p)
-    version_in = int(profile_in["meta"].get("version", 1))
+    diff = profile_diff(base, p)
+    version_in = int(base["meta"].get("version", 1))
     version_out = version_in
     if diff:
         version_out = version_in + 1
@@ -296,16 +300,19 @@ def _audit(*, run_id: str, flow: str, started_at: str, ended_at: str, profile_id
             "verdict": verdict, "explanation_mode": explanation_mode, "section_modes": section_modes}
 
 
-def refresh(fixture_dir: Path, *, upto_event_id: str | None = None, portfolio: str | Path | None = None) -> dict:
+def refresh(fixture_dir: Path, *, upto_event_id: str | None = None, portfolio: str | Path | None = None,
+            edited: dict | None = None) -> dict:
     """Flow A: rules (+ N3 when `values.notes` changed, through the gate) -> limits -> validate/save/audit.
-    Returns `{run_id, profile, profile_diff, audit}`."""
+    `edited` (P3.FLOWA): the stored profile with a declared edit applied (the API validated it); the diff and the
+    version are taken against the stored profile. Returns `{run_id, profile, profile_diff, audit}`."""
     fixture_dir = Path(fixture_dir)
     started = _now()
     run_id = store.new_run_id()
-    profile_in = _load_profile(fixture_dir)
+    stored = _load_profile(fixture_dir)
+    profile_in = stored if edited is None else edited
     pf = _load_portfolio(fixture_dir, portfolio, profile_in, data.load_assets())
     events = _events(fixture_dir, upto_event_id)
-    res = _refresh(profile_in, pf, events)
+    res = _refresh(profile_in, pf, events, baseline=stored)
     audit = _audit(run_id=run_id, flow="A", started_at=started, ended_at=_now(),
                    profile_id=profile_in["meta"]["profile_id"], as_of=pf["as_of"], version_in=res["version_in"],
                    version_out=res["version_out"], events=events, calls=res["llm_calls"], errors=res["llm_errors"],
