@@ -27,7 +27,7 @@
     "tests/flows/test_flow_b.py": "a0f02e120c32f29afd1cd6b008c4adf54bbca974ae902703e0cf2984cdb45d4c",
     "tests/flows/test_flow_b_goals_stress.py": "38db3920f94ff835b84c7edf9461db5ed44f4cfb5f061f2b20668bf5e00ee6ec",
     "tests/flows/test_intake_events.py": "fbb329589a51a3304394ce2f4137c9c0d1c60e08bac265cefb559e4dac2b97f5",
-    "tests/flows/test_new_user_no_portfolio.py": "c58673e99c29a89e94a38027d3be71f2f85685d18fe7ef0c3c42e4739efec154",
+    "tests/flows/test_new_user_no_portfolio.py": "f65ca2ff9edc136a4803611e830d31ce39035c60097d9ab14fa0a4b041ccc324",
     "tests/flows/test_personas.py": "7b90e33fd67b536b552f6152f12aceea5cb1a53eb9fb787c07d5404e3dd58d72",
     "tests/flows/test_pipeline_offline.py": "b909ef122e4b1d21b057478c394b5f217ba412533774e97a9b89fbe94ab1f04c",
     "tests/flows/test_rule_decision_refresh.py": "2364e870e2b7bed18aab7b623d446f94dc7bbbd897659c4bd3950a865ba2e833",

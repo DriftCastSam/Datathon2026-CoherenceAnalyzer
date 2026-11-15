@@ -244,6 +244,13 @@ def _derive_knowledge_score(p: dict, as_of: str | None) -> None:
     qq = _val(qq_node) if qq_node is not None else None
 
     old = k.get("score")
+    if declared is None or quiz is None:
+        # P5.INTAKEFULL: a skipped (or unanswered) declared_level leaves the score unknown, never a default (§20.6).
+        # The history is kept; no entry is added because there is no value to record.
+        field = _field("knowledge.score", None, KNOWLEDGE_SCORE_CONFIDENCE)
+        field["history"] = list(old.get("history", [])) if isinstance(old, dict) else []
+        k["score"] = field
+        return
     old_value = _val(old) if old is not None else None
     # SPEC-AMBIGUITY: "previous run" = the stored knowledge.score. Its question-quality term is what
     # remains after removing the current quiz/declared terms.

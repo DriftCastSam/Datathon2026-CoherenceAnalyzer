@@ -116,10 +116,17 @@ def _create(client: TestClient, locale: str = "en-CA") -> str:
     return r.json()["meta"]["profile_id"]
 
 
-def _answer_all(client: TestClient, pid: str) -> None:
+def _answer_all(client: TestClient, pid: str, skip: tuple[str, ...] = (), leave: tuple[str, ...] = ()) -> None:
+    """Answer every REQUIRED path; `skip` paths go through /intake/skip, `leave` paths are not touched (set elsewhere).
+    P5.INTAKEFULL (owner-approved): employment_type is now a REQUIRED path, so the no-employment case skips it."""
     assert set(ANSWERS) == {p for paths in intake.REQUIRED.values() for p in paths}     # every REQUIRED path, once
     for path, value in ANSWERS.items():
-        r = client.post(f"/profiles/{pid}/intake/answer", json={"path": path, "value": value})
+        if path in leave:
+            continue
+        if path in skip:
+            r = client.post(f"/profiles/{pid}/intake/skip", json={"path": path})
+        else:
+            r = client.post(f"/profiles/{pid}/intake/answer", json={"path": path, "value": value})
         assert r.status_code == 200, (path, r.status_code, r.text)
 
 
@@ -463,7 +470,9 @@ def test_full_order_create_answer_put_review_gives_a_valid_report(client, store_
     pid = _create(client, locale)
     if with_employment:
         _declare_employment(client, pid)
-    _answer_all(client, pid)
+        _answer_all(client, pid, leave=("identity.employment_type",))
+    else:
+        _answer_all(client, pid, skip=("identity.employment_type",))
     assert _put(client, pid).status_code == 200
     r = client.post(f"/profiles/{pid}/review")
     assert r.status_code == 200, r.text
