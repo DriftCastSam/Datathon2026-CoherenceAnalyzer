@@ -10,3 +10,5 @@ audit/
 profiles/
 portfolios/
 .claude/worktrees/
+build/
+*.zip

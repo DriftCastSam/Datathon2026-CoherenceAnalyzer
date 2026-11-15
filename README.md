@@ -453,6 +453,56 @@ Every Task (B1, B3 to B9, both B5 branches) and the Parallel state lead to `Flow
 
 The Flow B steps, including the Parallel engine state, are in the flowchart at [docs/index.html](docs/index.html); the state machine itself is `deploy/aws/flow_b.asl.json`.
 
+### Live API Lambda (Function URL)
+
+The same template also holds a second Lambda, `ApiFunction` (handler `coherence_analyzer.api_lambda_handler.handler`,
+python3.11), that serves the whole FastAPI app (`coherence_analyzer.api.app`: profiles, reviews, corrections, intake)
+over HTTP through a Lambda Function URL (`ApiFunctionUrl`), so the CloudFront-hosted static site
+(`deploy/site/`) can call it directly instead of going through `deploy/serve_local.py`'s uvicorn process. Mangum
+(`mangum` in `requirements.txt`) adapts the Function-URL event into one ASGI request/response cycle against `app`;
+see `coherence_analyzer/api_lambda_handler.py` for the adapter and why `lifespan="off"`. It runs with
+`COHERENCE_ANALYZER_LLM=live` and `COHERENCE_ANALYZER_STORE=s3` on the stack's bucket and prefix, the guardrail of
+the stack, and `BEDROCK_MODEL_ID` from the `BedrockModelId` parameter — the same environment variables as
+`FlowBFunction` (`COHERENCE_ANALYZER_LLM`, `COHERENCE_ANALYZER_STORE`, `COHERENCE_ANALYZER_S3_BUCKET`,
+`COHERENCE_ANALYZER_S3_PREFIX`, `BEDROCK_MODEL_ID`, `BEDROCK_GUARDRAIL_ID`, `BEDROCK_GUARDRAIL_VERSION`,
+`COHERENCE_ANALYZER_RUNTIME_CACHE_DIR=/tmp/llm-cache`). Its Function URL has `AuthType: NONE` plus the two
+`lambda:InvokeFunctionUrl`/`lambda:InvokeFunction` permissions a public Function URL needs, and CORS mirroring
+`api.py`'s own `CORSMiddleware` (`GET`, `POST`, `PUT`, all origins and headers). Nothing here is deployed by the
+tests or the build.
+
+`ApiFunction` and `ApiFunctionUrl` carry the same `DeployFlowB` condition as the Flow B resources, and reuse
+`FlowBFunction`'s exact `Code` block (`LambdaCodeS3Bucket`/`LambdaCodeS3Key`) — one zip artifact serves both
+Lambdas. If you already built and uploaded `flow-b-lambda.zip` for Flow B, there is no separate packaging step:
+a stack update that passes the same `LambdaCodeS3Bucket`/`LambdaCodeS3Key` picks up `ApiFunction` automatically.
+Packaging from scratch is the same commands as Flow B:
+
+```
+rm -rf build && mkdir build
+pip install -r requirements.txt --target build --platform manylinux2014_x86_64 --only-binary=:all: --python-version 3.11
+cp -r coherence_analyzer build/ && mkdir -p build/data && cp -r data/starter data/meta build/data/ && cp -r fixtures build/
+(cd build && zip -qr ../flow-b-lambda.zip . -x '*/__pycache__/*')
+aws s3 cp flow-b-lambda.zip s3://<artifact bucket>/coherence-analyzer/flow-b-lambda-<version>.zip
+aws cloudformation deploy \
+  --template-file deploy/aws/coherence-analyzer.cfn.json \
+  --stack-name coherence-analyzer \
+  --capabilities CAPABILITY_IAM \
+  --parameter-overrides ModelArn=<same as before> S3Prefix=ca/ BedrockModelId=<model id> \
+      LambdaCodeS3Bucket=<artifact bucket> LambdaCodeS3Key=coherence-analyzer/flow-b-lambda-<version>.zip
+aws cloudformation describe-stacks --stack-name coherence-analyzer \
+  --query "Stacks[0].Outputs[?OutputKey=='ApiFunctionUrl'].OutputValue" --output text
+```
+
+Smoke-test once deployed:
+
+```
+curl <ApiFunctionUrl output>/health
+```
+
+should return the same `{"ok": true}` body as the app's local `/health` route. To wire the CloudFront-hosted
+static site to it, set `deploy/site/app.html`'s `<meta name="coherence-api-base">` (or `window.COHERENCE_API_BASE`
+before the page's scripts run) to this Function URL — see `apiBase()` in `deploy/site/js/core/data_source.js` for
+where every API call reads it from.
+
 
 ## Known limitations
 
