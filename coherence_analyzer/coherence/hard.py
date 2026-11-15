@@ -84,6 +84,12 @@ def _lim(profile: dict, name: str):
     return profile["limits"].get(name)
 
 
+def _cap_provisional(status: str, provisional: bool) -> str:
+    """D11.2 + invariant 3: a check against a provisional limit (an LLM reading of the user's notes, not yet approved)
+    is never a `violation`: a breach is a `warning`."""
+    return "warning" if provisional and status == "violation" else status
+
+
 def _no_limit(cid: str, profile: dict, limit_name: str, unit: str, source: str) -> list[Check]:
     """`unknown`: the limit is not computable (its input was skipped; `derived_from` names the path). Never a pass,
     never a violation (invariant 3), and no number is invented."""
@@ -268,7 +274,9 @@ def _h12(weights, profile, assets, meta) -> list[Check]:
 
 
 def _h13(weights, profile, assets, meta) -> list[Check]:
-    """Theme weight: Σ weight of held assets whose asset_meta themes contain the theme (an ETF counts fully)."""
+    """Theme weight: Σ weight of held assets whose asset_meta themes contain the theme (an ETF counts fully).
+    A provisional limit (D11: an unapproved numeric note rule, `{value, provisional: true, quote}`) is capped at
+    `warning`; the check says it comes from the user's notes (their quote in `derived_from`)."""
     limits = profile["limits"].get("max_theme_weight") or {}
     if not limits:
         return []
@@ -276,15 +284,19 @@ def _h13(weights, profile, assets, meta) -> list[Check]:
     rows = _asset_rows(meta)
     out: list[Check] = []
     for theme in sorted(limits):
-        lim = limits[theme]
+        entry = limits[theme]
+        prov = isinstance(entry, dict) and entry.get("provisional") is True
+        lim = entry["value"] if isinstance(entry, dict) else entry
+        d = [*der, f"note: {entry['quote']}"] if prov and entry.get("quote") else der
         if rows is None:
-            out.append(_check("H13", "unknown", theme, None, lim, "weight", der, "rule:max_theme_weight",
+            out.append(_check("H13", "unknown", theme, None, lim, "weight", d, "rule:max_theme_weight",
                               "theme_weight_unknown"))
             continue
         v = sum(weights[t] for t in _held(weights) if theme in _themes(rows.get(t, {}).get("themes")))
-        status = "violation" if _gt(v, lim) else "pass"
-        out.append(_check("H13", status, theme, _r(v), lim, "weight", der, "rule:max_theme_weight",
-                          "theme_weight_over" if status == "violation" else "theme_weight_ok"))
+        over = _gt(v, lim)
+        status = _cap_provisional("violation" if over else "pass", prov)
+        out.append(_check("H13", status, theme, _r(v), lim, "weight", d, "rule:max_theme_weight",
+                          "theme_weight_over" if over else "theme_weight_ok"))
     return out
 
 
