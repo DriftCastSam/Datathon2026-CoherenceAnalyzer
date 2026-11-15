@@ -9,6 +9,7 @@
     "tests/checks/test_meta_checks.py": "99a098cdeae02a7cf2056712c48d89c2fe6965a40c7396f928cd1013268cf5bb",
     "tests/checks/test_o1.py": "ac6653d2aacb76ca7e91ba6cd46f8089e28729232e7328efce48ed92226fac7f",
     "tests/checks/test_s4_noncheckable.py": "0231e328a2ffcbebd234f657203a5e6f8871f6ddebf05cf83e83ed13c84b01ac",
+    "tests/dashboard/test_any_user_dashboard.py": "cd8be1af455e4898048150afc8c87120a2a60db540dcbdd91ee9ec17d4aff7d7",
     "tests/dashboard/test_d10_dashboard.py": "2983f901903a9bb9896ddced35e12aab06670752ddc5c14ea6a42622f621cfda",
     "tests/dashboard/test_d10_site.py": "13410842fa8ea0a567faead6065d58b0aaeb9f438ae9df95f7370b1ed00d3f75",
     "tests/dashboard/test_site.py": "969830a9af98efcbaca9e5ac0c4b1efee8afa7d1ca7a18b187865b6dc8f98366",
