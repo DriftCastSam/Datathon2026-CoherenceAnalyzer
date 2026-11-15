@@ -5,6 +5,8 @@
      Shares helpers with summary.js through App._summary. */
   const {num, subjectStatus, CAD_SIGN, PALETTE, LIVE_PALETTE, SAMPLE} = App._summary;
 
+  const BUSY_LABEL = "Running…";
+
   /* ---------- key data ---------- */
 
   function assetIndex(universe) {
@@ -156,6 +158,34 @@
 
   /* ---------- global nav actions ---------- */
 
+  function rerunMessage(row) {
+    let message = row.querySelector("[data-rerun-error]");
+    if (!message) {
+      message = document.createElement("span");
+      message.className = "t-small";
+      message.setAttribute("data-rerun-error", "");
+      message.setAttribute("role", "alert");
+      row.appendChild(message);
+    }
+    return message;
+  }
+
+  async function rerunAnalysis(button, row) {
+    const idleLabel = button.textContent;
+    button.disabled = true;
+    button.textContent = BUSY_LABEL;
+    rerunMessage(row).textContent = "";
+    try {
+      await App.rerunAnalysis();
+    } catch (error) {
+      console.error("[summary] re-run failed", error);
+      rerunMessage(row).textContent = "Re-run failed: " + error.message;
+    } finally {
+      button.disabled = false;
+      button.textContent = idleLabel;
+    }
+  }
+
   function wireNavActions() {
     const row = document.querySelector(".nav-actions");
     if (!row || row.dataset.appWired) return;
@@ -165,7 +195,7 @@
       if (label === "Edit profile") {
         button.addEventListener("click", () => { App.go("#/conversation"); });
       } else if (label === "Re-run analysis") {
-        button.addEventListener("click", () => { App.reload(); });
+        button.addEventListener("click", () => { rerunAnalysis(button, row); });
       } else if (label === "Export report") {
         button.title = "Not available in this simulation";
         button.setAttribute("aria-disabled", "true");

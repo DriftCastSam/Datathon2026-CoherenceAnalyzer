@@ -3,8 +3,9 @@
 
   const ROUTES = ["summary", "objectives", "risk", "constraints", "preferences", "coherence", "search", "whatif", "conversation"];
   const DEFAULT_ROUTE = "summary";
-  const REPORT_DIR = "reports/";
-  const FALLBACK_REPORT = "robert-review.json";
+  const SAMPLE_STAMP = "Sample data";
+  const SAMPLE_PHRASE = "illustrative sample data";
+  const REAL_PHRASE = "fictional persona data";
   const NAV_TABS = ["Accounts", "Markets", "Activities", "Documents", "Research"];
   const ESCAPES = {"&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;"};
   const STATUS_LABEL = {pass: "Aligned", warning: "Warning", violation: "Misaligned", info: "Info", unknown: "Unknown"};
@@ -256,7 +257,7 @@
   /* ---------- router ---------- */
 
   function routeFromHash() {
-    const raw = location.hash.replace(/^#\/?/, "");
+    const raw = location.hash.replace(/^#\/?/, "").split("?")[0];
     if (ROUTES.indexOf(raw) >= 0) return raw;
     if (raw) {
       try {
@@ -266,6 +267,11 @@
       }
     }
     return DEFAULT_ROUTE;
+  }
+
+  function routeParams() {
+    const at = location.hash.indexOf("?");
+    return new URLSearchParams(at >= 0 ? location.hash.slice(at + 1) : "");
   }
 
   function showRenderError(section, error) {
@@ -283,6 +289,7 @@
     const sections = document.querySelectorAll("section[data-route]");
     sections.forEach(section => { section.hidden = section.dataset.route !== App.route; });
     setNav(App.route);
+    updateChrome();
     const section = document.querySelector('section[data-route="' + App.route + '"]');
     const renderer = App.renderers[App.route];
     if (!section || typeof renderer !== "function") return;
@@ -304,39 +311,97 @@
     window.scrollTo(0, 0);
   }
 
-  /* ---------- data ---------- */
+  /* ---------- mode stamps and user chip ---------- */
 
-  async function getJson(url) {
-    try {
-      const response = await fetch(url, {cache: "no-store"});
-      if (!response.ok) throw new Error("HTTP " + response.status + " for " + url);
-      return await response.json();
-    } catch (error) {
-      /* Missing files (file:// previews, partial builds) leave nulls so screens fall back to sample data. */
-      return null;
+  function stampText(original) {
+    if (original.trim() === SAMPLE_STAMP) {
+      const origin = App.state.origin === "live" ? "live" : "prebuilt";
+      const suffix = App.state.fellBack ? " (live analysis unavailable)" : "";
+      return "Fictional persona · " + origin + " analysis" + suffix;
     }
+    return original.replace(SAMPLE_PHRASE, REAL_PHRASE);
   }
 
-  function firstReportFile(index) {
-    if (Array.isArray(index)) {
-      const entry = index.find(item => item && typeof item.file === "string" && item.file);
-      if (entry) return entry.file;
-    }
-    return FALLBACK_REPORT;
+  function updateChrome() {
+    const hasData = Boolean(App.state && App.state.report);
+    document.querySelectorAll("[data-mode-stamp]").forEach(element => {
+      if (element.dataset.stampOriginal === undefined) element.dataset.stampOriginal = element.textContent;
+      element.textContent = hasData ? stampText(element.dataset.stampOriginal) : element.dataset.stampOriginal;
+    });
+    const chip = document.querySelector(".user-chip span");
+    const person = App.state.personas.find(item => item.id === App.state.persona);
+    if (chip && person) chip.textContent = person.name;
+  }
+
+  /* ---------- data and state ---------- */
+
+  function applyState(next) {
+    Object.assign(App.state, next);
+    App.data = {
+      index: App.source.staticIndex(),
+      report: App.state.report,
+      universe: App.state.universe,
+      whatif: App.state.whatif
+    };
+  }
+
+  function firstEntryFile(persona) {
+    return persona && persona.entries.length ? persona.entries[0].file : null;
+  }
+
+  /* Loads report, universe and what-if for one persona without rendering. Throws on a
+     report failure; universe and what-if may be null (screens fall back to sample data). */
+  async function loadPersona(personaId, file, rerun) {
+    const person = App.state.personas.find(item => item.id === personaId);
+    const entryFile = file || firstEntryFile(person);
+    const [report, universe, whatif] = await Promise.all([
+      rerun ? App.source.rerun(personaId, entryFile) : App.source.report(personaId, entryFile),
+      App.source.universe(personaId),
+      App.source.whatif(personaId)
+    ]);
+    applyState({
+      persona: personaId, entryFile, report, universe, whatif, selection: [],
+      origin: App.source.mode, fellBack: App.source.usedFallback()
+    });
+  }
+
+  async function setPersona(personaId, file) {
+    await loadPersona(personaId, file, false);
+    render();
+  }
+
+  function setReport(report, origin) {
+    applyState({
+      report,
+      origin: origin || App.source.mode,
+      fellBack: origin ? false : App.source.usedFallback()
+    });
+    render();
+  }
+
+  function setSelection(tickers) {
+    App.state.selection = Array.isArray(tickers) ? tickers.slice() : [];
+    render();
+  }
+
+  async function rerunAnalysis() {
+    const report = await App.source.rerun(App.state.persona, App.state.entryFile);
+    setReport(report);
+    return report;
   }
 
   async function loadData() {
-    const results = await Promise.allSettled([
-      getJson(REPORT_DIR + "index.json"),
-      getJson(REPORT_DIR + "universe.json"),
-      getJson(REPORT_DIR + "whatif.json")
-    ]);
-    const settled = result => (result.status === "fulfilled" ? result.value : null);
-    const index = settled(results[0]);
-    const universe = settled(results[1]);
-    const whatif = settled(results[2]);
-    const report = await getJson(REPORT_DIR + firstReportFile(index));
-    App.data = {index, report, universe, whatif};
+    await App.source.init();
+    const personas = await App.source.personas();
+    App.state.personas = personas;
+    if (personas.length) {
+      try {
+        await loadPersona(personas[0].id, null, false);
+      } catch (error) {
+        console.error("[app] could not load the first persona", error);
+      }
+    }
+    if (!App.data) applyState({});
     render();
     return App.data;
   }
@@ -345,6 +410,9 @@
 
   const App = window.App = {
     data: null,
+    state: {persona: null, entryFile: null, report: null, universe: null, whatif: null, selection: [],
+      personas: [], origin: null, fellBack: false},
+    source: null,
     route: DEFAULT_ROUTE,
     renderers: {},
     navSpec: {},
@@ -368,6 +436,11 @@
     factsHtml,
     segmentsHtml,
     go,
+    routeParams,
+    setPersona,
+    setReport,
+    setSelection,
+    rerunAnalysis,
     setNav,
     reload: loadData
   };
@@ -380,5 +453,9 @@
     window.scrollTo(0, 0);
   });
   render();
-  loadData();
+  if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", loadData);
+  } else {
+    loadData();
+  }
 })();

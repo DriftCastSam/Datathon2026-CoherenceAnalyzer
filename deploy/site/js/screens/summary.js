@@ -1,7 +1,7 @@
 (() => {
   "use strict";
 
-  const REPORT_DIR = "reports/";
+  const OPTION_SEPARATOR = "|";
   const CAD_SIGN = "$";
   const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const PALETTE = ["var(--navy)", "var(--alloc-steel)", "var(--brand)", "var(--alloc-sky)", "var(--blue)", "var(--alloc-grey)"];
@@ -42,9 +42,6 @@
     {label: "Constraints", href: "#/constraints", finding: "One stock holds 22% of the portfolio; the limit is 10%."},
     {label: "Preferences", href: "#/preferences", finding: "Bitcoin is held, and one stock is a recent, highly publicized name."}
   ];
-
-  let activeFile = null;
-  let lastReport = null;
 
   /* ---------- small helpers ---------- */
 
@@ -400,31 +397,56 @@
 
   /* ---------- persona select ---------- */
 
-  function indexEntries(index) {
-    return Array.isArray(index) ? index.filter(entry => entry && typeof entry.file === "string" && entry.file) : [];
+  function pickerOptions(personas) {
+    const options = [];
+    for (const person of personas) {
+      if (!person.entries.length) {
+        options.push({value: person.id + OPTION_SEPARATOR, text: person.name});
+        continue;
+      }
+      for (const entry of person.entries) {
+        const text = person.entries.length > 1 ? person.name + " · " + entry.label : person.name;
+        options.push({value: person.id + OPTION_SEPARATOR + entry.file, text});
+      }
+    }
+    return options;
   }
 
-  /* Only select a value the option list actually has; otherwise the select would go blank. */
-  function setSelectValue(select, value) {
-    if (!select || !value) return;
-    if (Array.prototype.some.call(select.options, option => option.value === value)) select.value = value;
+  function selectedValue() {
+    const state = App.state;
+    return (state.persona || "") + OPTION_SEPARATOR + (state.entryFile || "");
   }
 
-  async function loadReport(file, select) {
-    if (!file) return;
+  function showError(screen, message) {
+    let box = screen.querySelector("[data-summary-error]");
+    if (!message) {
+      if (box) box.remove();
+      return;
+    }
+    if (!box) {
+      box = document.createElement("p");
+      box.className = "t-small";
+      box.setAttribute("data-summary-error", "");
+      box.setAttribute("role", "alert");
+      screen.querySelector(".sum__title-row").after(box);
+    }
+    box.textContent = message;
+  }
+
+  async function switchPersona(value, select, screen) {
+    const at = value.indexOf(OPTION_SEPARATOR);
+    const personaId = value.slice(0, at);
+    const file = value.slice(at + 1) || null;
+    select.disabled = true;
     try {
-      const response = await fetch(REPORT_DIR + file, {cache: "no-store"});
-      if (!response.ok) throw new Error("HTTP " + response.status + " for " + file);
-      const report = await response.json();
-      const data = App.data || {index: null, report: null, universe: null, whatif: null};
-      data.report = report;
-      App.data = data;
-      activeFile = file;
-      lastReport = report;
-      App.go("#/summary");
+      await App.setPersona(personaId, file);
+      showError(screen, "");
     } catch (error) {
-      console.warn("[summary] could not load " + file, error);
-      setSelectValue(select, activeFile);
+      console.error("[summary] could not load persona " + personaId, error);
+      showError(screen, "Could not load this persona: " + error.message);
+      select.value = selectedValue();
+    } finally {
+      select.disabled = false;
     }
   }
 
@@ -443,27 +465,13 @@
     };
     App._summary.setMenuState(false);
 
-    const entries = indexEntries(data.index);
     const select = screen.querySelector("[data-persona]");
-    select.innerHTML = entries.length
-      ? entries.map(entry => '<option value="' + App.esc(entry.file) + '">Persona: ' + App.esc(entry.label || entry.file) + '</option>').join("")
+    const options = pickerOptions(App.state.personas);
+    select.innerHTML = options.length
+      ? options.map(option => '<option value="' + App.esc(option.value) + '">Persona: ' + App.esc(option.text) + '</option>').join("")
       : '<option value="">Persona: ' + App.esc(findPersona(report)) + '</option>';
-
-    /* Keep the persona the user picked. Re-running the analysis reloads the index's first
-       report, so re-fetch the chosen file when it is still listed; fall back to the first
-       entry only when it has disappeared from the index. */
-    const chosen = entries.some(entry => entry.file === activeFile)
-      ? activeFile
-      : (entries.length ? entries[0].file : null);
-    if (report !== lastReport) {
-      lastReport = report;
-      activeFile = chosen;
-      if (activeFile && entries.length && activeFile !== entries[0].file) loadReport(activeFile, select);
-    } else if (!activeFile) {
-      activeFile = chosen;
-    }
-    setSelectValue(select, activeFile);
-    select.onchange = event => { loadReport(event.target.value, event.target); };
+    if (options.some(option => option.value === selectedValue())) select.value = selectedValue();
+    select.onchange = event => { switchPersona(event.target.value, event.target, screen); };
 
     screen.querySelector("[data-run-at]").textContent = fmtAsOf(
       ctx.site && typeof ctx.site.as_of === "string" && ctx.site.as_of ? ctx.site.as_of : SAMPLE.asOf
