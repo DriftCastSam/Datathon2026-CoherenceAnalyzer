@@ -32,6 +32,7 @@
     "tests/llm/test_explain.py": "06e06df10a8add30eeb0ca90c8b2d953146b9684ed724d956986d0460a9eaf99",
     "tests/llm/test_gate.py": "bda0a80906c40a42d1c96360ea5544934341a83919ba5afbfa1f68d4cfc849a7",
     "tests/llm/test_gate_vocabulary.py": "48b4330532c5d42f527908c65afa968a9bd511b780f698c363d26b5fd96ad436",
+    "tests/llm/test_gate_warn_enabled.py": "58c8b974d652ef312cf3f8c4aaa109dea35101cca10389307bb7756d3a7ed999",
     "tests/llm/test_guardrail.py": "897a69ab8d3950da028d98ae8f81d51922bc14068936443338c9a0588408e322",
     "tests/llm/test_numcheck.py": "d457be1cdc55e81734d3e56b22b300c219eec878d796c918ada62e171cfc9d8a",
     "tests/llm/test_question_rubric.py": "9277917aff58174588b00874f46f465c156a71226e2042329bf78a4f874202da",
