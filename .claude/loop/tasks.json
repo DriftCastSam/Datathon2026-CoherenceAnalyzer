@@ -864,6 +864,29 @@
     "README.md"
    ],
    "notes": "Audit gaps: (1) SPEC §7.4 S4 = 'Unapproved or non-checkable parsed values rules' and line ~313 says approved rules of kinds other than exclude_activity / max_theme_weight 'stay soft reminders (S4)', but soft.s4 only emits for unapproved rules, so an approved prefer_attribute, avoid_attribute or other rule gets no reminder. Required: S4 emits an info reminder (\"you wrote: '<quote>'\" form, quote from the rule) for every unapproved rule and for every approved rule that is not promoted into limits; approved promoted rules get none; still info only, never in the verdict. (2) explain.build_payload and explain.template_explain raise NotImplementedError and nothing calls them (D5 replaced them with section facts and template_section): delete them, after grepping that no code or test imports them; if a frozen test imports one, keep it and say so in README instead. Do not edit hard.py, gate.py or extractors.py (other lanes). These P3 tasks run IN PARALLEL in separate worktrees: edit only the files your task owns, plus README.md and new test files. No network, no pip install, no real AWS calls in code paths the tests run. Never write the activity-tags meta CSV (humans only, CLAUDE.md). The engine golden test must stay green. D10 (describe, never prescribe) applies to every user-facing string. Do not change frozen tests; if one contradicts the spec write .claude/loop/BLOCKED.md naming the test and the spec line."
+  },
+  {
+   "id": "P3.FREETEXT",
+   "title": "Intake answers are events; free-text answers go through N2 / N3 and the gate (Flow A)",
+   "spec": [
+    "docs/spec-factors.md §20.6",
+    "§3.4",
+    "§4 Flow A",
+    "§6.2 N2 N3",
+    "§11",
+    "§12 API",
+    "docs/spec-decisions.md D7",
+    "§1 inv. 1, 2, 3"
+   ],
+   "tests": [
+    "tests/flows/test_intake_events.py"
+   ],
+   "code": [
+    "coherence_analyzer/intake.py",
+    "coherence_analyzer/api.py (intake routes only)",
+    "README.md"
+   ],
+   "notes": "Gap: §20.6 says 'The answer is an event; free-text answers go through the existing N2/N3 extractors and the gate (§11)'. Today POST /profiles/{id}/intake/answer calls intake.answer, which writes the value at the path with no event and no extractor; /intake/skip likewise appends nothing. Required: (1) every intake answer and skip appends one event to the working copy's events.jsonl (reuse the existing profile_edit event shape and the Flow A event machinery P3.FLOWA added in api.py / pipeline.refresh: path, old, new, source `intake`; server-assigned event id), so the audit trail shows it; (2) a free-text answer (a string for a path whose value is free text, at least values.notes) goes through Flow A: N3 values_parser through the gate for notes (prompt values_parser.v2 after P3.GATE; use the recorded persona notes so the mock cache hits), N2 question_rubric for a question-type answer if §6.2 / §20.6 make one an intake answer; the value written is the gated result, never raw LLM output; a gate rejection keeps the previous value and the response says why; (3) structured answers keep today's behaviour (validated value, no LLM); (4) limits only from rule: fields and user-declared values (inv. 1). Read how P3.FLOWA implemented post_event and pipeline.refresh first and reuse them; do not edit pipeline.py. Edit only the files your task owns (in api.py only the intake routes and helpers they alone use), plus README.md and new test files. No network, no pip install, no real AWS calls in code paths the tests run. Never write the activity-tags meta CSV (humans only, CLAUDE.md). The engine golden test must stay green. D10 (describe, never prescribe) applies to every user-facing string. Do not change frozen tests; if one contradicts the spec write .claude/loop/BLOCKED.md naming the test and the spec line."
   }
  ]
 }
