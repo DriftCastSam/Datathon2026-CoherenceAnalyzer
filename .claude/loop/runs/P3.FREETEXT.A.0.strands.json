@@ -1,0 +1,67 @@
+{
+  "duration_s": 221.4,
+  "guard_cancellations": [
+    {
+      "reason": "'def' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'def' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'^def' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'post_event' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'^@app' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'app.(get' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'6.2' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'cut' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'',' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'ps={n:' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'\"primary\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'^import\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'passed' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    }
+  ],
+  "is_error": false,
+  "model_id": "us.anthropic.claude-sonnet-5-5",
+  "num_turns": 49,
+  "result": "o answers on one path give ids 0008 and 0009, and the second event's `old` equals the first's `new` (\u00a73.4).\n- `test_event_fields_are_server_assigned_not_client_supplied` (4 cases): A body with `event_id`, `ts`, `source` or `type` gets a 422, and no event is appended and the profile is unchanged (\u00a712).\n- `test_structured_answer_is_validated_stored_and_never_calls_an_llm` (5 cases): Bool, number, string and list answers are stored as plain values with an event and no `call_tool` or gate call. `employer_sector` is a declared string, not N3 input (\u00a720.6, \u00a76.2 N3).\n- `test_answer_event_is_in_the_log_the_pipeline_reads`: The intake event is in `events.jsonl`, so a later Flow A audit lists it in `events_considered` (\u00a74, \u00a710).\n- `test_declared_risk_answer_rebuilds_limits_from_rule_and_declared_fields_only`: After `risk.declared` is answered, `risk.effective` follows it and limits equal `build_limits(profile)`. No `limits_trace` entry depends on an `llm:` field (\u00a71 inv. 1/2, \u00a74 A5). I read the task as requiring a refresh here and marked it `SPEC-AMBIGUITY`.\n- `test_skip_appends_one_event_whose_new_value_is_the_skip_marker`: A skip appends one event with `new == {\"value\": None, \"by\": \"user:skipped\"}`, and the path leaves `missing` (\u00a720.6).\n- `test_answer_after_skip_records_the_marker_as_old`: A later answer's `old` is the skip marker (\u00a73.4).\n- `test_skip_never_calls_an_llm`: A skip makes no LLM call (\u00a720.6).\n- `test_refused_answer_or_skip_appends_no_event_and_changes_nothing` (11 cases): Limits, `limits_trace`, `llm:` fields, `rule:` fields, a null answer and skipping `values.notes` are refused with 4xx. The log and profile stay byte-identical (\u00a71 inv. 1\u20134).\n- `test_notes_answer_appends_event_runs_n3_through_the_gate_and_stores_the_gated_result`: A `values.notes` answer calls N3 once with only the notes, and the real gate returns `accepted`. The stored `parsed_notes` equal the gate's returned field, are stamped `llm:values_parser`, have exact-substring quotes and start unapproved. The event is `ev_robert_0008` (\u00a720.6, D7, \u00a74 A2/A3, \u00a711).\n- `test_notes_answer_unapproved_rules_do_not_reach_limits`: Replacing Amira's notes drops her approved `max_theme_weight` limit. Limits equal `build_limits` and no trace entry depends on an `llm:` field (\u00a76.2 N3, \u00a71 inv. 1/2).\n- `test_gate_rejection_keeps_the_previous_parse_and_the_response_says_why`: An N3 output with an invented quote gets `rejected:evidence`. The previous `parsed_notes` stay, the invented quote is not in the profile, and the 200 response contains `rejected:evidence`. The event is still logged (\u00a71 inv. 4/5, \u00a711).\n- `test_unrecorded_notes_keep_the_previous_parse_and_the_response_says_why`: A mock cache miss keeps the previous parse. The response names `values_parser`, and the event is still appended (\u00a71 inv. 4, \u00a76.1).\n- `test_notes_answer_must_be_non_blank_text` (6 cases): An empty, blank or non-string notes answer is refused and nothing is logged (\u00a720.6).\n- `test_notes_answer_equal_to_the_current_notes_runs_no_n3`: Re-answering the same notes logs an event but makes no LLM call and leaves the parse unchanged (\u00a74 A2).\n- `test_theme_number_answer_is_an_event_without_llm_and_stays_out_of_limits_until_approved`: The theme `max_pct` answer is an event with `old: null`, uses no LLM, and the unapproved rule stays out of limits (D7, \u00a720.6).\n- `test_d10_intake_event_text_and_responses_describe_never_prescribe`: Event texts and responses contain no advice phrases (D10, \u00a71 inv. 7).\n- `test_intake_events_never_write_fixtures_or_the_activity_tags_csv`: `fixtures/` and `data/meta/activity_tags.csv` hash the same before and after (CLAUDE.md).\n\nTwo spec gaps I resolved with the stricter reading, each marked `SPEC-AMBIGUITY` in the file:\n- **Question-type intake answer:** \u00a76.2 and \u00a720.6 do not make N2 a question-type intake answer. `REQUIRED` has no question paths, so N2 is not tested here.\n- **Gate rejection:** I assert a 200 response that contains `rejected:evidence`, with the event still appended.\n",
+  "stop_reason": "end_turn",
+  "usage": {
+    "inputTokens": 2375376,
+    "outputTokens": 28917,
+    "totalTokens": 2404293
+  }
+}

@@ -1,0 +1,449 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="19" skipped="0" tests="41" time="1.036" timestamp="2026-11-15T01:47:59.694428+00:00" hostname="bomboclat-laptop"><testcase classname="tests.flows.test_intake_events" name="test_structured_answer_appends_one_profile_edit_event_with_source_intake" time="0.012"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">client = &lt;starlette.testclient.TestClient object at 0x70fdea536900&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-468/test_structured_answer_appends0/store')
+
+    def test_structured_answer_appends_one_profile_edit_event_with_source_intake(client, store_dir):
+        # §20.6 "The answer is an event" + §3.4 profile_edit {path, old, new}: one event per answer, appended to the
+        # working copy's events.jsonl, server-assigned id (next after ev_robert_0007), source `intake`.
+        before, log = _start(client, ROBERT, store_dir)
+        assert [e["event_id"] for e in log][-1] == "ev_robert_0007"
+        path = "preferences.prefers_dividends"
+        assert before["preferences"]["prefers_dividends"] is True
+        _ok_answer(client, ROBERT, path, False)
+&gt;       (ev,) = _new_events(store_dir, ROBERT, log)
+        ^^^^^
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-freetext/tests/flows/test_intake_events.py:182: ValueError</failure></testcase><testcase classname="tests.flows.test_intake_events" name="test_each_answer_gets_its_own_sequential_event_and_chains_old_to_new" time="0.014"><failure message="ValueError: not enough values to unpack (expected 2, got 0)">client = &lt;starlette.testclient.TestClient object at 0x70fdea3c3b10&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-468/test_each_answer_gets_its_own_0/store')
+
+    def test_each_answer_gets_its_own_sequential_event_and_chains_old_to_new(client, store_dir):
+        # §3.4: old is the value the user saw. Two answers on one path -&gt; two events, ids ev_..._0008 and _0009, the
+        # second event's `old` equals the first event's `new`; ids are server-assigned, never repeated.
+        _, log = _start(client, ROBERT, store_dir)
+        path = "risk.max_acceptable_drawdown_pct"
+        _ok_answer(client, ROBERT, path, -20)
+        _ok_answer(client, ROBERT, path, -8)
+&gt;       first, second = _new_events(store_dir, ROBERT, log)
+        ^^^^^^^^^^^^^
+E       ValueError: not enough values to unpack (expected 2, got 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-freetext/tests/flows/test_intake_events.py:195: ValueError</failure></testcase><testcase classname="tests.flows.test_intake_events" name="test_event_fields_are_server_assigned_not_client_supplied[extra0]" time="0.008" /><testcase classname="tests.flows.test_intake_events" name="test_event_fields_are_server_assigned_not_client_supplied[extra1]" time="0.008" /><testcase classname="tests.flows.test_intake_events" name="test_event_fields_are_server_assigned_not_client_supplied[extra2]" time="0.008" /><testcase classname="tests.flows.test_intake_events" name="test_event_fields_are_server_assigned_not_client_supplied[extra3]" time="0.007" /><testcase classname="tests.flows.test_intake_events" name="test_structured_answer_is_validated_stored_and_never_calls_an_llm[preferences.prefers_dividends-True-False]" time="0.011"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">client = &lt;starlette.testclient.TestClient object at 0x70fdea417240&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-468/test_structured_answer_is_vali0/store')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x70fde9b1e450&gt;
+path = 'preferences.prefers_dividends', old = True, new = False
+
+    @pytest.mark.parametrize("path,old,new", [
+        ("preferences.prefers_dividends", True, False),            # bool
+        ("risk.max_acceptable_drawdown_pct", -12, -20),            # number
+        ("situation.monthly_expenses", 6500, 7000),                # number
+        ("identity.employer_sector", "Health Care", "Energy"),     # a plain string that is not free text for N3
+        ("preferences.asset_types_refused", ["crypto", "options", "leveraged_etf", "margin"], ["crypto"]),   # list
+    ])
+    def test_structured_answer_is_validated_stored_and_never_calls_an_llm(client, store_dir, monkeypatch, path, old, new):
+        # task (3): structured answers keep today's behaviour: the validated value at the path, no LLM, no N3/N2/N1.
+        # Only `values.notes` is free text for N3 (§6.2 N3 input = values.notes); a string like employer_sector is a
+        # declared value.
+        _, log = _start(client, ROBERT, store_dir)
+        llm_nodes = _no_llm(monkeypatch)
+        gate_calls = _spy_gate(monkeypatch)
+        _ok_answer(client, ROBERT, path, new)
+        node = _profile(client, ROBERT)
+        for part in path.split("."):
+            node = node[part]
+        assert node == new and not isinstance(node, dict)               # plain declared value (inv. 1)
+&gt;       (ev,) = _new_events(store_dir, ROBERT, log)
+        ^^^^^
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-freetext/tests/flows/test_intake_events.py:232: ValueError</failure></testcase><testcase classname="tests.flows.test_intake_events" name="test_structured_answer_is_validated_stored_and_never_calls_an_llm[risk.max_acceptable_drawdown_pct--12--20]" time="0.014"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">client = &lt;starlette.testclient.TestClient object at 0x70fdea416690&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-468/test_structured_answer_is_vali1/store')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x70fdea7906e0&gt;
+path = 'risk.max_acceptable_drawdown_pct', old = -12, new = -20
+
+    @pytest.mark.parametrize("path,old,new", [
+        ("preferences.prefers_dividends", True, False),            # bool
+        ("risk.max_acceptable_drawdown_pct", -12, -20),            # number
+        ("situation.monthly_expenses", 6500, 7000),                # number
+        ("identity.employer_sector", "Health Care", "Energy"),     # a plain string that is not free text for N3
+        ("preferences.asset_types_refused", ["crypto", "options", "leveraged_etf", "margin"], ["crypto"]),   # list
+    ])
+    def test_structured_answer_is_validated_stored_and_never_calls_an_llm(client, store_dir, monkeypatch, path, old, new):
+        # task (3): structured answers keep today's behaviour: the validated value at the path, no LLM, no N3/N2/N1.
+        # Only `values.notes` is free text for N3 (§6.2 N3 input = values.notes); a string like employer_sector is a
+        # declared value.
+        _, log = _start(client, ROBERT, store_dir)
+        llm_nodes = _no_llm(monkeypatch)
+        gate_calls = _spy_gate(monkeypatch)
+        _ok_answer(client, ROBERT, path, new)
+        node = _profile(client, ROBERT)
+        for part in path.split("."):
+            node = node[part]
+        assert node == new and not isinstance(node, dict)               # plain declared value (inv. 1)
+&gt;       (ev,) = _new_events(store_dir, ROBERT, log)
+        ^^^^^
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-freetext/tests/flows/test_intake_events.py:232: ValueError</failure></testcase><testcase classname="tests.flows.test_intake_events" name="test_structured_answer_is_validated_stored_and_never_calls_an_llm[situation.monthly_expenses-6500-7000]" time="0.013"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">client = &lt;starlette.testclient.TestClient object at 0x70fdea4157b0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-468/test_structured_answer_is_vali2/store')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x70fde9b8a120&gt;
+path = 'situation.monthly_expenses', old = 6500, new = 7000
+
+    @pytest.mark.parametrize("path,old,new", [
+        ("preferences.prefers_dividends", True, False),            # bool
+        ("risk.max_acceptable_drawdown_pct", -12, -20),            # number
+        ("situation.monthly_expenses", 6500, 7000),                # number
+        ("identity.employer_sector", "Health Care", "Energy"),     # a plain string that is not free text for N3
+        ("preferences.asset_types_refused", ["crypto", "options", "leveraged_etf", "margin"], ["crypto"]),   # list
+    ])
+    def test_structured_answer_is_validated_stored_and_never_calls_an_llm(client, store_dir, monkeypatch, path, old, new):
+        # task (3): structured answers keep today's behaviour: the validated value at the path, no LLM, no N3/N2/N1.
+        # Only `values.notes` is free text for N3 (§6.2 N3 input = values.notes); a string like employer_sector is a
+        # declared value.
+        _, log = _start(client, ROBERT, store_dir)
+        llm_nodes = _no_llm(monkeypatch)
+        gate_calls = _spy_gate(monkeypatch)
+        _ok_answer(client, ROBERT, path, new)
+        node = _profile(client, ROBERT)
+        for part in path.split("."):
+            node = node[part]
+        assert node == new and not isinstance(node, dict)               # plain declared value (inv. 1)
+&gt;       (ev,) = _new_events(store_dir, ROBERT, log)
+        ^^^^^
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-freetext/tests/flows/test_intake_events.py:232: ValueError</failure></testcase><testcase classname="tests.flows.test_intake_events" name="test_structured_answer_is_validated_stored_and_never_calls_an_llm[identity.employer_sector-Health Care-Energy]" time="0.012"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">client = &lt;starlette.testclient.TestClient object at 0x70fdea415ae0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-468/test_structured_answer_is_vali3/store')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x70fdeaa5fcb0&gt;
+path = 'identity.employer_sector', old = 'Health Care', new = 'Energy'
+
+    @pytest.mark.parametrize("path,old,new", [
+        ("preferences.prefers_dividends", True, False),            # bool
+        ("risk.max_acceptable_drawdown_pct", -12, -20),            # number
+        ("situation.monthly_expenses", 6500, 7000),                # number
+        ("identity.employer_sector", "Health Care", "Energy"),     # a plain string that is not free text for N3
+        ("preferences.asset_types_refused", ["crypto", "options", "leveraged_etf", "margin"], ["crypto"]),   # list
+    ])
+    def test_structured_answer_is_validated_stored_and_never_calls_an_llm(client, store_dir, monkeypatch, path, old, new):
+        # task (3): structured answers keep today's behaviour: the validated value at the path, no LLM, no N3/N2/N1.
+        # Only `values.notes` is free text for N3 (§6.2 N3 input = values.notes); a string like employer_sector is a
+        # declared value.
+        _, log = _start(client, ROBERT, store_dir)
+        llm_nodes = _no_llm(monkeypatch)
+        gate_calls = _spy_gate(monkeypatch)
+        _ok_answer(client, ROBERT, path, new)
+        node = _profile(client, ROBERT)
+        for part in path.split("."):
+            node = node[part]
+        assert node == new and not isinstance(node, dict)               # plain declared value (inv. 1)
+&gt;       (ev,) = _new_events(store_dir, ROBERT, log)
+        ^^^^^
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-freetext/tests/flows/test_intake_events.py:232: ValueError</failure></testcase><testcase classname="tests.flows.test_intake_events" name="test_structured_answer_is_validated_stored_and_never_calls_an_llm[preferences.asset_types_refused-old4-new4]" time="0.011"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">client = &lt;starlette.testclient.TestClient object at 0x70fdea414e20&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-468/test_structured_answer_is_vali4/store')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x70fdeaa5f3f0&gt;
+path = 'preferences.asset_types_refused'
+old = ['crypto', 'options', 'leveraged_etf', 'margin'], new = ['crypto']
+
+    @pytest.mark.parametrize("path,old,new", [
+        ("preferences.prefers_dividends", True, False),            # bool
+        ("risk.max_acceptable_drawdown_pct", -12, -20),            # number
+        ("situation.monthly_expenses", 6500, 7000),                # number
+        ("identity.employer_sector", "Health Care", "Energy"),     # a plain string that is not free text for N3
+        ("preferences.asset_types_refused", ["crypto", "options", "leveraged_etf", "margin"], ["crypto"]),   # list
+    ])
+    def test_structured_answer_is_validated_stored_and_never_calls_an_llm(client, store_dir, monkeypatch, path, old, new):
+        # task (3): structured answers keep today's behaviour: the validated value at the path, no LLM, no N3/N2/N1.
+        # Only `values.notes` is free text for N3 (§6.2 N3 input = values.notes); a string like employer_sector is a
+        # declared value.
+        _, log = _start(client, ROBERT, store_dir)
+        llm_nodes = _no_llm(monkeypatch)
+        gate_calls = _spy_gate(monkeypatch)
+        _ok_answer(client, ROBERT, path, new)
+        node = _profile(client, ROBERT)
+        for part in path.split("."):
+            node = node[part]
+        assert node == new and not isinstance(node, dict)               # plain declared value (inv. 1)
+&gt;       (ev,) = _new_events(store_dir, ROBERT, log)
+        ^^^^^
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-freetext/tests/flows/test_intake_events.py:232: ValueError</failure></testcase><testcase classname="tests.flows.test_intake_events" name="test_answer_event_is_in_the_log_the_pipeline_reads" time="0.016"><failure message="AssertionError: assert ['ev_robert_0..._robert_0008'] == ['ev_robert_0..._robert_0009']&#10;  &#10;  Right contains one more item: 'ev_robert_0009'&#10;  Use -v to get more diff">client = &lt;starlette.testclient.TestClient object at 0x70fdea417020&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-468/test_answer_event_is_in_the_lo0/store')
+
+    def test_answer_event_is_in_the_log_the_pipeline_reads(client, store_dir):
+        # §4 / §10: the audit trail of a later refresh lists the intake event, because it is in events.jsonl.
+        _, log = _start(client, ROBERT, store_dir)
+        _ok_answer(client, ROBERT, "preferences.home_bias_ok", False)
+        r = client.post(f"/profiles/{ROBERT}/events",
+                        json={"type": "note", "text": "Checking the log.", "ts": "2026-11-15T09:30:00-05:00",
+                              "source": "ui_chat", "payload": None})
+        assert r.status_code in (200, 201), r.text
+        ids = [e["event_id"] for e in _events(store_dir, ROBERT)]
+&gt;       assert ids == [e["event_id"] for e in log] + ["ev_robert_0008", "ev_robert_0009"]
+E       AssertionError: assert ['ev_robert_0..._robert_0008'] == ['ev_robert_0..._robert_0009']
+E         
+E         Right contains one more item: 'ev_robert_0009'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-freetext/tests/flows/test_intake_events.py:246: AssertionError</failure></testcase><testcase classname="tests.flows.test_intake_events" name="test_declared_risk_answer_rebuilds_limits_from_rule_and_declared_fields_only" time="0.012"><failure message="AssertionError: assert 'low_moderate' == 'low'&#10;  &#10;  - low&#10;  + low_moderate">client = &lt;starlette.testclient.TestClient object at 0x70fdea416ad0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-468/test_declared_risk_answer_rebu0/store')
+
+    def test_declared_risk_answer_rebuilds_limits_from_rule_and_declared_fields_only(client, store_dir):
+        # §1 inv. 1/2 + §4 A1/A5: an answer is a declared value; limits are (re)built by the rules module from rule:
+        # fields and declared values, so after the answer limits == build_limits(profile) and no limits_trace entry
+        # depends on an llm: field.
+        # SPEC-AMBIGUITY: §20.6 does not say a structured answer refreshes the profile; stricter reading (the task
+        # says to reuse the Flow A machinery) = it does, so risk.effective and limits follow the declared level.
+        before, _ = _start(client, ROBERT, store_dir)
+        assert before["risk"]["declared"] == "low_moderate"
+        _ok_answer(client, ROBERT, "risk.declared", "low")
+        after = _profile(client, ROBERT)
+        assert after["risk"]["declared"] == "low"
+&gt;       assert after["risk"]["effective"]["value"] == "low"
+E       AssertionError: assert 'low_moderate' == 'low'
+E         
+E         - low
+E         + low_moderate
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-freetext/tests/flows/test_intake_events.py:262: AssertionError</failure></testcase><testcase classname="tests.flows.test_intake_events" name="test_skip_appends_one_event_whose_new_value_is_the_skip_marker" time="0.009"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">client = &lt;starlette.testclient.TestClient object at 0x70fdea417ac0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-468/test_skip_appends_one_event_wh0/store')
+
+    def test_skip_appends_one_event_whose_new_value_is_the_skip_marker(client, store_dir):
+        # §20.6 skip -&gt; {"value": null, "by": "user:skipped"}; the audit trail shows the skip as a profile_edit event
+        # from source `intake` with new == the marker.
+        _, log = _start(client, ROBERT, store_dir)
+        path = "preferences.prefers_large_caps"
+        r = _skip(client, ROBERT, path)
+        assert r.status_code == 200, r.text
+&gt;       (ev,) = _new_events(store_dir, ROBERT, log)
+        ^^^^^
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-freetext/tests/flows/test_intake_events.py:281: ValueError</failure></testcase><testcase classname="tests.flows.test_intake_events" name="test_answer_after_skip_records_the_marker_as_old" time="0.015"><failure message="ValueError: not enough values to unpack (expected 2, got 0)">client = &lt;starlette.testclient.TestClient object at 0x70fdea4179b0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-468/test_answer_after_skip_records0/store')
+
+    def test_answer_after_skip_records_the_marker_as_old(client, store_dir):
+        # §3.4 old = what the user saw: after a skip the field shows the marker; the later answer's old is that marker.
+        _, log = _start(client, ROBERT, store_dir)
+        path = "preferences.prefers_large_caps"
+        assert _skip(client, ROBERT, path).status_code == 200
+        _ok_answer(client, ROBERT, path, False)
+&gt;       skip_ev, answer_ev = _new_events(store_dir, ROBERT, log)
+        ^^^^^^^^^^^^^^^^^^
+E       ValueError: not enough values to unpack (expected 2, got 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-freetext/tests/flows/test_intake_events.py:294: ValueError</failure></testcase><testcase classname="tests.flows.test_intake_events" name="test_skip_never_calls_an_llm" time="0.010" /><testcase classname="tests.flows.test_intake_events" name="test_refused_answer_or_skip_appends_no_event_and_changes_nothing[answer-limits.max_crypto_weight-0.9]" time="0.009" /><testcase classname="tests.flows.test_intake_events" name="test_refused_answer_or_skip_appends_no_event_and_changes_nothing[answer-limits_trace.max_fee_mer_pct-value1]" time="0.009" /><testcase classname="tests.flows.test_intake_events" name="test_refused_answer_or_skip_appends_no_event_and_changes_nothing[answer-risk.behavioural-low]" time="0.026" /><testcase classname="tests.flows.test_intake_events" name="test_refused_answer_or_skip_appends_no_event_and_changes_nothing[answer-knowledge.question_quality-1.0]" time="0.010" /><testcase classname="tests.flows.test_intake_events" name="test_refused_answer_or_skip_appends_no_event_and_changes_nothing[answer-values.parsed_notes-value4]" time="0.010" /><testcase classname="tests.flows.test_intake_events" name="test_refused_answer_or_skip_appends_no_event_and_changes_nothing[answer-values.parsed_notes.by-user:declared]" time="0.008" /><testcase classname="tests.flows.test_intake_events" name="test_refused_answer_or_skip_appends_no_event_and_changes_nothing[answer-risk.effective-high]" time="0.010" /><testcase classname="tests.flows.test_intake_events" name="test_refused_answer_or_skip_appends_no_event_and_changes_nothing[answer-preferences.prefers_dividends-None]" time="0.008" /><testcase classname="tests.flows.test_intake_events" name="test_refused_answer_or_skip_appends_no_event_and_changes_nothing[skip-limits-None]" time="0.009" /><testcase classname="tests.flows.test_intake_events" name="test_refused_answer_or_skip_appends_no_event_and_changes_nothing[skip-risk.behavioural-None]" time="0.010" /><testcase classname="tests.flows.test_intake_events" name="test_refused_answer_or_skip_appends_no_event_and_changes_nothing[skip-values.notes-None]" time="0.010" /><testcase classname="tests.flows.test_intake_events" name="test_notes_answer_appends_event_runs_n3_through_the_gate_and_stores_the_gated_result" time="0.006"><failure message="AssertionError: {&quot;detail&quot;:&quot;'values.notes' is not an intake path (limits, limits_trace and llm: fields can never be written through the API)&quot;}&#10;assert 422 == 200&#10; +  where 422 = &lt;Response [422 Unprocessable Content]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x70fde91c0c00&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-468/test_notes_answer_appends_even0/store')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x70fde9b4bd90&gt;
+
+    def test_notes_answer_appends_event_runs_n3_through_the_gate_and_stores_the_gated_result(client, store_dir,
+                                                                                             monkeypatch):
+        # §20.6 + D7 point 1 + §4 A2/A3: a free-text answer for values.notes is an event AND goes through N3
+        # (values_parser, recorded answer) and the gate: every quote is an exact substring of the new notes, the field is
+        # stamped llm:values_parser, every rule starts approved_by_user: false, and what is stored is exactly the
+        # gate's returned field, never the raw LLM output.
+        before, log = _start(client, ROBERT, store_dir)
+        assert before["values"]["notes"] == ROBERT_NOTES
+        gate_calls = _spy_gate(monkeypatch)
+        n3_calls: list[str] = []
+        real_n3 = extractors.values_parser_call
+    
+        def n3(notes):
+            n3_calls.append(notes)
+            return real_n3(notes)
+    
+        monkeypatch.setattr(extractors, "values_parser_call", n3)
+&gt;       _ok_answer(client, ROBERT, "values.notes", AMIRA_NOTES)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-freetext/tests/flows/test_intake_events.py:352: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x70fde91c0c00&gt;
+pid = 'persona-robert', path = 'values.notes'
+value = "I love AI and new tech but I don't want everything in tech."
+
+    def _ok_answer(client: TestClient, pid: str, path: str, value) -&gt; dict:
+        r = _answer(client, pid, path, value)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"'values.notes' is not an intake path (limits, limits_trace and llm: fields can never be written through the API)"}
+E       assert 422 == 200
+E        +  where 422 = &lt;Response [422 Unprocessable Content]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-freetext/tests/flows/test_intake_events.py:106: AssertionError</failure></testcase><testcase classname="tests.flows.test_intake_events" name="test_notes_answer_unapproved_rules_do_not_reach_limits" time="0.006"><failure message="AssertionError: {&quot;detail&quot;:&quot;'values.notes' is not an intake path (limits, limits_trace and llm: fields can never be written through the API)&quot;}&#10;assert 422 == 200&#10; +  where 422 = &lt;Response [422 Unprocessable Content]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x70fde91c0160&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-468/test_notes_answer_unapproved_r0/store')
+
+    def test_notes_answer_unapproved_rules_do_not_reach_limits(client, store_dir):
+        # §6.2 N3 + §1 inv. 1/2: only approved exclude_activity / max_theme_weight rules are promoted into limits. The
+        # fresh parse is unapproved, so Amira's approved tech_heavy limit disappears when her notes are replaced, limits
+        # equal build_limits(profile) and no limits_trace dependency is an llm: field.
+        # SPEC-AMBIGUITY: approval is per parsed rule; a re-parse of different notes carries no approval (as in the
+        # frozen Flow A test for a profile_edit of values.notes); stricter reading = no limit survives without one.
+        before, _ = _start(client, AMIRA, store_dir)
+        assert before["limits"]["max_theme_weight"] == {"tech_heavy": pytest.approx(0.5, abs=1e-9)}
+&gt;       _ok_answer(client, AMIRA, "values.notes", ROBERT_NOTES)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-freetext/tests/flows/test_intake_events.py:381: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x70fde91c0160&gt;
+pid = 'persona-amira', path = 'values.notes'
+value = 'I prefer companies I understand. No hype stocks unless I can explain the business.'
+
+    def _ok_answer(client: TestClient, pid: str, path: str, value) -&gt; dict:
+        r = _answer(client, pid, path, value)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"'values.notes' is not an intake path (limits, limits_trace and llm: fields can never be written through the API)"}
+E       assert 422 == 200
+E        +  where 422 = &lt;Response [422 Unprocessable Content]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-freetext/tests/flows/test_intake_events.py:106: AssertionError</failure></testcase><testcase classname="tests.flows.test_intake_events" name="test_gate_rejection_keeps_the_previous_parse_and_the_response_says_why" time="0.007"><failure message="AssertionError: {&quot;detail&quot;:&quot;'values.notes' is not an intake path (limits, limits_trace and llm: fields can never be written through the API)&quot;}&#10;assert 422 == 200&#10; +  where 422 = &lt;Response [422 Unprocessable Content]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x70fde91c0f30&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-468/test_gate_rejection_keeps_the_0/store')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x70fde91d47c0&gt;
+
+    def test_gate_rejection_keeps_the_previous_parse_and_the_response_says_why(client, store_dir, monkeypatch):
+        # §1 inv. 4/5 + §11 step 2: an N3 output whose quote is not a substring of the notes is `rejected:evidence`; the
+        # previous parsed_notes stay, the invented quote never reaches the profile, and the response gives the reason.
+        # The answer itself is still an event (the user did answer).
+        # SPEC-AMBIGUITY: 200 with the reason in the body (as Flow A does for a failed N3) rather than a 4xx; and the
+        # reason is the gate status string "rejected:evidence" (the §10 audit vocabulary).
+        before, log = _start(client, ROBERT, store_dir)
+        invented = "a quote the investor never wrote"
+    
+        def bad_n3(notes):
+            return {"output": {"rules": [{"rule_kind": "other", "params": {"note": "x"}, "applies_to": "all",
+                                          "quote": invented}]},
+                    "call_log": {"node": "values_parser", "model_id": "fixture:hand-written",
+                                 "prompt_version": extractors.prompt_version("values_parser"),
+                                 "input_hash": "sha256:" + "0" * 64, "cache_hit": True, "latency_ms": 0,
+                                 "tokens_in": 0, "tokens_out": 0}}
+    
+        monkeypatch.setattr(extractors, "values_parser_call", bad_n3)
+        gate_calls = _spy_gate(monkeypatch)
+        r = _answer(client, ROBERT, "values.notes", AMIRA_NOTES)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"'values.notes' is not an intake path (limits, limits_trace and llm: fields can never be written through the API)"}
+E       assert 422 == 200
+E        +  where 422 = &lt;Response [422 Unprocessable Content]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-freetext/tests/flows/test_intake_events.py:413: AssertionError</failure></testcase><testcase classname="tests.flows.test_intake_events" name="test_unrecorded_notes_keep_the_previous_parse_and_the_response_says_why" time="0.008"><failure message="AssertionError: {&quot;detail&quot;:&quot;'values.notes' is not an intake path (limits, limits_trace and llm: fields can never be written through the API)&quot;}&#10;assert 422 == 200&#10; +  where 422 = &lt;Response [422 Unprocessable Content]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x70fde91c1590&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-468/test_unrecorded_notes_keep_the0/store')
+
+    def test_unrecorded_notes_keep_the_previous_parse_and_the_response_says_why(client, store_dir):
+        # §1 inv. 4 + §6.1 (mock mode raises on a cache miss): no gated N3 output -&gt; the previous parsed_notes stay, the
+        # failure is reported, nothing is invented. The event is still appended.
+        # SPEC-AMBIGUITY: the response names the node (`values_parser`) that failed; 200 as in Flow A.
+        before, log = _start(client, ROBERT, store_dir)
+        r = _answer(client, ROBERT, "values.notes", UNRECORDED_NOTES)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"'values.notes' is not an intake path (limits, limits_trace and llm: fields can never be written through the API)"}
+E       assert 422 == 200
+E        +  where 422 = &lt;Response [422 Unprocessable Content]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-freetext/tests/flows/test_intake_events.py:430: AssertionError</failure></testcase><testcase classname="tests.flows.test_intake_events" name="test_notes_answer_must_be_non_blank_text[]" time="0.010" /><testcase classname="tests.flows.test_intake_events" name="test_notes_answer_must_be_non_blank_text[   ]" time="0.009" /><testcase classname="tests.flows.test_intake_events" name="test_notes_answer_must_be_non_blank_text[5]" time="0.010" /><testcase classname="tests.flows.test_intake_events" name="test_notes_answer_must_be_non_blank_text[bad3]" time="0.009" /><testcase classname="tests.flows.test_intake_events" name="test_notes_answer_must_be_non_blank_text[bad4]" time="0.011" /><testcase classname="tests.flows.test_intake_events" name="test_notes_answer_must_be_non_blank_text[True]" time="0.011" /><testcase classname="tests.flows.test_intake_events" name="test_notes_answer_equal_to_the_current_notes_runs_no_n3" time="0.008"><failure message="AssertionError: {&quot;detail&quot;:&quot;'values.notes' is not an intake path (limits, limits_trace and llm: fields can never be written through the API)&quot;}&#10;assert 422 == 200&#10; +  where 422 = &lt;Response [422 Unprocessable Content]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x70fde91c1150&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-468/test_notes_answer_equal_to_the0/store')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x70fde91d6b30&gt;
+
+    def test_notes_answer_equal_to_the_current_notes_runs_no_n3(client, store_dir, monkeypatch):
+        # §4 A2: N3 runs only if values.notes changed. The answer is still an event (every answer is), the profile's
+        # parsed rules (approved by the user in the fixture) are untouched and no LLM call is made.
+        before, log = _start(client, ROBERT, store_dir)
+        llm_nodes = _no_llm(monkeypatch)
+&gt;       _ok_answer(client, ROBERT, "values.notes", ROBERT_NOTES)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-freetext/tests/flows/test_intake_events.py:455: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x70fde91c1150&gt;
+pid = 'persona-robert', path = 'values.notes'
+value = 'I prefer companies I understand. No hype stocks unless I can explain the business.'
+
+    def _ok_answer(client: TestClient, pid: str, path: str, value) -&gt; dict:
+        r = _answer(client, pid, path, value)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"'values.notes' is not an intake path (limits, limits_trace and llm: fields can never be written through the API)"}
+E       assert 422 == 200
+E        +  where 422 = &lt;Response [422 Unprocessable Content]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-freetext/tests/flows/test_intake_events.py:106: AssertionError</failure></testcase><testcase classname="tests.flows.test_intake_events" name="test_theme_number_answer_is_an_event_without_llm_and_stays_out_of_limits_until_approved" time="0.015"><failure message="ValueError: not enough values to unpack (expected 1, got 0)">client = &lt;starlette.testclient.TestClient object at 0x70fde91c1e10&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-468/test_theme_number_answer_is_an0/store')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x70fde9111a20&gt;
+
+    def test_theme_number_answer_is_an_event_without_llm_and_stays_out_of_limits_until_approved(client, store_dir,
+                                                                                                monkeypatch):
+        # D7 point 1 + §20.6: the number of a parsed max_theme_weight rule is a user-declared value; the answer is an
+        # event, needs no LLM, and the unapproved rule is not promoted into limits (inv. 1/2; approval is a separate
+        # user action, POST .../parsed-rules/{i}/decision).
+        # SPEC-AMBIGUITY: the rule has no `max_pct` key before the answer; JSON has no "absent", so `old` is null.
+        assert client.get(f"/profiles/{ROBERT}").status_code == 200
+        wp = store_dir / "profiles" / ROBERT / "profile.json"
+        p = json.loads(wp.read_text(encoding="utf-8"))
+        p["values"]["parsed_notes"]["value"].append(
+            {"rule_kind": "max_theme_weight", "params": {"theme": "tech_heavy"}, "applies_to": "all",
+             "quote": NO_NUMBER_QUOTE, "approved_by_user": False})
+        wp.write_text(json.dumps(p, ensure_ascii=False, indent=2), encoding="utf-8")
+        path = f"{intake.PARSED_RULES_PATH}[2].params.{intake.THEME_NUMBER_KEY}"
+        assert path in intake.missing(_profile(client, ROBERT), "contraintes")
+        log = _events(store_dir, ROBERT)
+        llm_nodes = _no_llm(monkeypatch)
+        _ok_answer(client, ROBERT, path, 15)
+        after = _profile(client, ROBERT)
+        assert after["values"]["parsed_notes"]["value"][2]["params"]["max_pct"] == 15
+        assert after["values"]["parsed_notes"]["value"][2]["approved_by_user"] is False
+        assert "max_theme_weight" not in after["limits"]
+        assert llm_nodes == []
+&gt;       (ev,) = _new_events(store_dir, ROBERT, log)
+        ^^^^^
+E       ValueError: not enough values to unpack (expected 1, got 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-freetext/tests/flows/test_intake_events.py:488: ValueError</failure></testcase><testcase classname="tests.flows.test_intake_events" name="test_d10_intake_event_text_and_responses_describe_never_prescribe" time="0.018"><failure message="AssertionError: {&quot;detail&quot;:&quot;'values.notes' is not an intake path (limits, limits_trace and llm: fields can never be written through the API)&quot;}&#10;assert 422 == 200&#10; +  where 422 = &lt;Response [422 Unprocessable Content]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x70fde91c1d00&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-468/test_d10_intake_event_text_and0/store')
+
+    def test_d10_intake_event_text_and_responses_describe_never_prescribe(client, store_dir):
+        # D10 / §1 inv. 7: the event text and every response string describe what was recorded; none recommends a trade
+        # or a next step.
+        _, log = _start(client, ROBERT, store_dir)
+        bodies = [json.dumps(_ok_answer(client, ROBERT, "preferences.prefers_dividends", False)),
+                  _skip(client, ROBERT, "preferences.home_bias_ok").text,
+&gt;                 json.dumps(_ok_answer(client, ROBERT, "values.notes", AMIRA_NOTES))]
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-freetext/tests/flows/test_intake_events.py:500: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x70fde91c1d00&gt;
+pid = 'persona-robert', path = 'values.notes'
+value = "I love AI and new tech but I don't want everything in tech."
+
+    def _ok_answer(client: TestClient, pid: str, path: str, value) -&gt; dict:
+        r = _answer(client, pid, path, value)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"'values.notes' is not an intake path (limits, limits_trace and llm: fields can never be written through the API)"}
+E       assert 422 == 200
+E        +  where 422 = &lt;Response [422 Unprocessable Content]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-freetext/tests/flows/test_intake_events.py:106: AssertionError</failure></testcase><testcase classname="tests.flows.test_intake_events" name="test_intake_events_never_write_fixtures_or_the_activity_tags_csv" time="0.015"><failure message="AssertionError: {&quot;detail&quot;:&quot;'values.notes' is not an intake path (limits, limits_trace and llm: fields can never be written through the API)&quot;}&#10;assert 422 == 200&#10; +  where 422 = &lt;Response [422 Unprocessable Content]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x70fde91c2690&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-468/test_intake_events_never_write0/store')
+
+    def test_intake_events_never_write_fixtures_or_the_activity_tags_csv(client, store_dir):
+        # CLAUDE.md: fixtures/ is never written (the working copy is) and data/meta/activity_tags.csv is human-only.
+        _start(client, ROBERT, store_dir)
+        _ok_answer(client, ROBERT, "preferences.prefers_dividends", False)
+        assert _skip(client, ROBERT, "preferences.home_bias_ok").status_code == 200
+&gt;       _ok_answer(client, ROBERT, "values.notes", AMIRA_NOTES)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-freetext/tests/flows/test_intake_events.py:512: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x70fde91c2690&gt;
+pid = 'persona-robert', path = 'values.notes'
+value = "I love AI and new tech but I don't want everything in tech."
+
+    def _ok_answer(client: TestClient, pid: str, path: str, value) -&gt; dict:
+        r = _answer(client, pid, path, value)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"'values.notes' is not an intake path (limits, limits_trace and llm: fields can never be written through the API)"}
+E       assert 422 == 200
+E        +  where 422 = &lt;Response [422 Unprocessable Content]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-freetext/tests/flows/test_intake_events.py:106: AssertionError</failure></testcase></testsuite></testsuites>
