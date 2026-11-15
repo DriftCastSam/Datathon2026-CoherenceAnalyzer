@@ -196,8 +196,12 @@ def knowledge_score(quiz: float, declared_level: str, question_quality: float | 
 
 # ---------------------------------------------------------------- derive_all
 
-def derive_all(profile: dict, *, portfolio_value_cad: float, as_of: str) -> dict:
+def derive_all(profile: dict, *, portfolio_value_cad: float | None, as_of: str | None) -> dict:
     """Recompute every rule: field and return the updated profile (no mutation).
+
+    No portfolio yet (P5.NOPF): the caller passes `portfolio_value_cad=None, as_of=None` (D1: the reference date is
+    `portfolio.as_of`, never the clock). The effective horizon needs the date; capacity (hence effective risk) needs
+    the date and the value: those fields are null (`rule:` stamp kept). Everything else is derived as usual.
 
     A derived field whose input is missing (a skipped intake answer, `{value: null, by: user:skipped}`, or a derived
     input that is itself null) is `{value: null, by: rule:...}`: never a guessed default (§20.6, SPEC §7.1).
@@ -218,11 +222,10 @@ def derive_all(profile: dict, *, portfolio_value_cad: float, as_of: str) -> dict
     # a skipped list is unknown ("no withdrawal" is the user's answer []); a null list that was never skipped is empty
     withdrawals = None if is_skipped(wd_node) else list(_val(wd_node) or [])
     put("objectives.effective_horizon_years",
-        lambda h, w: effective_horizon_years(h, w, as_of), g("objectives.horizon_years"), withdrawals)
-    put("risk.capacity",
-        lambda eh, efm, stab, w: capacity(eh, efm, stab, w, portfolio_value_cad, as_of),
+        effective_horizon_years, g("objectives.horizon_years"), withdrawals, as_of)
+    put("risk.capacity", capacity,
         g("objectives.effective_horizon_years"), g("situation.emergency_fund_months"),
-        g("situation.income_stability"), withdrawals)
+        g("situation.income_stability"), withdrawals, portfolio_value_cad, as_of)
     declared = g("risk.declared")
     if declared is not None:
         idx(declared)  # validate the enum (raises ValueError)
@@ -232,7 +235,7 @@ def derive_all(profile: dict, *, portfolio_value_cad: float, as_of: str) -> dict
     return p
 
 
-def _derive_knowledge_score(p: dict, as_of: str) -> None:
+def _derive_knowledge_score(p: dict, as_of: str | None) -> None:
     k = p.get("knowledge")
     if not k or "quiz_score" not in k or "declared_level" not in k:
         return
@@ -249,7 +252,9 @@ def _derive_knowledge_score(p: dict, as_of: str) -> None:
 
     history = list(old.get("history", [])) if isinstance(old, dict) else []
     last = history[-1] if history else None
-    if last is None or last.get("date") != as_of or abs(float(last.get("value", 0)) - score) > 1e-9:
+    # no reference date yet (no portfolio): a history entry needs a date and the clock is never used, so none is added
+    if as_of is not None and (last is None or last.get("date") != as_of
+                              or abs(float(last.get("value", 0)) - score) > 1e-9):
         history.append({"date": as_of, "value": score})
     field = _field("knowledge.score", score, KNOWLEDGE_SCORE_CONFIDENCE)
     field["history"] = history

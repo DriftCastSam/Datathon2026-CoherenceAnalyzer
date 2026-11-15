@@ -97,7 +97,12 @@ def _resolve_portfolio(fixture_dir: Path, portfolio: str | Path | None) -> Path:
     return path
 
 
-def _load_portfolio(fixture_dir: Path, portfolio: str | Path | None, profile: dict, assets) -> dict:
+def _load_portfolio(fixture_dir: Path, portfolio: str | Path | None, profile: dict, assets, *,
+                    required: bool = True) -> dict | None:
+    """The profile's portfolio. `required=False` (Flow A only, P5.NOPF): a profile that has no default
+    `portfolio.json` yet returns None (an explicitly named missing file is still an error)."""
+    if not required and not portfolio and not (Path(fixture_dir) / DEFAULT_PORTFOLIO).exists():
+        return None
     path = _resolve_portfolio(fixture_dir, portfolio)
     pf = data.load_portfolio(path, assets)
     pid = profile["meta"]["profile_id"]
@@ -250,24 +255,28 @@ def profile_diff(old: dict, new: dict) -> list[dict]:
     return out
 
 
-def _refresh(profile_in: dict, pf: dict, events: list[dict], *, with_n1: bool = False,
+def _refresh(profile_in: dict, pf: dict | None, events: list[dict], *, with_n1: bool = False,
              baseline: dict | None = None) -> dict:
     """A1-A6 on an in-memory profile: N3 if the notes changed (gated), N2 per question when its flag is on (gated),
     N1 when `with_n1` (Flow B only, gated), derive, limits + trace, validate, version. Saves the new profile version
     only when a value changed. Flow A and C: rules and N3 by default, N2 opt-in (config.N2_QUESTION_RUBRIC); no N1 (D7).
     `baseline` (P3.FLOWA): the stored profile when `profile_in` already carries a declared edit (quiz score, a
-    profile_edit); the diff and the version are taken against it, so the edit itself shows in the diff."""
+    profile_edit); the diff and the version are taken against it, so the edit itself shows in the diff.
+    `pf` None (P5.NOPF, Flow A on a profile with no portfolio yet): no value and no reference date (D1), so what needs
+    them is null and traced; no N1 (it needs the date and belongs to Flow B)."""
     base = baseline if baseline is not None else profile_in
+    value_cad = pf["value_cad"] if pf is not None else None
+    as_of = pf["as_of"] if pf is not None else None
     p, calls, errors = _run_n3(profile_in, events)
     p, n2_calls, n2_errors = _run_n2(p, events)
     calls, errors = calls + n2_calls, errors + n2_errors
-    if with_n1:
-        p, n1_calls, n1_errors = _run_n1(p, events, pf["as_of"])      # D1: window anchored on portfolio.as_of
+    if with_n1 and as_of is not None:
+        p, n1_calls, n1_errors = _run_n1(p, events, as_of)      # D1: window anchored on portfolio.as_of
         calls, errors = calls + n1_calls, errors + n1_errors
     # N3's output is not an input of any rule, N2 only feeds knowledge.score and N1 only risk.behavioural (never
     # limits), so deriving once after them equals A1 + A4 of SPEC §4.
-    p = derive.derive_all(p, portfolio_value_cad=pf["value_cad"], as_of=pf["as_of"])
-    lim, trace = limits_mod.build_limits(p, pf["value_cad"])
+    p = derive.derive_all(p, portfolio_value_cad=value_cad, as_of=as_of)
+    lim, trace = limits_mod.build_limits(p, value_cad)
     p["limits"], p["limits_trace"] = lim, trace
     p = store.plain(p)      # plain JSON types (tuples -> lists)
     diff = profile_diff(base, p)
@@ -290,7 +299,7 @@ def _model_id(calls: list[dict]) -> str:
     return config.BEDROCK_MODEL_ID or bedrock.MOCK_MODEL_ID
 
 
-def _audit(*, run_id: str, flow: str, started_at: str, ended_at: str, profile_id: str, as_of: str, version_in: int,
+def _audit(*, run_id: str, flow: str, started_at: str, ended_at: str, profile_id: str, as_of: str | None, version_in: int,
            version_out: int, events: list[dict], calls: list[dict], errors: list[dict], diff: list[dict],
            engine_info: dict | None, verdict: str | None, explanation_mode: str | None,
            section_modes: dict | None) -> dict:
@@ -311,11 +320,12 @@ def refresh(fixture_dir: Path, *, upto_event_id: str | None = None, portfolio: s
     run_id = store.new_run_id()
     stored = _load_profile(fixture_dir)
     profile_in = stored if edited is None else edited
-    pf = _load_portfolio(fixture_dir, portfolio, profile_in, data.load_assets())
+    pf = _load_portfolio(fixture_dir, portfolio, profile_in, data.load_assets(), required=False)   # None: not set yet
     events = _events(fixture_dir, upto_event_id)
     res = _refresh(profile_in, pf, events, baseline=stored)
     audit = _audit(run_id=run_id, flow="A", started_at=started, ended_at=_now(),
-                   profile_id=profile_in["meta"]["profile_id"], as_of=pf["as_of"], version_in=res["version_in"],
+                   profile_id=profile_in["meta"]["profile_id"], as_of=pf["as_of"] if pf is not None else None,
+                   version_in=res["version_in"],
                    version_out=res["version_out"], events=events, calls=res["llm_calls"], errors=res["llm_errors"],
                    diff=res["diff"], engine_info=None, verdict=None, explanation_mode=None, section_modes=None)
     store.save_audit(audit)

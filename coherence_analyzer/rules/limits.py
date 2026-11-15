@@ -25,6 +25,8 @@ LIMITS_TABLE: dict[str, dict] = {
 }
 
 MAX_EMPLOYER_SECTOR_WEIGHT = 0.15
+NO_PORTFOLIO_VALUE = "portfolio.value_cad (not set)"
+NO_PORTFOLIO_INPUTS = "portfolio.value_cad, portfolio.as_of (not set)"
 LIMITS_NOTE = "Derived from the profile only. This is what the portfolio struct gets compared against."
 
 # Trace path for user-approved parsed rules. The llm: field `values.parsed_notes` itself is never a
@@ -102,7 +104,7 @@ def _skip_trace(profile: dict, trace: dict[str, list[str]]) -> tuple[dict[str, l
     return out, skipped
 
 
-def build_limits(profile: dict, portfolio_value_cad: float) -> tuple[dict, dict[str, list[str]]]:
+def build_limits(profile: dict, portfolio_value_cad: float | None) -> tuple[dict, dict[str, list[str]]]:
     """Return (limits, limits_trace). Only approved parsed rules are promoted.
 
     Reads `risk.effective` (rule:) and user-declared values only (invariant 2). Weights are fractions;
@@ -111,6 +113,10 @@ def build_limits(profile: dict, portfolio_value_cad: float) -> tuple[dict, dict[
     A limit whose input is skipped or null (`{value: null, by: user:skipped}`, docs/spec-factors.md §20.6) is
     None, never a default; `limits_trace` names the skipped input ("<path> (skipped)") and the checks that need
     the limit report `unknown`.
+
+    No portfolio value yet (`portfolio_value_cad=None`, P5.NOPF): `floor_at_horizon` is None and its trace says
+    "portfolio.value_cad (not set)"; when `risk.effective` is null too (it needs the portfolio value and date) every
+    table limit is None with a trace entry of the same kind. Nothing is defaulted.
     """
     level = _rule_value(profile, "risk", "effective")
     row = LIMITS_TABLE[level] if level is not None else None
@@ -161,7 +167,8 @@ def build_limits(profile: dict, portfolio_value_cad: float) -> tuple[dict, dict[
         "_note": LIMITS_NOTE,
         "by": "rule:limits_table[risk.effective] + goals + preferences",
         "vol_band_annual": list(row["vol_band"]) if row is not None else None,
-        "floor_at_horizon": round(portfolio_value_cad * row["floor_ratio"], 2) if row is not None else None,
+        "floor_at_horizon": (round(portfolio_value_cad * row["floor_ratio"], 2)
+                             if row is not None and portfolio_value_cad is not None else None),
         "max_drawdown_pct": max_dd,
         "min_fixed_income_weight": table("min_fixed_income"),
         "max_single_stock_weight": table("max_single_stock"),
@@ -177,6 +184,12 @@ def build_limits(profile: dict, portfolio_value_cad: float) -> tuple[dict, dict[
     if themes:
         limits["max_theme_weight"] = {k: themes[k] for k in sorted(themes)}
     trace, _ = _skip_trace(profile, build_trace())
+    if portfolio_value_cad is None:
+        trace["floor_at_horizon"] = [*trace["floor_at_horizon"], NO_PORTFOLIO_VALUE]
+        if row is None:       # risk.effective needs the portfolio value and date: the table limits wait for them
+            for name, inputs in LIMIT_INPUTS.items():
+                if name != "floor_at_horizon" and _TABLE[0] in inputs:
+                    trace[name] = [*trace[name], NO_PORTFOLIO_INPUTS]
     if themeless:
         trace["max_theme_weight"] = [*trace.get("max_theme_weight", []),
                                      f"values.parsed_notes (skipped: {themeless} approved max_theme_weight rule(s) "
