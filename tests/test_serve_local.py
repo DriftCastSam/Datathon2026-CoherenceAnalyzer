@@ -9,6 +9,8 @@ from fastapi.testclient import TestClient
 from deploy.serve_local import create_app
 
 INDEX_HTML = "<!doctype html><title>site</title><p>hello</p>"
+SITE_REVIEW_URL = "/site-api/profiles"
+EDITED_RISK = "high"
 PERSONA_IDS = {"persona-robert", "persona-amira", "persona-mateo"}
 
 
@@ -44,3 +46,30 @@ def test_api_lists_three_fixture_personas(client: TestClient) -> None:
 
 def test_unknown_static_path_returns_404(client: TestClient) -> None:
     assert client.get("/missing.html").status_code == 404
+
+
+def test_site_review_attaches_limits_and_profile_card(client: TestClient) -> None:
+    response = client.post(f"{SITE_REVIEW_URL}/persona-robert/review")
+
+    assert response.status_code == 200
+    site = response.json()["site"]
+    assert site["limits"]
+    assert site["profile_card"]["name"] == "Robert"
+    assert site["label"] == "Robert · live analysis"
+
+
+def test_site_review_reflects_edited_risk_answer(client: TestClient) -> None:
+    answer = client.post(
+        "/api/profiles/persona-robert/intake/answer",
+        json={"path": "risk.declared", "value": EDITED_RISK},
+    )
+    assert answer.status_code == 200
+
+    response = client.post(f"{SITE_REVIEW_URL}/persona-robert/review")
+
+    card = response.json()["site"]["profile_card"]
+    assert card["risk_declared"] == EDITED_RISK
+
+
+def test_site_review_unknown_profile_returns_404(client: TestClient) -> None:
+    assert client.post(f"{SITE_REVIEW_URL}/persona-nobody/review").status_code == 404

@@ -4,6 +4,7 @@
   /* Data source chosen once at boot: "live" when the local API answers `api/health`, else
      "static" (prebuilt JSON under reports/). All URLs are relative so one origin serves both. */
   const API_DIR = "api/";
+  const SITE_API_DIR = "site-api/";
   const REPORT_DIR = "reports/";
   const HEALTH_TIMEOUT_MS = 1500;
   const REQUEST_TIMEOUT_MS = 120000;
@@ -118,7 +119,7 @@
   }
 
   async function runLiveReview(personaId) {
-    const report = await post(API_DIR + "profiles/" + encodeURIComponent(personaId) + "/review");
+    const report = await post(SITE_API_DIR + "profiles/" + encodeURIComponent(personaId) + "/review");
     reportCache.set(personaId, report);
     return report;
   }

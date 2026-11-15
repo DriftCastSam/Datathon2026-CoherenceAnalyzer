@@ -16,6 +16,7 @@ import os
 import sys
 import tempfile
 from pathlib import Path
+from types import SimpleNamespace
 
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
@@ -26,14 +27,39 @@ import uvicorn  # noqa: E402
 from fastapi import FastAPI  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
 
+from coherence_analyzer import api  # noqa: E402
 from coherence_analyzer.api import app as api_app  # noqa: E402
+from deploy import build_site  # noqa: E402
 
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8000
 DEFAULT_SITE_DIR = ROOT / ".cache" / "site"
 API_MOUNT_PATH = "/api"
+SITE_API_PREFIX = "/site-api"
+PORTFOLIO_FILE = "portfolio.json"
+LIVE_LABEL_SUFFIX = " · live analysis"
 STORE_DIR_ENV = "COHERENCE_ANALYZER_STORE_DIR"
 STORE_DIR_PREFIX = "coherence-serve-"
+
+
+def live_review(profile_id: str) -> dict:
+    """Run the API review, then attach the display-only `site` block.
+
+    The block is computed by `build_site.site_extras` from the persona's
+    working copy, so edited intake answers change limits and the profile card.
+
+    Raises:
+        HTTPException: 404 for an unknown profile, 422 when the review rejects it.
+    """
+    report = api.post_review(profile_id)
+    work, fixture = api._workdir(profile_id)
+    name = build_site.load_persona(fixture.name).name
+    persona = SimpleNamespace(path=work, name=name)
+    report["site"] = {
+        **build_site.site_extras(persona, PORTFOLIO_FILE),
+        "label": f"{name}{LIVE_LABEL_SUFFIX}",
+    }
+    return report
 
 
 def create_app(site_dir: Path) -> FastAPI:
@@ -47,6 +73,9 @@ def create_app(site_dir: Path) -> FastAPI:
         The API mount is registered first so `/` never shadows it.
     """
     root_app = FastAPI(title="CoherenceAnalyzer local")
+    root_app.add_api_route(
+        f"{SITE_API_PREFIX}/profiles/{{profile_id}}/review", live_review, methods=["POST"]
+    )
     root_app.mount(API_MOUNT_PATH, api_app)
     root_app.mount("/", StaticFiles(directory=site_dir, html=True), name="site")
     return root_app
@@ -70,8 +99,6 @@ def main(argv: list[str] | None = None) -> None:
     """
     args = parse_args(argv)
     if not args.no_build:
-        from deploy import build_site
-
         build_site.build(args.site_dir)
     os.environ.setdefault(STORE_DIR_ENV, tempfile.mkdtemp(prefix=STORE_DIR_PREFIX))
     uvicorn.run(create_app(args.site_dir), host=args.host, port=args.port)
