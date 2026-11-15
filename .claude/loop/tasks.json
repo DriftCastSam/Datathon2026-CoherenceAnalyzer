@@ -638,7 +638,7 @@
     "§12 CLI"
    ],
    "tests": [
-    "tests/test_cli_disclaimer.py"
+    "tests/flows/test_cli_disclaimer.py"
    ],
    "code": [
     "coherence_analyzer/cli.py",
