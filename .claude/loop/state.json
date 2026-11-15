@@ -43,6 +43,6 @@
     "P4.DECISION": "impl",
     "P4.N4GATE": "impl",
     "P4.WARNEN": "impl",
-    "P5.DASH": "tests"
+    "P5.DASH": "impl"
   }
 }

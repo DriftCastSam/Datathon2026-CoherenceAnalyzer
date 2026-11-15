@@ -3,7 +3,8 @@
 
 A scenario is a set of inputs the user picks in the Simulation tab: the asset, the size (target weight, % of the
 portfolio) and the funding (pro rata from all holdings, or a specific holding). This script precomputes the grid of
-those inputs for each asset of the starter universe against Robert's current portfolio. Each scenario runs the same
+those inputs for each asset of the starter universe against the current portfolio of ONE profile directory (the
+`profile_dir` argument of `build`: profile.json, events.jsonl, portfolio.json; any persona seed or user). Each scenario runs the same
 code as a review: `intent.apply` -> `engine.analyse` -> hard + soft checks -> five factor sections (flow-B context:
 current vs proposed) -> the deterministic `explain.template_section` text. No LLM call.
 
@@ -26,7 +27,7 @@ from coherence_analyzer import data, engine, explain, factors, intent as intent_
 from coherence_analyzer import config  # noqa: E402
 from coherence_analyzer.coherence import hard, report as report_mod, soft  # noqa: E402
 
-FIXTURE = ROOT / "fixtures" / "robert"
+FIXTURES = ROOT / "fixtures"
 TARGETS = (5.0, 10.0)
 METRIC_KEYS = ("vol", "mdd", "p5_T", "p50_T", "p95_T", "loss_prob", "width")
 
@@ -45,11 +46,22 @@ def _shares(weights_pct: dict, assets) -> dict:
             "bonds": sum(w for t, w in weights_pct.items() if cls.get(t) == "etf_bond") / 100}
 
 
-def build(out: Path) -> dict:
+def default_profile_dir() -> Path:
+    """The profile directory used when `build` gets none: the first one under fixtures/, in name order."""
+    found = sorted(d for d in FIXTURES.iterdir() if (d / "profile.json").is_file() and (d / "portfolio.json").is_file())
+    if not found:
+        raise FileNotFoundError(f"no profile directory under {FIXTURES}")
+    return found[0]
+
+
+def build(out: Path, profile_dir: Path | None = None) -> dict:
+    """Write universe.json and whatif.json into `out` for the profile directory `profile_dir` (its profile.json,
+    events.jsonl and portfolio.json). Nothing is shared between two calls."""
+    fixture = Path(profile_dir) if profile_dir is not None else default_profile_dir()
     assets = data.load_assets()
-    profile_in = pipeline._load_profile(FIXTURE)
-    pf = pipeline._load_portfolio(FIXTURE, None, profile_in, assets)
-    profile = pipeline._refresh(profile_in, pf, pipeline._events(FIXTURE))["profile"]
+    profile_in = pipeline._load_profile(fixture)
+    pf = pipeline._load_portfolio(fixture, None, profile_in, assets)
+    profile = pipeline._refresh(profile_in, pf, pipeline._events(fixture))["profile"]
     horizon_m = int(round(float(_val(profile["objectives"]["horizon_years"])) * 12))
     market = engine.load_market(str(config.DATA_DIR))
     meta = {n: data.load_meta(n) for n in pipeline.META_NAMES}
