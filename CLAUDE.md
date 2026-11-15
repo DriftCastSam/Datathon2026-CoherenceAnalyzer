@@ -15,7 +15,9 @@ Then read `docs/spec-decisions.md`: team-approved resolutions of SPEC ambiguitie
 ## Commands
 ```
 pip install -r requirements.txt
-COHERENCE_ANALYZER_LLM=mock pytest -q
+COHERENCE_ANALYZER_LLM=mock pytest -q              # full suite (~5 min): before every commit and merge
+python scripts/quick_tests.py                       # while iterating: only tests the working-tree change can break
+python scripts/quick_tests.py --base loop/p0 --list # what a branch's changes would run; --heavy adds the site builds
 COHERENCE_ANALYZER_LLM=mock python -m coherence_analyzer.cli demo
 COHERENCE_ANALYZER_LLM=record python -m coherence_analyzer.cli demo   # needs AWS creds + BEDROCK_MODEL_ID
 python scripts/loop_lane.py run P2.X [-- <agent_loop args>]   # one build-loop lane (worktree + branch loop/p2.x)
