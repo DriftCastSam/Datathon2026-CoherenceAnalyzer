@@ -1,0 +1,67 @@
+{
+  "duration_s": 991.0,
+  "guard_cancellations": [
+    {
+      "reason": "'internal\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'values_parser\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'python' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'parsed_notes\\[\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'os.environ[COHERENCE_ANALYZER_STORE_DIR]=d' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'os.environ[COHERENCE_ANALYZER_STORE_DIR]=d' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'API_BASE\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'static' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'which' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'STORE\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'def' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "command substitution is not allowed; run the inner command on its own",
+      "tool": "shell"
+    },
+    {
+      "reason": "'^from\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    }
+  ],
+  "is_error": false,
+  "model_id": "us.anthropic.claude-sonnet-5-5",
+  "num_turns": 68,
+  "result": "ccepted `values_parser` call, and the flow C audit is retrievable by the report's run id (\u00a74 A6, \u00a710).\n- `test_every_llm_reading_of_a_correction_goes_through_the_gate`: both `values_parser` and `profile_consistency` outputs pass `gate.gate` (inv. 5, \u00a711).\n- `test_a_reading_that_cannot_be_used_keeps_the_previous_one_and_says_so[gate_rejection / no_usable_answer]`: a quote not in the notes, or a missing recorded answer, keeps the previous parsed rules and limits. The words are still saved, the review still runs, and `messages` says the previous reading is kept (\u00a711, D10).\n- `test_a_correction_on_an_n6_finding_reruns_n6_with_the_new_notes`: N6's payload carries the corrected notes and the new finding replaces the stale one. C1 stays and the limits don't move (\u00a720.9, inv. 2).\n- `test_an_n6_answer_with_a_made_up_quote_is_dropped_by_the_gate`: an N6 finding whose quote isn't in the notes drops the whole N6 output, and only the rule findings remain (\u00a720.9, inv. 5).\n- `test_a_bad_body_is_a_422_and_nothing_is_written[\u2026]`: unknown keys (`limits`, `limits_trace`, `llm:\u2026`, extra target key), unknown kind, missing target or text, blank, empty, 501-character and non-string text all give 422 with no write and no refresh (\u00a712, inv. 2).\n- `test_a_text_of_exactly_500_characters_is_accepted`: the 500-character boundary is accepted (task 1).\n- `test_a_target_that_points_at_nothing_is_refused_and_nothing_is_written[\u2026]`: an out-of-range, negative or non-numeric rule ref, or an unknown finding or check ref, gives 404 or 422 from the route itself, with no write.\n- `test_an_unknown_profile_is_a_404`: an unknown profile gives \"unknown profile\" and creates no working directory (\u00a712).\n- `test_the_body_model_names_the_four_target_kinds`: OpenAPI shows `target.kind` as exactly `parsed_rule`, `profile_finding`, `behaviour`, `note_reading`.\n- `test_every_ai_derived_item_can_be_corrected[\u2026]`: a parsed rule, a profile finding and an S1/S3 behaviour row on the three personas each give 200 with the right event payload and notes line, even when the recorded answers miss in mock mode (owner Q1, D13).\n- `test_fixtures_and_the_activity_tags_file_are_never_touched`: the `fixtures/` tree and `data/meta/activity_tags.csv` have identical hashes after corrections, and only the store copy gets the event (\u00a710, CLAUDE.md).\n- `test_a_correction_does_not_change_another_persona_report`: Mateo's and Robert's reports (minus `run_id`) and Mateo's notes are unchanged by a correction on Amira (task 5).\n- `test_correction_hooks_are_defined_once_and_used`: `renderCorrectionControl(kind, ref)` and `sendCorrection(kind, ref, text)` are each defined once and used (task 4).\n- `test_the_control_is_a_text_box_and_a_plain_verb_button_that_asks_nothing`: a form with a `text` box (maxlength 500) and a \u00ab Corriger \u00bb submit button. No `?`, placeholder, disabled attribute, typed digits, request or `prompt()` (D13).\n- `test_the_control_is_hidden_in_the_static_demo`: the control returns `\"\"` early when `apiBase()` is empty, and the shipped meta tag stays empty (task 4).\n- `test_send_correction_posts_target_and_text_only_then_rerenders_with_the_returned_report`: it posts through `apiPost` to `/corrections` with only `{target: {kind, ref}, text}`, no limits or `llm:` keys. It re-renders from `.report`, keeps the `site` block, shows failures, and `method:` and `\"POST\"` each still occur once (inv. 2).\n- `test_correction_forms_are_bound_to_send_correction`: the `[data-correct-\u2026]` forms are bound on submit with `preventDefault`, taking kind and ref from the markup.\n- `test_every_ai_derived_item_gets_the_control`: `renderValuesRules` (with the quote and the provisional flag), `pageProfil` findings (by `id`) and `factorPage` S1/S3 rows (by `id`) each call the control with their own target kind (task 4).\n- `test_new_and_changed_ui_strings_pass_the_blocklist_and_d10_vocabulary`: the new and changed functions, and the whole page apart from the fixed disclaimer, pass the \u00a79.3 blocklist and the D10 vocabulary.\n",
+  "stop_reason": "end_turn",
+  "usage": {
+    "inputTokens": 8054603,
+    "outputTokens": 72903,
+    "totalTokens": 8127506
+  }
+}

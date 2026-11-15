@@ -228,6 +228,8 @@ details.abadge ul{margin:8px 0 0;padding-left:18px;font-size:13px;color:var(--mu
 .unkrow{padding:8px 6px;border-top:1px solid var(--line-2);font-size:14px}
 .vr{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px 16px;padding:12px 0;border-top:1px solid var(--line-2);align-items:center}
 .vr .q{font-weight:600} .vr .acts{display:flex;gap:8px;flex-wrap:wrap}
+.corr{display:flex;gap:8px;align-items:flex-start;margin-top:8px;grid-column:1/-1}
+.corr textarea{flex:1;min-width:0;min-height:40px;border:1px solid var(--line);border-radius:4px;padding:8px;font:inherit;background:transparent;color:inherit}
 .vr .btn{min-height:32px;padding:4px 12px;font-size:13px} .vr .btn[disabled]{opacity:.55;cursor:not-allowed}
 @media (max-width:560px){.vr{grid-template-columns:1fr}}
 .limits li{padding:8px 0;border-top:1px solid var(--line-2);font-size:14px}
@@ -270,7 +272,7 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
   const pct = (x, d = 1) => (x * 100).toFixed(d).replace(".", ",").replace("-", "−") + " %";
   const cad = x => nb(new Intl.NumberFormat("fr-CA", {maximumFractionDigits: 0}).format(x)) + " $";
   const kcad = x => Math.round(x / 1000) + " k$";
-  const RANK = {violation: 4, warning: 3, unknown: 2, info: 1, pass: 0};
+  const SEVERITY = {violation: 4, warning: 3, unknown: 2, info: 1, pass: 0};
   const ICON = {violation: "✕", warning: "⚠", unknown: "?", info: "i", pass: "✓"};
   const PILLAR = {violation: "Hors limites", warning: "Avertissement", unknown: "À vérifier", info: "Info", pass: "Aligné"};
   const CHECK_ST = {violation: "Hors limite", warning: "Avertissement", unknown: "Non vérifiable", info: "Info", pass: "Respecté"};
@@ -311,7 +313,7 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
 
   /* Flow B reports carry the checks of the trade (`checks_proposed`) next to today's: the sections and the verdict follow the trade. */
   const shownChecks = rep => rep.checks_proposed || rep.checks_current;
-  const checksOf = (rep, f) => shownChecks(rep).filter(c => c.factor === f).sort((a, b) => RANK[b.status] - RANK[a.status]);
+  const checksOf = (rep, f) => shownChecks(rep).filter(c => c.factor === f).sort((a, b) => SEVERITY[b.status] - SEVERITY[a.status]);
   const worst = (rep, f) => checksOf(rep, f)[0];
   function pillarLine(rep, s) {
     const cs = checksOf(rep, s.factor), bad = cs.filter(c => c.status === "violation" || c.status === "warning");
@@ -465,10 +467,11 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
     const lock = live ? "" : 'disabled title="Affichage seulement : la décision passe par l’API"';
     rep.sections.forEach(s => { const d = (s.facts.derived || {})["values.parsed_notes"];
       ((d && d.value) || []).forEach((r, i) => { const k = [r.quote, r.rule_kind, JSON.stringify(r.params)].join("|"); if (!seen.has(k)) { seen.add(k); rules.push(Object.assign({}, r, {_idx: i})); } }); });
-    const rows = rules.map(r => `<li class="vr"><div><span class="q">« ${esc(r.quote)} »</span><div class="small"><span class="mono">${esc(r.rule_kind)}</span> · ${esc(show(r.params))}</div></div>
-      <div class="acts">${r.approved_by_user ? st("pass", "Approuvée") : st("info", "En attente d'approbation")}<button class="btn" type="button" data-action="approve" data-index="${r._idx}" ${lock}>Approuver</button><button class="btn" type="button" data-action="reject" data-index="${r._idx}" ${lock}>Rejeter</button></div></li>`).join("");
+    const rows = rules.map(r => { const prov = r.rule_kind === "max_theme_weight" && typeof (r.params || {}).max_pct === "number" && !r.approved_by_user;
+      return `<li class="vr"><div><span class="q">« ${esc(r.quote)} »</span><div class="small"><span class="mono">${esc(r.rule_kind)}</span> · ${esc(show(r.params))}</div></div>
+      <div class="acts">${r.approved_by_user ? st("pass", "Approuvée") : prov ? st("info", "Limite provisoire, en attente d'approbation") : st("info", "En attente d'approbation")}<button class="btn" type="button" data-action="approve" data-index="${r._idx}" ${lock}>Approuver</button><button class="btn" type="button" data-action="reject" data-index="${r._idx}" ${lock}>Rejeter</button></div>${renderCorrectionControl("parsed_rule", r._idx)}</li>`; }).join("");
     return `<section class="card" id="values-rules"><h3>Règles tirées de vos notes</h3>
-      <p class="small" style="margin-top:6px">Le texte de vos notes est lu par l'IA, puis chaque règle attend votre approbation. Une règle non approuvée n'entre dans aucune limite : elle ne produit qu'un rappel d'information. ${live ? "Chaque bouton envoie votre décision à l'API, puis la page se met à jour." : "Affichage seulement : la décision passe par l'API."}</p>
+      <p class="small" style="margin-top:6px">Le texte de vos notes est lu par l'IA, puis chaque règle attend votre approbation. Une règle avec un chiffre compte tout de suite comme limite provisoire : ses contrôles restent au plus des avertissements jusqu'à votre approbation. ${live ? "Chaque bouton envoie votre décision à l'API, puis la page se met à jour." : "Affichage seulement : la décision passe par l'API."}</p>
       ${rules.length ? `<ul class="vrules">${rows}</ul>` : `<p class="small" style="margin-top:10px">Aucune règle tirée de vos notes.</p>`}</section>`;
   }
   /* ---------- SPEC §12 routes: the one POST helper, N3 decision, B2 intent form (nothing here sends a limit or an AI output) ---------- */
@@ -483,6 +486,28 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
     const res = await fetch(base + path, {method: verb || "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
     if (!res.ok) throw new Error("API : HTTP " + res.status);
     return res.json();
+  }
+  /* P6.CORRECT: a passive affordance next to every item the AI read. A text box and a plain verb; nothing is asked, nothing is sent while rendering.
+     No API base (the static demo): nothing is drawn. The body sent is the target and the user's words only. */
+  function renderCorrectionControl(kind, ref) {
+    if (!apiBase()) return "";
+    return `<form class="corr" data-correct-kind="${esc(kind)}" data-correct-ref="${esc(ref)}"><textarea name="text" maxlength="500" rows="1" aria-label="Votre correction"></textarea><button class="btn" type="submit">Corriger</button></form>`;
+  }
+  async function sendCorrection(kind, ref, text) {
+    const words = String(text || "").trim();
+    if (!apiBase() || !state.rep || !words) return;
+    const id = state.rep.profile_id;
+    try {
+      const res = await apiPost(`/profiles/${id}/corrections`, {target: {kind, ref}, text: words});
+      const rep = res.report;
+      const r = await fetch(apiBase() + "/profiles/" + id);
+      if (!r.ok) throw new Error("API : HTTP " + r.status);
+      rep.site = buildLiveSite(rep, await r.json());
+      state.rep = rep; state.error = "";
+      if (res.messages && res.messages.length) state.error = "Votre correction est enregistrée dans vos notes. L'IA n'a pas pu mettre sa lecture à jour : la lecture précédente est conservée.";
+      resetWhatif();
+    } catch (e) { state.error = "La correction n'a pas été enregistrée (" + e.message + ")."; }
+    render();
   }
   async function decideRule(action, index) {
     if (!apiBase() || (action !== "approve" && action !== "reject")) return;
@@ -947,7 +972,7 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
   }
   function factorPage(rep) {
     const secs = rep.sections;
-    if (!state.factor || !secs.find(s => s.factor === state.factor)) state.factor = (secs.slice().sort((a, b) => RANK[b.status] - RANK[a.status])[0]).factor;
+    if (!state.factor || !secs.find(s => s.factor === state.factor)) state.factor = (secs.slice().sort((a, b) => SEVERITY[b.status] - SEVERITY[a.status])[0]).factor;
     const s = secs.find(x => x.factor === state.factor), i = secs.indexOf(s) + 1, cs = checksOf(rep, s.factor), f = s.facts, n = s.narrative;
     const rows = [];
     for (const [k, v] of Object.entries(f.declared || {})) rows.push([fieldName(k), "déclaré", show(v), ""]);
@@ -961,7 +986,7 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
           <p class="sub" style="margin-top:4px">${esc(s.question)}</p>
           ${hard ? `<p class="small" style="margin-top:10px">${hard}</p>` : ""}
           <div style="margin-top:12px">${meters(rep, s)}</div>
-          ${cs.length ? cs.map(c => { const [t, sub] = CHECK[c.id] || [c.id, ""], ix = shownChecks(rep).indexOf(c); return `<div class="chk"><div class="rule" data-check="c:${ix}" tabindex="0" role="button" aria-expanded="false" title="Voir d'où vient ce contrôle"><span class="ic tx-${c.status}" aria-label="${CHECK_ST[c.status]}">${ICON[c.status]}</span><div><b>${esc(t)}${c.subject ? " · " + esc(c.subject) : ""}</b><span class="id">${esc(c.id)}</span> ${st(c.status)}<div class="small">${esc(sub)}</div></div><div class="v">${fv(c, c.value)}${c.limit == null ? "" : `<small>limite ${fv(c, c.limit)}</small>`}</div></div><div class="chainslot" id="chain-c-${ix}" hidden></div></div>`; }).join("")
+          ${cs.length ? cs.map(c => { const [t, sub] = CHECK[c.id] || [c.id, ""], ix = shownChecks(rep).indexOf(c); return `<div class="chk"><div class="rule" data-check="c:${ix}" tabindex="0" role="button" aria-expanded="false" title="Voir d'où vient ce contrôle"><span class="ic tx-${c.status}" aria-label="${CHECK_ST[c.status]}">${ICON[c.status]}</span><div><b>${esc(t)}${c.subject ? " · " + esc(c.subject) : ""}</b><span class="id">${esc(c.id)}</span> ${st(c.status)}<div class="small">${esc(sub)}</div></div><div class="v">${fv(c, c.value)}${c.limit == null ? "" : `<small>limite ${fv(c, c.limit)}</small>`}</div></div><div class="chainslot" id="chain-c-${ix}" hidden></div>${c.id === "S1" || c.id === "S3" ? renderCorrectionControl("behaviour", c.id) : ""}</div>`; }).join("")
             : `<p class="small" style="margin-top:12px">Aucune vérification chiffrée pour ce facteur${s.not_covered && s.not_covered.length ? " (pas encore couvert : " + s.not_covered.join(", ") + ")" : ""}.</p>`}
         </section>
         <section class="card"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap"><h3>Explication</h3><span class="mode">texte : ${esc(n.mode)}</span></div>
@@ -982,7 +1007,7 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
       <section class="card"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap"><h2>Points à clarifier</h2>${pc.findings.length ? st(pc.status, `${pc.findings.length} point${pc.findings.length > 1 ? "s" : ""}`) : st("pass", "Aucune contradiction")}</div>
         <div class="pcs" style="margin-top:16px">${pc.findings.map(x => { const v = x.values || x.quotes || []; return `<div class="pcc ${x.status}"><span class="t tx-${x.status}">${tag[x.status]} · ${x.source.startsWith("llm") ? "IA, vérifiée par le code" : "règle " + esc(x.id)}</span>
           <div class="vs"><span class="small">${esc(fieldName(x.fields[0]))}</span><br><b>« ${esc(show(v[0]))} »</b></div><div class="vs"><span class="small">${esc(fieldName(x.fields[1]))}</span><br><b>« ${esc(show(v[1]))} »</b></div>
-          ${x.reason ? `<p class="small">${esc(x.reason)}</p>` : ""}<p class="ask"><b>Question :</b> ${esc((x.question && (x.question["fr-CA"] || x.question)) || "")}</p></div>`; }).join("") || `<p class="sub">Les réponses du profil vont dans le même sens.</p>`}</div>${renderIntake(rep)}</section>
+          ${x.reason ? `<p class="small">${esc(x.reason)}</p>` : ""}<p class="ask"><b>Question :</b> ${esc((x.question && (x.question["fr-CA"] || x.question)) || "")}</p>${renderCorrectionControl("profile_finding", x.id)}</div>`; }).join("") || `<p class="sub">Les réponses du profil vont dans le même sens.</p>`}</div>${renderIntake(rep)}</section>
       ${renderValuesRules(rep)}
       <div class="half">
         <section class="card"><h3>Profil de ${esc(p.name)}</h3><dl class="facts" style="margin-top:10px">
@@ -1261,6 +1286,9 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
     const intentForm = $("#intent-form");
     if (intentForm) intentForm.addEventListener("submit", e => { e.preventDefault(); confirmIntent(e.target); });
     bindChecks(rep);
+    document.querySelectorAll("[data-correct-kind]").forEach(f => f.addEventListener("submit", e => {
+      e.preventDefault(), sendCorrection(f.dataset.correctKind, f.dataset.correctKind === "parsed_rule" ? Number(f.dataset.correctRef) : f.dataset.correctRef, f.elements.text.value);
+    }));
   }
   function go(page, keepFocus) {
     if (location.hash !== "#" + page) location.hash = page; else { state.page = page; render(); }

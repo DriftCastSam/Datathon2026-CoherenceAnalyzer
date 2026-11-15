@@ -26,6 +26,7 @@ import math
 import os
 import re
 import threading
+from contextlib import contextmanager
 from datetime import date, datetime
 from pathlib import Path
 from typing import Annotated, Any, Literal
@@ -37,6 +38,7 @@ from pydantic import (BaseModel, ConfigDict, Field, StrictBool, StrictFloat, Str
 
 from . import config, data, intake, pipeline, store
 from . import intent as intent_mod
+from .llm import bedrock, extractors
 
 EVENT_TYPES = ("question", "order_intent", "quiz_result", "profile_edit", "note", "intent_confirmed")
 COPY_PATTERNS = ("profile.json", "events.jsonl", "portfolio*.json", "intents.json")
@@ -892,6 +894,145 @@ def post_decision(profile_id: str, index: int, body: DecisionIn) -> dict:
         else:
             node.pop("rejected_quotes", None)
         return _record_decision(work, profile_id, fixture, index, profile, old, body.approved)
+
+
+# ---------------------------------------------------------------- corrections (P6.CORRECT, D11, D13)
+
+CORRECTION_SOURCE = "ui"
+CORRECTION_MAX_CHARS = 500
+_FINDING_REF = re.compile(r"^(C\d{1,3}|N6\.\d{1,3})$")      # profile_coherence finding ids: rules C1.., N6.k
+_BEHAVIOUR_REFS = ("S1", "S3")                               # the soft checks read from the behaviour classifier
+
+
+class CorrectionTarget(_Body):
+    """What the user corrects: an AI-derived item. `ref` = parsed-rule index, finding id or check id."""
+    kind: Literal["parsed_rule", "profile_finding", "behaviour", "note_reading"]
+    ref: StrictInt | StrictStr
+
+    @model_validator(mode="after")
+    def _ref_fits_kind(self) -> "CorrectionTarget":
+        ref = self.ref
+        if self.kind == "parsed_rule":
+            if not isinstance(ref, int) or ref < 0:
+                raise ValueError("a parsed_rule ref is the index of the rule (an integer >= 0)")
+        elif self.kind == "profile_finding":
+            if not isinstance(ref, str) or not _FINDING_REF.match(ref):
+                raise ValueError("a profile_finding ref is a finding id such as C1 or N6.1")
+        elif self.kind == "behaviour":
+            if ref not in _BEHAVIOUR_REFS:
+                raise ValueError(f"a behaviour ref is one of {list(_BEHAVIOUR_REFS)}")
+        elif not isinstance(ref, str) or not ref.strip() or len(ref) > 64:
+            raise ValueError("a note_reading ref is a short name")
+        return self
+
+
+class CorrectionIn(_Body):
+    """POST /profiles/{id}/corrections. Nothing else: no limits, limits_trace or llm: field can be sent (inv. 2)."""
+    target: CorrectionTarget
+    text: StrictStr = Field(max_length=CORRECTION_MAX_CHARS)
+
+    @field_validator("text")
+    @classmethod
+    def _text_not_blank(cls, v: str) -> str:
+        if not v.strip():
+            raise ValueError("text must not be blank")
+        return v
+
+
+def _correction_line(target: CorrectionTarget, text: str) -> str:
+    return f"Correction ({target.kind} {target.ref}): {text}"
+
+
+def _correction_messages(res: dict) -> list[str]:
+    """Plain statements when N3 could not re-read the notes (gate rejection or no usable answer). D10: they say what
+    was recorded and what was kept, nothing else."""
+    out = []
+    for call in res["audit"]["llm_calls"]:
+        if call.get("gate") != "accepted":
+            out.append(f"Your correction was saved in your notes. Its reading ({call.get('node')}) was not updated: "
+                       f"gate result {call.get('gate')}. The previous reading is kept.")
+    for err in res["audit"]["llm_errors"]:
+        out.append(f"Your correction was saved in your notes. Its reading ({err.get('node')}) was not updated: no "
+                   "usable answer was returned. The previous reading is kept.")
+    return out
+
+
+@contextmanager
+def _reading_failure_is_no_answer():
+    """Inside the block, any failure of the N3 call other than the two the pipeline already handles (cache miss,
+    invalid output) is raised as `LLMOutputInvalid`: the pipeline then records it as "no usable answer" and keeps the
+    previous reading (§1 inv. 4). The user's words are never lost to a failing reader. Callers hold `_LOCK`."""
+    real = extractors.values_parser_call
+
+    def guarded(notes: str) -> dict:
+        try:
+            return real(notes)
+        except (bedrock.LLMCacheMiss, bedrock.LLMOutputInvalid):
+            raise
+        except Exception as exc:        # noqa: BLE001 - any other failure of the reader is "no usable answer"
+            raise bedrock.LLMOutputInvalid(f"{type(exc).__name__}: {exc}") from exc
+
+    extractors.values_parser_call = guarded
+    try:
+        yield
+    finally:
+        extractors.values_parser_call = real
+
+
+@app.post("/profiles/{profile_id}/corrections")
+def post_correction(profile_id: str, body: CorrectionIn) -> dict:
+    """The user corrects anything the AI read, in their own words (owner review 2026-11-15, Q1). One `note` event
+    (source `ui`, payload `{target, text}`); the text joins `values.notes` as declared words on its own line; Flow A
+    (N3 re-reads the notes through the gate, D11 provisional limits follow) then the Flow C review. The AI never
+    decides from the correction alone: a gate rejection or a missing answer keeps the previous reading, and the
+    response says so in `messages`. Everything is validated before anything is written; a failure after the append
+    restores events.jsonl and profile.json."""
+    work, fixture = _workdir(profile_id)
+    if not (work / "portfolio.json").is_file():
+        raise HTTPException(status_code=409, detail="this profile holds no portfolio yet: "
+                            f"PUT /profiles/{profile_id}/portfolio first")
+    with _LOCK:
+        stored = _load(work)
+        if body.target.kind == "parsed_rule":
+            rules = ((stored.get("values") or {}).get("parsed_notes") or {}).get("value")
+            if not isinstance(rules, list) or body.target.ref >= len(rules):
+                raise HTTPException(status_code=404, detail=f"no parsed rule at index {body.target.ref}")
+        line = _correction_line(body.target, body.text)
+        edited = copy.deepcopy(stored)
+        values = edited.setdefault("values", {})
+        old_notes = values.get("notes")
+        old_notes = old_notes if isinstance(old_notes, str) else ""
+        values["notes"] = f"{old_notes}\n{line}" if old_notes.strip() else line
+        try:
+            pipeline.validate_profile(edited, "edited profile")
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        events_path = work / "events.jsonl"
+        event = {"event_id": _next_event_id(store.read_events(events_path), fixture), "profile_id": profile_id,
+                 "ts": pipeline._now(), "type": "note", "text": line,
+                 "payload": {"target": {"kind": body.target.kind, "ref": body.target.ref}, "text": body.text},
+                 "source": CORRECTION_SOURCE}
+        events_before = events_path.read_bytes() if events_path.exists() else b""
+        profile_before = (work / "profile.json").read_bytes()
+        try:
+            _append_event(work, event)
+            with _reading_failure_is_no_answer():
+                try:
+                    res = pipeline.refresh(work, edited=edited)
+                except ValueError as exc:
+                    raise HTTPException(status_code=422, detail=str(exc)) from exc
+                _save(work, res["profile"])
+                try:
+                    report = pipeline.review(work)
+                except ValueError as exc:
+                    raise HTTPException(status_code=422, detail=str(exc)) from exc
+            _adopt_refreshed_profile(work, report)
+        except BaseException:
+            events_path.write_bytes(events_before)
+            (work / "profile.json").write_bytes(profile_before)
+            raise
+    return {"event": event, "profile_diff": res["profile_diff"], "report": report,
+            "messages": _correction_messages(res)}
 
 
 # ---------------------------------------------------------------- review, reports, audit

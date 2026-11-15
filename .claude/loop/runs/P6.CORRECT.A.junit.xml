@@ -1,0 +1,997 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="47" skipped="0" tests="47" time="2.639" timestamp="2026-11-15T06:09:34.189049+00:00" hostname="bomboclat-laptop"><testcase classname="tests.flows.test_correction_loop" name="test_correction_returns_event_profile_diff_and_a_flow_c_report" time="0.006"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x7944202fb380&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x794420254050&gt;
+
+    def test_correction_returns_event_profile_diff_and_a_flow_c_report(client, monkeypatch):
+        # §12 + task (1): the response is {event, profile_diff, report}; the report is the Flow C review (§13 schema).
+        install(monkeypatch, n3=tech_reader({TECH20: 20}))
+&gt;       body = _correct(client, AMIRA, "parsed_rule", TECH_RULE, TECH20)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:225: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x7944202fb380&gt;
+pid = 'persona-amira', kind = 'parsed_rule', ref = 1
+text = 'Actually my limit for tech is 20 % of the portfolio.'
+
+    def _correct(client: TestClient, pid: str, kind: str, ref, text: str) -&gt; dict:
+        r = _correct_raw(client, pid, kind, ref, text)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:143: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_correction_appends_one_note_event_from_the_ui" time="0.008"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x7944202602d0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_correction_appends_one_no0/store')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x79442036be10&gt;
+
+    def test_correction_appends_one_note_event_from_the_ui(client, store_dir, monkeypatch):
+        # §3.4 + task (1): one `note` event, source "ui", payload {target, text}; append-only; the response carries it.
+        install(monkeypatch, n3=tech_reader({TECH20: 20}))
+        assert client.get(f"/profiles/{AMIRA}").status_code == 200                   # first access copies the fixture
+        before = _events(store_dir, AMIRA)
+&gt;       body = _correct(client, AMIRA, "parsed_rule", TECH_RULE, TECH20)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:243: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x7944202602d0&gt;
+pid = 'persona-amira', kind = 'parsed_rule', ref = 1
+text = 'Actually my limit for tech is 20 % of the portfolio.'
+
+    def _correct(client: TestClient, pid: str, kind: str, ref, text: str) -&gt; dict:
+        r = _correct_raw(client, pid, kind, ref, text)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:143: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_correction_text_joins_the_notes_as_the_users_own_words" time="0.003"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x7944202611d0&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x79442020d250&gt;
+
+    def test_correction_text_joins_the_notes_as_the_users_own_words(client, monkeypatch):
+        # §3.1 + D11: the text is appended to values.notes (user-declared), after what was there, on a separator line.
+        # SPEC-AMBIGUITY: the task gives the separator as "e.g."; stricter reading: exactly that line format.
+        install(monkeypatch, n3=tech_reader({TECH20: 20}))
+        original = _fixture_profile(AMIRA)["values"]["notes"]
+&gt;       body = _correct(client, AMIRA, "parsed_rule", TECH_RULE, TECH20)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:261: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x7944202611d0&gt;
+pid = 'persona-amira', kind = 'parsed_rule', ref = 1
+text = 'Actually my limit for tech is 20 % of the portfolio.'
+
+    def _correct(client: TestClient, pid: str, kind: str, ref, text: str) -&gt; dict:
+        r = _correct_raw(client, pid, kind, ref, text)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:143: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_two_corrections_stack_in_order_and_the_latest_reading_wins" time="0.004"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x794420255810&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_two_corrections_stack_in_0/store')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7944201f29c0&gt;
+
+    def test_two_corrections_stack_in_order_and_the_latest_reading_wins(client, store_dir, monkeypatch):
+        # §3.1: earlier words are never dropped; N3 re-reads all the notes, so the newest cap replaces the older one.
+        install(monkeypatch, n3=tech_reader({TECH20: 20, TECH30: 30}))
+        original = _fixture_profile(AMIRA)["values"]["notes"]
+&gt;       _correct(client, AMIRA, "parsed_rule", TECH_RULE, TECH20)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:275: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x794420255810&gt;
+pid = 'persona-amira', kind = 'parsed_rule', ref = 1
+text = 'Actually my limit for tech is 20 % of the portfolio.'
+
+    def _correct(client: TestClient, pid: str, kind: str, ref, text: str) -&gt; dict:
+        r = _correct_raw(client, pid, kind, ref, text)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:143: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_the_parsed_rule_changes_and_the_provisional_limit_follows" time="0.007"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x794420255350&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7944201f28b0&gt;
+
+    def test_the_parsed_rule_changes_and_the_provisional_limit_follows(client, monkeypatch):
+        # §6.2 N3 + D11 points 1-2 + inv. 1: N3 re-reads the notes with the correction; the gated numeric rule becomes a
+        # PROVISIONAL limit (flag, trace entry), never an approved one. The user's earlier approval of 50 % is gone.
+        fake = install(monkeypatch, n3=tech_reader({TECH20: 20}))
+        before = _profile(client, AMIRA)
+        assert _num(before["limits"]["max_theme_weight"]["tech_heavy"]) == pytest.approx(0.5, abs=1e-9)
+        assert not _is_provisional(before["limits"]["max_theme_weight"]["tech_heavy"])
+&gt;       _correct(client, AMIRA, "parsed_rule", TECH_RULE, TECH20)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:294: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x794420255350&gt;
+pid = 'persona-amira', kind = 'parsed_rule', ref = 1
+text = 'Actually my limit for tech is 20 % of the portfolio.'
+
+    def _correct(client: TestClient, pid: str, kind: str, ref, text: str) -&gt; dict:
+        r = _correct_raw(client, pid, kind, ref, text)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:143: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_a_check_against_the_provisional_limit_is_capped_at_warning" time="0.666"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x79442020e570&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x79442027a950&gt;
+
+    def test_a_check_against_the_provisional_limit_is_capped_at_warning(client, monkeypatch):
+        # D11 point 2 + inv. 3: Amira holds 38 % in tech_heavy (QQQ + NVDA + SHOP.TO); against a provisional 20 % the H13
+        # check is a `warning`, never a `violation`, and no check anywhere gets `violation` from the AI reading.
+        install(monkeypatch, n3=tech_reader({TECH20: 20}))
+        base = client.post(f"/profiles/{AMIRA}/review").json()
+&gt;       rep = _correct(client, AMIRA, "parsed_rule", TECH_RULE, TECH20)["report"]
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:320: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x79442020e570&gt;
+pid = 'persona-amira', kind = 'parsed_rule', ref = 1
+text = 'Actually my limit for tech is 20 % of the portfolio.'
+
+    def _correct(client: TestClient, pid: str, kind: str, ref, text: str) -&gt; dict:
+        r = _correct_raw(client, pid, kind, ref, text)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:143: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_correction_runs_flow_a_then_flow_c_and_both_are_audited" time="0.002"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x7944201f3f00&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_correction_runs_flow_a_th0/store')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x79441f924e50&gt;
+
+    def test_correction_runs_flow_a_then_flow_c_and_both_are_audited(client, store_dir, monkeypatch):
+        # §4 A2/A3/A6 + §10 + §11: the refresh audit names the new event and an accepted values_parser call (through the
+        # gate); the review audit is retrievable by the report's run_id.
+        install(monkeypatch, n3=tech_reader({TECH20: 20}))
+&gt;       body = _correct(client, AMIRA, "parsed_rule", TECH_RULE, TECH20)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:337: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x7944201f3f00&gt;
+pid = 'persona-amira', kind = 'parsed_rule', ref = 1
+text = 'Actually my limit for tech is 20 % of the portfolio.'
+
+    def _correct(client: TestClient, pid: str, kind: str, ref, text: str) -&gt; dict:
+        r = _correct_raw(client, pid, kind, ref, text)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:143: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_every_llm_reading_of_a_correction_goes_through_the_gate" time="0.003"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x79441f9285a0&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7944202723f0&gt;
+
+    def test_every_llm_reading_of_a_correction_goes_through_the_gate(client, monkeypatch):
+        # inv. 5 + §11: N3 (re-read of the notes) and N6 (profile consistency) outputs both pass gate.gate.
+        install(monkeypatch, n3=tech_reader({TECH20: 20}), n6=lambda payload: {"abstain": True, "findings": []})
+        seen: list[str] = []
+        real_gate = gate.gate
+    
+        def spy(node, old_field, llm_output, context):
+            seen.append(node)
+            return real_gate(node, old_field, llm_output, context)
+    
+        monkeypatch.setattr(gate, "gate", spy)
+        monkeypatch.setattr(internal, "gate", spy)      # internal.py binds `gate` by name (from ..gate import gate)
+&gt;       _correct(client, AMIRA, "parsed_rule", TECH_RULE, TECH20)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:362: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x79441f9285a0&gt;
+pid = 'persona-amira', kind = 'parsed_rule', ref = 1
+text = 'Actually my limit for tech is 20 % of the portfolio.'
+
+    def _correct(client: TestClient, pid: str, kind: str, ref, text: str) -&gt; dict:
+        r = _correct_raw(client, pid, kind, ref, text)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:143: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_a_reading_that_cannot_be_used_keeps_the_previous_one_and_says_so[gate_rejection]" time="0.003"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x79441f929370&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_a_reading_that_cannot_be_0/store')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x79441f9698b0&gt;
+mode = 'gate_rejection'
+
+    @pytest.mark.parametrize("mode", ["gate_rejection", "no_usable_answer"])
+    def test_a_reading_that_cannot_be_used_keeps_the_previous_one_and_says_so(client, store_dir, monkeypatch, mode):
+        # §11 + inv. 4/5 + D10: a quote that is not in the notes is dropped by the gate (rejected:evidence); a recorded
+        # answer that is missing (mock mode, the notes changed) is no answer. Either way the previous reading and its
+        # limits stay, the user's words are still saved, the review still runs, and the response says so in plain words.
+        fake = install(monkeypatch, n3=bad_quote_reader) if mode == "gate_rejection" else None
+        previous = _fixture_profile(AMIRA)
+&gt;       body = _correct(client, AMIRA, "parsed_rule", TECH_RULE, TECH20)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:382: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x79441f929370&gt;
+pid = 'persona-amira', kind = 'parsed_rule', ref = 1
+text = 'Actually my limit for tech is 20 % of the portfolio.'
+
+    def _correct(client: TestClient, pid: str, kind: str, ref, text: str) -&gt; dict:
+        r = _correct_raw(client, pid, kind, ref, text)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:143: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_a_reading_that_cannot_be_used_keeps_the_previous_one_and_says_so[no_usable_answer]" time="0.004"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x79441f929260&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_a_reading_that_cannot_be_1/store')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x79442021a6d0&gt;
+mode = 'no_usable_answer'
+
+    @pytest.mark.parametrize("mode", ["gate_rejection", "no_usable_answer"])
+    def test_a_reading_that_cannot_be_used_keeps_the_previous_one_and_says_so(client, store_dir, monkeypatch, mode):
+        # §11 + inv. 4/5 + D10: a quote that is not in the notes is dropped by the gate (rejected:evidence); a recorded
+        # answer that is missing (mock mode, the notes changed) is no answer. Either way the previous reading and its
+        # limits stay, the user's words are still saved, the review still runs, and the response says so in plain words.
+        fake = install(monkeypatch, n3=bad_quote_reader) if mode == "gate_rejection" else None
+        previous = _fixture_profile(AMIRA)
+&gt;       body = _correct(client, AMIRA, "parsed_rule", TECH_RULE, TECH20)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:382: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x79441f929260&gt;
+pid = 'persona-amira', kind = 'parsed_rule', ref = 1
+text = 'Actually my limit for tech is 20 % of the portfolio.'
+
+    def _correct(client: TestClient, pid: str, kind: str, ref, text: str) -&gt; dict:
+        r = _correct_raw(client, pid, kind, ref, text)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:143: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_a_correction_on_an_n6_finding_reruns_n6_with_the_new_notes" time="0.204"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x79441f929150&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_a_correction_on_an_n6_fin0/store')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x79442021a350&gt;
+
+    def test_a_correction_on_an_n6_finding_reruns_n6_with_the_new_notes(client, store_dir, monkeypatch):
+        # §20.9 + task (3): N6's payload carries values.notes; after the correction the notes changed, so N6 runs again on
+        # them (not a stale answer), through the gate; rules (C1) are code and stay. Limits do not move (inv. 2).
+        base = client.post(f"/profiles/{ROBERT}/review").json()
+        ids = [f["id"] for f in base["profile_coherence"]["findings"]]
+        assert "N6.1" in ids and "C1" in ids
+        old_quote = "No hype stocks unless I can explain the business."
+        assert any(old_quote in (f.get("quotes") or []) for f in base["profile_coherence"]["findings"])
+        limits_before = _profile(client, ROBERT)["limits"]
+        fake = install(monkeypatch, n3=other_reader(ROBERT_TEXT), n6=n6_tension(ROBERT_TEXT))
+&gt;       body = _correct(client, ROBERT, "profile_finding", "N6.1", ROBERT_TEXT)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:438: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x79441f929150&gt;
+pid = 'persona-robert', kind = 'profile_finding', ref = 'N6.1'
+text = 'I changed my mind about small speculative companies.'
+
+    def _correct(client: TestClient, pid: str, kind: str, ref, text: str) -&gt; dict:
+        r = _correct_raw(client, pid, kind, ref, text)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:143: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_an_n6_answer_with_a_made_up_quote_is_dropped_by_the_gate" time="0.003"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x79441f92a250&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x79442018ec30&gt;
+
+    def test_an_n6_answer_with_a_made_up_quote_is_dropped_by_the_gate(client, monkeypatch):
+        # §20.9 gate + inv. 5: a finding whose quote is not in the notes drops the whole N6 output; only the rules remain.
+        install(monkeypatch, n3=other_reader(ROBERT_TEXT), n6=n6_tension(ROBERT_TEXT, quote="Nothing like this was written."))
+&gt;       body = _correct(client, ROBERT, "profile_finding", "N6.1", ROBERT_TEXT)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:456: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x79441f92a250&gt;
+pid = 'persona-robert', kind = 'profile_finding', ref = 'N6.1'
+text = 'I changed my mind about small speculative companies.'
+
+    def _correct(client: TestClient, pid: str, kind: str, ref, text: str) -&gt; dict:
+        r = _correct_raw(client, pid, kind, ref, text)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:143: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_a_bad_body_is_a_422_and_nothing_is_written[blank_text]" time="0.006"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 422&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x79441f9297b0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_a_bad_body_is_a_422_and_n0/store')
+name = 'blank_text'
+
+    @pytest.mark.parametrize("name", sorted(BAD_BODIES))
+    def test_a_bad_body_is_a_422_and_nothing_is_written(client, store_dir, name):
+        # §12 + inv. 2 (bodies forbid unknown keys; no limits / limits_trace / llm: field can be sent) + task (1).
+        _profile(client, AMIRA)
+        work = _work(store_dir, AMIRA)
+        before = {p.name: p.read_bytes() for p in work.iterdir() if p.is_file()}
+        audit_before = sorted(p.name for p in (store_dir / "audit").glob("*")) if (store_dir / "audit").exists() else []
+        r = client.post(f"/profiles/{AMIRA}/corrections", json=BAD_BODIES[name])
+&gt;       assert r.status_code == 422, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 422
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:489: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_a_bad_body_is_a_422_and_nothing_is_written[empty_text]" time="0.006"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 422&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x79441f92a580&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_a_bad_body_is_a_422_and_n1/store')
+name = 'empty_text'
+
+    @pytest.mark.parametrize("name", sorted(BAD_BODIES))
+    def test_a_bad_body_is_a_422_and_nothing_is_written(client, store_dir, name):
+        # §12 + inv. 2 (bodies forbid unknown keys; no limits / limits_trace / llm: field can be sent) + task (1).
+        _profile(client, AMIRA)
+        work = _work(store_dir, AMIRA)
+        before = {p.name: p.read_bytes() for p in work.iterdir() if p.is_file()}
+        audit_before = sorted(p.name for p in (store_dir / "audit").glob("*")) if (store_dir / "audit").exists() else []
+        r = client.post(f"/profiles/{AMIRA}/corrections", json=BAD_BODIES[name])
+&gt;       assert r.status_code == 422, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 422
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:489: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_a_bad_body_is_a_422_and_nothing_is_written[extra_key]" time="0.007"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 422&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x79441f92aad0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_a_bad_body_is_a_422_and_n2/store')
+name = 'extra_key'
+
+    @pytest.mark.parametrize("name", sorted(BAD_BODIES))
+    def test_a_bad_body_is_a_422_and_nothing_is_written(client, store_dir, name):
+        # §12 + inv. 2 (bodies forbid unknown keys; no limits / limits_trace / llm: field can be sent) + task (1).
+        _profile(client, AMIRA)
+        work = _work(store_dir, AMIRA)
+        before = {p.name: p.read_bytes() for p in work.iterdir() if p.is_file()}
+        audit_before = sorted(p.name for p in (store_dir / "audit").glob("*")) if (store_dir / "audit").exists() else []
+        r = client.post(f"/profiles/{AMIRA}/corrections", json=BAD_BODIES[name])
+&gt;       assert r.status_code == 422, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 422
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:489: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_a_bad_body_is_a_422_and_nothing_is_written[extra_target_key]" time="0.007"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 422&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x79441f92acf0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_a_bad_body_is_a_422_and_n3/store')
+name = 'extra_target_key'
+
+    @pytest.mark.parametrize("name", sorted(BAD_BODIES))
+    def test_a_bad_body_is_a_422_and_nothing_is_written(client, store_dir, name):
+        # §12 + inv. 2 (bodies forbid unknown keys; no limits / limits_trace / llm: field can be sent) + task (1).
+        _profile(client, AMIRA)
+        work = _work(store_dir, AMIRA)
+        before = {p.name: p.read_bytes() for p in work.iterdir() if p.is_file()}
+        audit_before = sorted(p.name for p in (store_dir / "audit").glob("*")) if (store_dir / "audit").exists() else []
+        r = client.post(f"/profiles/{AMIRA}/corrections", json=BAD_BODIES[name])
+&gt;       assert r.status_code == 422, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 422
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:489: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_a_bad_body_is_a_422_and_nothing_is_written[limits]" time="0.007"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 422&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x79441f92a470&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_a_bad_body_is_a_422_and_n4/store')
+name = 'limits'
+
+    @pytest.mark.parametrize("name", sorted(BAD_BODIES))
+    def test_a_bad_body_is_a_422_and_nothing_is_written(client, store_dir, name):
+        # §12 + inv. 2 (bodies forbid unknown keys; no limits / limits_trace / llm: field can be sent) + task (1).
+        _profile(client, AMIRA)
+        work = _work(store_dir, AMIRA)
+        before = {p.name: p.read_bytes() for p in work.iterdir() if p.is_file()}
+        audit_before = sorted(p.name for p in (store_dir / "audit").glob("*")) if (store_dir / "audit").exists() else []
+        r = client.post(f"/profiles/{AMIRA}/corrections", json=BAD_BODIES[name])
+&gt;       assert r.status_code == 422, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 422
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:489: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_a_bad_body_is_a_422_and_nothing_is_written[limits_trace]" time="0.006"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 422&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x79441f92ae00&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_a_bad_body_is_a_422_and_n5/store')
+name = 'limits_trace'
+
+    @pytest.mark.parametrize("name", sorted(BAD_BODIES))
+    def test_a_bad_body_is_a_422_and_nothing_is_written(client, store_dir, name):
+        # §12 + inv. 2 (bodies forbid unknown keys; no limits / limits_trace / llm: field can be sent) + task (1).
+        _profile(client, AMIRA)
+        work = _work(store_dir, AMIRA)
+        before = {p.name: p.read_bytes() for p in work.iterdir() if p.is_file()}
+        audit_before = sorted(p.name for p in (store_dir / "audit").glob("*")) if (store_dir / "audit").exists() else []
+        r = client.post(f"/profiles/{AMIRA}/corrections", json=BAD_BODIES[name])
+&gt;       assert r.status_code == 422, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 422
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:489: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_a_bad_body_is_a_422_and_nothing_is_written[llm_field]" time="0.006"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 422&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x79441f92b020&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_a_bad_body_is_a_422_and_n6/store')
+name = 'llm_field'
+
+    @pytest.mark.parametrize("name", sorted(BAD_BODIES))
+    def test_a_bad_body_is_a_422_and_nothing_is_written(client, store_dir, name):
+        # §12 + inv. 2 (bodies forbid unknown keys; no limits / limits_trace / llm: field can be sent) + task (1).
+        _profile(client, AMIRA)
+        work = _work(store_dir, AMIRA)
+        before = {p.name: p.read_bytes() for p in work.iterdir() if p.is_file()}
+        audit_before = sorted(p.name for p in (store_dir / "audit").glob("*")) if (store_dir / "audit").exists() else []
+        r = client.post(f"/profiles/{AMIRA}/corrections", json=BAD_BODIES[name])
+&gt;       assert r.status_code == 422, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 422
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:489: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_a_bad_body_is_a_422_and_nothing_is_written[missing_target]" time="0.006"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 422&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x79441f92b240&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_a_bad_body_is_a_422_and_n7/store')
+name = 'missing_target'
+
+    @pytest.mark.parametrize("name", sorted(BAD_BODIES))
+    def test_a_bad_body_is_a_422_and_nothing_is_written(client, store_dir, name):
+        # §12 + inv. 2 (bodies forbid unknown keys; no limits / limits_trace / llm: field can be sent) + task (1).
+        _profile(client, AMIRA)
+        work = _work(store_dir, AMIRA)
+        before = {p.name: p.read_bytes() for p in work.iterdir() if p.is_file()}
+        audit_before = sorted(p.name for p in (store_dir / "audit").glob("*")) if (store_dir / "audit").exists() else []
+        r = client.post(f"/profiles/{AMIRA}/corrections", json=BAD_BODIES[name])
+&gt;       assert r.status_code == 422, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 422
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:489: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_a_bad_body_is_a_422_and_nothing_is_written[missing_text]" time="0.006"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 422&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x79441f92b460&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_a_bad_body_is_a_422_and_n8/store')
+name = 'missing_text'
+
+    @pytest.mark.parametrize("name", sorted(BAD_BODIES))
+    def test_a_bad_body_is_a_422_and_nothing_is_written(client, store_dir, name):
+        # §12 + inv. 2 (bodies forbid unknown keys; no limits / limits_trace / llm: field can be sent) + task (1).
+        _profile(client, AMIRA)
+        work = _work(store_dir, AMIRA)
+        before = {p.name: p.read_bytes() for p in work.iterdir() if p.is_file()}
+        audit_before = sorted(p.name for p in (store_dir / "audit").glob("*")) if (store_dir / "audit").exists() else []
+        r = client.post(f"/profiles/{AMIRA}/corrections", json=BAD_BODIES[name])
+&gt;       assert r.status_code == 422, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 422
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:489: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_a_bad_body_is_a_422_and_nothing_is_written[text_not_a_string]" time="0.006"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 422&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x79441f92b680&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_a_bad_body_is_a_422_and_n9/store')
+name = 'text_not_a_string'
+
+    @pytest.mark.parametrize("name", sorted(BAD_BODIES))
+    def test_a_bad_body_is_a_422_and_nothing_is_written(client, store_dir, name):
+        # §12 + inv. 2 (bodies forbid unknown keys; no limits / limits_trace / llm: field can be sent) + task (1).
+        _profile(client, AMIRA)
+        work = _work(store_dir, AMIRA)
+        before = {p.name: p.read_bytes() for p in work.iterdir() if p.is_file()}
+        audit_before = sorted(p.name for p in (store_dir / "audit").glob("*")) if (store_dir / "audit").exists() else []
+        r = client.post(f"/profiles/{AMIRA}/corrections", json=BAD_BODIES[name])
+&gt;       assert r.status_code == 422, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 422
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:489: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_a_bad_body_is_a_422_and_nothing_is_written[too_long]" time="0.006"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 422&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x79441f92b8a0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_a_bad_body_is_a_422_and_n10/store')
+name = 'too_long'
+
+    @pytest.mark.parametrize("name", sorted(BAD_BODIES))
+    def test_a_bad_body_is_a_422_and_nothing_is_written(client, store_dir, name):
+        # §12 + inv. 2 (bodies forbid unknown keys; no limits / limits_trace / llm: field can be sent) + task (1).
+        _profile(client, AMIRA)
+        work = _work(store_dir, AMIRA)
+        before = {p.name: p.read_bytes() for p in work.iterdir() if p.is_file()}
+        audit_before = sorted(p.name for p in (store_dir / "audit").glob("*")) if (store_dir / "audit").exists() else []
+        r = client.post(f"/profiles/{AMIRA}/corrections", json=BAD_BODIES[name])
+&gt;       assert r.status_code == 422, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 422
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:489: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_a_bad_body_is_a_422_and_nothing_is_written[unknown_kind]" time="0.006"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 422&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x79441f92bac0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_a_bad_body_is_a_422_and_n11/store')
+name = 'unknown_kind'
+
+    @pytest.mark.parametrize("name", sorted(BAD_BODIES))
+    def test_a_bad_body_is_a_422_and_nothing_is_written(client, store_dir, name):
+        # §12 + inv. 2 (bodies forbid unknown keys; no limits / limits_trace / llm: field can be sent) + task (1).
+        _profile(client, AMIRA)
+        work = _work(store_dir, AMIRA)
+        before = {p.name: p.read_bytes() for p in work.iterdir() if p.is_file()}
+        audit_before = sorted(p.name for p in (store_dir / "audit").glob("*")) if (store_dir / "audit").exists() else []
+        r = client.post(f"/profiles/{AMIRA}/corrections", json=BAD_BODIES[name])
+&gt;       assert r.status_code == 422, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 422
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:489: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_a_text_of_exactly_500_characters_is_accepted" time="0.003"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x79441f92bce0&gt;
+
+    def test_a_text_of_exactly_500_characters_is_accepted(client):
+        text = "Cap: " + "t" * 495
+        assert len(text) == 500
+&gt;       body = _correct(client, AMIRA, "parsed_rule", 0, text)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:498: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x79441f92bce0&gt;
+pid = 'persona-amira', kind = 'parsed_rule', ref = 0
+text = 'Cap: tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt...tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt'
+
+    def _correct(client: TestClient, pid: str, kind: str, ref, text: str) -&gt; dict:
+        r = _correct_raw(client, pid, kind, ref, text)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:143: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_a_target_that_points_at_nothing_is_refused_and_nothing_is_written[parsed_rule-99]" time="0.006"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert (404 in (404, 422) and False)&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&#10; +  and   False = _from_the_route(&lt;Response [404 Not Found]&gt;)">client = &lt;starlette.testclient.TestClient object at 0x79441f92a7a0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_a_target_that_points_at_n0/store')
+kind = 'parsed_rule', ref = 99
+
+    @pytest.mark.parametrize("kind,ref", [("parsed_rule", 99), ("parsed_rule", -1), ("parsed_rule", "abc"),
+                                          ("profile_finding", "nope"), ("behaviour", "nope")])
+    def test_a_target_that_points_at_nothing_is_refused_and_nothing_is_written(client, store_dir, kind, ref):
+        # SPEC-AMBIGUITY: the spec does not say what an unknown ref does; stricter reading: a correction must point at an
+        # AI-derived item that can exist (a rule index in range, a C / N6 finding id, a check id), else 404 / 422, no write.
+        _profile(client, AMIRA)
+        before = (_work(store_dir, AMIRA) / "events.jsonl").read_bytes()
+        r = _correct_raw(client, AMIRA, kind, ref, "ok")
+&gt;       assert r.status_code in (404, 422) and _from_the_route(r), r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert (404 in (404, 422) and False)
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+E        +  and   False = _from_the_route(&lt;Response [404 Not Found]&gt;)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:516: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_a_target_that_points_at_nothing_is_refused_and_nothing_is_written[parsed_rule--1]" time="0.006"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert (404 in (404, 422) and False)&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&#10; +  and   False = _from_the_route(&lt;Response [404 Not Found]&gt;)">client = &lt;starlette.testclient.TestClient object at 0x79441f92bbd0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_a_target_that_points_at_n1/store')
+kind = 'parsed_rule', ref = -1
+
+    @pytest.mark.parametrize("kind,ref", [("parsed_rule", 99), ("parsed_rule", -1), ("parsed_rule", "abc"),
+                                          ("profile_finding", "nope"), ("behaviour", "nope")])
+    def test_a_target_that_points_at_nothing_is_refused_and_nothing_is_written(client, store_dir, kind, ref):
+        # SPEC-AMBIGUITY: the spec does not say what an unknown ref does; stricter reading: a correction must point at an
+        # AI-derived item that can exist (a rule index in range, a C / N6 finding id, a check id), else 404 / 422, no write.
+        _profile(client, AMIRA)
+        before = (_work(store_dir, AMIRA) / "events.jsonl").read_bytes()
+        r = _correct_raw(client, AMIRA, kind, ref, "ok")
+&gt;       assert r.status_code in (404, 422) and _from_the_route(r), r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert (404 in (404, 422) and False)
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+E        +  and   False = _from_the_route(&lt;Response [404 Not Found]&gt;)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:516: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_a_target_that_points_at_nothing_is_refused_and_nothing_is_written[parsed_rule-abc]" time="0.006"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert (404 in (404, 422) and False)&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&#10; +  and   False = _from_the_route(&lt;Response [404 Not Found]&gt;)">client = &lt;starlette.testclient.TestClient object at 0x79441f92bf00&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_a_target_that_points_at_n2/store')
+kind = 'parsed_rule', ref = 'abc'
+
+    @pytest.mark.parametrize("kind,ref", [("parsed_rule", 99), ("parsed_rule", -1), ("parsed_rule", "abc"),
+                                          ("profile_finding", "nope"), ("behaviour", "nope")])
+    def test_a_target_that_points_at_nothing_is_refused_and_nothing_is_written(client, store_dir, kind, ref):
+        # SPEC-AMBIGUITY: the spec does not say what an unknown ref does; stricter reading: a correction must point at an
+        # AI-derived item that can exist (a rule index in range, a C / N6 finding id, a check id), else 404 / 422, no write.
+        _profile(client, AMIRA)
+        before = (_work(store_dir, AMIRA) / "events.jsonl").read_bytes()
+        r = _correct_raw(client, AMIRA, kind, ref, "ok")
+&gt;       assert r.status_code in (404, 422) and _from_the_route(r), r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert (404 in (404, 422) and False)
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+E        +  and   False = _from_the_route(&lt;Response [404 Not Found]&gt;)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:516: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_a_target_that_points_at_nothing_is_refused_and_nothing_is_written[profile_finding-nope]" time="0.007"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert (404 in (404, 422) and False)&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&#10; +  and   False = _from_the_route(&lt;Response [404 Not Found]&gt;)">client = &lt;starlette.testclient.TestClient object at 0x79441c508160&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_a_target_that_points_at_n3/store')
+kind = 'profile_finding', ref = 'nope'
+
+    @pytest.mark.parametrize("kind,ref", [("parsed_rule", 99), ("parsed_rule", -1), ("parsed_rule", "abc"),
+                                          ("profile_finding", "nope"), ("behaviour", "nope")])
+    def test_a_target_that_points_at_nothing_is_refused_and_nothing_is_written(client, store_dir, kind, ref):
+        # SPEC-AMBIGUITY: the spec does not say what an unknown ref does; stricter reading: a correction must point at an
+        # AI-derived item that can exist (a rule index in range, a C / N6 finding id, a check id), else 404 / 422, no write.
+        _profile(client, AMIRA)
+        before = (_work(store_dir, AMIRA) / "events.jsonl").read_bytes()
+        r = _correct_raw(client, AMIRA, kind, ref, "ok")
+&gt;       assert r.status_code in (404, 422) and _from_the_route(r), r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert (404 in (404, 422) and False)
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+E        +  and   False = _from_the_route(&lt;Response [404 Not Found]&gt;)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:516: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_a_target_that_points_at_nothing_is_refused_and_nothing_is_written[behaviour-nope]" time="0.006"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert (404 in (404, 422) and False)&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code&#10; +  and   False = _from_the_route(&lt;Response [404 Not Found]&gt;)">client = &lt;starlette.testclient.TestClient object at 0x79441c5087c0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_a_target_that_points_at_n4/store')
+kind = 'behaviour', ref = 'nope'
+
+    @pytest.mark.parametrize("kind,ref", [("parsed_rule", 99), ("parsed_rule", -1), ("parsed_rule", "abc"),
+                                          ("profile_finding", "nope"), ("behaviour", "nope")])
+    def test_a_target_that_points_at_nothing_is_refused_and_nothing_is_written(client, store_dir, kind, ref):
+        # SPEC-AMBIGUITY: the spec does not say what an unknown ref does; stricter reading: a correction must point at an
+        # AI-derived item that can exist (a rule index in range, a C / N6 finding id, a check id), else 404 / 422, no write.
+        _profile(client, AMIRA)
+        before = (_work(store_dir, AMIRA) / "events.jsonl").read_bytes()
+        r = _correct_raw(client, AMIRA, kind, ref, "ok")
+&gt;       assert r.status_code in (404, 422) and _from_the_route(r), r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert (404 in (404, 422) and False)
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+E        +  and   False = _from_the_route(&lt;Response [404 Not Found]&gt;)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:516: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_an_unknown_profile_is_a_404" time="0.002"><failure message="AssertionError: assert (404 == 404 and 'unknown profile' in 'Not Found')&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x79441c5089e0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_an_unknown_profile_is_a_40/store')
+
+    def test_an_unknown_profile_is_a_404(client, store_dir):
+        r = _correct_raw(client, "persona-nobody", "parsed_rule", 0, "ok")
+&gt;       assert r.status_code == 404 and "unknown profile" in r.json()["detail"]
+E       AssertionError: assert (404 == 404 and 'unknown profile' in 'Not Found')
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:522: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_the_body_model_names_the_four_target_kinds" time="0.014"><failure message="KeyError: '/profiles/{profile_id}/corrections'">client = &lt;starlette.testclient.TestClient object at 0x79441f92a9c0&gt;
+
+    def test_the_body_model_names_the_four_target_kinds(client):
+        # task (1): target.kind is exactly parsed_rule | profile_finding | behaviour | note_reading (read from OpenAPI).
+        spec = client.get("/openapi.json").json()
+&gt;       op = spec["paths"]["/profiles/{profile_id}/corrections"]["post"]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       KeyError: '/profiles/{profile_id}/corrections'
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:529: KeyError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_every_ai_derived_item_can_be_corrected[persona-amira-parsed_rule-0]" time="0.003"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x79441f92b9b0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_every_ai_derived_item_can0/store')
+pid = 'persona-amira', kind = 'parsed_rule', ref = 0
+
+    @pytest.mark.parametrize("pid,kind,ref", [(AMIRA, "parsed_rule", 0), (ROBERT, "parsed_rule", 1),
+                                              (ROBERT, "profile_finding", "C1"), (ROBERT, "behaviour", "S1"),
+                                              (ROBERT, "behaviour", "S3"), (MATEO, "parsed_rule", 3)])
+    def test_every_ai_derived_item_can_be_corrected(client, store_dir, pid, kind, ref):
+        # Owner Q1 (2026-11-15): "correct anything that is wrong" on a parsed rule, a profile finding, or a behaviour row.
+        # No fake here: the recorded answers miss because the notes changed, which must never break the route (mock mode).
+        text = "I want to put this in my own words."
+&gt;       body = _correct(client, pid, kind, ref, text)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:558: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x79441f92b9b0&gt;
+pid = 'persona-amira', kind = 'parsed_rule', ref = 0
+text = 'I want to put this in my own words.'
+
+    def _correct(client: TestClient, pid: str, kind: str, ref, text: str) -&gt; dict:
+        r = _correct_raw(client, pid, kind, ref, text)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:143: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_every_ai_derived_item_can_be_corrected[persona-robert-parsed_rule-1]" time="0.003"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x79441f92b130&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_every_ai_derived_item_can1/store')
+pid = 'persona-robert', kind = 'parsed_rule', ref = 1
+
+    @pytest.mark.parametrize("pid,kind,ref", [(AMIRA, "parsed_rule", 0), (ROBERT, "parsed_rule", 1),
+                                              (ROBERT, "profile_finding", "C1"), (ROBERT, "behaviour", "S1"),
+                                              (ROBERT, "behaviour", "S3"), (MATEO, "parsed_rule", 3)])
+    def test_every_ai_derived_item_can_be_corrected(client, store_dir, pid, kind, ref):
+        # Owner Q1 (2026-11-15): "correct anything that is wrong" on a parsed rule, a profile finding, or a behaviour row.
+        # No fake here: the recorded answers miss because the notes changed, which must never break the route (mock mode).
+        text = "I want to put this in my own words."
+&gt;       body = _correct(client, pid, kind, ref, text)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:558: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x79441f92b130&gt;
+pid = 'persona-robert', kind = 'parsed_rule', ref = 1
+text = 'I want to put this in my own words.'
+
+    def _correct(client: TestClient, pid: str, kind: str, ref, text: str) -&gt; dict:
+        r = _correct_raw(client, pid, kind, ref, text)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:143: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_every_ai_derived_item_can_be_corrected[persona-robert-profile_finding-C1]" time="0.004"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x79441c50aad0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_every_ai_derived_item_can2/store')
+pid = 'persona-robert', kind = 'profile_finding', ref = 'C1'
+
+    @pytest.mark.parametrize("pid,kind,ref", [(AMIRA, "parsed_rule", 0), (ROBERT, "parsed_rule", 1),
+                                              (ROBERT, "profile_finding", "C1"), (ROBERT, "behaviour", "S1"),
+                                              (ROBERT, "behaviour", "S3"), (MATEO, "parsed_rule", 3)])
+    def test_every_ai_derived_item_can_be_corrected(client, store_dir, pid, kind, ref):
+        # Owner Q1 (2026-11-15): "correct anything that is wrong" on a parsed rule, a profile finding, or a behaviour row.
+        # No fake here: the recorded answers miss because the notes changed, which must never break the route (mock mode).
+        text = "I want to put this in my own words."
+&gt;       body = _correct(client, pid, kind, ref, text)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:558: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x79441c50aad0&gt;
+pid = 'persona-robert', kind = 'profile_finding', ref = 'C1'
+text = 'I want to put this in my own words.'
+
+    def _correct(client: TestClient, pid: str, kind: str, ref, text: str) -&gt; dict:
+        r = _correct_raw(client, pid, kind, ref, text)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:143: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_every_ai_derived_item_can_be_corrected[persona-robert-behaviour-S1]" time="0.003"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x79441c50a8b0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_every_ai_derived_item_can3/store')
+pid = 'persona-robert', kind = 'behaviour', ref = 'S1'
+
+    @pytest.mark.parametrize("pid,kind,ref", [(AMIRA, "parsed_rule", 0), (ROBERT, "parsed_rule", 1),
+                                              (ROBERT, "profile_finding", "C1"), (ROBERT, "behaviour", "S1"),
+                                              (ROBERT, "behaviour", "S3"), (MATEO, "parsed_rule", 3)])
+    def test_every_ai_derived_item_can_be_corrected(client, store_dir, pid, kind, ref):
+        # Owner Q1 (2026-11-15): "correct anything that is wrong" on a parsed rule, a profile finding, or a behaviour row.
+        # No fake here: the recorded answers miss because the notes changed, which must never break the route (mock mode).
+        text = "I want to put this in my own words."
+&gt;       body = _correct(client, pid, kind, ref, text)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:558: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x79441c50a8b0&gt;
+pid = 'persona-robert', kind = 'behaviour', ref = 'S1'
+text = 'I want to put this in my own words.'
+
+    def _correct(client: TestClient, pid: str, kind: str, ref, text: str) -&gt; dict:
+        r = _correct_raw(client, pid, kind, ref, text)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:143: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_every_ai_derived_item_can_be_corrected[persona-robert-behaviour-S3]" time="0.003"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x79441c50af10&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_every_ai_derived_item_can4/store')
+pid = 'persona-robert', kind = 'behaviour', ref = 'S3'
+
+    @pytest.mark.parametrize("pid,kind,ref", [(AMIRA, "parsed_rule", 0), (ROBERT, "parsed_rule", 1),
+                                              (ROBERT, "profile_finding", "C1"), (ROBERT, "behaviour", "S1"),
+                                              (ROBERT, "behaviour", "S3"), (MATEO, "parsed_rule", 3)])
+    def test_every_ai_derived_item_can_be_corrected(client, store_dir, pid, kind, ref):
+        # Owner Q1 (2026-11-15): "correct anything that is wrong" on a parsed rule, a profile finding, or a behaviour row.
+        # No fake here: the recorded answers miss because the notes changed, which must never break the route (mock mode).
+        text = "I want to put this in my own words."
+&gt;       body = _correct(client, pid, kind, ref, text)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:558: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x79441c50af10&gt;
+pid = 'persona-robert', kind = 'behaviour', ref = 'S3'
+text = 'I want to put this in my own words.'
+
+    def _correct(client: TestClient, pid: str, kind: str, ref, text: str) -&gt; dict:
+        r = _correct_raw(client, pid, kind, ref, text)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:143: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_every_ai_derived_item_can_be_corrected[persona-mateo-parsed_rule-3]" time="0.003"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x79441c50b130&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_every_ai_derived_item_can5/store')
+pid = 'persona-mateo', kind = 'parsed_rule', ref = 3
+
+    @pytest.mark.parametrize("pid,kind,ref", [(AMIRA, "parsed_rule", 0), (ROBERT, "parsed_rule", 1),
+                                              (ROBERT, "profile_finding", "C1"), (ROBERT, "behaviour", "S1"),
+                                              (ROBERT, "behaviour", "S3"), (MATEO, "parsed_rule", 3)])
+    def test_every_ai_derived_item_can_be_corrected(client, store_dir, pid, kind, ref):
+        # Owner Q1 (2026-11-15): "correct anything that is wrong" on a parsed rule, a profile finding, or a behaviour row.
+        # No fake here: the recorded answers miss because the notes changed, which must never break the route (mock mode).
+        text = "I want to put this in my own words."
+&gt;       body = _correct(client, pid, kind, ref, text)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:558: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x79441c50b130&gt;
+pid = 'persona-mateo', kind = 'parsed_rule', ref = 3
+text = 'I want to put this in my own words.'
+
+    def _correct(client: TestClient, pid: str, kind: str, ref, text: str) -&gt; dict:
+        r = _correct_raw(client, pid, kind, ref, text)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:143: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_fixtures_and_the_activity_tags_file_are_never_touched" time="0.005"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x79441c50b570&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-622/test_fixtures_and_the_activity0/store')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x79441f768ec0&gt;
+
+    def test_fixtures_and_the_activity_tags_file_are_never_touched(client, store_dir, monkeypatch):
+        # §10 + CLAUDE.md: seeds are read-only (the loop works on the store copy); activity_tags.csv gets no row from code.
+        before = _hashes(FIXTURES, META_DIR)
+        assert before
+        install(monkeypatch, n3=tech_reader({TECH20: 20}))
+&gt;       _correct(client, AMIRA, "parsed_rule", TECH_RULE, TECH20)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:572: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x79441c50b570&gt;
+pid = 'persona-amira', kind = 'parsed_rule', ref = 1
+text = 'Actually my limit for tech is 20 % of the portfolio.'
+
+    def _correct(client: TestClient, pid: str, kind: str, ref, text: str) -&gt; dict:
+        r = _correct_raw(client, pid, kind, ref, text)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:143: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_a_correction_does_not_change_another_persona_report" time="0.518"><failure message="AssertionError: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404 Not Found]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x79441c50bf00&gt;
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x79441f6b1780&gt;
+
+    def test_a_correction_does_not_change_another_persona_report(client, monkeypatch):
+        # task (5): the persona reports stay as they are; one profile's correction reaches only its own working copy.
+        def report(pid: str) -&gt; dict:
+            rep = client.post(f"/profiles/{pid}/review").json()
+            rep.pop("run_id")
+            return rep
+    
+        before = {pid: report(pid) for pid in (MATEO, ROBERT)}
+        install(monkeypatch, n3=tech_reader({TECH20: 20}))
+&gt;       _correct(client, AMIRA, "parsed_rule", TECH_RULE, TECH20)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:588: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x79441c50bf00&gt;
+pid = 'persona-amira', kind = 'parsed_rule', ref = 1
+text = 'Actually my limit for tech is 20 % of the portfolio.'
+
+    def _correct(client: TestClient, pid: str, kind: str, ref, text: str) -&gt; dict:
+        r = _correct_raw(client, pid, kind, ref, text)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: {"detail":"Not Found"}
+E       assert 404 == 200
+E        +  where 404 = &lt;Response [404 Not Found]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:143: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_correction_hooks_are_defined_once_and_used" time="0.001"><failure message="AssertionError: index.html must define `function renderCorrectionControl(` exactly once (found 0)">page = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...ble de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  }\n  boot();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+
+    def test_correction_hooks_are_defined_once_and_used(page):
+        for name in NEW_UI_HOOKS:
+&gt;           function_source(page, name)                                              # exactly one definition
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:618: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+html = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...ble de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  }\n  boot();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+name = 'renderCorrectionControl'
+
+    def function_source(html: str, name: str) -&gt; tuple[str, list[str]]:
+        """(body source, literal template texts with `${}` slots as '§') of `function &lt;name&gt;(...) {...}`."""
+        found = list(re.finditer(rf"function\s+{re.escape(name)}\s*\(", html))
+&gt;       assert len(found) == 1, f"index.html must define `function {name}(` exactly once (found {len(found)})"
+               ^^^^^^^^^^^^^^^
+E       AssertionError: index.html must define `function renderCorrectionControl(` exactly once (found 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/dashboard/test_ui_flow_b.py:150: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_the_control_is_a_text_box_and_a_plain_verb_button_that_asks_nothing" time="0.001"><failure message="AssertionError: index.html must define `function renderCorrectionControl(` exactly once (found 0)">page = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...ble de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  }\n  boot();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+
+    def test_the_control_is_a_text_box_and_a_plain_verb_button_that_asks_nothing(page):
+        # task (4) + D13 spirit: a passive affordance. A small form with a text box (&lt;= 500 chars) and a submit button
+        # labelled « Corriger »: no prompt text, no question mark, no placeholder, no typed number, no request while rendering.
+&gt;       body, texts = function_source(page, "renderCorrectionControl")
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:627: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+html = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...ble de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  }\n  boot();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+name = 'renderCorrectionControl'
+
+    def function_source(html: str, name: str) -&gt; tuple[str, list[str]]:
+        """(body source, literal template texts with `${}` slots as '§') of `function &lt;name&gt;(...) {...}`."""
+        found = list(re.finditer(rf"function\s+{re.escape(name)}\s*\(", html))
+&gt;       assert len(found) == 1, f"index.html must define `function {name}(` exactly once (found {len(found)})"
+               ^^^^^^^^^^^^^^^
+E       AssertionError: index.html must define `function renderCorrectionControl(` exactly once (found 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/dashboard/test_ui_flow_b.py:150: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_the_control_is_hidden_in_the_static_demo" time="0.001"><failure message="AssertionError: index.html must define `function renderCorrectionControl(` exactly once (found 0)">page = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...ble de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  }\n  boot();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+
+    def test_the_control_is_hidden_in_the_static_demo(page):
+        # task (4): no API base (the shipped page: empty &lt;meta name="coherence-api-base"&gt;) -&gt; the control renders nothing.
+        # The check is on the source: an early `if (!apiBase()) return "";` before any markup.
+&gt;       body, _ = function_source(page, "renderCorrectionControl")
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:644: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+html = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...ble de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  }\n  boot();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+name = 'renderCorrectionControl'
+
+    def function_source(html: str, name: str) -&gt; tuple[str, list[str]]:
+        """(body source, literal template texts with `${}` slots as '§') of `function &lt;name&gt;(...) {...}`."""
+        found = list(re.finditer(rf"function\s+{re.escape(name)}\s*\(", html))
+&gt;       assert len(found) == 1, f"index.html must define `function {name}(` exactly once (found {len(found)})"
+               ^^^^^^^^^^^^^^^
+E       AssertionError: index.html must define `function renderCorrectionControl(` exactly once (found 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/dashboard/test_ui_flow_b.py:150: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_send_correction_posts_target_and_text_only_then_rerenders_with_the_returned_report" time="0.001"><failure message="AssertionError: index.html must define `function sendCorrection(` exactly once (found 0)">page = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...ble de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  }\n  boot();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+
+    def test_send_correction_posts_target_and_text_only_then_rerenders_with_the_returned_report(page):
+        # §12 + inv. 2: the body is exactly {target: {kind, ref}, text}; the only POST helper is apiPost; the page then shows
+        # the returned `report` (the Flow C review) instead of keeping the old one. A failure is shown, never swallowed.
+&gt;       body, texts = function_source(page, "sendCorrection")
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:654: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+html = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...ble de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  }\n  boot();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+name = 'sendCorrection'
+
+    def function_source(html: str, name: str) -&gt; tuple[str, list[str]]:
+        """(body source, literal template texts with `${}` slots as '§') of `function &lt;name&gt;(...) {...}`."""
+        found = list(re.finditer(rf"function\s+{re.escape(name)}\s*\(", html))
+&gt;       assert len(found) == 1, f"index.html must define `function {name}(` exactly once (found {len(found)})"
+               ^^^^^^^^^^^^^^^
+E       AssertionError: index.html must define `function sendCorrection(` exactly once (found 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/dashboard/test_ui_flow_b.py:150: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_correction_forms_are_bound_to_send_correction" time="0.001"><failure message="AssertionError: a [data-correct-kind] listener must call sendCorrection(&#10;assert None">page = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...ble de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  }\n  boot();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+
+    def test_correction_forms_are_bound_to_send_correction(page):
+        # The forms are plain markup after render(): the page binds their submit (preventDefault) to sendCorrection.
+        m = re.search(r"querySelectorAll\(\s*[\"'`][^\"'`]*data-correct[^;]*?sendCorrection\(", page, re.S)
+&gt;       assert m, "a [data-correct-kind] listener must call sendCorrection("
+E       AssertionError: a [data-correct-kind] listener must call sendCorrection(
+E       assert None
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:672: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_every_ai_derived_item_gets_the_control" time="0.001"><failure message="assert None&#10; +  where None = &lt;function search at 0x79444feb7cc0&gt;('renderCorrectionControl\\(\\s*[\\&quot;\']parsed_rule[\\&quot;\']\\s*,\\s*[^)]*_idx', '\n    const seen = new Set(), rules = [], live = Boolean(apiBase());\n    const lock = live ? &quot;&quot; : \'disabled title=&quot;...ules&quot;&gt;${rows}&lt;/ul&gt;` : `&lt;p class=&quot;small&quot; style=&quot;margin-top:10px&quot;&gt;Aucune règle tirée de vos notes.&lt;/p&gt;`}&lt;/section&gt;`;\n  ')&#10; +    where &lt;function search at 0x79444feb7cc0&gt; = re.search">page = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...ble de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  }\n  boot();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+
+    def test_every_ai_derived_item_gets_the_control(page):
+        # task (4): each parsed note rule (with its quote and provisional flag), each profile_coherence finding, and the S1 /
+        # S3 behaviour rows carry the control, each with its own target.
+        rules, _ = function_source(page, "renderValuesRules")
+&gt;       assert re.search(r"renderCorrectionControl\(\s*[\"']parsed_rule[\"']\s*,\s*[^)]*_idx", rules)
+E       assert None
+E        +  where None = &lt;function search at 0x79444feb7cc0&gt;('renderCorrectionControl\\(\\s*[\\"\']parsed_rule[\\"\']\\s*,\\s*[^)]*_idx', '\n    const seen = new Set(), rules = [], live = Boolean(apiBase());\n    const lock = live ? "" : \'disabled title="...ules"&gt;${rows}&lt;/ul&gt;` : `&lt;p class="small" style="margin-top:10px"&gt;Aucune règle tirée de vos notes.&lt;/p&gt;`}&lt;/section&gt;`;\n  ')
+E        +    where &lt;function search at 0x79444feb7cc0&gt; = re.search
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:682: AssertionError</failure></testcase><testcase classname="tests.flows.test_correction_loop" name="test_new_and_changed_ui_strings_pass_the_blocklist_and_d10_vocabulary" time="0.002"><failure message="AssertionError: index.html must define `function renderCorrectionControl(` exactly once (found 0)">page = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...ble de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  }\n  boot();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+
+    def test_new_and_changed_ui_strings_pass_the_blocklist_and_d10_vocabulary(page):
+        # SPEC §9.3 item 3 + D10 items 1, 2, 4: no advisory phrase, nothing that proposes, ranks or labels a choice.
+        for name in CHANGED_UI:
+&gt;           body, texts = function_source(page, name)
+                          ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/flows/test_correction_loop.py:695: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+html = '&lt;!doctype html&gt;\n&lt;html lang="fr"&gt;\n&lt;head&gt;\n&lt;meta charset="utf-8"&gt;\n&lt;meta name="viewport" content="width=device-width,...ble de charger la liste des rapports. Rechargez la page.&lt;/p&gt;`; }\n  }\n  boot();\n})();\n&lt;/script&gt;\n&lt;/body&gt;\n&lt;/html&gt;\n'
+name = 'renderCorrectionControl'
+
+    def function_source(html: str, name: str) -&gt; tuple[str, list[str]]:
+        """(body source, literal template texts with `${}` slots as '§') of `function &lt;name&gt;(...) {...}`."""
+        found = list(re.finditer(rf"function\s+{re.escape(name)}\s*\(", html))
+&gt;       assert len(found) == 1, f"index.html must define `function {name}(` exactly once (found {len(found)})"
+               ^^^^^^^^^^^^^^^
+E       AssertionError: index.html must define `function renderCorrectionControl(` exactly once (found 0)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p6-correct/tests/dashboard/test_ui_flow_b.py:150: AssertionError</failure></testcase></testsuite></testsuites>
