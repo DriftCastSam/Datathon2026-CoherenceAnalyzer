@@ -1,7 +1,7 @@
 """FastAPI over the Flow C pipeline: profiles, intake, events, parsed-rule decisions, review, reports, audit (P1.4).
 
 Sources: SPEC §12 (API), §3.4 (event log), §10 (persistence, audit), §1 invariants 2 and 6;
-docs/spec-decisions.md D7 (Flow B is P2: `order_intent` -> 501, nothing appended; product focus = Flow C);
+docs/spec-decisions.md D7 (product focus = Flow C; Flow B routes are P2.APIFB, tests/flows/test_api_flow_b.py);
 docs/spec-factors.md §20.6 (intake: `missing` / `next_question`, skip marker), §20.7, §20.9 (`profile_coherence`).
 
 Everything runs offline with COHERENCE_ANALYZER_LLM=mock. `COHERENCE_ANALYZER_STORE_DIR` points at a tmp dir for
@@ -375,17 +375,9 @@ def test_post_event_accepts_the_non_order_types(client, store_dir, pid, etype, p
     assert ev["payload"] == payload
 
 
-def test_order_intent_is_501_and_nothing_is_appended(client, store_dir, pid):
-    # D7: Flow B is P2. order_intent -> 501 with a message saying so; the event log is untouched.
-    assert client.get(f"/profiles/{pid}").status_code == 200
-    path = _events_path(store_dir, pid)
-    before = path.read_bytes()
-    r = client.post(f"/profiles/{pid}/events",
-                    json=_event(type="order_intent", text="I want to put 10% in NVDA, everyone's talking about it"))
-    assert r.status_code == 501
-    text = json.dumps(r.json())
-    assert "Flow B" in text and "P2" in text
-    assert path.read_bytes() == before
+# The P1.4 pin "order_intent -> 501" (D7: Flow B deferred to P2) was removed when P2.APIFB wired Flow B into the API
+# (SPEC §12: order_intent -> B1 draft; POST /intents/{intent_id}/confirm -> B3-B9). Oracle fix, standing approval;
+# the replacement oracle is tests/flows/test_api_flow_b.py.
 
 
 @pytest.mark.parametrize("body", [

@@ -554,7 +554,7 @@
     "docs/spec-factors.md §20.7"
    ],
    "tests": [
-    "tests/test_d10_dashboard.py"
+    "tests/dashboard/test_d10_dashboard.py"
    ],
    "code": [
     "deploy/site/index.html",
@@ -645,6 +645,28 @@
     "README.md"
    ],
    "notes": "Audit gaps: _print_review in cli.py prints no disclaimer (check and demo do); README lacks a 'Known limitations' section covering SPEC §19: 5-year window + block bootstrap + drift ASSUMED; survivorship bias; without ETF look-through sector/employer/activity checks are unknown (say what look-through now covers); behaviour classification noisy, confidence cap 0.8, needs >= 2 events, warning never block; plus the AMF/CIRO KYC out-of-scope note the UI shows (deploy/site/index.html ~372-381). Disclaimer text comes from config.py, never retyped. Touch only _print_review in cli.py (P2.D10A edits other parts of cli.py in parallel). These P2 tasks run IN PARALLEL in separate worktrees: edit only the files your task owns (plus README.md and new test files). No network, no pip install, no real AWS calls in code paths the tests run. Never write the activity-tags meta CSV (humans only, CLAUDE.md). Golden test (tests/test_engine_golden.py) must stay green. D10 (describe, never prescribe) applies to every user-facing string."
+  },
+  {
+   "id": "P2.APIFB",
+   "title": "API Flow B routes: order_intent event -> B1 draft intent, POST /intents/{intent_id}/confirm -> B3-B9 report",
+   "spec": [
+    "§12 API",
+    "§4 Flow B",
+    "§3.4",
+    "§3.6",
+    "§1 inv. 2, 6, 7",
+    "§10",
+    "§11",
+    "docs/spec-decisions.md D7 D10"
+   ],
+   "tests": [
+    "tests/flows/test_api_flow_b.py"
+   ],
+   "code": [
+    "coherence_analyzer/api.py",
+    "README.md"
+   ],
+   "notes": "Wire the existing Flow B steps (pipeline.b1_parse_intent ... b9_save, pipeline.check, FLOW_B_STEPS; do not change pipeline.py, it is done and frozen-tested) into the FastAPI app per SPEC §12. (1) POST /profiles/{id}/events with type order_intent: append the event to the working copy's events.jsonl, run B1 (N4 intent_parser through the gate, mock cache) and B2 without auto-confirm, store the draft intent in the working copy (never under fixtures/), and return the event plus the draft intent with its intent_id and status 'draft'. The draft carries only fields the user stated (D10: nothing pre-filled, no suggested ticker, size or funding). Use Robert's recorded text for ev_robert_0007 so the mock cache hits; an N4 cache miss or a draft that fails the gate returns a draft with the unparsed fields null (or a 4xx with the gate reason), never a guess. (2) POST /intents/{intent_id}/confirm, body = the user-edited intent (ticker, target_weight_pct, funding; forbid unknown keys and any limits / limits_trace / llm: field, inv. 2): append an intent_confirmed event (§3.4/§3.6), run B3-B9 and return the Flow B report (same shape as pipeline.check with auto_confirm, schema-valid, headroom null | object, fixed disclaimer). Unknown intent_id -> 404; confirming twice -> 409 or the same run, document which. User edits win over the draft. (3) No route path names a trade action beyond the SPEC §12 /intents/{intent_id}/confirm route; nothing is executed (inv. 7). GET /reports/{run_id} and /audit/{run_id} serve the Flow B run. The old P1.4 pin 'order_intent -> 501' was removed from tests/flows/test_api.py (oracle fix); phase A must write its replacement in tests/flows/test_api_flow_b.py. Runs IN PARALLEL with P2.D10C in a separate worktree: edit only api.py, README.md and the new test file. No network, no pip install, no real AWS calls. Golden test must stay green. D10 (describe, never prescribe) applies to every user-facing string."
   },
   {
    "id": "P2.UI",
