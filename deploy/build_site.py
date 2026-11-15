@@ -73,17 +73,22 @@ def site_extras(profile_dir: Path, name: str, portfolio_file: str, whatif_files:
         portfolio_file: name of the portfolio JSON file within profile_dir.
         whatif_files: {"universe": file, "scenarios": file} (names inside reports/) of this profile's precomputed what-if.
     """
-    from coherence_analyzer.rules import derive, limits as limits_mod
+    from coherence_analyzer.rules import derive, limits as limits_mod, registry
     profile = json.loads((profile_dir / "profile.json").read_text(encoding="utf-8"))
     pf = json.loads((profile_dir / portfolio_file).read_text(encoding="utf-8"))
     value, as_of = float(pf["value_cad"]), pf["as_of"]
     p = derive.derive_all(copy.deepcopy(profile), portfolio_value_cad=value, as_of=as_of)
     lim, trace = limits_mod.build_limits(p, value)
     withdrawals = p["situation"].get("planned_withdrawals")
-    if isinstance(withdrawals, list) and len(withdrawals) > 0:
+    if registry.is_skipped(withdrawals):
+        first = None
+    elif isinstance(withdrawals, list) and len(withdrawals) > 0:
         first = withdrawals[0]
     else:
         first = {}
+    goals = p["objectives"].get("goals", [])
+    if registry.is_skipped(goals):
+        goals = []
     return {
         "as_of": as_of, "value_cad": value, "portfolio_file": portfolio_file, "whatif": dict(whatif_files) if whatif_files else False,
         "weights_pct": {k: float(v) for k, v in pf["weights_pct"].items() if float(v) > 0},
@@ -96,7 +101,7 @@ def site_extras(profile_dir: Path, name: str, portfolio_file: str, whatif_files:
             "horizon_years": p["objectives"]["horizon_years"],
             "effective_horizon_years": _val(p["objectives"]["effective_horizon_years"]),
             "first_withdrawal": first, "emergency_fund_months": _val(p["situation"]["emergency_fund_months"]),
-            "goals": p["objectives"].get("goals", []), "notes": p["values"].get("notes", ""),
+            "goals": goals, "notes": p["values"].get("notes", ""),
         },
     }
 
@@ -177,8 +182,12 @@ def build(out: Path) -> Path:
     removed afterwards and the previous COHERENCE_ANALYZER_STORE_DIR is restored."""
     out = Path(out)
     if out.exists():
-        shutil.rmtree(out)
-    shutil.copytree(ROOT / "deploy" / "site", out)
+        for item in out.iterdir():
+            if item.is_dir():
+                shutil.rmtree(item)
+            else:
+                item.unlink()
+    shutil.copytree(ROOT / "deploy" / "site", out, dirs_exist_ok=True)
     saved = os.environ.get("COHERENCE_ANALYZER_STORE_DIR")
     try:
         with tempfile.TemporaryDirectory() as store:
