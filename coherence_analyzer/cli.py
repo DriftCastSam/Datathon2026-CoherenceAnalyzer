@@ -36,11 +36,26 @@ def _intent_line(intent: dict) -> str:
             f"(funding: {f.get('kind')}{' ' + str(src) if src != '' else ''})")
 
 
+NOT_STATED = "not stated"
+
+
+def _draft_line(draft: dict) -> str:
+    """D10 pt 1: a field N4 listed in ambiguous_fields is printed as not stated, with no value and no default."""
+    s = pipeline.stated_draft(draft)
+    f = s["funding"]
+    src = (f.get("ticker") or f.get("asset_class") or f.get("amount_cad") or "") if f else ""
+    funding = NOT_STATED if not f else f"{f.get('kind')}{' ' + str(src) if src != '' else ''}"
+    weight = NOT_STATED if s["target_weight_pct"] is None else f"{s['target_weight_pct']} %"
+    action = s["action"] if s["action"] is not None else NOT_STATED
+    ticker = s["ticker"] if s["ticker"] is not None else NOT_STATED
+    return f"{action} {ticker} to {weight} (funding: {funding})"
+
+
 def _print_draft(res: dict) -> None:
     """B2: the N4 draft the user would confirm or edit; nothing has run yet beyond N4 and nothing is saved."""
     print(f"order_intent {res['event']['event_id']}: \"{res['event']['text']}\"")
     draft = res["draft"]
-    print(f"  draft intent (N4, gate {res['draft_gate']}): " + (_intent_line(draft) if draft else "none"))
+    print(f"  draft intent (N4, gate {res['draft_gate']}): " + (_draft_line(draft) if draft else "none"))
     print(f"  intent {res['intent_id']} on file: {_intent_line(res['intent'])}")
     print("  waiting for confirmation: re-run with --auto-confirm to check this trade")
 

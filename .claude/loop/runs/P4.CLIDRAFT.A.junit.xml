@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="7" skipped="0" tests="19" time="1.630" timestamp="2026-11-15T01:58:45.537774+00:00" hostname="bomboclat-laptop"><testcase classname="tests.flows.test_cli_draft_d10" name="test_cli_check_draft_line_does_not_show_the_ambiguous_funding" time="0.008"><failure message="AssertionError: assert 'pro_rata_all' not in '  draft int...ro_rata_all)'&#10;  &#10;  'pro_rata_all' is contained here:&#10;    (funding: pro_rata_all)">store_env = PosixPath('/tmp/pytest-of-safraa/pytest-482/test_cli_check_draft_line_does0')
+
+    def test_cli_check_draft_line_does_not_show_the_ambiguous_funding(store_env):
+        # D10 pt 1 / §4 B2: end to end (mock cache: N4 lists ambiguous_fields ["funding"], guessed pro_rata_all).
+        out = _capture(cli.main, ["check", str(FIX), "--intent", INTENT_ID])
+        line = _draft_line(out)
+&gt;       assert "pro_rata_all" not in line
+E       AssertionError: assert 'pro_rata_all' not in '  draft int...ro_rata_all)'
+E         
+E         'pro_rata_all' is contained here:
+E           (funding: pro_rata_all)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-clidraft/tests/flows/test_cli_draft_d10.py:78: AssertionError</failure></testcase><testcase classname="tests.flows.test_cli_draft_d10" name="test_cli_check_draft_marks_the_ambiguous_field_as_not_stated" time="0.006"><failure message="AssertionError: assert 'not stated' in '  draft intent (N4, gate accepted): buy NVDA to 10 % (funding: pro_rata_all)'">store_env = PosixPath('/tmp/pytest-of-safraa/pytest-482/test_cli_check_draft_marks_the0')
+
+    def test_cli_check_draft_marks_the_ambiguous_field_as_not_stated(store_env):
+        # D10 pt 1: the field is shown as not stated, not silently dropped, and no default is put in its place.
+        out = _capture(cli.main, ["check", str(FIX), "--intent", INTENT_ID])
+        line = _draft_line(out)
+&gt;       assert NOT_STATED in line
+E       AssertionError: assert 'not stated' in '  draft intent (N4, gate accepted): buy NVDA to 10 % (funding: pro_rata_all)'
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-clidraft/tests/flows/test_cli_draft_d10.py:88: AssertionError</failure></testcase><testcase classname="tests.flows.test_cli_draft_d10" name="test_cli_check_still_waits_for_confirmation_and_saves_nothing" time="0.005" /><testcase classname="tests.flows.test_cli_draft_d10" name="test_print_draft_blanks_every_field_listed_ambiguous" time="0.001"><failure message="AssertionError: assert ('37' not in '  draft int...ro_rata_all)'&#10;  &#10;  '37' is contained here:&#10;    y NVDA to 37 % (funding: pro_rata_all)&#10;  ?           ++)">def test_print_draft_blanks_every_field_listed_ambiguous():
+        # D10 pt 1: same rule as api._draft_intent: each field in ambiguous_fields is not stated, whichever it is.
+        res = _res(_draft(ambiguous=("target_weight_pct", "funding"), target_weight_pct=37))
+        line = _draft_line(_capture(cli._print_draft, res))
+&gt;       assert "37" not in line and "pro_rata_all" not in line
+E       AssertionError: assert ('37' not in '  draft int...ro_rata_all)'
+E         
+E         '37' is contained here:
+E           y NVDA to 37 % (funding: pro_rata_all)
+E         ?           ++)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-clidraft/tests/flows/test_cli_draft_d10.py:105: AssertionError</failure></testcase><testcase classname="tests.flows.test_cli_draft_d10" name="test_print_draft_blanks_ticker_and_action_when_ambiguous" time="0.001"><failure message="AssertionError: assert 'TSLA' not in '  draft int...ro_rata_all)'&#10;  &#10;  'TSLA' is contained here:&#10;      draft intent (N4, gate accepted): buy TSLA to 10 % (funding: pro_rata_all)&#10;  ?                                         ++++">def test_print_draft_blanks_ticker_and_action_when_ambiguous():
+        res = _res(_draft(ambiguous=("action", "ticker"), ticker="TSLA"))
+        line = _draft_line(_capture(cli._print_draft, res))
+&gt;       assert "TSLA" not in line
+E       AssertionError: assert 'TSLA' not in '  draft int...ro_rata_all)'
+E         
+E         'TSLA' is contained here:
+E             draft intent (N4, gate accepted): buy TSLA to 10 % (funding: pro_rata_all)
+E         ?                                         ++++
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-clidraft/tests/flows/test_cli_draft_d10.py:113: AssertionError</failure></testcase><testcase classname="tests.flows.test_cli_draft_d10" name="test_print_draft_without_ambiguous_fields_shows_the_whole_draft" time="0.000" /><testcase classname="tests.flows.test_cli_draft_d10" name="test_print_draft_missing_ambiguous_key_is_treated_as_none_ambiguous" time="0.000" /><testcase classname="tests.flows.test_cli_draft_d10" name="test_print_draft_rejected_draft_prints_none_and_shows_no_value" time="0.000" /><testcase classname="tests.flows.test_cli_draft_d10" name="test_print_draft_does_not_mutate_the_result" time="0.000" /><testcase classname="tests.flows.test_cli_draft_d10" name="test_print_draft_uses_no_recommending_words" time="0.000" /><testcase classname="tests.flows.test_cli_draft_d10" name="test_b2_a_field_the_user_filled_in_counts_as_an_edit_even_if_equal_to_the_guess" time="0.000"><failure message="AssertionError: assert [] == ['funding']&#10;  &#10;  Right contains one more item: 'funding'&#10;  Use -v to get more diff">def test_b2_a_field_the_user_filled_in_counts_as_an_edit_even_if_equal_to_the_guess():
+        # D10 pt 1 / §10: N4 guessed pro_rata_all and listed funding as ambiguous; the user confirmed pro_rata_all.
+        # Against the blanked draft (funding None) that is a user edit. Only funding: the other fields were stated.
+        out = pipeline.b2_confirm(_state(_draft()), auto_confirm=True)
+&gt;       assert out["intent_edits"] == ["funding"]
+E       AssertionError: assert [] == ['funding']
+E         
+E         Right contains one more item: 'funding'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-clidraft/tests/flows/test_cli_draft_d10.py:169: AssertionError</failure></testcase><testcase classname="tests.flows.test_cli_draft_d10" name="test_b2_every_ambiguous_field_is_an_edit_when_the_user_filled_it" time="0.000"><failure message="AssertionError: assert [] == ['ticker', 't...t_weight_pct']&#10;  &#10;  Right contains 2 more items, first extra item: 'ticker'&#10;  Use -v to get more diff">def test_b2_every_ambiguous_field_is_an_edit_when_the_user_filled_it():
+        out = pipeline.b2_confirm(_state(_draft(ambiguous=("ticker", "target_weight_pct"))), auto_confirm=True)
+&gt;       assert out["intent_edits"] == ["ticker", "target_weight_pct"]      # INTENT_KEYS order
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: assert [] == ['ticker', 't...t_weight_pct']
+E         
+E         Right contains 2 more items, first extra item: 'ticker'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-clidraft/tests/flows/test_cli_draft_d10.py:174: AssertionError</failure></testcase><testcase classname="tests.flows.test_cli_draft_d10" name="test_b2_no_ambiguous_field_and_equal_values_means_no_edit" time="0.000" /><testcase classname="tests.flows.test_cli_draft_d10" name="test_b2_a_stated_field_the_user_changed_is_still_an_edit" time="0.000" /><testcase classname="tests.flows.test_cli_draft_d10" name="test_b2_without_a_draft_every_filled_field_is_an_edit" time="0.000" /><testcase classname="tests.flows.test_cli_draft_d10" name="test_b2_does_not_mutate_the_draft_kept_for_the_audit" time="0.000" /><testcase classname="tests.flows.test_cli_draft_d10" name="test_b2_without_auto_confirm_still_stops_and_has_no_edits" time="0.000" /><testcase classname="tests.flows.test_cli_draft_d10" name="test_audit_intent_edits_count_a_user_filled_ambiguous_field" time="0.669"><failure message="AssertionError: assert [] == ['funding']&#10;  &#10;  Right contains one more item: 'funding'&#10;  Use -v to get more diff">store_env = PosixPath('/tmp/pytest-of-safraa/pytest-482/test_audit_intent_edits_count_0')
+
+    def test_audit_intent_edits_count_a_user_filled_ambiguous_field(store_env):
+        # §10 audit end to end: a copy of Robert whose confirmed in_0001 funds NVDA with exactly what N4 guessed
+        # (pro_rata_all, listed ambiguous). The audit's intent_edits is ["funding"]; the other fields were stated.
+        fx = store_env / "fixtures" / "robert"
+        shutil.copytree(FIX, fx)
+        intents = json.loads((fx / "intents.json").read_text(encoding="utf-8"))
+        intents[0]["funding"] = {"kind": "pro_rata_all"}
+        (fx / "intents.json").write_text(json.dumps(intents), encoding="utf-8")
+        rep = pipeline.check(fx, INTENT_ID, auto_confirm=True)
+        audit = store.load_audit(rep["run_id"])
+&gt;       assert audit["intent_edits"] == ["funding"]
+E       AssertionError: assert [] == ['funding']
+E         
+E         Right contains one more item: 'funding'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-clidraft/tests/flows/test_cli_draft_d10.py:220: AssertionError</failure></testcase><testcase classname="tests.flows.test_cli_draft_d10" name="test_audit_intent_edits_on_the_shipped_robert_fixture" time="0.607" /></testsuite></testsuites>
