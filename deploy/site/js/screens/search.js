@@ -287,8 +287,8 @@
      live report. The risk label comes from the shared map; the horizon uses the same buckets
      as the coherence screen. A missing value is omitted instead of invented. */
   function noteHorizon(years) {
-    const count = Number(years);
-    if (!Number.isFinite(count) || count <= 0) return "";
+    const count = App.format.num(years, 0);
+    if (count <= 0) return "";
     if (count < 1) return "Under 1 year";
     if (count <= 2) return "1 to 2 years";
     if (count <= 5) return "3 to 5 years";

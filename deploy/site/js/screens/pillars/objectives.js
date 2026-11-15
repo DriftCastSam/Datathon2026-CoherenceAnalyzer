@@ -48,13 +48,7 @@
 
   /* ---------- formatting ---------- */
 
-  function num(value, fallback) {
-    return typeof value === "number" && isFinite(value) ? value : fallback;
-  }
-
-  function amount(value) {
-    return "$" + App.fmtCad(value);
-  }
+  const {num, amount} = App.format;
 
   function signedPct(value, base) {
     if (!base) return App.fmtPct(value);

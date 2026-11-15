@@ -7,7 +7,10 @@
   const MODE_LIVE = "live";
   const BOOLEAN_WORDS = {yes: true, y: true, true: true, no: false, n: false, false: false};
   const NONE_WORDS = ["none", "no", "nothing", "empty"];
-  const NUMBER_NOISE = /[$\s,%]|cad|years?|yrs?/gi;
+  const NUMBER_NOISE = /[$\s%]|cad|years?|yrs?/gi;
+  const THOUSANDS_FORM = /^-?\d{1,3}(,\d{3})+(\.\d+)?$/;
+  const COMMA_DECIMAL_FORM = /^-?\d+,\d{1,2}$/;
+  const AMBIGUOUS_NUMBER = "Enter a number with a dot for decimals and commas only for thousands (for example 25,000 or 1.5).";
   const STATIC_NOTICE = "Offline demo: answers are not analysed; showing the prebuilt analysis.";
   const RUN_LABEL = "Run analysis";
   const RUN_BUSY_LABEL = "Running analysis…";
@@ -21,6 +24,8 @@
     persona: null, questions: [], index: -1, busy: false, saving: false,
     loading: false, error: "", fieldError: "", runError: ""
   };
+  /* Only the most recent question load for the current persona may fill the screen. */
+  let loadSeq = 0;
   let activeSection = null;
 
   App.navSpec.conversation = {tabs: [], chrome: "bare"};
@@ -61,9 +66,19 @@
     return {error: "Choose one of the suggestions: " + spec.chips.map(item => item.label).join(", ") + "."};
   }
 
+  /* "25,000" is thousands, a single trailing ",5" or ",25" is a decimal comma; anything else
+     with a comma is rejected rather than guessed. */
+  function normalizeNumberText(cleaned) {
+    if (!cleaned.includes(",")) return {text: cleaned};
+    if (THOUSANDS_FORM.test(cleaned)) return {text: cleaned.replace(/,/g, "")};
+    if (COMMA_DECIMAL_FORM.test(cleaned)) return {text: cleaned.replace(",", ".")};
+    return {error: AMBIGUOUS_NUMBER};
+  }
+
   function parseNumber(spec, raw) {
-    const cleaned = raw.replace(NUMBER_NOISE, "");
-    let value = cleaned === "" ? NaN : Number(cleaned);
+    const normalized = normalizeNumberText(raw.replace(NUMBER_NOISE, ""));
+    if (normalized.error) return normalized;
+    let value = normalized.text === "" ? NaN : Number(normalized.text);
     if (!Number.isFinite(value)) return {error: "Enter a number."};
     if (spec.negateOnInput && value > 0) value = -value;
     if (spec.integer && !Number.isInteger(value)) return {error: "Enter a whole number."};
@@ -114,45 +129,53 @@
   }
 
   async function loadQuestions() {
-    screen.loading = true;
-    screen.error = "";
-    screen.persona = App.state.persona;
+    const personaId = App.state.persona;
+    loadSeq += 1;
+    const token = loadSeq;
+    Object.assign(screen, {
+      persona: personaId, questions: [], index: -1, busy: false, saving: false,
+      loading: true, error: "", fieldError: "", runError: ""
+    });
     try {
-      const result = await App.source.intake(App.state.persona, App.state.report);
-      screen.questions = result.questions.map(question => ({...question, skipped: false}));
+      const result = await App.source.intake(personaId, App.state.report);
+      if (token !== loadSeq) return;
+      screen.questions = result.questions.map(question => ({...question, skipped: Boolean(question.skipped)}));
       screen.index = firstOpenAfter(-1);
     } catch (error) {
+      if (token !== loadSeq) return;
       console.error("[conversation] could not load the questions", error);
       screen.questions = [];
       screen.error = "Could not load the questions: " + error.message;
-    } finally {
-      screen.loading = false;
     }
+    screen.loading = false;
   }
 
   /* Saves (or skips) the current question through the data source, then moves on. */
   async function commit(action, failure) {
     const question = screen.questions[screen.index];
     if (screen.saving || !question) return;
+    const token = loadSeq;
     screen.saving = true;
     screen.fieldError = "";
     render();
     try {
       await action(question);
-      screen.index = firstOpenAfter(screen.questions.indexOf(question));
+      if (token === loadSeq) screen.index = firstOpenAfter(screen.questions.indexOf(question));
     } catch (error) {
       console.error("[conversation] " + failure, error);
-      screen.fieldError = "Could not " + failure + ": " + error.message;
+      if (token === loadSeq) screen.fieldError = "Could not " + failure + ": " + error.message;
     } finally {
-      screen.saving = false;
-      render();
+      if (token === loadSeq) {
+        screen.saving = false;
+        render();
+      }
     }
   }
 
   function saveAnswer(value) {
     return commit(async question => {
       if (value === KEEP_VALUE) return;
-      await App.source.answer(App.state.persona, question.path, value);
+      await App.source.answer(screen.persona, question.path, value);
       question.current = value;
       question.skipped = false;
     }, "save the answer");
@@ -160,7 +183,7 @@
 
   function skipQuestion() {
     return commit(async question => {
-      await App.source.skip(App.state.persona, question.path);
+      await App.source.skip(screen.persona, question.path);
       question.current = null;
       question.skipped = true;
     }, "skip the question");
@@ -305,17 +328,21 @@
       return;
     }
     if (screen.busy) return;
+    const personaId = App.state.persona;
+    const token = loadSeq;
     screen.busy = true;
     screen.runError = "";
     render();
     try {
-      const report = await App.source.rerun(App.state.persona, App.state.entryFile);
-      if (App.source.usedFallback()) throw new Error("the live analysis failed; see the server log");
+      const report = await App.source.rerun(personaId, App.state.entryFile);
+      if (App.source.isFallback(report)) throw new Error("the live analysis failed; see the server log");
+      if (token !== loadSeq || App.state.persona !== personaId) return;
       screen.busy = false;
       App.setReport(report);
       App.go(SUMMARY_HASH);
     } catch (error) {
       console.error("[conversation] analysis failed", error);
+      if (token !== loadSeq || App.state.persona !== personaId) return;
       screen.busy = false;
       screen.runError = "The analysis could not be run: " + error.message;
       render();
@@ -357,12 +384,10 @@
   App.renderers.conversation = function (section) {
     bindOnce(section);
     activeSection = section;
-    const needsLoad = App.state.persona && screen.persona !== App.state.persona && !screen.loading;
-    render();
+    const needsLoad = Boolean(App.state.persona) && screen.persona !== App.state.persona;
     if (needsLoad) {
-      screen.fieldError = "";
-      screen.runError = "";
       loadQuestions().then(render);
     }
+    render();
   };
 })();

@@ -3,7 +3,8 @@
 
   /* Key data, holdings table, accounts menu and nav-action wiring for the summary screen.
      Shares helpers with summary.js through App._summary. */
-  const {num, subjectStatus, CAD_SIGN, PALETTE, LIVE_PALETTE, SAMPLE} = App._summary;
+  const {num} = App.format;
+  const {subjectStatus, CAD_SIGN, PALETTE, LIVE_PALETTE, SAMPLE} = App._summary;
 
   const BUSY_LABEL = "Running…";
 

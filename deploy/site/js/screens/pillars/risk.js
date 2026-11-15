@@ -49,13 +49,7 @@
 
   /* ---------- formatting ---------- */
 
-  function num(value, fallback) {
-    return typeof value === "number" && isFinite(value) ? value : fallback;
-  }
-
-  function amount(value) {
-    return "$" + App.fmtCad(value);
-  }
+  const {num, amount} = App.format;
 
   function negativePct(fraction) {
     return "\u2212" + App.fmtPct(Math.abs(fraction));

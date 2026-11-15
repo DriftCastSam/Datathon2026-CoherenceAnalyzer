@@ -349,9 +349,15 @@
     return persona && persona.entries.length ? persona.entries[0].file : null;
   }
 
+  /* Only the most recent persona load may apply its result. */
+  let personaLoadSeq = 0;
+
   /* Loads report, universe and what-if for one persona without rendering. Throws on a
-     report failure; universe and what-if may be null (screens fall back to sample data). */
+     report failure; universe and what-if may be null (screens fall back to sample data).
+     Resolves false when a newer load started meanwhile and this result was dropped. */
   async function loadPersona(personaId, file, rerun) {
+    personaLoadSeq += 1;
+    const token = personaLoadSeq;
     const person = App.state.personas.find(item => item.id === personaId);
     const entryFile = file || firstEntryFile(person);
     const [report, universe, whatif] = await Promise.all([
@@ -359,22 +365,23 @@
       App.source.universe(personaId),
       App.source.whatif(personaId)
     ]);
+    if (token !== personaLoadSeq) return false;
     applyState({
       persona: personaId, entryFile, report, universe, whatif, selection: [],
-      origin: App.source.mode, fellBack: App.source.usedFallback()
+      origin: App.source.mode, fellBack: App.source.isFallback(report)
     });
+    return true;
   }
 
   async function setPersona(personaId, file) {
-    await loadPersona(personaId, file, false);
-    render();
+    if (await loadPersona(personaId, file, false)) render();
   }
 
   function setReport(report, origin) {
     applyState({
       report,
       origin: origin || App.source.mode,
-      fellBack: origin ? false : App.source.usedFallback()
+      fellBack: origin ? false : App.source.isFallback(report)
     });
     render();
   }
@@ -385,8 +392,9 @@
   }
 
   async function rerunAnalysis() {
-    const report = await App.source.rerun(App.state.persona, App.state.entryFile);
-    setReport(report);
+    const personaId = App.state.persona;
+    const report = await App.source.rerun(personaId, App.state.entryFile);
+    if (App.state.persona === personaId) setReport(report);
     return report;
   }
 

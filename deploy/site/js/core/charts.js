@@ -159,7 +159,7 @@
     const bands = {};
     BAND_KEYS.forEach(key => { if (isSeries(cone[key])) bands[key] = cone[key]; });
     const compare = isSeries(opts.compareMedian) ? opts.compareMedian : null;
-    const floor = Number.isFinite(opts.floor) ? opts.floor : null;
+    const floor = App.format.num(opts.floor, null);
     const axis = axisFor(Object.values(bands).concat(compare ? [compare] : []), floor);
     const spanY = (axis.max - axis.min) || 1;
     const yOf = value => VIEW.bottom - ((value - axis.min) / spanY) * (VIEW.bottom - VIEW.top);

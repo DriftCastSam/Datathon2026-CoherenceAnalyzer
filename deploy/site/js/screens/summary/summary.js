@@ -47,14 +47,10 @@
 
   /* ---------- small helpers ---------- */
 
+  const {num} = App.format;
+
   function isNum(value) {
     return typeof value === "number" && Number.isFinite(value);
-  }
-
-  function num(value, fallback) {
-    if (value === null || value === undefined || value === "") return fallback;
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : fallback;
   }
 
   function unwrap(value) {
@@ -392,9 +388,9 @@
   }
 
   function chartNoteHtml(ctx) {
-    const asOf = ctx.site && typeof ctx.site.as_of === "string" && ctx.site.as_of ? ctx.site.as_of : "2026-11-12";
+    const asOf = ctx.site && typeof ctx.site.as_of === "string" ? ctx.site.as_of : "";
     const years = horizonYears(ctx);
-    return years + (years === 1 ? " year" : " years") + ", CAD, as of " + asOf;
+    return years + (years === 1 ? " year" : " years") + ", CAD" + (asOf ? ", as of " + asOf : "");
   }
 
   /* ---------- persona select ---------- */
@@ -488,6 +484,6 @@
   };
 
   App._summary = {
-    num, subjectStatus, CAD_SIGN, PALETTE, LIVE_PALETTE, SAMPLE
+    subjectStatus, CAD_SIGN, PALETTE, LIVE_PALETTE, SAMPLE
   };
 })();

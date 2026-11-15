@@ -13,6 +13,7 @@
   };
 
   const view = App.whatifView;
+  const {num} = App.format;
   const ASSETS_PARAM = "assets";
   const TICKER_SEPARATOR = ",";
   const EMPTY_NONE = {
@@ -66,6 +67,14 @@
       baseReports.set(personaId, report);
       if (App.state.persona === personaId) App.renderers.whatif(section);
     }).catch(error => console.error("[whatif] base profile unavailable for " + personaId, error));
+  }
+
+  /* The floor line belongs to the profile the scenarios were computed from: the prebuilt report
+     in live mode (once loaded), the current report in prebuilt mode. */
+  function scenarioFloor() {
+    const source = App.source.mode === MODE_LIVE ? baseReports.get(App.state.persona) : App.state.report;
+    const limits = source && source.site ? source.site.limits : null;
+    return limits ? num(limits.floor_at_horizon, undefined) : undefined;
   }
 
   function profileDisplay(section) {
@@ -133,8 +142,7 @@
   function drawChart(mount, base, scenario, years) {
     const host = mount.querySelector('[data-chart="whatif"]');
     if (!host) return;
-    const limits = App.state.report && App.state.report.site ? App.state.report.site.limits : null;
-    const floor = limits && view.hasNumber(limits.floor_at_horizon) ? Number(limits.floor_at_horizon) : undefined;
+    const floor = scenarioFloor();
     const drawn = App.charts && App.charts.fan
       && App.charts.fan(host, {cone: scenario.cone, compareMedian: (base.cone || {}).p50, floor, years, asOf: base.as_of});
     if (!drawn) host.innerHTML = '<p class="t-small muted">' + CHART_UNAVAILABLE + "</p>";

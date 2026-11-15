@@ -9,42 +9,22 @@
   const HEALTH_TIMEOUT_MS = 1500;
   const REQUEST_TIMEOUT_MS = 120000;
   const INTAKE_LOCALE = "en-CA";
-  const LEGACY_UNIVERSE = "universe.json";
-  const LEGACY_WHATIF = "whatif.json";
+  const INTAKE_MANIFEST = "intake.json";
+  const SOURCE_LIVE = "live";
+  const SOURCE_FALLBACK = "fallback";
+  const SOURCE_PREBUILT = "prebuilt";
   const MODE_LIVE = "live";
   const MODE_STATIC = "static";
-  const SKIPPED_BY = "user:skipped";
-  const DEFAULT_PERSONA_ID = "persona-robert";
   const STATIC_CARD_KEYS = {
     "risk.declared": "risk_declared",
     "objectives.horizon_years": "horizon_years"
   };
 
-  /* Required intake paths and en-CA question texts, mirrored from coherence_analyzer/intake.py
-     (REQUIRED, QUESTIONS). */
-  const INTAKE_PATHS = [
-    {factor: "objectif", path: "objectives.primary", text: "What is your main goal for this portfolio (for example preserving capital, earning income or growing capital)?"},
-    {factor: "objectif", path: "objectives.goals", text: "What are your dated goals (name, date, amount in CAD), for example retirement or a down payment?"},
-    {factor: "horizon", path: "objectives.horizon_years", text: "In how many years do you expect to need this money?"},
-    {factor: "horizon", path: "identity.retirement_target_age", text: "At what age do you plan to retire?"},
-    {factor: "horizon", path: "situation.planned_withdrawals", text: "Do you plan any large withdrawals (date, amount, purpose)? Answer with an empty list if there are none."},
-    {factor: "risque", path: "risk.declared", text: "How would you describe your risk tolerance: low, low-moderate, moderate, moderate-high or high?"},
-    {factor: "risque", path: "risk.max_acceptable_drawdown_pct", text: "What is the largest drop in your portfolio you could accept, as a percentage (for example -12)?"},
-    {factor: "risque", path: "risk.reaction_to_20pct_drop", text: "If your portfolio lost 20%, what would you do: sell everything, sell some, do nothing or buy more?"},
-    {factor: "contraintes", path: "situation.emergency_fund", text: "How much do you hold as an emergency fund, in CAD?"},
-    {factor: "contraintes", path: "situation.monthly_expenses", text: "What are your monthly expenses, in CAD?"},
-    {factor: "contraintes", path: "identity.employer_sector", text: "Which sector does your employer operate in?"},
-    {factor: "contraintes", path: "preferences.asset_types_refused", text: "Which product types do you refuse to hold (for example crypto, options, margin)? Answer with an empty list if none."},
-    {factor: "preferences", path: "preferences.prefers_dividends", text: "Do you prefer dividend-paying holdings (yes or no)?"},
-    {factor: "preferences", path: "preferences.prefers_large_caps", text: "Do you prefer large-cap companies (yes or no)?"},
-    {factor: "preferences", path: "preferences.home_bias_ok", text: "Are you comfortable with an overweight in Canadian holdings (yes or no)?"}
-  ];
-
   let mode = MODE_STATIC;
   let staticIndex = null;
   let livePersonas = [];
   const reportCache = new Map();
-  const state = {fallback: false};
+  let intakeManifest = null;
 
   /* ---------- transport ---------- */
 
@@ -100,6 +80,25 @@
     return (staticIndex || []).filter(entry => (entry.persona_id || "") === personaId);
   }
 
+  /* Throws for a persona the prebuilt index does not list, instead of serving another one's files. */
+  async function requireKnownPersona(personaId) {
+    await loadStaticIndex();
+    if (!staticEntries(personaId).length) {
+      throw new Error("Unknown persona \"" + personaId + "\": it is not listed in " + REPORT_DIR + "index.json");
+    }
+  }
+
+  /* Records where a report came from on the object itself (not serialised), so overlapping
+     calls for different personas cannot overwrite each other's stamp. */
+  function stamp(report, source) {
+    Object.defineProperty(report, "_source", {value: source, enumerable: false, configurable: true});
+    return report;
+  }
+
+  function isFallback(report) {
+    return Boolean(report) && report._source === SOURCE_FALLBACK;
+  }
+
   function groupStatic(index) {
     const groups = new Map();
     for (const entry of index) {
@@ -113,38 +112,32 @@
   /* ---------- reports ---------- */
 
   async function staticReport(personaId, file) {
-    await loadStaticIndex();
-    const target = file || (staticEntries(personaId)[0] || (staticIndex || [])[0] || {}).file;
-    if (!target) throw new Error("No prebuilt report is listed for " + personaId + " in " + REPORT_DIR + "index.json");
-    return request(REPORT_DIR + target);
+    await requireKnownPersona(personaId);
+    const target = file || staticEntries(personaId)[0].file;
+    return stamp(await request(REPORT_DIR + target), SOURCE_PREBUILT);
   }
 
   async function runLiveReview(personaId) {
     const report = await post(SITE_API_DIR + "profiles/" + encodeURIComponent(personaId) + "/review");
-    reportCache.set(personaId, report);
+    reportCache.set(personaId, stamp(report, SOURCE_LIVE));
     return report;
   }
 
   /* A live persona whose review fails still shows its prebuilt report, and the stamp says so. */
   async function liveOrFallback(personaId, file, produce) {
-    state.fallback = false;
     try {
       return await produce();
     } catch (error) {
       console.error("[data] live analysis failed for " + personaId, error);
       await loadStaticIndex();
       if (!staticEntries(personaId).length) throw error;
-      state.fallback = true;
-      return staticReport(personaId, file);
+      return stamp(await staticReport(personaId, file), SOURCE_FALLBACK);
     }
   }
 
   async function report(personaId, file) {
     if (mode === MODE_STATIC) return staticReport(personaId, file);
-    if (reportCache.has(personaId)) {
-      state.fallback = false;
-      return reportCache.get(personaId);
-    }
+    if (reportCache.has(personaId)) return reportCache.get(personaId);
     return liveOrFallback(personaId, file, () => runLiveReview(personaId));
   }
 
@@ -155,17 +148,17 @@
 
   /* ---------- universe and what-if ---------- */
 
-  async function personaFile(prefix, personaId, legacy) {
-    const specific = await optionalJson(REPORT_DIR + prefix + "-" + personaId + ".json");
-    return specific || optionalJson(REPORT_DIR + legacy);
+  async function personaFile(prefix, personaId) {
+    await requireKnownPersona(personaId);
+    return optionalJson(REPORT_DIR + prefix + "-" + personaId + ".json");
   }
 
   function universe(personaId) {
-    return personaFile("universe", personaId, LEGACY_UNIVERSE);
+    return personaFile("universe", personaId);
   }
 
   function whatif(personaId) {
-    return personaFile("whatif", personaId, LEGACY_WHATIF);
+    return personaFile("whatif", personaId);
   }
 
   /* ---------- personas ---------- */
@@ -177,32 +170,50 @@
 
   /* ---------- intake ---------- */
 
-  function lookup(root, path) {
+  /* The required questions (paths and en-CA texts) come from the build, not a copy kept here. */
+  async function loadIntakeManifest() {
+    if (intakeManifest === null) {
+      let manifest;
+      try {
+        manifest = await request(REPORT_DIR + INTAKE_MANIFEST);
+      } catch (error) {
+        throw new Error("The question list (" + REPORT_DIR + INTAKE_MANIFEST + ") could not be loaded: " + error.message);
+      }
+      if (!manifest || !Array.isArray(manifest.questions) || typeof manifest.skipped_by !== "string") {
+        throw new Error("The question list (" + REPORT_DIR + INTAKE_MANIFEST + ") has an unexpected shape.");
+      }
+      intakeManifest = manifest;
+    }
+    return intakeManifest;
+  }
+
+  /* {current, skipped} for one path of a profile; a skipped answer reads back as skipped. */
+  function lookup(root, path, skippedBy) {
     let node = root;
     for (const part of path.split(".")) {
-      if (node === null || typeof node !== "object") return null;
+      if (node === null || typeof node !== "object") return {current: null, skipped: false};
       node = node[part];
     }
     if (node && typeof node === "object" && !Array.isArray(node) && "value" in node) {
-      return node.by === SKIPPED_BY ? null : node.value;
+      return node.by === skippedBy ? {current: null, skipped: true} : {current: node.value, skipped: false};
     }
-    return node === undefined ? null : node;
-  }
-
-  function withCurrent(read) {
-    return {questions: INTAKE_PATHS.map(item => ({...item, current: read(item.path)}))};
+    return {current: node === undefined ? null : node, skipped: false};
   }
 
   async function intake(personaId, currentReport) {
+    const manifest = await loadIntakeManifest();
+    let read;
     if (mode === MODE_LIVE) {
       const profile = await request(API_DIR + "profiles/" + encodeURIComponent(personaId));
-      return withCurrent(path => lookup(profile, path));
+      read = path => lookup(profile, path, manifest.skipped_by);
+    } else {
+      const card = currentReport && currentReport.site ? currentReport.site.profile_card : null;
+      read = path => {
+        const key = STATIC_CARD_KEYS[path];
+        return {current: card && key && card[key] !== undefined ? card[key] : null, skipped: false};
+      };
     }
-    const card = currentReport && currentReport.site ? currentReport.site.profile_card : null;
-    return withCurrent(path => {
-      const key = STATIC_CARD_KEYS[path];
-      return card && key && card[key] !== undefined ? card[key] : null;
-    });
+    return {questions: manifest.questions.map(item => ({...item, ...read(item.path)}))};
   }
 
   function requireLive(action) {
@@ -224,13 +235,15 @@
 
   /* ---------- boot ---------- */
 
-  /* The first persona is the default one; move the preferred persona there. */
+  /* The first persona listed in the prebuilt index is the default one; move it first. */
   function defaultFirst(list) {
-    const preferred = list.find(item => item.id === DEFAULT_PERSONA_ID);
+    const defaultId = (staticIndex || []).map(entry => entry.persona_id).find(Boolean);
+    const preferred = list.find(item => item.id === defaultId);
     return preferred ? [preferred, ...list.filter(item => item !== preferred)] : list;
   }
 
   async function init() {
+    await loadStaticIndex();
     try {
       await request(API_DIR + "health", undefined, HEALTH_TIMEOUT_MS);
       const profiles = await request(API_DIR + "profiles");
@@ -240,7 +253,6 @@
       console.info("[data] live API unavailable, using prebuilt reports", error);
       mode = MODE_STATIC;
     }
-    await loadStaticIndex();
     App.source.mode = mode;
     return mode;
   }
@@ -258,9 +270,8 @@
     skip,
     universe,
     whatif,
-    intakePaths: INTAKE_PATHS,
-    /* True when the last live call fell back to a prebuilt report. */
-    usedFallback: () => state.fallback,
+    /* True when this report is the prebuilt stand-in for a failed live analysis. */
+    isFallback,
     staticIndex: () => staticIndex
   };
 })();
