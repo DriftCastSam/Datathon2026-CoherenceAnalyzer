@@ -1181,9 +1181,29 @@
       },
       "Metadata": {
         "com.aws.cloudformation.Context": {
-          "why": "AuthType NONE on AWS::Lambda::Url does not itself allow unauthenticated invocation; an explicit resource-based policy statement with Action lambda:InvokeFunctionUrl and FunctionUrlAuthType NONE is required for public invoke. A second statement granting lambda:InvokeFunction with FunctionUrlAuthType was tried and rejected by the Lambda API at deploy time (FunctionUrlAuthType is only a valid condition on the InvokeFunctionUrl action, confirmed by a real CREATE_FAILED event, not just cfn-lint, which only checks schema shape): this one statement is the complete, correct grant.",
+          "why": "AuthType NONE on AWS::Lambda::Url does not itself allow unauthenticated invocation; an explicit resource-based policy statement with Action lambda:InvokeFunctionUrl and FunctionUrlAuthType NONE is required for public invoke. Per AWS's Lambda Developer Guide (urls-auth.html, 'Starting in October 2025, new function URLs will require both lambda:InvokeFunctionUrl and lambda:InvokeFunction permissions') a real deploy without the second statement below 403s at invoke time: 'requires both the lambda:InvokeFunctionUrl and lambda:InvokeFunction permissions'.",
           "must": [
-            "Action lambda:InvokeFunctionUrl only; do not add a second statement for lambda:InvokeFunction"
+            "Paired with ApiFunctionUrlInvokePermission below"
+          ]
+        }
+      },
+      "Condition": "DeployFlowB"
+    },
+    "ApiFunctionUrlInvokePermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "ApiFunction"
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "*",
+        "InvokedViaFunctionUrl": true
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "The second permission AWS's docs require for a public (NONE) Function URL. Earlier attempt used FunctionUrlAuthType here, which the Lambda API rejects ('FunctionUrlAuthType is only supported for lambda:InvokeFunctionUrl action', a real CREATE_FAILED event). The correct, CloudFormation-native condition for this statement is InvokedViaFunctionUrl (Boolean), matching the AWS CLI's `add-permission --invoked-via-function-url` flag: it scopes the public lambda:InvokeFunction grant to calls routed through the function URL only, never a direct lambda:Invoke API call.",
+          "must": [
+            "InvokedViaFunctionUrl: true, not FunctionUrlAuthType, on this statement"
           ]
         }
       },
