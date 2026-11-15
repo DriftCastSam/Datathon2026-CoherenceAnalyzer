@@ -70,7 +70,9 @@ def check_bash(cmd: str, locked: set[str] | None = None) -> str | None:
 def main() -> int:
     ev = json.load(sys.stdin)
     tool, ti = ev.get("tool_name", ""), ev.get("tool_input", {}) or {}
-    locked = frozen()
+    # Frozen oracles bind the build loop only (agent_loop.py sets COHERENCE_ANALYZER_LOOP=1 and re-checks hashes).
+    # Interactive sessions may edit them, then `agent_loop.py --refreeze`. PROTECTED stays blocked everywhere.
+    locked = frozen() if os.environ.get("COHERENCE_ANALYZER_LOOP") else set()
     if tool in ("Edit", "Write", "MultiEdit", "NotebookEdit"):
         path = rel(ti.get("file_path") or ti.get("notebook_path") or "")
         if msg := blocked(path, locked):

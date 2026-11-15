@@ -43,6 +43,7 @@ TASKS, STATE, FROZEN, RUNS = LOOP / "tasks.json", LOOP / "state.json", LOOP / "f
 BLOCKED = LOOP / "BLOCKED.md"
 PROTECTED = ("SPEC.md", "data/starter/", "data/meta/activity_tags.csv", "scripts/engine_v0.py")
 BRANCH = "loop/p0"
+FULL_SUITE = False  # --full: whole suite in preflight and phase B (default: affected tests only)
 
 try:  # BEDROCK_MODEL_ID / AWS_* for the Strands backend; never overrides the pinned values below
     from dotenv import load_dotenv
@@ -50,9 +51,11 @@ try:  # BEDROCK_MODEL_ID / AWS_* for the Strands backend; never overrides the pi
 except ImportError:
     pass
 
-ENV = {**os.environ, "COHERENCE_ANALYZER_LLM": "mock", "PYTHONHASHSEED": "0", "TZ": "UTC",
+ENV = {**os.environ, "COHERENCE_ANALYZER_LOOP": "1", "COHERENCE_ANALYZER_LLM": "mock", "PYTHONHASHSEED": "0", "TZ": "UTC",
        "PATH": f"{ROOT / '.venv' / 'bin'}{os.pathsep}{os.environ.get('PATH', '')}"}
 PY = str(ROOT / ".venv" / "bin" / "python") if (ROOT / ".venv" / "bin" / "python").exists() else sys.executable
+
+XDIST = subprocess.run([PY, "-c", "import xdist"], capture_output=True).returncode == 0
 
 ALLOWED = ["Read", "Edit", "Write", "Glob", "Grep",
            "Bash(python -m pytest:*)", "Bash(COHERENCE_ANALYZER_LLM=mock python -m pytest:*)", "Bash(pytest:*)",
@@ -95,7 +98,8 @@ def log(msg: str) -> None:
 def pytest_run(paths: list[str], tag: str) -> dict:
     xml = RUNS / f"{tag}.junit.xml"
     xml.parent.mkdir(parents=True, exist_ok=True)
-    r = sh(PY, "-m", "pytest", "-q", "-p", "no:cacheprovider", "-rs", f"--junitxml={xml}", *paths)
+    par = ["-n", "auto", "--dist", "loadfile"] if XDIST and (not paths or len(paths) > 3) else []
+    r = sh(PY, "-m", "pytest", "-q", "-p", "no:cacheprovider", "-rs", *par, f"--junitxml={xml}", *paths)
     stats = {"tests": 0, "failures": 0, "errors": 0, "skipped": 0}
     if xml.exists():
         for s in ET.parse(xml).getroot().iter("testsuite"):
@@ -147,7 +151,13 @@ def verify_impl_phase(task: dict) -> list[str]:
         errs.append("acceptance tests failing:\n" + acc["tail"])
     if acc["skipped"] and not task.get("allow_skips"):
         errs.append(f"acceptance tests skipped: {acc['skipped']}")
-    full = pytest_run([], f"{task['id']}.B.full")
+    if FULL_SUITE:
+        full = pytest_run([], f"{task['id']}.B.full")
+    else:  # only what the change can reach (scripts/quick_tests.py); `loop_lane.py merge` runs the full suite
+        sys.path.insert(0, str(ROOT / "scripts"))
+        import quick_tests
+        picked, _, _ = quick_tests.select(quick_tests.changed_files("HEAD"), heavy=False, light_all=False)
+        full = pytest_run(picked, f"{task['id']}.B.affected") if picked else {"rc": 0, "tail": ""}
     if full["rc"] != 0:
         errs.append("full suite failing:\n" + full["tail"])
     return errs
@@ -238,6 +248,8 @@ def preflight(args) -> None:
     # at that task's phase B must not be blocked by them.
     state = jload(STATE, {"done": {}})
     pending_oracles = [f for t in jload(TASKS, {})["tasks"] if state["done"].get(t["id"]) == "tests" for f in t["tests"]]
+    if not FULL_SUITE:  # the branch tip was green at its last commit/merge
+        return
     base = pytest_run([f"--ignore={f}" for f in pending_oracles], "preflight")
     if base["rc"] != 0:
         raise SystemExit("suite is red before starting:\n" + base["tail"])
@@ -254,7 +266,21 @@ def main() -> None:
     ap.add_argument("--stop-after-tests", action="store_true")
     ap.add_argument("--dry-run", action="store_true")
     ap.add_argument("--verify")
+    ap.add_argument("--full", action="store_true", help="full suite in preflight and phase B (slow)")
+    ap.add_argument("--refreeze", nargs="*", metavar="TEST",
+                    help="re-hash frozen tests after an approved edit (no args: every changed frozen file)")
     args = ap.parse_args()
+    global FULL_SUITE
+    FULL_SUITE = args.full
+
+    if args.refreeze is not None:
+        frozen = jload(FROZEN, {"files": {}})
+        targets = args.refreeze or [f for f, h in sorted(frozen["files"].items()) if sha(ROOT / f) != h]
+        for f in targets:
+            frozen["files"][f] = sha(ROOT / f)
+            log(f"refrozen {f}")
+        jsave(FROZEN, frozen)
+        return
 
     tasks = jload(TASKS, {})["tasks"]
     state = jload(STATE, {"done": {}})

@@ -600,102 +600,153 @@ def _load_module(name: str, path: Path):
     return mod
 
 
-# The JS scanner of the frozen Flow B UI oracle is reused, not copied.
+# The JS scanner of the frozen Flow B UI oracle is reused, not copied. `deploy/site/index.html` (French,
+# single-page) has been retired: the "Corriger" control is now three separate, per-screen pairs of
+# (builder, submit-handler) functions in app.html's own modular JS, not one shared pair on one page.
 H = _load_module("_ui_flow_b_helpers_for_correct", ROOT / "tests" / "dashboard" / "test_ui_flow_b.py")
-function_source, typed_digits, uses = H.function_source, H.typed_digits, H.uses
+function_source, string_literals, typed_digits, uses, norm = (
+    H.function_source, H.string_literals, H.typed_digits, H.uses, H.norm)
 D10_WORDS = H.D10_WORDS
-NEW_UI_HOOKS = ("renderCorrectionControl", "sendCorrection")
-CHANGED_UI = NEW_UI_HOOKS + ("renderValuesRules", "pageProfil", "factorPage")
+DEPLOY = ROOT / "deploy"
+PREFERENCES = DEPLOY / "site" / "js" / "screens" / "pillars" / "preferences.js"
+COHERENCE_JS = DEPLOY / "site" / "js" / "screens" / "pillars" / "coherence.js"
+RISK_JS = DEPLOY / "site" / "js" / "screens" / "pillars" / "risk.js"
+APP_HTML = DEPLOY / "site" / "app.html"
+# (file, builder function, submit-handler function, target kind)
+CONTROLS = (
+    (PREFERENCES, "correctionFormHtml", "handleCorrection", "parsed_rule"),
+    (COHERENCE_JS, "correctionFormHtml", "submitCorrection", "profile_finding"),
+    (RISK_JS, "correctionControlHtml", "submitCorrection", "behaviour"),
+)
 
 
 @pytest.fixture(scope="module")
-def page() -> str:
-    return INDEX.read_text(encoding="utf-8")
+def prefs_src() -> str:
+    return PREFERENCES.read_text(encoding="utf-8")
 
 
-def test_correction_hooks_are_defined_once_and_used(page):
-    for name in NEW_UI_HOOKS:
-        function_source(page, name)                                              # exactly one definition
-        assert uses(page, name) >= 2, f"{name} must be used somewhere besides its definition"
-    assert re.search(r"function\s+renderCorrectionControl\s*\(\s*kind\s*,\s*ref\s*\)", page)
-    assert re.search(r"function\s+sendCorrection\s*\(\s*kind\s*,\s*ref\s*,\s*text\s*\)", page)
+@pytest.fixture(scope="module")
+def coherence_src() -> str:
+    return COHERENCE_JS.read_text(encoding="utf-8")
 
 
-def test_the_control_is_a_text_box_and_a_plain_verb_button_that_asks_nothing(page):
-    # task (4) + D13 spirit: a passive affordance. A small form with a text box (<= 500 chars) and a submit button
-    # labelled « Corriger »: no prompt text, no question mark, no placeholder, no typed number, no request while rendering.
-    body, texts = function_source(page, "renderCorrectionControl")
-    literal = " ".join(texts)
-    assert re.search(r"<form\b[^>]*\bdata-correct-kind=", literal) and re.search(r"<form\b[^>]*\bdata-correct-ref=", literal)
-    assert re.search(r"<(textarea|input)\b[^>]*\bname=[\"']text[\"']", literal)
-    assert re.search(r"<(textarea|input)\b[^>]*\bmaxlength=[\"']500[\"']", literal)
-    assert re.search(r"<button\b[^>]*\btype=[\"']submit[\"'][^>]*>\s*Corriger\s*</button>", literal)
-    assert "?" not in literal and "placeholder" not in literal.lower()
-    assert not re.search(r"<(input|textarea|button)\b[^>]*\bdisabled\b", literal)
-    assert not re.search(r"<textarea\b[^>]*>[^<]+</textarea>", literal), "the box starts empty"
-    assert "fetch(" not in body and "apiPost(" not in body, "rendering makes no request"
-    assert not re.search(r"\b(prompt|confirm|alert)\s*\(", body)
-    assert not typed_digits(texts)
+@pytest.fixture(scope="module")
+def risk_src() -> str:
+    return RISK_JS.read_text(encoding="utf-8")
 
 
-def test_the_control_is_hidden_in_the_static_demo(page):
-    # task (4): no API base (the shipped page: empty <meta name="coherence-api-base">) -> the control renders nothing.
-    # The check is on the source: an early `if (!apiBase()) return "";` before any markup.
-    body, _ = function_source(page, "renderCorrectionControl")
-    guard = re.search(r"if\s*\(\s*!\s*apiBase\(\s*\)\s*\)\s*return\s*(\"\"|''|``)\s*;?", body)
-    assert guard, "a static page (no API base) must get an empty string"
-    assert guard.start() < body.index("<form")
-    assert re.search(r"<meta\s+name=[\"']coherence-api-base[\"']\s+content=[\"']{2}\s*/?>", page)
+@pytest.fixture(scope="module")
+def app_html() -> str:
+    return APP_HTML.read_text(encoding="utf-8")
 
 
-def test_send_correction_posts_target_and_text_only_then_rerenders_with_the_returned_report(page):
-    # §12 + inv. 2: the body is exactly {target: {kind, ref}, text}; the only POST helper is apiPost; the page then shows
-    # the returned `report` (the Flow C review) instead of keeping the old one. A failure is shown, never swallowed.
-    body, texts = function_source(page, "sendCorrection")
-    assert re.search(r"apiPost\(\s*`/profiles/\$\{[^}]+\}/corrections`\s*,", body)
-    assert re.search(r"target\s*:\s*\{\s*kind\s*(:\s*kind)?\s*,\s*ref\s*(:\s*ref)?\s*\}", body)
+_SRC_BY_FILE = {PREFERENCES: "prefs_src", COHERENCE_JS: "coherence_src", RISK_JS: "risk_src"}
+
+
+def test_correction_hooks_are_defined_once_and_used(prefs_src, coherence_src, risk_src):
+    by_file = {PREFERENCES: prefs_src, COHERENCE_JS: coherence_src, RISK_JS: risk_src}
+    for path, builder, handler, _kind in CONTROLS:
+        src = by_file[path]
+        function_source(src, builder)                                            # exactly one definition
+        function_source(src, handler)
+        assert uses(src, builder) >= 2, f"{builder} ({path.name}) must be used somewhere besides its definition"
+        assert uses(src, handler) >= 1, f"{handler} ({path.name}) must be called, not just defined"
+
+
+def test_the_control_is_a_text_box_and_a_plain_verb_button_that_asks_nothing(prefs_src, coherence_src, risk_src):
+    # D13 spirit: a passive affordance. A small form with a text box (<= 500 chars) and a submit button
+    # labelled "Correct" (English UI): no prompt text, no question mark, no placeholder, no typed number.
+    by_file = {PREFERENCES: prefs_src, COHERENCE_JS: coherence_src, RISK_JS: risk_src}
+    for path, builder, _handler, _kind in CONTROLS:
+        body = function_source(by_file[path], builder)
+        texts = string_literals(body)
+        literal = " ".join(texts)
+        assert re.search(r"<form\b[^>]*\bdata-correct(-ref|Ref)?=", literal), (path.name, builder)
+        assert re.search(r"<(textarea|input)\b[^>]*\bname=[\"']text[\"']", literal), (path.name, builder)
+        assert re.search(r"<(textarea|input)\b[^>]*\bmaxlength=[\"']500[\"']", literal), (path.name, builder)
+        assert re.search(r"<button\b[^>]*\btype=[\"']submit[\"'][^>]*>\s*Correct\s*</button>", literal), \
+            (path.name, builder)
+        assert "?" not in literal and "placeholder" not in literal.lower(), (path.name, builder)
+        assert not re.search(r"<(input|textarea|button)\b[^>]*\bdisabled\b", literal), (path.name, builder)
+        assert not re.search(r"<textarea\b[^>]*>[^<]+</textarea>", literal), "the box starts empty"
+        assert "fetch(" not in body, "rendering makes no request"
+        assert not re.search(r"\b(prompt|confirm|alert)\s*\(", body)
+        assert not typed_digits(literal)
+
+
+def test_the_control_is_hidden_in_the_static_demo(prefs_src, coherence_src, risk_src, app_html):
+    # No API base (the shipped page: empty <meta name="coherence-api-base">) -> the control renders nothing.
+    by_file = {PREFERENCES: prefs_src, COHERENCE_JS: coherence_src, RISK_JS: risk_src}
+    for path, builder, _handler, _kind in CONTROLS:
+        body = function_source(by_file[path], builder)
+        guard = re.search(r"if\s*\(\s*App\.source\.mode\s*!==\s*[\"']live[\"']\s*(\|\|[^)]*)?\)\s*return\s*(\"\"|''|``)",
+                           body)
+        assert guard, f"a static page (no live API) must get an empty string from {builder} in {path.name}"
+        assert guard.start() < (body.index("<form") if "<form" in body else len(body))
+    assert re.search(r"<meta\s+name=[\"']coherence-api-base[\"']\s+content=[\"']{2}\s*/?>", app_html)
+
+
+def test_send_correction_posts_target_and_text_only_then_rerenders_with_the_returned_report(
+        prefs_src, coherence_src, risk_src):
+    # §12 + inv. 2: the body is exactly {target: {kind, ref}, text}, built by data_source.js's correction() (one
+    # place, not duplicated per screen); each handler calls it, then shows the returned report instead of the
+    # old one. A failure is shown, never swallowed.
+    data_source_src = (DEPLOY / "site" / "js" / "core" / "data_source.js").read_text(encoding="utf-8")
+    body = function_source(data_source_src, "correction")
+    assert re.search(r"target\s*:\s*\{\s*kind\s*,\s*ref\s*\}", body)
     assert re.search(r"\btext\b", body)
     assert not re.search(r"limits|llm:|limits_trace", body)
-    assert "apiBase(" in body                                                    # no request without an API
-    assert re.search(r"\.report\b", body) and "state.rep" in body
-    assert "buildLiveSite(" in body or ".site" in body, "the returned report has no `site` block: keep or rebuild it"
-    assert re.search(r"\b(render|renderReport|route)\s*\(", body)
-    assert "catch" in body and "state.error" in body
-    assert not re.search(r"\b(prompt|confirm|alert)\s*\(", body)
-    assert len(re.findall(r"\bmethod\s*:", page)) == 1 and len(re.findall(r"[\"']POST[\"']", page)) == 1
-    assert not typed_digits(texts)
+    by_file = {PREFERENCES: prefs_src, COHERENCE_JS: coherence_src, RISK_JS: risk_src}
+    for path, _builder, handler, kind in CONTROLS:
+        src = by_file[path]
+        hbody = function_source(src, handler)
+        assert re.search(r"App\.source\.correction\(", hbody), (path.name, handler)
+        assert re.search(rf"[\"']{re.escape(kind)}[\"']", hbody), (path.name, handler, kind)
+        assert "App.setReport(" in hbody or "App.setReport(" in src, (path.name, handler)
+        assert "catch" in hbody, (path.name, handler)
+        assert not re.search(r"\b(prompt|confirm|alert)\s*\(", hbody)
 
 
-def test_correction_forms_are_bound_to_send_correction(page):
-    # The forms are plain markup after render(): the page binds their submit (preventDefault) to sendCorrection.
-    m = re.search(r"querySelectorAll\(\s*[\"'`][^\"'`]*data-correct[^;]*?sendCorrection\(", page, re.S)
-    assert m, "a [data-correct-kind] listener must call sendCorrection("
-    window = page[m.start() - 200:m.end() + 300]
-    assert "preventDefault" in window and "submit" in window
-    assert "dataset" in window or "getAttribute" in window                       # kind / ref come from the markup
+def test_correction_forms_are_bound_to_send_correction(prefs_src, coherence_src, risk_src):
+    # The forms are plain markup after render(): each file binds their submit (preventDefault) to its own handler.
+    by_file = {PREFERENCES: prefs_src, COHERENCE_JS: coherence_src, RISK_JS: risk_src}
+    for path, _builder, handler, _kind in CONTROLS:
+        src = by_file[path]
+        m = re.search(r'addEventListener\(\s*[\"\']submit[\"\'][^;]*?' + re.escape(handler) + r"\(", src, re.S)
+        assert m, f"a submit listener must call {handler}( in {path.name}"
+        window = src[max(0, m.start() - 200):m.end() + 100]
+        assert "preventDefault" in window, (path.name, handler)
 
 
-def test_every_ai_derived_item_gets_the_control(page):
-    # task (4): each parsed note rule (with its quote and provisional flag), each profile_coherence finding, and the S1 /
-    # S3 behaviour rows carry the control, each with its own target.
-    rules, _ = function_source(page, "renderValuesRules")
-    assert re.search(r"renderCorrectionControl\(\s*[\"']parsed_rule[\"']\s*,\s*[^)]*_idx", rules)
-    assert "r.quote" in rules                                                    # the quote stays shown
-    assert "provisional" in rules or "provisoire" in norm(rules), "the D11 provisional flag is shown on the rule"
-    profil, _ = function_source(page, "pageProfil")
-    assert re.search(r"renderCorrectionControl\(\s*[\"']profile_finding[\"']\s*,\s*[^)]*\bid\b", profil)
-    factor, _ = function_source(page, "factorPage")
-    assert re.search(r"renderCorrectionControl\(\s*[\"']behaviour[\"']\s*,\s*[^)]*\bid\b", factor)
-    assert "S1" in factor and "S3" in factor, "only the behaviour rows (S1 / S3) get the behaviour control"
+def test_every_ai_derived_item_gets_the_control(prefs_src, coherence_src, risk_src):
+    # Each parsed note rule (with its quote and provisional flag), each profile_coherence finding, and the S1 /
+    # S3 behaviour rows carry the control, each with its own target; the hard checks (H4/H7/H8/H14) do not.
+    assert re.search(r"correctionFormHtml\(\s*index\s*,\s*notice\s*\)", prefs_src)
+    assert "rule.quote" in prefs_src
+    assert "provisional" in prefs_src.lower(), "the D11 provisional flag is shown on the rule"
+    assert re.search(r"correctionFormHtml\(\s*finding\s*\)", coherence_src)
+    assert "finding.id" in coherence_src
+    detail = function_source(risk_src, "detailCard")
+    assert "CORRECTABLE_CHECKS" in risk_src and "S1" in risk_src and "S3" in risk_src
+    assert "correctionControlHtml(check)" in detail, "only gated checks (S1/S3) get the behaviour control"
 
 
-def test_new_and_changed_ui_strings_pass_the_blocklist_and_d10_vocabulary(page):
+def test_new_and_changed_ui_strings_pass_the_blocklist_and_d10_vocabulary(prefs_src, coherence_src, risk_src):
     # SPEC §9.3 item 3 + D10 items 1, 2, 4: no advisory phrase, nothing that proposes, ranks or labels a choice.
-    for name in CHANGED_UI:
-        body, texts = function_source(page, name)
-        assert blocklist_hits(body) == [], name
-        assert D10_WORDS.search(H.norm(re.sub(r"</?(option|optgroup)\b", " ", body))) is None, name
-        if name in NEW_UI_HOOKS:
-            assert not typed_digits(texts), name
-    exempt = page.replace(H.DISCLAIMER_FR, " ").replace(H.REFUSAL_FR, " ").replace(H.SAMPLE_QUESTION, " ")
-    assert blocklist_hits(exempt) == []                                          # the whole page, disclaimer apart
+    by_file = {PREFERENCES: prefs_src, COHERENCE_JS: coherence_src, RISK_JS: risk_src}
+    checked = {
+        PREFERENCES: ("correctionFormHtml", "parsedRuleHtml", "parsedNotesHtml", "handleCorrection", "ruleSummary"),
+        COHERENCE_JS: ("correctionFormHtml", "correctionNoteHtml", "findingCard", "submitCorrection"),
+        RISK_JS: ("correctionControlHtml", "detailCard", "submitCorrection"),
+    }
+    for path, names in checked.items():
+        src = by_file[path]
+        for name in names:
+            body = function_source(src, name)
+            literal = " ".join(string_literals(body))
+            assert blocklist_hits(literal) == [], (path.name, name)
+            words = re.sub(r"</?(option|optgroup)\b", " ", literal)
+            found = D10_WORDS.search(norm(words))
+            assert found is None, (path.name, name, found and found.group(0))
+    for path in (PREFERENCES, COHERENCE_JS, RISK_JS):
+        assert blocklist_hits(by_file[path]) == [], path.name
