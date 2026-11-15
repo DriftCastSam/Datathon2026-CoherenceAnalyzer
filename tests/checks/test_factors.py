@@ -450,13 +450,14 @@ def test_flow_b_uses_proposed_checks_not_current(profile, checks_base, checks_nv
 
 
 def test_unknowns_are_listed_whatever_the_status(secs_base, secs_trade):
-    """§7.5/D3: unknowns are always listed; baseline contraintes lists H6 and H10, the others list none."""
+    """§7.5/D3: unknowns are always listed; baseline contraintes lists H11 (D19: H6/H10 now resolve via
+    ETF look-through), the others list none."""
     blob = json.dumps(secs_base["contraintes"]["unknowns"], default=str)
-    assert "H6" in blob and "H10" in blob
+    assert "H11" in blob and "H6" not in blob and "H10" not in blob
     for fid in ("objectif", "horizon", "risque", "preferences"):
         assert secs_base[fid]["unknowns"] == []
     blob = json.dumps(secs_trade["contraintes"]["unknowns"], default=str)
-    assert "H6" in blob and "H10" in blob
+    assert "H11" in blob
     assert secs_trade["horizon"]["unknowns"] == [] and secs_trade["risque"]["unknowns"] == []
 
 
@@ -594,13 +595,14 @@ META_IDS = {"H11", "H12", "H13"}   # need the data/meta files (P1.2)
 
 def test_facts_check_entries_contraintes(secs_trade):
     c = secs_trade["contraintes"]["facts"]
-    # P1.2 oracle fix: H11-H13 now run; with no data/meta CSV each of their entries is `unknown` (SPEC §7.3, D7 point 4).
+    # D19: H6/H10 now resolve via ETF look-through (pass on both sides for H6, pass -> violation for H10 on the
+    # NVDA side); facts only list non-pass checks, so H6 drops out and only the proposed-side H10 remains.
     assert sorted((e["id"], e["status"]) for e in c["checks"] if e["id"] not in META_IDS) == [
-        ("H10", "unknown"), ("H10", "violation"), ("H3", "violation"), ("H6", "unknown")]
+        ("H10", "violation"), ("H3", "violation")]
     assert all(e["status"] == "unknown" for e in c["checks"] if e["id"] in META_IDS)
     h3, h10 = _entry(c, "H3", "violation"), _entry(c, "H10", "violation")
     assert (_norm(h3["value"]), _norm(h3["limit"])) == ("10,0 %", "8,0 %")
-    assert (_norm(h10["value"]), _norm(h10["limit"])) == ("34,7 %", "30,0 %")
+    assert (_norm(h10["value"]), _norm(h10["limit"])) == ("41,7 %", "30,0 %")
     # SPEC-AMBIGUITY: the facts entry must let the writer name the offender; the ticker is the check subject.
     assert "NVDA" in json.dumps(h3, ensure_ascii=False)
     assert "Information Technology" in json.dumps(h10, ensure_ascii=False)
@@ -608,11 +610,11 @@ def test_facts_check_entries_contraintes(secs_trade):
 
 def test_facts_baseline_contraintes_lists_only_the_unknowns(secs_base):
     c = secs_base["contraintes"]["facts"]
-    assert sorted((e["id"], e["status"]) for e in c["checks"] if e["id"] not in META_IDS) == [
-        ("H10", "unknown"), ("H6", "unknown")]
+    # D19: H6/H10 both pass with ETF look-through, so no non-pass hard check remains in the baseline.
+    assert sorted((e["id"], e["status"]) for e in c["checks"] if e["id"] not in META_IDS) == []
     assert all(e["status"] == "unknown" for e in c["checks"] if e["id"] in META_IDS)   # P1.2 oracle fix, no meta CSV yet
     blob = json.dumps(c["unknowns"], default=str)
-    assert "H6" in blob and "H10" in blob
+    assert "H11" in blob and "H6" not in blob and "H10" not in blob
 
 
 @pytest.mark.parametrize("fid", DISPLAY)
@@ -861,12 +863,13 @@ def test_template_section_covers_every_violation_and_quotes_only_its_facts(secs_
 
 
 def test_template_section_says_what_it_cannot_verify(secs_base):
-    """Baseline contraintes (H6, H10 unknown): the template carries an `unknown` segment (D3: never silent)."""
+    """Baseline contraintes (D19: H11 unknown; H6/H10 resolve via ETF look-through): the template carries an
+    `unknown` segment (D3: never silent)."""
     facts = secs_base["contraintes"]["facts"]
     out = explain.template_section(facts)
     assert any(seg["kind"] == "unknown" for seg in out["segments"])
     refs = {r for seg in out["segments"] for r in seg["refs"]}
-    assert {"H6", "H10"} & refs
+    assert "H11" in refs
 
 
 @pytest.mark.parametrize("fid", ["objectif", "preferences"])

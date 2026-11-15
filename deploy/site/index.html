@@ -132,6 +132,23 @@ tr.flag td{background:var(--red-bg)}
 .ftabs button{display:flex;gap:8px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:99px;padding:8px 14px;cursor:pointer;color:var(--navy);font-weight:600;font-size:14px}
 .ftabs button[aria-selected="true"]{background:var(--navy);border-color:var(--navy);color:var(--surface)}
 .ftabs .dot{width:8px;height:8px;border-radius:50%;background:var(--c)}
+.expo{--x-direct:#2a78d6;--x-etf:#1baf7a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .expo{--x-direct:#3987e5;--x-etf:#199e70}}
+:root[data-theme="dark"] .expo{--x-direct:#3987e5;--x-etf:#199e70}
+.expo .xrow{border-top:1px solid var(--line-2)} .expo .xrow:first-of-type{border-top:0}
+.expo summary{display:grid;grid-template-columns:minmax(120px,1.1fr) 2fr 64px 92px;gap:12px;align-items:center;padding:9px 2px;cursor:pointer;list-style:none}
+.expo summary::-webkit-details-marker{display:none}
+.expo summary .nm::before{content:"▸ ";color:var(--soft)} .expo details[open] summary .nm::before{content:"▾ "}
+.expo .bar{display:flex;gap:2px;height:12px;align-items:stretch}
+.expo .bar i{display:block;min-width:2px}
+.expo .bar i:first-child{border-radius:4px 0 0 4px} .expo .bar i:last-child{border-radius:0 4px 4px 0} .expo .bar i:only-child{border-radius:4px}
+.expo .seg-direct{background:var(--x-direct)}
+.expo .seg-etf{background:var(--x-etf) repeating-linear-gradient(45deg,transparent 0 3px,rgba(255,255,255,.35) 3px 5px)}
+.expo .num{text-align:right;font-variant-numeric:tabular-nums;color:var(--ink)} .expo .num.c{color:var(--muted);font-size:13px}
+.expo .legend{display:flex;gap:16px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.expo .legend span{display:inline-flex;gap:6px;align-items:center} .expo .legend i{width:14px;height:10px;border-radius:2px;display:inline-block}
+.expo .parts{margin:0 0 10px 18px} .expo .parts td,.expo .parts th{padding:4px 8px;font-size:13px}
+@media (max-width:640px){.expo summary{grid-template-columns:1fr 64px 80px}.expo summary .bar{grid-column:1/-1;order:4}}
 .rule{display:grid;grid-template-columns:24px minmax(0,1fr) auto;gap:12px;padding:12px 0;border-top:1px solid var(--line-2);align-items:start}
 .rule .ic{font-weight:800;line-height:1.5}
 .rule b{font-weight:700} .rule .v{text-align:right;white-space:nowrap;font-weight:700;font-variant-numeric:tabular-nums}
@@ -357,6 +374,56 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
       <p class="small" style="margin-top:6px">Part des trajectoires simulées qui atteignent le montant à la date visée. Information seulement : jamais une violation, jamais dans le verdict.</p>
       <div class="tbl" style="margin-top:10px"><table><thead><tr><th>Objectif</th><th>Date</th><th class="r">Montant</th><th class="r">Probabilité</th><th>Statut</th></tr></thead><tbody>${rows}</tbody></table></div>
       ${assumptionBadge(g.assumptions, " hypothèses de ces probabilités ")}</section>`;
+  }
+  /* D19: what the portfolio really holds, ETFs looked through (metrics_current.exposure). Descriptive only:
+     no limit, no status here; the checks stay on the Facteurs page. */
+  const XFR = {"Information Technology": "Technologies de l'information", "Communication Services": "Services de communication",
+    "Consumer Discretionary": "Consommation discrétionnaire", "Consumer Staples": "Consommation de base", "Energy": "Énergie",
+    "Financials": "Finance", "Health Care": "Santé", "Industrials": "Industrie", "Materials": "Matériaux",
+    "Real Estate": "Immobilier", "Utilities": "Services publics", "Cash and other": "Liquidités et autres", "Bonds": "Obligations",
+    "Gold": "Or", "Crypto asset": "Crypto", "Crypto": "Crypto", "Broad market (diversified)": "Marché large (non ventilé)",
+    "Stocks": "Actions", "Equity ETFs": "FNB d'actions", "Canada": "Canada", "United States": "États-Unis",
+    "Global (crypto)": "Mondial (crypto)", "Global (gold)": "Mondial (or)", "United Kingdom": "Royaume-Uni",
+    "Netherlands": "Pays-Bas", "Switzerland": "Suisse", "Ireland": "Irlande", "Japan": "Japon", "Germany": "Allemagne",
+    "France": "France", "China": "Chine", "Bermuda": "Bermudes", "Brazil": "Brésil", "Israel": "Israël", "Other": "Autres"};
+  const xn = n => XFR[n] || n;
+  const XTABS = [["sector", "Secteurs"], ["country", "Pays"], ["names", "Entreprises"], ["class", "Classes d'actifs"], ["currency", "Devises"]];
+  function renderExposure(rep, m) {
+    const e = (m || rep.metrics_current).exposure;
+    if (!e) return "";
+    const tab = XTABS.some(([k]) => k === state.expo) ? state.expo : "sector";
+    const names = tab === "names", sn = e.single_names;
+    // one shape for every tab: {name, weight, value_cad, direct, etf, parts: [{label, how, weight}]}
+    const rows = names
+      ? sn.rows.slice(0, 15).map(r => ({name: r.name + " (" + r.ticker + ")", weight: r.weight, value_cad: r.value_cad,
+          direct: r.direct, etf: r.weight - r.direct,
+          parts: [...(r.direct ? [{label: r.name, how: "détenu directement", weight: r.direct}] : []),
+                  ...r.via.map(v => ({label: v.name + " (" + v.etf + ")", how: "via ce FNB", weight: v.weight}))]}))
+      : e.dimensions[tab].rows.map(r => ({name: xn(r.name), weight: r.weight, value_cad: r.value_cad,
+          direct: r.parts.filter(p => p.via === "direct").reduce((a, p) => a + p.weight, 0),
+          etf: r.parts.filter(p => p.via === "etf").reduce((a, p) => a + p.weight, 0),
+          parts: r.parts.map(p => ({label: p.name + " (" + p.ticker + ")", how: p.via === "etf" ? "via ce FNB" : "détenu directement", weight: p.weight}))}));
+    const max = Math.max(...rows.map(r => r.weight), 0.0001);
+    const seg = (cls, w, what, r) => w > 0.00005 ? `<i class="seg-${cls}" style="flex:0 0 calc(${(w / max * 100).toFixed(2)}% - 1px)" title="${esc(r.name)} · ${what} : ${pct(w)} (${cad(w * e.value_cad)})"></i>` : "";
+    const list = rows.map(r => `<details class="xrow"><summary><span class="nm">${esc(r.name)}</span>
+        <span class="bar" aria-hidden="true">${seg("direct", r.direct, "détenu directement", r)}${seg("etf", r.etf, "via vos FNB", r)}</span>
+        <span class="num"><b>${pct(r.weight)}</b></span><span class="num c">${cad(r.value_cad)}</span></summary>
+        <div class="tbl parts"><table><thead><tr><th>Provient de</th><th>Comment</th><th class="r">Part du portefeuille</th><th class="r">Montant</th></tr></thead>
+        <tbody>${r.parts.map(p => `<tr><td>${esc(p.label)}</td><td>${p.how}</td><td class="r">${pct(p.weight, 2)}</td><td class="r">${cad(p.weight * e.value_cad)}</td></tr>`).join("")}</tbody></table></div></details>`).join("");
+    const unc = names ? sn.uncovered : (e.dimensions[tab].uncovered || []);
+    const notes = [];
+    if (names) notes.push(`Minimum seulement : pour chaque FNB, seules ses principales positions publiées par l'émetteur sont comptées${Object.keys(sn.etf_listed).length ? " (part du FNB couverte : " + Object.entries(sn.etf_listed).map(([k, v]) => esc(k) + " " + pct(v, 0)).join(", ") + ")" : ""}. L'exposition réelle à chaque entreprise peut être plus élevée.`);
+    if (unc.length) notes.push(`Non ventilé, faute de données de l'émetteur : ${unc.map(esc).join(", ")}. Ces FNB restent dans leur propre catégorie.`);
+    if (tab === "currency") notes.push("Devise de cotation du titre. Un FNB coté en dollars canadiens peut détenir des actifs étrangers.");
+    const srcs = e.sources || [], dates = [...new Set(srcs.map(x => x.as_of))].sort();
+    return `<section class="card expo" id="exposure"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap"><h3>Exposition réelle, FNB ventilés</h3><span class="small">valeur : ${cad(e.value_cad)}</span></div>
+      <p class="small" style="margin-top:6px">Ce que le portefeuille détient vraiment : chaque FNB est réparti selon les pondérations publiées par son émetteur. Ouvrez une ligne pour voir de quels placements elle vient. Information seulement, jamais une recommandation.</p>
+      <div class="ftabs" role="tablist" aria-label="Dimensions d'exposition" style="margin-top:12px">${XTABS.map(([k, t]) => `<button type="button" role="tab" aria-selected="${k === tab}" data-expo="${k}">${t}</button>`).join("")}</div>
+      <div class="legend" style="margin-top:12px"><span><i class="seg-direct"></i>Détenu directement</span><span><i class="seg-etf"></i>Via vos FNB</span></div>
+      <div role="tabpanel" style="margin-top:6px">${list || '<p class="small">Aucune donnée.</p>'}</div>
+      ${notes.map(n => `<p class="small" style="margin-top:8px">${n}</p>`).join("")}
+      ${srcs.length ? `<details style="margin-top:10px"><summary class="small" style="cursor:pointer">Sources des pondérations (${dates.length === 1 ? "au " + esc(dates[0]) : "au " + esc(dates[0]) + " – " + esc(dates[dates.length - 1])})</summary><ul class="small" style="margin-top:6px">${srcs.map(x => `<li>${esc(x.etf)} · ${esc(x.file.replace("data/meta/", ""))} · au ${esc(x.as_of)} · <a href="${esc(x.source_url)}" target="_blank" rel="noopener">${esc(new URL(x.source_url).hostname)}</a></li>`).join("")}</ul></details>` : ""}
+    </section>`;
   }
   function renderLookthrough(rep) {
     const ids = [...new Set((rep.unknowns || []).filter(u => String(u.message_key).includes("etf") || String(u.message_key).includes("broad")).map(u => u.id))].sort();
@@ -954,6 +1021,7 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
         ${tile("Valeur pessimiste (P5)", cad(m.p5_T), `Votre plancher : ${cad(L.floor_at_horizon)}`, m.p5_T < L.floor_at_horizon)}
         ${tile("Probabilité de perte", pct(m.loss_prob), "À l'horizon, simulation", false)}</div>
       <div class="grid2">${keyData(rep, true)}<div class="page" style="gap:20px">${grp("Secteurs", g.sector)}${grp("Pays", g.country)}</div></div>
+      ${renderExposure(rep)}
       ${renderLookthrough(rep)}
       <div class="half">${renderStress(rep)}${renderGoals(rep)}</div></div>`;
   }
@@ -1184,6 +1252,7 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
     $("#foot").innerHTML = `<div class="wrap" style="display:flex;flex-direction:column;gap:4px"><b style="color:var(--navy)">${esc(rep.disclaimer)}</b><span>Aucune recommandation d'achat ou de vente. Rapport produit par <span class="mono">pipeline.review</span>, hors ligne, sorties d'IA enregistrées.</span></div>`;
     document.querySelectorAll("[data-go]").forEach(b => b.addEventListener("click", () => go(b.dataset.go)));
     document.querySelectorAll("[data-factor]").forEach(b => b.addEventListener("click", () => { state.factor = b.dataset.factor; go("facteurs", true); }));
+    document.querySelectorAll("[data-expo]").forEach(b => b.addEventListener("click", () => { state.expo = b.dataset.expo; render(); document.querySelector('[data-expo="' + state.expo + '"]')?.focus(); }));
     if (state.page === "recherche" && rep.site.whatif) bindRecherche();
     if (state.page === "simulation" && rep.site.whatif) bindSimulation();
     document.querySelectorAll("[data-action]").forEach(b => b.addEventListener("click", () => { if (apiBase()) decideRule(b.dataset.action, Number(b.dataset.index)); }));

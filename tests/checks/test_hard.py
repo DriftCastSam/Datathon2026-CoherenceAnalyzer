@@ -94,6 +94,33 @@ def checks_nvda(profile, assets, meta, m_nvda) -> list:
     return hard.run_all(_fractions(engine.ROBERT_NVDA), m_nvda, profile, assets, meta)
 
 
+# D19: pins the no-data fallback (ETF part `unknown`) via tests/conftest.py's `without_lookthrough`,
+# now that data/meta/etf_sector_weights.csv is real and the default fixtures above resolve it.
+@pytest.fixture(scope="module")
+def meta_no_lookthrough(without_lookthrough) -> dict:
+    return {n: data.load_meta(n) for n in META_NAMES}
+
+
+@pytest.fixture(scope="module")
+def m_base_no_lookthrough(market, without_lookthrough) -> dict:
+    return engine.analyse(market, engine.ROBERT, ROBERT_HORIZON_M, ROBERT_VALUE)
+
+
+@pytest.fixture(scope="module")
+def m_nvda_no_lookthrough(market, without_lookthrough) -> dict:
+    return engine.analyse(market, engine.ROBERT_NVDA, ROBERT_HORIZON_M, ROBERT_VALUE)
+
+
+@pytest.fixture(scope="module")
+def checks_base_no_lookthrough(profile, assets, meta_no_lookthrough, m_base_no_lookthrough) -> list:
+    return hard.run_all(_fractions(engine.ROBERT), m_base_no_lookthrough, profile, assets, meta_no_lookthrough)
+
+
+@pytest.fixture(scope="module")
+def checks_nvda_no_lookthrough(profile, assets, meta_no_lookthrough, m_nvda_no_lookthrough) -> list:
+    return hard.run_all(_fractions(engine.ROBERT_NVDA), m_nvda_no_lookthrough, profile, assets, meta_no_lookthrough)
+
+
 def _by_id(checks: list, cid: str) -> list:
     return [c for c in checks if c["id"] == cid]
 
@@ -198,15 +225,27 @@ def test_baseline_h5_foreign_currency_pass(checks_base):
     assert h5["limit"] == 0.40
 
 
-def test_baseline_h6_employer_sector_pass_plus_etf_unknown(checks_base, meta):
-    """Health Care: JNJ 5% direct; XIU/SPY have no look-through file -> also an `unknown` for the ETF part."""
+def test_baseline_h6_employer_sector_pass_with_etf_lookthrough(checks_base, meta):
+    """D19: Health Care = JNJ 5% direct + the ETF look-through part (XIU/SPY Health Care share) = 6.2%, under 15%."""
     h6 = _by_id(checks_base, "H6")
     assert "violation" not in {c["status"] for c in h6}
     direct = _one(checks_base, "H6", "pass")
+    assert direct["value"] == pytest.approx(0.062456, abs=1e-6)
+    assert direct["limit"] == 0.15
+    assert meta["etf_sector_weights"] is not None   # D19: real issuer look-through data now loaded
+    assert len(h6) == 1   # look-through resolves what used to be a separate ETF-part `unknown`
+
+
+def test_baseline_h6_employer_sector_pass_plus_etf_unknown_without_lookthrough(
+        checks_base_no_lookthrough, meta_no_lookthrough):
+    """Fallback (no data/meta look-through files): JNJ 5% direct passes; the ETF part stays `unknown`."""
+    h6 = _by_id(checks_base_no_lookthrough, "H6")
+    assert "violation" not in {c["status"] for c in h6}
+    direct = _one(checks_base_no_lookthrough, "H6", "pass")
     assert direct["value"] == pytest.approx(0.05, abs=1e-9)
     assert direct["limit"] == 0.15
-    assert meta["etf_sector_weights"] is None   # look-through not built in P0
-    _one(checks_base, "H6", "unknown")
+    assert meta_no_lookthrough["etf_sector_weights"] is None
+    _one(checks_base_no_lookthrough, "H6", "unknown")
 
 
 # ---------------------------------------------------------------- engine checks as properties (§7.3)
@@ -238,9 +277,16 @@ def test_h7_h10_follow_status_logic(case, checks_base, checks_nvda, m_base, m_nv
 
 
 @pytest.mark.parametrize("case", ["base", "nvda"])
-def test_h10_broad_market_flagged_unknown_without_lookthrough(case, checks_base, checks_nvda, m_base, m_nvda):
-    """§7.3 H10: broad-market ETFs (XIU, SPY) are excluded from the max when look-through is off, and flagged unknown."""
-    checks, m = (checks_base, m_base) if case == "base" else (checks_nvda, m_nvda)
+def test_h10_broad_market_flagged_unknown_without_lookthrough(
+        case, checks_base_no_lookthrough, checks_nvda_no_lookthrough, m_base_no_lookthrough, m_nvda_no_lookthrough):
+    """§7.3 H10: broad-market ETFs (XIU, SPY) are excluded from the max when look-through is off, and flagged unknown.
+
+    D19: data/meta now has real look-through data, so this pins the no-data fallback explicitly via
+    tests/conftest.py's `without_lookthrough`; the look-through-on path is pinned by the tests above and by
+    tests/engine/test_lookthrough.py.
+    """
+    checks, m = ((checks_base_no_lookthrough, m_base_no_lookthrough) if case == "base"
+                 else (checks_nvda_no_lookthrough, m_nvda_no_lookthrough))
     assert m["lookthrough"] is False
     assert any(g["name"].startswith(BROAD) for g in m["groups"]["sector"])
     _one(checks, "H10", "unknown")
@@ -313,11 +359,13 @@ def test_nvda_h1_h2_h6_unchanged(checks_nvda):
     assert _statuses(checks_nvda, "H1") == {"pass"}
     assert _one(checks_nvda, "H2")["status"] == "pass"
     assert "violation" not in _statuses(checks_nvda, "H6")    # NVDA is IT, employer sector is Health Care
-    assert _one(checks_nvda, "H6", "pass")["value"] == pytest.approx(0.05, abs=1e-9)
+    # D19: 5% direct JNJ + the ETF look-through Health Care share (same as the baseline, unaffected by the NVDA swap).
+    assert _one(checks_nvda, "H6", "pass")["value"] == pytest.approx(0.062456, abs=1e-6)
 
 
 def test_nvda_h8_h10_violation_measured(checks_nvda):
-    """docs/spec-decisions.md D2: Robert + NVDA 10% fails H8 (mdd -13.4% vs -12%) and H10 (IT 34.7% vs 30%)."""
+    """docs/spec-decisions.md D2: Robert + NVDA 10% fails H8 (mdd -13.4% vs -12%) and H10 (IT, over 30%;
+    41.7% with D19's ETF look-through added, was 34.7% direct-only)."""
     assert _one(checks_nvda, "H8")["status"] == "violation"
     h10 = _one(checks_nvda, "H10", "violation")
     assert h10["subject"] == "Information Technology"
@@ -371,10 +419,11 @@ def test_h5_foreign_currency_over(profile, assets, meta):
 
 
 def test_h6_employer_sector_over(profile, assets, meta):
-    """JNJ +11 from ZST: Health Care direct equity = 0.16 > 0.15 -> H6 violation (and H3 for JNJ)."""
+    """JNJ +11 from ZST: Health Care direct equity 0.16 + D19's ETF look-through share 0.012456 = 0.172456 > 0.15
+    -> H6 violation (and H3 for JNJ)."""
     checks = _cheap(profile, assets, meta, _variant(engine.ROBERT, JNJ=11, ZST_TO=-11))
     h6 = _one(checks, "H6", "violation")
-    assert h6["value"] == pytest.approx(0.16, abs=1e-9)
+    assert h6["value"] == pytest.approx(0.172456, abs=1e-6)
     assert h6["limit"] == 0.15
     assert {c["subject"] for c in _by_id(checks, "H3") if c["status"] == "violation"} == {"JNJ"}
 
@@ -402,11 +451,16 @@ def test_baseline_verdict_follows_rule(checks_base):
 
 @pytest.mark.parametrize("case", ["base", "nvda"])
 def test_unknowns_listed_separately(case, checks_base, checks_nvda):
-    """§7.5: unknown items are always listed under "what we can't verify", whatever the verdict."""
+    """§7.5: unknown items are always listed under "what we can't verify", whatever the verdict.
+
+    D19: with real ETF look-through data, H6/H10 resolve to pass/violation; H11 (ESG exclusion tags) stays
+    unknown without data/meta/activity_tags.csv rows.
+    """
     checks = checks_base if case == "base" else checks_nvda
     u = report.unknowns(checks)
     assert u == [c for c in checks if c["status"] == "unknown"]
-    assert {"H6", "H10"} <= {c["id"] for c in u}
+    assert "H11" in {c["id"] for c in u}
+    assert {"H6", "H10"}.isdisjoint({c["id"] for c in u})
 
 
 def _c(cid: str, status: str, kind: str = "hard") -> dict:

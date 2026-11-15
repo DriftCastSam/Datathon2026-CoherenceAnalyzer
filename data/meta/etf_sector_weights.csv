@@ -1,0 +1,45 @@
+etf,sector,weight,source_url,as_of
+XIU.TO,Financials,0.4116,https://www.blackrock.com/ca/investors/en/products/239832/ishares-sptsx-60-index-etf/1464253357814.ajax?fileType=csv&fileName=XIU_holdings&dataType=fund,2026-11-13
+XIU.TO,Energy,0.1677,https://www.blackrock.com/ca/investors/en/products/239832/ishares-sptsx-60-index-etf/1464253357814.ajax?fileType=csv&fileName=XIU_holdings&dataType=fund,2026-11-13
+XIU.TO,Materials,0.1269,https://www.blackrock.com/ca/investors/en/products/239832/ishares-sptsx-60-index-etf/1464253357814.ajax?fileType=csv&fileName=XIU_holdings&dataType=fund,2026-11-13
+XIU.TO,Information Technology,0.0958,https://www.blackrock.com/ca/investors/en/products/239832/ishares-sptsx-60-index-etf/1464253357814.ajax?fileType=csv&fileName=XIU_holdings&dataType=fund,2026-11-13
+XIU.TO,Industrials,0.0824,https://www.blackrock.com/ca/investors/en/products/239832/ishares-sptsx-60-index-etf/1464253357814.ajax?fileType=csv&fileName=XIU_holdings&dataType=fund,2026-11-13
+XIU.TO,Consumer Staples,0.0354,https://www.blackrock.com/ca/investors/en/products/239832/ishares-sptsx-60-index-etf/1464253357814.ajax?fileType=csv&fileName=XIU_holdings&dataType=fund,2026-11-13
+XIU.TO,Consumer Discretionary,0.0333,https://www.blackrock.com/ca/investors/en/products/239832/ishares-sptsx-60-index-etf/1464253357814.ajax?fileType=csv&fileName=XIU_holdings&dataType=fund,2026-11-13
+XIU.TO,Utilities,0.0262,https://www.blackrock.com/ca/investors/en/products/239832/ishares-sptsx-60-index-etf/1464253357814.ajax?fileType=csv&fileName=XIU_holdings&dataType=fund,2026-11-13
+XIU.TO,Communication Services,0.0158,https://www.blackrock.com/ca/investors/en/products/239832/ishares-sptsx-60-index-etf/1464253357814.ajax?fileType=csv&fileName=XIU_holdings&dataType=fund,2026-11-13
+XIU.TO,Real Estate,0.0022,https://www.blackrock.com/ca/investors/en/products/239832/ishares-sptsx-60-index-etf/1464253357814.ajax?fileType=csv&fileName=XIU_holdings&dataType=fund,2026-11-13
+XIU.TO,Cash and other,0.0031,https://www.blackrock.com/ca/investors/en/products/239832/ishares-sptsx-60-index-etf/1464253357814.ajax?fileType=csv&fileName=XIU_holdings&dataType=fund,2026-11-13
+SPY,Information Technology,0.3615,https://www.ssga.com/us/en/intermediary/etfs/state-street-spdr-sp-500-etf-trust-spy,2026-11-12
+SPY,Financials,0.1250,https://www.ssga.com/us/en/intermediary/etfs/state-street-spdr-sp-500-etf-trust-spy,2026-11-12
+SPY,Health Care,0.1038,https://www.ssga.com/us/en/intermediary/etfs/state-street-spdr-sp-500-etf-trust-spy,2026-11-12
+SPY,Consumer Discretionary,0.0953,https://www.ssga.com/us/en/intermediary/etfs/state-street-spdr-sp-500-etf-trust-spy,2026-11-12
+SPY,Communication Services,0.0888,https://www.ssga.com/us/en/intermediary/etfs/state-street-spdr-sp-500-etf-trust-spy,2026-11-12
+SPY,Industrials,0.0822,https://www.ssga.com/us/en/intermediary/etfs/state-street-spdr-sp-500-etf-trust-spy,2026-11-12
+SPY,Consumer Staples,0.0508,https://www.ssga.com/us/en/intermediary/etfs/state-street-spdr-sp-500-etf-trust-spy,2026-11-12
+SPY,Energy,0.0358,https://www.ssga.com/us/en/intermediary/etfs/state-street-spdr-sp-500-etf-trust-spy,2026-11-12
+SPY,Utilities,0.0210,https://www.ssga.com/us/en/intermediary/etfs/state-street-spdr-sp-500-etf-trust-spy,2026-11-12
+SPY,Real Estate,0.0185,https://www.ssga.com/us/en/intermediary/etfs/state-street-spdr-sp-500-etf-trust-spy,2026-11-12
+SPY,Materials,0.0173,https://www.ssga.com/us/en/intermediary/etfs/state-street-spdr-sp-500-etf-trust-spy,2026-11-12
+QQQ,Information Technology,0.5534,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/holdings/fund?idType=ticker&productType=ETF,2026-11-12
+QQQ,Communication Services,0.1436,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/holdings/fund?idType=ticker&productType=ETF,2026-11-12
+QQQ,Consumer Discretionary,0.1160,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/holdings/fund?idType=ticker&productType=ETF,2026-11-12
+QQQ,Consumer Staples,0.0704,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/holdings/fund?idType=ticker&productType=ETF,2026-11-12
+QQQ,Health Care,0.0488,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/holdings/fund?idType=ticker&productType=ETF,2026-11-12
+QQQ,Industrials,0.0365,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/holdings/fund?idType=ticker&productType=ETF,2026-11-12
+QQQ,Utilities,0.0121,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/holdings/fund?idType=ticker&productType=ETF,2026-11-12
+QQQ,Materials,0.0108,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/holdings/fund?idType=ticker&productType=ETF,2026-11-12
+QQQ,Energy,0.0045,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/holdings/fund?idType=ticker&productType=ETF,2026-11-12
+QQQ,Financials,0.0022,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/holdings/fund?idType=ticker&productType=ETF,2026-11-12
+QQQ,Cash and other,0.0016,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/holdings/fund?idType=ticker&productType=ETF,2026-11-12
+ESGV,Information Technology,0.3947,https://advisors.vanguard.com/investments/products/api/funds/4393/holdings/daily,2026-11-12
+ESGV,Financials,0.1282,https://advisors.vanguard.com/investments/products/api/funds/4393/holdings/daily,2026-11-12
+ESGV,Health Care,0.1176,https://advisors.vanguard.com/investments/products/api/funds/4393/holdings/daily,2026-11-12
+ESGV,Consumer Discretionary,0.1147,https://advisors.vanguard.com/investments/products/api/funds/4393/holdings/daily,2026-11-12
+ESGV,Communication Services,0.1025,https://advisors.vanguard.com/investments/products/api/funds/4393/holdings/daily,2026-11-12
+ESGV,Industrials,0.0482,https://advisors.vanguard.com/investments/products/api/funds/4393/holdings/daily,2026-11-12
+ESGV,Consumer Staples,0.0408,https://advisors.vanguard.com/investments/products/api/funds/4393/holdings/daily,2026-11-12
+ESGV,Real Estate,0.0261,https://advisors.vanguard.com/investments/products/api/funds/4393/holdings/daily,2026-11-12
+ESGV,Materials,0.0178,https://advisors.vanguard.com/investments/products/api/funds/4393/holdings/daily,2026-11-12
+ESGV,Utilities,0.0015,https://advisors.vanguard.com/investments/products/api/funds/4393/holdings/daily,2026-11-12
+ESGV,Cash and other,0.0079,https://advisors.vanguard.com/investments/products/api/funds/4393/holdings/daily,2026-11-12

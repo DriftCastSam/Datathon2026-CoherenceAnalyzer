@@ -1,0 +1,407 @@
+{
+  "cache_key": "d105211d8516ae9c454f70222783e0728373fb50a0a7dffcfd64ad30a8656ed4",
+  "call_log": {
+    "hand_written": true,
+    "latency_ms": 0,
+    "tokens_in": 0,
+    "tokens_out": 0
+  },
+  "input_hash": "sha256:3bf3f167b2af9accda641266ec07070690a6e99fee25cffd54ed7c1255d288fd",
+  "model_id": "fixture:hand-written",
+  "node": "explainer",
+  "output": {
+    "segments": [
+      {
+        "kind": "unknown",
+        "refs": [
+          "H11"
+        ],
+        "text": "H11: les activités exclues ne peuvent pas être vérifiées pour les FNB, dont le contenu n'a pas de données d'activité (GLD, SPY, XBB.TO, XIU.TO, ZST.TO) ni pour les titres sans ligne d'activité dans les données (ENB.TO, FTS.TO, JNJ, PG, RY.TO)."
+      }
+    ]
+  },
+  "prompt_version": "explainer.v2",
+  "user_payload": {
+    "checks": [
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "ENB.TO",
+        "value": "6,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "FTS.TO",
+        "value": "7,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_etf_no_lookthrough",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "GLD",
+        "value": "5,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "JNJ",
+        "value": "5,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "PG",
+        "value": "5,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "RY.TO",
+        "value": "7,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_etf_no_lookthrough",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "SPY",
+        "value": "12,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_etf_no_lookthrough",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "XBB.TO",
+        "value": "22,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_etf_no_lookthrough",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "XIU.TO",
+        "value": "18,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_etf_no_lookthrough",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "ZST.TO",
+        "value": "13,0 %"
+      }
+    ],
+    "declared": {
+      "identity.employer_sector": "Health Care",
+      "preferences.asset_types_refused": [
+        "crypto",
+        "options",
+        "leveraged_etf",
+        "margin"
+      ],
+      "preferences.max_fee_mer_pct": "0,5 %",
+      "values.environment.exclusions": [],
+      "values.governance.exclusions": [
+        "accounting_fraud_last_5y"
+      ],
+      "values.social.exclusions": [
+        "tobacco"
+      ]
+    },
+    "derived": {
+      "knowledge.score": {
+        "because": [
+          "knowledge.quiz_score = 0,8",
+          "knowledge.declared_level = advanced",
+          "knowledge.question_quality = 0,62"
+        ],
+        "by": "rule:knowledge_score",
+        "confidence": "0,85",
+        "value": "74"
+      },
+      "situation.emergency_fund_months": {
+        "because": [
+          "situation.emergency_fund = 30 000 $",
+          "situation.monthly_expenses = 6 500 $"
+        ],
+        "by": "rule:emergency_fund_months",
+        "confidence": "1",
+        "value": "4,6"
+      },
+      "situation.income_stability": {
+        "because": [
+          "identity.employment_type = salaried"
+        ],
+        "by": "rule:income_stability",
+        "confidence": "1",
+        "value": "high"
+      }
+    },
+    "evidence_events": [],
+    "factor": "contraintes",
+    "intent": null,
+    "locale": "fr-CA",
+    "metrics": {
+      "current": {},
+      "proposed": {}
+    },
+    "question": "Quelles limites s'appliquent?",
+    "status": "unknown",
+    "unknowns": [
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "ENB.TO",
+        "value": "6,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "FTS.TO",
+        "value": "7,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_etf_no_lookthrough",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "GLD",
+        "value": "5,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "JNJ",
+        "value": "5,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "PG",
+        "value": "5,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_no_tag_rows",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "RY.TO",
+        "value": "7,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_etf_no_lookthrough",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "SPY",
+        "value": "12,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_etf_no_lookthrough",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "XBB.TO",
+        "value": "22,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_etf_no_lookthrough",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "XIU.TO",
+        "value": "18,0 %"
+      },
+      {
+        "derived_from": [
+          "limits.excluded_activities",
+          "values.environment.exclusions",
+          "values.social.exclusions",
+          "values.governance.exclusions",
+          "values.parsed_notes[approved_by_user]"
+        ],
+        "id": "H11",
+        "limit": "—",
+        "message_key": "excluded_activity_etf_no_lookthrough",
+        "source": "rule:excluded_activities",
+        "status": "unknown",
+        "subject": "ZST.TO",
+        "value": "13,0 %"
+      }
+    ],
+    "verdict": "coherent"
+  }
+}

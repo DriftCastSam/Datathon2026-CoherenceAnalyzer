@@ -9,6 +9,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from . import config
 from .config import DATA_DIR, META_DIR
 
 # asset_class -> (profile asset type(s), is_fixed_income)
@@ -57,8 +58,12 @@ def load_macro_series(series_id: str, data_dir: Path = DATA_DIR, upto: str | Non
 META_COLUMNS: dict[str, tuple[str, ...]] = {
     "asset_meta": ("ticker", "mer_pct", "mer_source_url", "mer_as_of", "has_lookthrough", "themes"),
     "etf_sector_weights": ("etf", "sector", "weight", "source_url", "as_of"),
+    "etf_country_weights": ("etf", "country", "weight", "source_url", "as_of"),
+    "etf_top_holdings": ("etf", "holding_ticker", "holding_name", "weight", "source_url", "as_of"),
     "activity_tags": ("ticker", "tag", "evidence_summary", "source_url", "as_of", "added_by"),
 }
+# ETF look-through files (SPEC §3.2, D19): the column each weight row is keyed on.
+_WEIGHT_KEY = {"etf_sector_weights": "sector", "etf_country_weights": "country", "etf_top_holdings": "holding_ticker"}
 _TAG_REQUIRED = ("ticker", "tag", "source_url", "as_of", "added_by")   # evidence_summary may stay empty
 _BOOLS = {"true": True, "1": True, "yes": True, "false": False, "0": False, "no": False, "": False}
 
@@ -97,14 +102,15 @@ def _validate_meta(name: str, df: pd.DataFrame, path: Path) -> pd.DataFrame:
             raise ValueError(f"{path}: activity_tags rows need ticker, tag, source_url, as_of and added_by "
                              f"(human, sourced); incomplete row(s) at line(s) {[int(i) + 2 for i in bad.index]}")
         return df
-    if name == "etf_sector_weights":
-        bad = df[_blank(df, ("etf", "sector", "source_url", "as_of"))]
+    if name in _WEIGHT_KEY:
+        req = ("etf", _WEIGHT_KEY[name], "source_url", "as_of")
+        bad = df[_blank(df, req)]
         if len(bad):
-            raise ValueError(f"{path}: etf_sector_weights rows need etf, sector, source_url and as_of; "
+            raise ValueError(f"{path}: {name} rows need {', '.join(req[:-1])} and as_of; "
                              f"incomplete row(s) at line(s) {[int(i) + 2 for i in bad.index]}")
         df["weight"] = [_number(w, f"{path}: weight", 0.0, 1.0) for w in df["weight"]]
         if df["weight"].isna().any():
-            raise ValueError(f"{path}: etf_sector_weights rows need a weight")
+            raise ValueError(f"{path}: {name} rows need a weight")
         return df
     # asset_meta
     if (df["ticker"] == "").any():
@@ -126,16 +132,18 @@ def _validate_meta(name: str, df: pd.DataFrame, path: Path) -> pd.DataFrame:
     return df
 
 
-def load_meta(name: str, meta_dir: Path = META_DIR) -> pd.DataFrame | None:
-    """asset_meta | etf_sector_weights | activity_tags (SPEC §3.2). None if the file isn't built yet.
+def load_meta(name: str, meta_dir: Path | None = None) -> pd.DataFrame | None:
+    """asset_meta | etf_sector_weights | etf_country_weights | etf_top_holdings | activity_tags (SPEC §3.2, D19).
+    None if the file isn't built yet.
 
     Validates the documented columns and the sourcing rules (ValueError otherwise). Typed on load:
     asset_meta mer_pct float (NaN = not filled), has_lookthrough bool, themes list[str];
-    etf_sector_weights weight float (fraction). Blank cells elsewhere stay ''.
+    etf_* weight float (fraction). Blank cells elsewhere stay ''.
     """
     if name not in META_COLUMNS:
         raise ValueError(f"unknown meta file {name!r}; expected one of {sorted(META_COLUMNS)}")
-    p = Path(meta_dir) / f"{name}.csv"
+    # resolved at call time (not import time), so config.META_DIR can be redirected as a whole (tests, D19)
+    p = Path(config.META_DIR if meta_dir is None else meta_dir) / f"{name}.csv"
     if not p.exists():
         return None
     try:
@@ -152,6 +160,26 @@ def load_meta(name: str, meta_dir: Path = META_DIR) -> pd.DataFrame | None:
 
 
 SHARES_SUM_TOL = 0.01   # issuer rounding: an ETF whose sector weights sum to 1 +- 0.01 is covered
+
+
+def etf_shares(df: pd.DataFrame | None, key: str) -> dict[str, dict[str, float]]:
+    """{etf: {key value: share}} from a loaded etf_sector_weights / etf_country_weights frame (D19); the same
+    coverage rule as etf_sector_shares (sum 1 +- SHARES_SUM_TOL, else not covered)."""
+    if df is None or len(df) == 0:
+        return {}
+    return etf_sector_shares(df.rename(columns={key: "sector"})[["etf", "sector", "weight"]])
+
+
+def etf_top_holdings(df: pd.DataFrame | None) -> dict[str, list[dict]]:
+    """{etf: [{ticker, name, weight}]} from the loaded etf_top_holdings frame (D19), heaviest first. Partial by
+    design (top holdings only); duplicate (etf, ticker) rows add up."""
+    if df is None or len(df) == 0:
+        return {}
+    acc: dict[str, dict[str, dict]] = {}
+    for etf, t, nm, w in zip(df["etf"], df["holding_ticker"], df["holding_name"], df["weight"]):
+        row = acc.setdefault(str(etf), {}).setdefault(str(t), {"ticker": str(t), "name": str(nm) or str(t), "weight": 0.0})
+        row["weight"] += float(w)
+    return {e: sorted(rows.values(), key=lambda r: (-r["weight"], r["ticker"])) for e, rows in sorted(acc.items())}
 
 
 def etf_sector_shares(df: pd.DataFrame | None) -> dict[str, dict[str, float]]:

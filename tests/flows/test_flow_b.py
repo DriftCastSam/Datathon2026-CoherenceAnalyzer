@@ -348,9 +348,14 @@ def test_metrics_current_and_proposed_are_the_engine_values_with_the_same_seed(r
 
 
 def test_unknowns_are_those_of_the_proposed_checks_and_listed_apart_from_the_verdict(rep):
-    """§7.5 + D3: `unknowns` = the proposed checks with status unknown (H6, H10 ...), always listed, never a verdict."""
+    """§7.5 + D3: `unknowns` = the proposed checks with status unknown (H11 ...), always listed, never a verdict.
+
+    D19: real ETF look-through data resolves H6/H10; H11 (ESG exclusion tags) stays unknown without
+    data/meta/activity_tags.csv rows.
+    """
     unknown_ids = [c["id"] for c in rep["checks_proposed"] if c["status"] == "unknown"]
-    assert {"H6", "H10"} <= set(unknown_ids)
+    assert "H11" in set(unknown_ids)
+    assert {"H6", "H10"}.isdisjoint(unknown_ids)
     assert [u["id"] for u in rep["unknowns"]] == unknown_ids
     assert all(u["status"] == "unknown" for u in rep["unknowns"])
 
