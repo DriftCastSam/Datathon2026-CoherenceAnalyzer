@@ -226,7 +226,7 @@
 
   function defaultNavSpec() {
     return {
-      tabs: NAV_TABS.map((label, index) => ({label, href: "#", active: index === 1})),
+      tabs: NAV_TABS.map((label, index) => ({label, href: index === 1 ? undefined : "#", active: index === 1})),
       chrome: "full"
     };
   }

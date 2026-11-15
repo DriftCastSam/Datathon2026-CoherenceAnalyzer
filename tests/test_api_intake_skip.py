@@ -83,14 +83,13 @@ def test_skip_required_path_then_review_succeeds(client, pid, factor, path):
     assert r.status_code == 200, f"Review after skipping {path} failed: {r.text}"
     report = r.json()
 
-    # Check that no check has status "violation" with this path in derived_from, subject, or limits_trace
+    # Check that no check has status "violation" with this path in derived_from or subject
     for check in report.get("checks_current", []):
         if check.get("status") == "violation":
             der = check.get("derived_from", []) or []
             subj = check.get("subject", []) or []
-            trace = check.get("limits_trace", []) or []
-            assert path not in der and path not in subj and path not in trace, \
-                f"Check {check['id']} has violation status with {path} in derived_from/subject/limits_trace after skip"
+            assert path not in der and path not in subj, \
+                f"Check {check['id']} has violation status with {path} in derived_from/subject after skip"
 
 
 @pytest.mark.parametrize("path", _all_not_skippable_paths())

@@ -26,16 +26,17 @@
   const MODE_LIVE = "live";
   const BASE_PROFILE_NOTE = "What-if scenarios are precomputed from the persona's original profile; "
     + "edits made in this session are not reflected here.";
+  const LIVE_LOADING = "loading";
+  const LIVE_OK = "ok";
+  const LIVE_FAILED = "failed";
 
   /* Choices persist while the screen re-renders; a persona change starts them over. */
   const choice = {persona: null, ticker: null, target: null, funding: null};
 
-  /* Live what-if loading: guard against stale results and avoid refetching unchanged selections. */
-  let loadSeq = 0;
-  let loadedKey = null;
-  let inFlightKey = null;
-  let liveLoadSuccess = false;
-  let loading = false;
+  /* Live what-if loading: screen-local cache keyed by requestKey -> {status, data?}.
+     Bound the cache by clearing entries for other personas. */
+  const MAX_CACHED_ENTRIES = 10;
+  const live = new Map();
 
   function requestedTickers() {
     const raw = App.routeParams().get(ASSETS_PARAM);
@@ -43,10 +44,11 @@
     return fromRoute.length ? fromRoute : (App.state.selection || []);
   }
 
-  /* Returns {context} when there is something to show, else {empty}. */
-  function resolve() {
-    const universe = App.state.universe;
-    const whatif = App.state.whatif;
+  /* Returns {context} when there is something to show, else {empty}.
+     Accepts optional liveData = {universe, whatif} from the live cache. */
+  function resolve(liveData) {
+    const universe = liveData ? liveData.universe : App.state.universe;
+    const whatif = liveData ? liveData.whatif : App.state.whatif;
     if (!universe || !universe.base || !whatif) return {empty: EMPTY_NO_DATA};
     const requested = requestedTickers();
     if (!requested.length) return {empty: EMPTY_NONE};
@@ -61,46 +63,34 @@
     return personaId + "|" + tickers.slice().sort().join(",") + "|" + reportId;
   }
 
-  function loadLiveWhatif(personaId, tickers, section) {
-    loadSeq += 1;
-    const token = loadSeq;
-    const requestKey = cacheKey(personaId, tickers, App.state.report);
-    loading = true;
-    inFlightKey = requestKey;
-    liveLoadSuccess = false;
+  function boundCache(currentKey) {
+    if (live.size <= MAX_CACHED_ENTRIES) return;
+    const keys = Array.from(live.keys());
+    for (const key of keys) {
+      if (key !== currentKey) {
+        live.delete(key);
+        if (live.size <= MAX_CACHED_ENTRIES) break;
+      }
+    }
+  }
+
+  function settle(requestKey, entry, section) {
+    live.set(requestKey, entry);
+    const currentKey = cacheKey(App.state.persona, requestedTickers(), App.state.report);
+    if (requestKey === currentKey && App.route === "whatif") {
+      App.renderers.whatif(section);
+    }
+  }
+
+  function loadLiveWhatif(requestKey, personaId, tickers, section) {
+    live.set(requestKey, {status: LIVE_LOADING});
     App.source.whatifLive(personaId, tickers).then(data => {
-      if (token !== loadSeq || App.state.persona !== personaId) return;
-      App.state.universe = data.universe;
-      App.state.whatif = data.whatif;
-      App.data.universe = data.universe;
-      App.data.whatif = data.whatif;
-      liveLoadSuccess = true;
-      loading = false;
-      loadedKey = requestKey;
-      inFlightKey = null;
-      if (App.state.persona === personaId) App.renderers.whatif(section);
+      settle(requestKey, {status: LIVE_OK, data}, section);
     }).catch(error => {
-      if (token !== loadSeq || App.state.persona !== personaId) return;
-      console.error("[whatif] live what-if failed, using static files", error);
-      liveLoadSuccess = false;
-      Promise.all([App.source.universe(personaId), App.source.whatif(personaId)]).then(([universe, whatif]) => {
-        if (token !== loadSeq || App.state.persona !== personaId) return;
-        App.state.universe = universe;
-        App.state.whatif = whatif;
-        App.data.universe = universe;
-        App.data.whatif = whatif;
-        loading = false;
-        loadedKey = requestKey;
-        inFlightKey = null;
-        if (App.state.persona === personaId) App.renderers.whatif(section);
-      }).catch(fallbackError => {
-        if (token !== loadSeq || App.state.persona !== personaId) return;
-        console.error("[whatif] fallback to static files also failed", fallbackError);
-        loading = false;
-        inFlightKey = null;
-        if (App.state.persona === personaId) App.renderers.whatif(section);
-      });
+      console.error("[whatif] live what-if failed", error);
+      settle(requestKey, {status: LIVE_FAILED}, section);
     });
+    boundCache(requestKey);
   }
 
   function scenarioFloor() {
@@ -108,10 +98,10 @@
     return limits ? num(limits.floor_at_horizon, undefined) : undefined;
   }
 
-  function profileDisplay() {
-    const live = view.profileLine(App.state.report);
-    const note = App.source.mode !== MODE_LIVE || !liveLoadSuccess;
-    return {line: live, note};
+  function profileDisplay(liveDataPresent) {
+    const line = view.profileLine(App.state.report);
+    const note = App.source.mode !== MODE_LIVE || !liveDataPresent;
+    return {line, note};
   }
 
   function syncChoice(context) {
@@ -207,7 +197,7 @@
     show(mount, "content", false);
   }
 
-  function paintContext(mount, context, section) {
+  function paintContext(mount, context, section, liveDataPresent) {
     const {targets, fundings} = syncChoice(context);
     const {base, whatif, tickers} = context;
     show(mount, "empty", false);
@@ -220,7 +210,7 @@
       fundings.map(item => ({value: item.id, label: item.label})), choice.funding);
     text(mount, "meta", (tickers.indexOf(choice.ticker) + 1) + " of " + tickers.length
       + (tickers.length === 1 ? " selected asset" : " selected assets"));
-    const profile = profileDisplay();
+    const profile = profileDisplay(liveDataPresent);
     text(mount, "profile", profile.line);
     text(mount, "profile-note", profile.note ? BASE_PROFILE_NOTE : "");
     show(mount, "profile-note", profile.note);
@@ -248,33 +238,53 @@
     });
   }
 
+  function bindSelects(section) {
+    bindSelect(section, "#whatif-asset", value => { choice.ticker = value; });
+    bindSelect(section, "#whatif-amount", value => { choice.target = Number(value); });
+    bindSelect(section, "#whatif-funding", value => { choice.funding = value; });
+  }
+
+  function paint(mount, resolved, section, noteHidden) {
+    if (resolved.empty) {
+      paintEmpty(mount, resolved.empty);
+    } else {
+      paintContext(mount, resolved.context, section, noteHidden);
+    }
+  }
+
   function renderWhatIf(section) {
     const mount = section.querySelector(".scr");
     if (!mount) return;
 
     const personaId = App.state.persona;
     const tickers = requestedTickers();
+    const currentKey = cacheKey(personaId, tickers, App.state.report);
+
+    /* In live mode, check the cache and start a load if needed. */
     if (App.source.mode === MODE_LIVE && tickers.length > 0) {
-      const currentKey = cacheKey(personaId, tickers, App.state.report);
-      if (currentKey !== loadedKey && currentKey !== inFlightKey) {
-        loadLiveWhatif(personaId, tickers, section);
+      const entry = live.get(currentKey);
+      if (!entry) {
+        loadLiveWhatif(currentKey, personaId, tickers, section);
+        paintEmpty(mount, {title: LOADING_TITLE, text: LOADING_TEXT});
+        bindSelects(section);
+        return;
       }
+      if (entry.status === LIVE_LOADING) {
+        paintEmpty(mount, {title: LOADING_TITLE, text: LOADING_TEXT});
+        bindSelects(section);
+        return;
+      }
+      if (entry.status === LIVE_OK) {
+        paint(mount, resolve(entry.data), section, true);
+        bindSelects(section);
+        return;
+      }
+      /* entry.status === LIVE_FAILED: fall through to render from App.state with note shown. */
     }
 
-    if (loading) {
-      paintEmpty(mount, {title: LOADING_TITLE, text: LOADING_TEXT});
-      return;
-    }
-
-    const resolved = resolve();
-    if (resolved.empty) {
-      paintEmpty(mount, resolved.empty);
-    } else {
-      paintContext(mount, resolved.context, section);
-    }
-    bindSelect(section, "#whatif-asset", value => { choice.ticker = value; });
-    bindSelect(section, "#whatif-amount", value => { choice.target = Number(value); });
-    bindSelect(section, "#whatif-funding", value => { choice.funding = value; });
+    /* Static mode or failed live load: render from App.state. */
+    paint(mount, resolve(), section, false);
+    bindSelects(section);
   }
 
   App.renderers.whatif = renderWhatIf;
