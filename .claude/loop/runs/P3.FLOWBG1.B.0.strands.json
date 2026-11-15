@@ -1,0 +1,35 @@
+{
+  "duration_s": 120.0,
+  "guard_cancellations": [
+    {
+      "reason": "'stress\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'stress' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'stress' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "command substitution is not allowed; run the inner command on its own",
+      "tool": "shell"
+    },
+    {
+      "reason": "'cut' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    }
+  ],
+  "is_error": false,
+  "model_id": "us.anthropic.claude-sonnet-5-5",
+  "num_turns": 23,
+  "result": "The Flow B report now carries the G1 `goals` block and the rate `stress` block, like Flow C. `tests/flows/test_flow_b_goals_stress.py` passes (19 tests) and the full mock suite passes (1806). I did not run the CLI demo.\n\nFiles changed:\n- `coherence_analyzer/pipeline.py`:\n  - `b6_checks_and_diff` now builds `goals` and `goal_checks` with the Flow C helper `_goals_block`, on the proposed portfolio.\n  - `b8_explain` passes the G1 rows to the objectif section's facts.\n  - `b9_save` adds `stress.stress_block` on the proposed weights and value, and passes both blocks to the report builder.\n  - I did not touch `_refresh` or `b7_resize`.\n- `coherence_analyzer/coherence/report.py`: `build_trade_check` takes optional `goals` and `stress` and adds them to the report when given.\n- `README.md`: a Status line for this step, and a note under Assumptions \u2192 \"Contributions, goal_probs and G1\".\n\n`schemas/report.json` needed no change: it already allows both blocks at the top level, and the Flow B report validates against it. The Step Functions path (`lambda_handler`) and the API confirm route needed no edits and return the same blocks.\n\nSPEC-AMBIGUITY resolved: \u00a713 has one `goals` block and one `stress` block, with no current/proposed pair. I put both on the proposed portfolio, matching the Flow B verdict, sections and explanation, and the frozen test asserts the same reading. Both blocks are info only: they are not checks, unknowns or flipped checks, and they don't change the verdict or headroom.\n",
+  "stop_reason": "end_turn",
+  "usage": {
+    "inputTokens": 565538,
+    "outputTokens": 7704,
+    "totalTokens": 573242
+  }
+}
