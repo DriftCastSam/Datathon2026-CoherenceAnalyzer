@@ -490,7 +490,9 @@ def test_theme_number_answer_is_an_event_without_llm_and_stays_out_of_limits_unt
     after = _profile(client, ROBERT)
     assert after["values"]["parsed_notes"]["value"][2]["params"]["max_pct"] == 15
     assert after["values"]["parsed_notes"]["value"][2]["approved_by_user"] is False
-    assert "max_theme_weight" not in after["limits"]
+    # D11 (owner, 2026-11-15): with its number the unapproved rule is a provisional limit only, never a firm one.
+    assert all(isinstance(v, dict) and v.get("provisional") is True
+               for v in (after["limits"].get("max_theme_weight") or {}).values())
     assert llm_nodes == []
     (ev,) = _new_events(store_dir, ROBERT, log)
     _check_intake_event(ev, ROBERT, path, None, 15)

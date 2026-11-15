@@ -64,17 +64,40 @@ def robert_nvda_sections(locale: str = "fr-CA") -> list[dict]:
 
 
 def contraintes_unknown_good(facts: dict) -> dict:
-    """Robert's current portfolio (`engine.ROBERT`): contraintes is `unknown` (H6, H10 have no ETF look-through)."""
-    h6 = next(c for c in facts["checks"] if c["id"] == "H6" and c["status"] == "unknown")
-    h10 = next(c for c in facts["checks"] if c["id"] == "H10" and c["status"] == "unknown")
-    return {"segments": [
-        {"kind": "unknown", "refs": ["H6"],
-         "text": f"H6: la part des FNB ({h6['value']}) n'est pas ventilée par secteur; le plafond de {h6['limit']} "
-                 f"pour le secteur de votre employeur ({h6['subject']}) ne peut donc pas être vérifié."},
-        {"kind": "unknown", "refs": ["H10"],
-         "text": f"H10: la part « {h10['subject']} » ({h10['value']} du risque) n'est pas ventilée par secteur; "
-                 f"le plafond de {h10['limit']} ne peut pas être vérifié pour cette part."},
-    ]}
+    """Robert's current portfolio (`engine.ROBERT`): contraintes is `unknown`. Without ETF look-through data that is
+    H6 / H10 (ETF part) and H11; with it (D19) only H11 is left."""
+    segs = _etf_unknown_segments(facts) + _h11_segments(facts)
+    assert segs, "contraintes is unknown, so some check must be unknown"
+    return {"segments": segs}
+
+
+def _etf_unknown_segments(facts: dict) -> list[dict]:
+    """H6 / H10 `unknown` for the ETF part (only when the sector look-through file does not cover the ETFs)."""
+    segs = []
+    for h6 in [c for c in facts["checks"] if c["id"] == "H6" and c["status"] == "unknown"][:1]:
+        segs.append({"kind": "unknown", "refs": ["H6"],
+                     "text": f"H6: la part des FNB ({h6['value']}) n'est pas ventilée par secteur; le plafond de "
+                             f"{h6['limit']} pour le secteur de votre employeur ({h6['subject']}) ne peut donc pas "
+                             f"être vérifié."})
+    for h10 in [c for c in facts["checks"] if c["id"] == "H10" and c["status"] == "unknown"][:1]:
+        segs.append({"kind": "unknown", "refs": ["H10"],
+                     "text": f"H10: la part « {h10['subject']} » ({h10['value']} du risque) n'est pas ventilée par "
+                             f"secteur; le plafond de {h10['limit']} ne peut pas être vérifié pour cette part."})
+    return segs
+
+
+def _h11_segments(facts: dict) -> list[dict]:
+    """H11 `unknown`: FNB whose constituents carry no activity tags, and stocks with no tag rows in the data."""
+    h11 = [c for c in facts["checks"] if c["id"] == "H11" and c["status"] == "unknown"]
+    if not h11:
+        return []
+    etf = sorted(c["subject"] for c in h11 if c["message_key"] == "excluded_activity_etf_no_lookthrough")
+    bare = sorted(c["subject"] for c in h11 if c["message_key"] == "excluded_activity_no_tag_rows")
+    assert len(etf) + len(bare) == len(h11), h11
+    parts = ([f"pour les FNB, dont le contenu n'a pas de données d'activité ({', '.join(etf)})"] if etf else []) + \
+            ([f"pour les titres sans ligne d'activité dans les données ({', '.join(bare)})"] if bare else [])
+    return [{"kind": "unknown", "refs": ["H11"],
+             "text": "H11: les activités exclues ne peuvent pas être vérifiées " + " ni ".join(parts) + "."}]
 
 
 def _check(facts: dict, cid: str, status: str = "violation") -> dict:
@@ -204,25 +227,32 @@ def amira_horizon(facts: dict) -> dict:
 
 
 def amira_contraintes(facts: dict) -> dict:
-    """Amira: H2, H5, H6 violations, S2 warning, H6 / H10 unknown (ETF part without sector look-through)."""
+    """Amira: H2, H5, H6 violations, S2 warning. Without ETF look-through data H6 / H10 also carry an `unknown` ETF
+    part; with it (D19) H6 includes the ETF part and H10 is measured (Information Technology share of risk)."""
     h2, h5, h6 = _check(facts, "H2"), _check(facts, "H5"), _check(facts, "H6")
     s2 = _check(facts, "S2", "warning")
-    h6u, h10u = _by_status(facts, "H6", "unknown")[0], _by_status(facts, "H10", "unknown")[0]
-    return {"segments": [
+    segs = [
         _seg("fact", ["H2", "H5"],
              f"H2: les cryptoactifs pèsent {h2['value']}, au-delà du maximum de {h2['limit']}. "
              f"H5: les actifs en devises étrangères pèsent {h5['value']}, au-delà du maximum de {h5['limit']}."),
         _seg("fact", ["H6", "declared.identity.employer_sector"],
              f"H6: le secteur de votre employeur ({h6['subject']}) pèse {h6['value']}, au-delà du maximum "
              f"de {h6['limit']}."),
-        _seg("fact", ["S2", "derived.knowledge.score"],
-             f"S2 (avertissement): votre score de connaissances est de {s2['value']}, sous le seuil de {s2['limit']} "
-             f"pour la complexité de certains placements détenus ({s2['subject']})."),
-        _seg("unknown", ["H6", "H10"],
-             f"H6: la part des FNB ({h6u['value']}) n'est pas ventilée par secteur; le plafond de {h6u['limit']} ne "
-             f"peut pas être vérifié pour elle. H10: la part « {h10u['subject']} » ({h10u['value']} du risque) n'est "
-             f"pas ventilée non plus; le plafond de {h10u['limit']} ne peut pas être vérifié."),
-    ]}
+    ]
+    for h10 in _by_status(facts, "H10", "violation")[:1]:
+        segs.append(_seg("fact", ["H10"],
+                         f"H10: le secteur {h10['subject']} porte {h10['value']} du risque du portefeuille, au-delà "
+                         f"du maximum de {h10['limit']} pour un seul secteur."))
+    segs.append(_seg("fact", ["S2", "derived.knowledge.score"],
+                     f"S2 (avertissement): votre score de connaissances est de {s2['value']}, sous le seuil de "
+                     f"{s2['limit']} pour la complexité de certains placements détenus ({s2['subject']})."))
+    h6u, h10u = _by_status(facts, "H6", "unknown"), _by_status(facts, "H10", "unknown")
+    if h6u and h10u:
+        segs.append(_seg("unknown", ["H6", "H10"],
+             f"H6: la part des FNB ({h6u[0]['value']}) n'est pas ventilée par secteur; le plafond de {h6u[0]['limit']} "
+             f"ne peut pas être vérifié pour elle. H10: la part « {h10u[0]['subject']} » ({h10u[0]['value']} du risque) "
+             f"n'est pas ventilée non plus; le plafond de {h10u[0]['limit']} ne peut pas être vérifié."))
+    return {"segments": segs + _h11_segments(facts)}
 
 
 def amira_preferences(facts: dict) -> dict:
@@ -241,12 +271,8 @@ def amira_preferences(facts: dict) -> dict:
 
 
 def mateo_contraintes(facts: dict) -> dict:
-    """Mateo: every check is `unknown` (H6, H10: ETF part; H11: ETF without look-through or no activity-tag rows)."""
-    h6, h10 = _by_status(facts, "H6", "unknown")[0], _by_status(facts, "H10", "unknown")[0]
-    h11 = _by_status(facts, "H11", "unknown")
-    etf = sorted(c["subject"] for c in h11 if c["message_key"] == "excluded_activity_etf_no_lookthrough")
-    bare = sorted(c["subject"] for c in h11 if c["message_key"] == "excluded_activity_no_tag_rows")
-    assert etf and bare and len(etf) + len(bare) == len(h11)
+    """Mateo: no violation; `unknown` = H11 (ETF without activity data, or no activity-tag rows), plus the H6 / H10
+    ETF part when the sector look-through file does not cover his ETFs."""
     d = facts["declared"]
     refused = ", ".join(d["preferences.asset_types_refused"])
     return {"segments": [
@@ -255,15 +281,8 @@ def mateo_contraintes(facts: dict) -> dict:
              f"Vos limites déclarées: types d'actifs refusés ({refused}), frais maximaux de "
              f"{d['preferences.max_fee_mer_pct']}, exclusion des controverses environnementales et sociales "
              f"importantes."),
-        _seg("unknown", ["H6"],
-             f"H6: la part des FNB ({h6['value']}) n'est pas ventilée par secteur; le plafond de {h6['limit']} pour "
-             f"le secteur de votre employeur ({h6['subject']}) ne peut pas être vérifié."),
-        _seg("unknown", ["H10"],
-             f"H10: la part « {h10['subject']} » ({h10['value']} du risque) n'est pas ventilée par secteur; le "
-             f"plafond de {h10['limit']} ne peut pas être vérifié pour cette part."),
-        _seg("unknown", ["H11"],
-             f"H11: les activités exclues ne peuvent pas être vérifiées pour les FNB sans ventilation "
-             f"({', '.join(etf)}) ni pour les titres sans ligne d'activité dans les données ({', '.join(bare)})."),
+        *_etf_unknown_segments(facts),
+        *_h11_segments(facts),
     ]}
 
 

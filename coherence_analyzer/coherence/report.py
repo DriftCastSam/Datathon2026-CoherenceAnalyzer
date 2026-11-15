@@ -2,6 +2,9 @@
 from __future__ import annotations
 
 from .hard import Check
+from ..numfacts import tokenize
+
+NOTES_SOURCE = "values.notes"       # D13 (<source>) of a quote taken from a parsed note rule: the user's own notes
 
 
 def verdict_from_statuses(statuses) -> str:
@@ -24,10 +27,30 @@ def sections_verdict(sections: list[dict]) -> str:
     return verdict_from_statuses(s["status"] for s in sections)
 
 
+class _Sections(list):
+    """The five sections, carrying the profile's `origin` (D16) so the disclaimer picked by `explain.explain` matches the
+    profile. A plain list everywhere else (JSON, equality, copies)."""
+    origin: str | None = None
+
+
 def build_sections(ctx) -> list[dict]:
     """The report's `sections` (§20.4): five sections in display order (`factors.build_sections`)."""
     from .. import factors   # lazy: factors imports this module for `verdict`
-    return factors.build_sections(ctx)
+    out = _Sections(factors.build_sections(ctx))
+    out.origin = ((getattr(ctx, "profile", None) or {}).get("meta") or {}).get("origin")
+    return out
+
+
+def _pick_disclaimer(disclaimer: str, explanation: dict) -> str:
+    """D16: the explanation already carries the disclaimer of the profile's origin (`explain.explain`); when the caller
+    passed the seed text for the same locale and the explanation holds the user text, the report carries the user
+    text too (`disclaimer` and `explanation.disclaimer` stay equal). Anything else: the caller's text."""
+    from .. import config
+    mine = (explanation or {}).get("disclaimer")
+    for loc, seed in config.DISCLAIMER.items():
+        if disclaimer == seed and mine == config.DISCLAIMER_USER[loc]:
+            return mine
+    return disclaimer
 
 
 def tag_checks(checks: list[Check]) -> list[Check]:
@@ -67,7 +90,7 @@ def build_review(*, run_id: str, profile_id: str, profile_version: int, portfoli
         "checks_current": checks, "checks_proposed": None, "diff": None,
         "metrics_current": metrics, "metrics_proposed": None, "headroom": None,
         "unknowns": unknowns(checks), "assumptions": assumptions, "data_window": data_window,
-        "explanation": explanation, "disclaimer": disclaimer, "sections": sections,
+        "explanation": explanation, "disclaimer": _pick_disclaimer(disclaimer, explanation), "sections": sections,
         "profile_coherence": profile_coherence,      # separate block (§20.9): never enters the verdict
     }
     if goals is not None:
@@ -115,6 +138,61 @@ def diff(current: list[Check], proposed: list[Check], m_cur: dict, m_new: dict) 
     return {"flipped": flipped, "metrics_delta": delta}
 
 
+def _note_rules(sections: list[dict]) -> list[dict]:
+    """Parsed note rules shown in the sections' facts (verbatim `quote`), in section order, without duplicates."""
+    out: list[dict] = []
+    for s in sections:
+        node = ((s.get("facts") or {}).get("derived") or {}).get("values.parsed_notes")
+        for r in (node or {}).get("value") or []:
+            if isinstance(r, dict) and isinstance(r.get("quote"), str) and r not in out:
+                out.append(r)
+    return out
+
+
+def _limit_quote(c: dict, rules: list[dict]) -> tuple[str, str] | None:
+    """D13 point 2: (verbatim quote, source) when the limit traces to the user's own words, i.e. its `derived_from`
+    names `values.parsed_notes` and a parsed rule matches the check (H13: the theme; H11: the activity tag).
+    Several rules on one theme: the one whose number is the check's limit, else the first. No match: None."""
+    if not any(str(p).startswith("values.parsed_notes") for p in c.get("derived_from", [])):
+        return None
+    if c["id"] == "H13":
+        cands = [r for r in rules if r.get("rule_kind") == "max_theme_weight"
+                 and (r.get("params") or {}).get("theme") == c.get("subject")]
+        lim = c.get("limit")
+
+        def matches(r: dict) -> bool:
+            pct = (r.get("params") or {}).get("max_pct")
+            toks = tokenize(pct) if isinstance(pct, str) else []
+            return lim is not None and bool(toks) and abs(float(toks[0].value) - float(lim) * 100) <= 0.05
+        cands = sorted(cands, key=lambda r: not matches(r))      # stable: the matching rule first
+    elif c["id"] == "H11":
+        cands = [r for r in rules if r.get("rule_kind") == "exclude_activity"
+                 and (r.get("params") or {}).get("tag") == c.get("value")]
+    else:
+        cands = []
+    return (cands[0]["quote"], NOTES_SOURCE) if cands else None
+
+
+def trade_statements(checks_current: list[dict], checks_proposed: list[dict], sections: list[dict]) -> list[dict]:
+    """D13: one `{check_id, text, refs}` per hard limit the trade crosses: the set the headroom uses, i.e.
+    `resizer.violations_added` (violations added or worsened, D14), one statement per id, in the order of the
+    proposed list. Status and verdict are untouched. Pure: numbers are the checks' own values, the quote is the
+    parsed rule's verbatim quote, the locale comes from the sections' facts."""
+    from .. import explain, resizer
+    locale = next((s["facts"]["locale"] for s in sections if (s.get("facts") or {}).get("locale")), "fr-CA")
+    rules = _note_rules(sections)
+    out: list[dict] = []
+    for cid in resizer.violations_added(checks_current, checks_proposed):
+        c = next(c for c in checks_proposed if c["id"] == cid and c["status"] == "violation"
+                 and resizer.violations_added(checks_current, [c]))
+        was = resizer._key(c)
+        before = next((b for b in checks_current if b["status"] == "violation" and resizer._key(b) == was), None)
+        quote = _limit_quote(c, rules)
+        refs = [cid] + ([quote[0]] if quote else [])
+        out.append({"check_id": cid, "text": explain.trade_statement(c, before, locale, quote), "refs": refs})
+    return out
+
+
 def build_trade_check(*, run_id: str, profile_id: str, profile_version: int, portfolio_id: str, intent: dict,
                       checks_current: list[dict], checks_proposed: list[dict], metrics_current: dict,
                       metrics_proposed: dict, sections: list[dict], explanation: dict, headroom: dict | None,
@@ -134,8 +212,9 @@ def build_trade_check(*, run_id: str, profile_id: str, profile_version: int, por
         "checks_current": cur, "checks_proposed": new, "diff": d,
         "metrics_current": metrics_current, "metrics_proposed": metrics_proposed, "headroom": headroom,
         "unknowns": unknowns(new), "assumptions": assumptions, "data_window": data_window,
-        "explanation": explanation, "disclaimer": disclaimer, "sections": sections,
-        "profile_coherence": profile_coherence,
+        "explanation": explanation, "disclaimer": _pick_disclaimer(disclaimer, explanation), "sections": sections,
+        "profile_coherence": profile_coherence, "trade_statements": trade_statements(
+            checks_current, checks_proposed, sections),
     }
     if goals is not None:
         rep["goals"] = goals          # G1 block (P2.14), proposed side: info only, never in the verdict

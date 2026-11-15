@@ -246,6 +246,25 @@ def _workdir(profile_id: str) -> tuple[Path, Path]:
     return work, seed
 
 
+def workdir(profile_id: str) -> Path:
+    """Return the working directory for the profile.
+
+    The working directory is where the profile's mutable state lives (profile.json,
+    events.jsonl, portfolio.json). For seed profiles this is a copy in the store;
+    for user profiles it's the original location in the store.
+
+    Args:
+        profile_id: The profile identifier
+
+    Returns:
+        Path to the working directory
+
+    Raises:
+        HTTPException: 404 if the profile does not exist
+    """
+    return _workdir(profile_id)[0]
+
+
 def _load(work: Path) -> dict:
     return json.loads((work / "profile.json").read_text(encoding="utf-8"))
 
@@ -306,6 +325,7 @@ def _new_user_profile(profile_id: str, body: ProfileIn) -> dict:
     if body.display_name is not None:
         identity["name"] = body.display_name
     return {"meta": {"profile_id": profile_id, "schema_version": 2, "version": 1, "locale": body.locale,
+                     "origin": "user",      # D16: a user-made profile (seeds carry no origin or "seed"): user disclaimer
                      "updated_at": pipeline._now()[:10]},
             "identity": identity,
             "situation": {"monthly_expenses": None, "emergency_fund": None, "planned_withdrawals": None},
@@ -863,6 +883,16 @@ def post_decision(profile_id: str, index: int, body: DecisionIn) -> dict:
             rule["params"] = {**params, intake.THEME_NUMBER_KEY: body.max_pct}
         old = rule.get("approved_by_user") is True
         rule["approved_by_user"] = body.approved
+        # D11.3: a rejection removes a provisional limit and keeps it removed. The rule flag alone cannot say
+        # "rejected" (an unapproved rule is provisional), so the quote is listed on the parsed_notes node.
+        node = profile["values"]["parsed_notes"]
+        rejected = [q for q in node.get("rejected_quotes", []) if q != rule.get("quote")]
+        if not body.approved:
+            rejected.append(rule.get("quote"))
+        if rejected:
+            node["rejected_quotes"] = rejected
+        else:
+            node.pop("rejected_quotes", None)
         return _record_decision(work, profile_id, fixture, index, profile, old, body.approved)
 
 
@@ -1018,14 +1048,14 @@ def _adopt_refreshed_profile(work: Path, report: dict) -> None:
 
 
 @app.post("/profiles/{profile_id}/review")
-def post_review(profile_id: str) -> dict:
+def post_review(profile_id: str, locale: str | None = Query(None)) -> dict:
     work, _ = _workdir(profile_id)
     if not (work / "portfolio.json").is_file():
         raise HTTPException(status_code=409, detail="this profile holds no portfolio yet: "
                             f"PUT /profiles/{profile_id}/portfolio first")
     with _LOCK:
         try:
-            report = pipeline.review(work)
+            report = pipeline.review(work, locale=locale)
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
         _adopt_refreshed_profile(work, report)

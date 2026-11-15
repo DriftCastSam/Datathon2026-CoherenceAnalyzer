@@ -501,13 +501,13 @@ def build(out_dir: Path) -> list[Path]:
     paths = []
     for name, rep in reports.items():
         p = out_dir / f"{name}.json"
-        p.write_text(json.dumps(_clean(rep), ensure_ascii=False, separators=(",", ":")))
+        p.write_text(json.dumps(_clean(rep), ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
         paths.append(p)
     (out_dir / "index.json").write_text(json.dumps([
         {"file": "robert-review-nvda.json", "label": "Robert · review · NVDA held", "verdict": reports["robert-review-nvda"]["verdict"]},
         {"file": "robert-nvda.json", "label": "Robert · trade · NVDA 10 %", "verdict": reports["robert-nvda"]["verdict"]},
         {"file": "robert-review.json", "label": "Robert · review · today", "verdict": reports["robert-review"]["verdict"]},
-    ]))
+    ]), encoding="utf-8")
     return paths
 
 

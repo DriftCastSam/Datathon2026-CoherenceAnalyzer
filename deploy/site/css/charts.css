@@ -1,0 +1,9 @@
+/* Shared projection fan chart (App.charts.fan). */
+.fan{width:100%}
+.fan svg{display:block;width:100%;height:auto}
+.fan text{font-family:var(--f)}
+.fan__grid{stroke:#e6ebf1;stroke-width:1}
+/* Sizes are SVG user units: the 1200-wide viewBox renders at roughly 0.6 scale, so 20 reads as ~12px. */
+.fan__tick,.fan__x{font-size:20px;fill:var(--label)}
+.fan__series{font-size:22px;font-weight:600}
+.fan__floor{font-size:20px;font-weight:600;paint-order:stroke;stroke:#fff;stroke-width:5px;stroke-linejoin:round}

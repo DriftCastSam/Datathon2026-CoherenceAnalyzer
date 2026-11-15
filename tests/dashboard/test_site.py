@@ -285,15 +285,21 @@ def test_lookthrough_flag_and_its_unknowns(site):
 
 
 def test_unknowns_are_listed_apart_and_never_change_the_verdict(site):
-    """D3 / SPEC §7.5: `unknowns` = the `unknown` checks; Mateo is `coherent` with a non-empty list."""
+    """D3 / SPEC §7.5: `unknowns` = the `unknown` checks; Mateo is `coherent` with a non-empty list.
+
+    D19: with real ETF look-through data, H6/H10 resolve for every persona, and Amira's holdings don't trigger
+    an H11 (ESG exclusion tag) unknown either, so her report now has no unknowns at all -- still correct per D3
+    (an empty list is fine; it must just never affect the verdict, which stays `incoherent` on her hard violations).
+    """
     for key, rep in by_key(site).items():
-        assert rep["unknowns"], key
         assert all(u["status"] == "unknown" for u in rep["unknowns"])
         listed = [c for c in rep["checks_current"] if c["status"] == "unknown"]
         assert sorted((u["id"], u.get("subject") or "") for u in rep["unknowns"]) == \
                sorted((c["id"], c.get("subject") or "") for c in listed)
     mateo = by_key(site)["mateo"]
     assert mateo["verdict"] == "coherent" and mateo["unknowns"]
+    amira = by_key(site)["amira"]
+    assert amira["verdict"] == "incoherent" and amira["unknowns"] == []
 
 
 def test_every_check_carries_a_derived_from_chain(site):

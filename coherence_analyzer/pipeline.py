@@ -25,7 +25,7 @@ from typing import Any
 
 from jsonschema import Draft202012Validator
 
-from . import config, data, engine, explain, factors, gate, intent as intent_mod, resizer, store, stress
+from . import config, data, engine, explain, factors, gate, intake, intent as intent_mod, resizer, store, stress
 from .coherence import hard, internal, report as report_mod, soft
 from .llm import bedrock, extractors
 from .rules import derive, limits as limits_mod
@@ -444,6 +444,14 @@ def _horizon_months(profile: dict) -> int:
     return int(round(float(years) * 12))
 
 
+def _metrics(market: engine.Market, pf: dict, horizon_m: int) -> dict:
+    """engine.analyse (risk math) plus the D19 look-through `exposure` block, which is descriptive only: no check,
+    verdict or LLM node reads it."""
+    m = store.plain(engine.analyse(market, pf["weights_pct"], horizon_m, pf["value_cad"]))
+    m["exposure"] = store.plain(engine.portfolio_exposure(market, pf["weights_pct"], pf["value_cad"]))
+    return m
+
+
 def _b5_side(state: dict, side: str) -> dict:
     """One side of B5: only the keys it adds (a delta, not the whole state), so that the two sides can run as the two
     branches of a Step Functions Parallel state and be merged by key (P2.15). Same seed and horizon on both sides."""
@@ -451,7 +459,7 @@ def _b5_side(state: dict, side: str) -> dict:
     horizon_m = _horizon_months(state["profile"])
     market = engine.load_market(str(config.DATA_DIR))
     return {"horizon_months": horizon_m, "data_window": list(market.window),
-            f"metrics_{side}": store.plain(engine.analyse(market, pf["weights_pct"], horizon_m, pf["value_cad"]))}
+            f"metrics_{side}": _metrics(market, pf, horizon_m)}
 
 
 def b5_analyse_current(state: dict) -> dict:
@@ -516,10 +524,11 @@ def _goals_block(market, pf: dict, profile: dict, horizon_m: int, metrics: dict)
     return block, checks
 
 
-def review(fixture_dir: Path, portfolio: str | Path | None = None) -> dict:
+def review(fixture_dir: Path, portfolio: str | Path | None = None, locale: str | None = None) -> dict:
     """Flow C: baseline coherence report for the current portfolio (B5-B9 without an intent). Writes the report and
     the audit record to the store and returns the report. `portfolio` = file name inside the fixture directory
-    (default `portfolio.json`)."""
+    (default `portfolio.json`). `locale` = language for the explanation (default: profile `meta.locale`, or fr-CA),
+    validated against `intake.LOCALES`."""
     fixture_dir = Path(fixture_dir)
     started = _now()
     run_id = store.new_run_id()
@@ -530,10 +539,13 @@ def review(fixture_dir: Path, portfolio: str | Path | None = None) -> dict:
 
     res = _refresh(profile_in, pf, events)                       # Flow A: rules + N3 (only if the notes changed)
     profile = res["profile"]
-    locale = profile["meta"].get("locale", DEFAULT_LOCALE)
+    loc = locale if locale is not None else profile["meta"].get("locale", DEFAULT_LOCALE)
+    if loc not in intake.LOCALES:
+        raise ValueError(f"locale must be one of {intake.LOCALES}, got {loc!r}")
+    locale = loc
     horizon_m = _horizon_months(profile)
     market = engine.load_market(str(config.DATA_DIR))
-    metrics = store.plain(engine.analyse(market, pf["weights_pct"], horizon_m, pf["value_cad"]))
+    metrics = _metrics(market, pf, horizon_m)
     goals_block, goal_checks = _goals_block(market, pf, profile, horizon_m, metrics)
     meta = {n: data.load_meta(n) for n in META_NAMES}
     checks = (hard.run_all(pf["weights"], metrics, profile, assets, meta)

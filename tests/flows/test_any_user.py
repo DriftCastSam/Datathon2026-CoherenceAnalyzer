@@ -500,8 +500,9 @@ def test_review_works_end_to_end_for_a_new_user(client, store_dir, locale):
     assert rep["flow"] == "C" and rep["profile_id"] == pid and rep["intent"] is None
     assert rep["verdict"] in VERDICTS
     assert [s["factor"] for s in rep["sections"]] == list(FACTORS)
-    assert rep["disclaimer"] == config.DISCLAIMER[locale]                # SPEC §9.4: the fixed text, in the user's locale
-    assert rep["explanation"]["disclaimer"] == config.DISCLAIMER[locale]
+    # D16 (owner, 2026-11-15): a user-made profile carries the fixed text without the fictional-profiles clause.
+    assert rep["disclaimer"] == config.DISCLAIMER_USER[locale]
+    assert rep["explanation"]["disclaimer"] == config.DISCLAIMER_USER[locale]
     for s in rep["sections"]:
         if s["status"] != "pass":
             assert s["narrative"]["mode"] == "template", s["factor"]    # no recorded answer for this user

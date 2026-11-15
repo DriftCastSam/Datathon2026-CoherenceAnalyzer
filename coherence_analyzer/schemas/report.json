@@ -64,6 +64,20 @@
       }
     },
     "disclaimer": {"type": "string", "minLength": 1},
+    "trade_statements": {
+      "description": "Flow B only (D13): one plain statement per hard limit the trade crosses (violations added or worsened, the set the headroom uses). `refs` = the check id and, when the limit traces to the user's own words, the verbatim quote. Absent on Flow C reports. Wording only: statuses and verdict are unchanged.",
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["check_id", "text", "refs"],
+        "additionalProperties": false,
+        "properties": {
+          "check_id": {"type": "string", "pattern": "^[A-Z][0-9]+$"},
+          "text": {"type": "string", "minLength": 1},
+          "refs": {"type": "array", "items": {"type": "string", "minLength": 1}, "minItems": 1}
+        }
+      }
+    },
     "profile_coherence": {
       "description": "Internal coherence of the profile (docs/spec-factors.md 20.9): separate from the verdict; never violation (invariant 3).",
       "type": "object",
@@ -236,7 +250,8 @@
         "p95_T": {"type": "number"},
         "cone": {"type": "object", "required": ["p5", "p25", "p50", "p75", "p95"]},
         "assumptions": {"type": "array", "items": {"type": "string"}},
-        "lookthrough": {"type": "boolean"}
+        "lookthrough": {"type": "boolean"},
+        "exposure": {"type": "object", "description": "D19: descriptive ETF look-through view (sector, country, class, currency, single companies); never read by a check"}
       }
     },
     "segment": {

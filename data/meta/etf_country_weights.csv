@@ -1,0 +1,65 @@
+etf,country,weight,source_url,as_of
+XIU.TO,Canada,0.9746,https://www.blackrock.com/ca/investors/en/products/239832/ishares-sptsx-60-index-etf/1464253357814.ajax?fileType=csv&fileName=XIU_holdings&dataType=fund,2026-11-13
+XIU.TO,United States,0.0166,https://www.blackrock.com/ca/investors/en/products/239832/ishares-sptsx-60-index-etf/1464253357814.ajax?fileType=csv&fileName=XIU_holdings&dataType=fund,2026-11-13
+XIU.TO,Bermuda,0.0061,https://www.blackrock.com/ca/investors/en/products/239832/ishares-sptsx-60-index-etf/1464253357814.ajax?fileType=csv&fileName=XIU_holdings&dataType=fund,2026-11-13
+XIU.TO,Cash and other,0.0031,https://www.blackrock.com/ca/investors/en/products/239832/ishares-sptsx-60-index-etf/1464253357814.ajax?fileType=csv&fileName=XIU_holdings&dataType=fund,2026-11-13
+SPY,United States,0.9987,https://www.ssga.com/us/en/intermediary/library-content/products/fund-data/etfs/us/holdings-daily-us-en-spy.xlsx,2026-11-12
+SPY,Cash and other,0.0010,https://www.ssga.com/us/en/intermediary/library-content/products/fund-data/etfs/us/holdings-daily-us-en-spy.xlsx,2026-11-12
+QQQ,United States,0.9700,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/weightedHoldings/fund?idType=ticker&productType=ETF&breakdown=country,2026-10-31
+QQQ,Netherlands,0.0112,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/weightedHoldings/fund?idType=ticker&productType=ETF&breakdown=country,2026-10-31
+QQQ,Canada,0.0106,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/weightedHoldings/fund?idType=ticker&productType=ETF&breakdown=country,2026-10-31
+QQQ,Brazil,0.0037,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/weightedHoldings/fund?idType=ticker&productType=ETF&breakdown=country,2026-10-31
+QQQ,China,0.0024,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/weightedHoldings/fund?idType=ticker&productType=ETF&breakdown=country,2026-10-31
+QQQ,United Kingdom,0.0022,https://dng-api.invesco.com/cache/v1/accounts/en_US/shareclasses/QQQ/weightedHoldings/fund?idType=ticker&productType=ETF&breakdown=country,2026-10-31
+ESGV,United States,0.9921,https://advisors.vanguard.com/investments/products/api/funds/4393/holdings/daily,2026-11-12
+ESGV,Cash and other,0.0079,https://advisors.vanguard.com/investments/products/api/funds/4393/holdings/daily,2026-11-12
+XBB.TO,Canada,0.9611,https://www.blackrock.com/ca/investors/en/products/239493/ishares-canadian-universe-bond-index-etf/1464253357814.ajax?fileType=csv&fileName=XBB_holdings&dataType=fund&asOfDate=20261113,2026-11-13
+XBB.TO,United States,0.0289,https://www.blackrock.com/ca/investors/en/products/239493/ishares-canadian-universe-bond-index-etf/1464253357814.ajax?fileType=csv&fileName=XBB_holdings&dataType=fund&asOfDate=20261113,2026-11-13
+XBB.TO,Supranational,0.0045,https://www.blackrock.com/ca/investors/en/products/239493/ishares-canadian-universe-bond-index-etf/1464253357814.ajax?fileType=csv&fileName=XBB_holdings&dataType=fund&asOfDate=20261113,2026-11-13
+XBB.TO,Germany,0.0024,https://www.blackrock.com/ca/investors/en/products/239493/ishares-canadian-universe-bond-index-etf/1464253357814.ajax?fileType=csv&fileName=XBB_holdings&dataType=fund&asOfDate=20261113,2026-11-13
+XBB.TO,France,0.0014,https://www.blackrock.com/ca/investors/en/products/239493/ishares-canadian-universe-bond-index-etf/1464253357814.ajax?fileType=csv&fileName=XBB_holdings&dataType=fund&asOfDate=20261113,2026-11-13
+XBB.TO,United Kingdom,0.0011,https://www.blackrock.com/ca/investors/en/products/239493/ishares-canadian-universe-bond-index-etf/1464253357814.ajax?fileType=csv&fileName=XBB_holdings&dataType=fund&asOfDate=20261113,2026-11-13
+XBB.TO,Switzerland,0.0005,https://www.blackrock.com/ca/investors/en/products/239493/ishares-canadian-universe-bond-index-etf/1464253357814.ajax?fileType=csv&fileName=XBB_holdings&dataType=fund&asOfDate=20261113,2026-11-13
+XBB.TO,Luxembourg,0.0002,https://www.blackrock.com/ca/investors/en/products/239493/ishares-canadian-universe-bond-index-etf/1464253357814.ajax?fileType=csv&fileName=XBB_holdings&dataType=fund&asOfDate=20261113,2026-11-13
+XBB.TO,Cash and other,0.0002,https://www.blackrock.com/ca/investors/en/products/239493/ishares-canadian-universe-bond-index-etf/1464253357814.ajax?fileType=csv&fileName=XBB_holdings&dataType=fund&asOfDate=20261113,2026-11-13
+AGG,United States,0.9345,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,United Kingdom,0.0104,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Canada,0.0101,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Supranational,0.0094,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Japan,0.0054,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Mexico,0.0037,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Germany,0.0022,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Australia,0.0021,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Spain,0.0014,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Philippines,0.0014,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Ireland,0.0013,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Switzerland,0.0012,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Belgium,0.0012,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Indonesia,0.0011,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Netherlands,0.0011,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Korea (South),0.0009,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Chile,0.0009,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Poland,0.0009,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Panama,0.0009,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Israel,0.0008,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Peru,0.0008,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Brazil,0.0007,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,France,0.0007,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,China,0.0007,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Uruguay,0.0005,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Norway,0.0003,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Italy,0.0002,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Luxembourg,0.0002,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Taiwan,0.0002,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Bermuda,0.0002,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Austria,0.0001,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Macau,0.0001,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Sweden,0.0001,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Hong Kong,0.0001,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Singapore,0.0001,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Hungary,0.0001,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,South Africa,0.0000,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Finland,0.0000,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+AGG,Cash and other,0.0038,https://www.ishares.com/us/products/239458/ishares-core-u-s-aggregate-bond-etf/latest-holdings.csv,2026-11-13
+TLT,United States,1.0000,https://www.ishares.com/us/products/239454/ishares-20%20-year-treasury-bond-etf/latest-holdings.csv,2026-11-12
+TLT,Cash and other,0.0002,https://www.ishares.com/us/products/239454/ishares-20%20-year-treasury-bond-etf/latest-holdings.csv,2026-11-12

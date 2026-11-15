@@ -1,0 +1,3 @@
+.scr-whatif .wf-empty{display:flex;flex-direction:column;align-items:flex-start;gap:12px}
+.scr-whatif .wf-error{margin:0;padding:16px;border:1px solid var(--line, #d8dde6);border-radius:8px}
+.scr-whatif .wf-another{align-self:flex-start;text-decoration:none}

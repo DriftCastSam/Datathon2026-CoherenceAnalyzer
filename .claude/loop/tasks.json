@@ -1107,7 +1107,8 @@
     "§11"
    ],
    "tests": [
-    "tests/profile/test_provisional_limits.py"
+    "tests/profile/test_provisional_limits.py",
+    "tests/profile/test_limits_no_llm_inputs.py"
    ],
    "code": [
     "coherence_analyzer/rules/limits.py",
@@ -1116,31 +1117,7 @@
     "coherence_analyzer/schemas/report.json",
     "README.md"
    ],
-   "notes": "Implement D11 exactly: a gated, unapproved max_theme_weight rule with a numeric max_pct is promoted into limits.max_theme_weight with provisional: true and limits_trace naming values.parsed_notes[provisional]; H13 against a provisional limit is at most `warning` (never violation) and its check says it comes from the user's notes (quote in subject / derived_from); approval (approved_by_user true, via the existing decision route + refresh) makes it full strength (violation possible, trace [approved_by_user]); rejection removes it; rules without a number are unchanged. Amira's fixture: her tech_heavy rule is already approved, so her report is unchanged; write a test on a copy with the rule unapproved. The frozen guard test tests/profile/test_limits_no_llm_inputs.py pins the old rule (unapproved parsed rules never in limits): the owner approved updating it, the orchestrator does that after your phase A; do not touch it. Do not edit pipeline.py, api.py, explain.py (other lanes). These P6 tasks run IN PARALLEL in separate worktrees: edit only the files (and functions) your task owns, plus README.md and new test files. Read docs/spec-decisions.md D11-D18 first: they are new owner decisions and win over SPEC.md. No network, no pip install, no real AWS calls in code paths the tests run. Never write the activity-tags meta CSV. The engine golden test must stay green (no engine math change). D10 applies to every user-facing string. Do not change frozen tests; if one contradicts D11-D18 write .claude/loop/BLOCKED.md naming it (the owner approved updating tests that pin the old behaviour, the orchestrator will do it). Persona fixtures, their reports and the demo keep their current results except where a D-entry changes them on purpose (say which in README)."
-  },
-  {
-   "id": "P6.DATES",
-   "title": "D12 + D15: 'today' is the run date (recorded, pinned for fixtures) and objectives.start_date defers the start",
-   "spec": [
-    "docs/spec-decisions.md D12 D15 (D1 replaced for live use)",
-    "§7.1",
-    "§6.2 N1",
-    "§7.3 G1",
-    "§10 audit",
-    "docs/spec-factors.md §20.6"
-   ],
-   "tests": [
-    "tests/profile/test_reference_date_and_start.py"
-   ],
-   "code": [
-    "coherence_analyzer/config.py (reference-date settings only)",
-    "coherence_analyzer/pipeline.py (where the reference date is resolved and passed; not b9_save / build_trade_check)",
-    "coherence_analyzer/rules/derive.py",
-    "coherence_analyzer/intake.py",
-    "coherence_analyzer/schemas/profile.v2.json",
-    "README.md"
-   ],
-   "notes": "D12: one function resolves the reference date: COHERENCE_ANALYZER_TODAY if set, else for seed persona profiles (meta.origin 'seed' or absent on a fixture) portfolio.as_of, else the run date in the profile's time zone (America/Toronto default; config); every rule that used portfolio.as_of as 'today' uses it (effective horizon, withdrawals within 24 months, N1 30-day window, G1); the audit records reference_date and its source (env | portfolio.as_of | run_date). Persona reports and all existing tests stay identical (they resolve to portfolio.as_of). D15: optional declared objectives.start_date (YYYY-MM) in the schema; horizon end = max(start, reference) + horizon_years; effective horizon = months from the reference date to min(horizon end, first planned withdrawal); absent or past = starts now; an optional intake question for it under `horizon` (empty answer = starts now; add it to intake's OPTIONAL list, not REQUIRED, so the 18-path frozen count holds). Tests freeze the clock (monkeypatch the resolver), never read the wall clock. Do not edit limits.py, hard.py, report.py, explain.py or api.py (other lanes). These P6 tasks run IN PARALLEL in separate worktrees: edit only the files (and functions) your task owns, plus README.md and new test files. Read docs/spec-decisions.md D11-D18 first: they are new owner decisions and win over SPEC.md. No network, no pip install, no real AWS calls in code paths the tests run. Never write the activity-tags meta CSV. The engine golden test must stay green (no engine math change). D10 applies to every user-facing string. Do not change frozen tests; if one contradicts D11-D18 write .claude/loop/BLOCKED.md naming it (the owner approved updating tests that pin the old behaviour, the orchestrator will do it). Persona fixtures, their reports and the demo keep their current results except where a D-entry changes them on purpose (say which in README)."
+   "notes": "Implement D11 exactly: a gated, unapproved max_theme_weight rule with a numeric max_pct is promoted into limits.max_theme_weight with provisional: true and limits_trace naming values.parsed_notes[provisional]; H13 against a provisional limit is at most `warning` (never violation) and its check says it comes from the user's notes (quote in subject / derived_from); approval (approved_by_user true, via the existing decision route + refresh) makes it full strength (violation possible, trace [approved_by_user]); rejection removes it; rules without a number are unchanged. Amira's fixture: her tech_heavy rule is already approved, so her report is unchanged; write a test on a copy with the rule unapproved. The frozen guard test tests/profile/test_limits_no_llm_inputs.py pins the old rule (unapproved parsed rules never in limits): the owner approved updating it, the orchestrator does that after your phase A; do not touch it. Do not edit pipeline.py, api.py, explain.py (other lanes). These P6 tasks run IN PARALLEL in separate worktrees: edit only the files (and functions) your task owns, plus README.md and new test files. Read docs/spec-decisions.md D11-D18 first: they are new owner decisions and win over SPEC.md. No network, no pip install, no real AWS calls in code paths the tests run. Never write the activity-tags meta CSV. The engine golden test must stay green (no engine math change). D10 applies to every user-facing string. Do not change frozen tests; if one contradicts D11-D18 write .claude/loop/BLOCKED.md naming it (the owner approved updating tests that pin the old behaviour, the orchestrator will do it). Persona fixtures, their reports and the demo keep their current results except where a D-entry changes them on purpose (say which in README). ORCHESTRATOR (owner-approved): tests/profile/test_limits_no_llm_inputs.py is updated to D11 and re-frozen; it is now an acceptance test of this task (firm limits and firm traces unchanged by llm: fields; the unapproved numeric theme rule appears only as a provisional entry traced values.parsed_notes[provisional])."
   },
   {
    "id": "P6.TRADEMSG",

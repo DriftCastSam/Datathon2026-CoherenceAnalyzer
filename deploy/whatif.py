@@ -54,15 +54,21 @@ def default_profile_dir() -> Path:
     return found[0]
 
 
-def build(out: Path, profile_dir: Path | None = None) -> dict:
-    """Write universe.json and whatif.json into `out` for the profile directory `profile_dir` (its profile.json,
-    events.jsonl and portfolio.json). Nothing is shared between two calls."""
-    fixture = Path(profile_dir) if profile_dir is not None else default_profile_dir()
+def context(profile_dir: Path, locale: str) -> dict:
+    """Load profile, portfolio, assets and prepare the what-if context.
+
+    Args:
+        profile_dir: directory holding profile.json, events.jsonl, portfolio.json
+        locale: locale for section narratives (e.g. "en-CA", "fr-CA")
+
+    Returns:
+        Context dict with all data needed for universe() and scenarios()
+    """
     assets = data.load_assets()
-    profile_in = pipeline._load_profile(fixture)
-    pf = pipeline._load_portfolio(fixture, None, profile_in, assets)
-    profile = pipeline._refresh(profile_in, pf, pipeline._events(fixture))["profile"]
-    horizon_m = int(round(float(_val(profile["objectives"]["horizon_years"])) * 12))
+    profile_in = pipeline._load_profile(profile_dir)
+    pf = pipeline._load_portfolio(profile_dir, None, profile_in, assets)
+    profile = pipeline._refresh(profile_in, pf, pipeline._events(profile_dir))["profile"]
+    horizon_m = pipeline._horizon_months(profile)
     market = engine.load_market(str(config.DATA_DIR))
     meta = {n: data.load_meta(n) for n in pipeline.META_NAMES}
     w0, value = pf["weights_pct"], pf["value_cad"]
@@ -75,54 +81,112 @@ def build(out: Path, profile_dir: Path | None = None) -> dict:
 
     m0, c0 = run(w0)
     ctx0 = factors.SectionContext(profile=profile, limits=profile["limits"], limits_trace=profile["limits_trace"],
-                                  checks_current=c0, metrics_current=m0, locale="fr-CA")
+                                  checks_current=c0, metrics_current=m0, locale=locale)
     base_secs = {s["factor"]: s["status"] for s in report_mod.build_sections(ctx0)}
     bonds = sorted((t for t in w0 if assets.loc[t, "asset_class"] == "etf_bond"), key=lambda t: -w0[t])
-    fundings = [("pro_rata_all", {"kind": "pro_rata_all"}, "Au prorata de toutes les positions")]
-    if bonds:
-        fundings.append((f"specific:{bonds[0]}", {"kind": "specific", "ticker": bonds[0]},
-                         f"Depuis {assets.loc[bonds[0], 'name']} ({bonds[0]})"))
 
-    universe = [{"ticker": t, "name": r["name"], "asset_class": r["asset_class"], "market": r["market"],
-                 "currency": r["currency"], "sector": r["sector"], "held_pct": round(w0.get(t, 0.0), 2)}
-                for t, r in sorted(assets.iterrows(), key=lambda kv: kv[1]["name"].lower())]
-    base = {"verdict": report_mod.verdict(c0), "sections": base_secs, "metrics": {k: m0[k] for k in METRIC_KEYS},
-            "cone": _cone(m0), "shares": _shares(w0, assets), "value_cad": value, "as_of": pf["as_of"],
-            "weights_pct": w0, "fundings": [{"id": i, "label": lab} for i, _, lab in fundings], "targets": list(TARGETS),
-            "checks": {f"{c['id']}|{c.get('subject')}": c["status"] for c in c0}}
-    (out / "universe.json").write_text(json.dumps({"assets": universe, "base": base}, ensure_ascii=False))
+    if locale == "fr-CA":
+        fundings = [("pro_rata_all", {"kind": "pro_rata_all"}, "Au prorata de toutes les positions")]
+        if bonds:
+            fundings.append((f"specific:{bonds[0]}", {"kind": "specific", "ticker": bonds[0]},
+                             f"Depuis {assets.loc[bonds[0], 'name']} ({bonds[0]})"))
+    else:
+        fundings = [("pro_rata_all", {"kind": "pro_rata_all"}, "Pro rata from all holdings")]
+        if bonds:
+            fundings.append((f"specific:{bonds[0]}", {"kind": "specific", "ticker": bonds[0]},
+                             f"From {assets.loc[bonds[0], 'name']} ({bonds[0]})"))
+
+    return {
+        "assets": assets, "profile": profile, "w0": w0, "value": value, "as_of": pf["as_of"],
+        "m0": m0, "c0": c0, "base_secs": base_secs, "fundings": fundings, "run": run, "locale": locale
+    }
+
+
+def universe(ctx: dict) -> dict:
+    """Build the universe block: assets list and base portfolio state.
+
+    Args:
+        ctx: context from context()
+
+    Returns:
+        {"assets": [...], "base": {...}} suitable for universe.json
+    """
+    assets, w0, m0, c0 = ctx["assets"], ctx["w0"], ctx["m0"], ctx["c0"]
+    universe_assets = [
+        {"ticker": t, "name": r["name"], "asset_class": r["asset_class"], "market": r["market"],
+         "currency": r["currency"], "sector": r["sector"], "held_pct": round(w0.get(t, 0.0), 2)}
+        for t, r in sorted(assets.iterrows(), key=lambda kv: kv[1]["name"].lower())
+    ]
+    base = {
+        "verdict": report_mod.verdict(c0), "sections": ctx["base_secs"], "metrics": {k: m0[k] for k in METRIC_KEYS},
+        "cone": _cone(m0), "shares": _shares(w0, assets), "value_cad": ctx["value"], "as_of": ctx["as_of"],
+        "weights_pct": w0, "fundings": [{"id": i, "label": lab} for i, _, lab in ctx["fundings"]], "targets": list(TARGETS),
+        "checks": {f"{c['id']}|{c.get('subject')}": c["status"] for c in c0}
+    }
+    return {"assets": universe_assets, "base": base}
+
+
+def scenarios(ctx: dict, tickers: list[str]) -> dict:
+    """Build what-if scenarios for the given tickers.
+
+    Args:
+        ctx: context from context()
+        tickers: list of tickers to compute scenarios for
+
+    Returns:
+        {ticker: {"asset": {...}, "scenarios": {key: {...}}}} suitable for whatif.json
+    """
+    assets = ctx["assets"]
+    universe_assets = [
+        {"ticker": t, "name": assets.loc[t, "name"], "asset_class": assets.loc[t, "asset_class"],
+         "market": assets.loc[t, "market"], "currency": assets.loc[t, "currency"],
+         "sector": assets.loc[t, "sector"], "held_pct": round(ctx["w0"].get(t, 0.0), 2)}
+        for t in tickers if t in assets.index
+    ]
 
     all_scen = {}
-    for a in universe:
+    for a in universe_assets:
         t = a["ticker"]
         scen = {}
         for target in TARGETS:
-            for fid, funding, _ in fundings:
+            for fid, funding, _ in ctx["fundings"]:
                 key = f"{int(target)}|{fid}"
                 try:
-                    w1, _ = intent_mod.apply(w0, {"action": "buy", "ticker": t, "target_weight_pct": target,
-                                                  "funding": funding}, value)
+                    w1, _ = intent_mod.apply(ctx["w0"], {"action": "buy", "ticker": t, "target_weight_pct": target,
+                                                  "funding": funding}, ctx["value"])
                 except ValueError as exc:
                     scen[key] = {"error": str(exc)}
                     continue
-                m1, c1 = run(w1)
-                ctx = factors.SectionContext(profile=profile, limits=profile["limits"], limits_trace=profile["limits_trace"],
-                                             checks_current=c0, checks_proposed=c1, metrics_current=m0, metrics_proposed=m1,
-                                             intent={"action": "buy", "ticker": t, "target_weight_pct": target,
-                                                     "funding": funding}, locale="fr-CA")
-                secs = report_mod.build_sections(ctx)
+                m1, c1 = ctx["run"](w1)
+                secs_ctx = factors.SectionContext(
+                    profile=ctx["profile"], limits=ctx["profile"]["limits"], limits_trace=ctx["profile"]["limits_trace"],
+                    checks_current=ctx["c0"], checks_proposed=c1, metrics_current=ctx["m0"], metrics_proposed=m1,
+                    intent={"action": "buy", "ticker": t, "target_weight_pct": target, "funding": funding}, locale=ctx["locale"])
+                secs = report_mod.build_sections(secs_ctx)
                 scen[key] = {
                     "verdict": report_mod.verdict(c1), "metrics": {k: m1[k] for k in METRIC_KEYS}, "cone": _cone(m1),
                     "shares": _shares(w1, assets), "weights_pct": {k: round(v, 3) for k, v in w1.items()},
                     "checks": [{k: c.get(k) for k in ("id", "subject", "status", "value", "limit", "unit", "factor")}
                                for c in c1 if c["status"] != "pass"],
-                    "sections": [{"factor": s["factor"], "title": s["title"], "before": base_secs[s["factor"]],
+                    "sections": [{"factor": s["factor"], "title": s["title"], "before": ctx["base_secs"][s["factor"]],
                                   "after": s["status"], "segments": explain.template_section(s["facts"])["segments"]}
                                  for s in secs],
                 }
         all_scen[t] = {"asset": a, "scenarios": scen}
-    (out / "whatif.json").write_text(json.dumps(all_scen, ensure_ascii=False, separators=(",", ":")))
-    return base
+    return all_scen
+
+
+def build(out: Path, profile_dir: Path | None = None, locale: str = "fr-CA") -> dict:
+    """Write universe.json and whatif.json into `out` for the profile directory `profile_dir` (its profile.json,
+    events.jsonl and portfolio.json). Nothing is shared between two calls."""
+    fixture = Path(profile_dir) if profile_dir is not None else default_profile_dir()
+    ctx = context(fixture, locale)
+    univ = universe(ctx)
+    (out / "universe.json").write_text(json.dumps(univ, ensure_ascii=False), encoding="utf-8")
+    all_tickers = [a["ticker"] for a in univ["assets"]]
+    all_scen = scenarios(ctx, all_tickers)
+    (out / "whatif.json").write_text(json.dumps(all_scen, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+    return univ["base"]
 
 
 if __name__ == "__main__":

@@ -376,10 +376,12 @@ def test_unapproved_parsed_rules_are_ignored_by_build_limits(robert):
                               _rule(approved=False, applies_to="all", **THEME_RULE)])
     lim, trace = _build(p)
     dumped = json.dumps(lim, default=str)
-    assert "fossil_fuel_producer" not in dumped and "tech_heavy" not in dumped
-    assert not lim.get("max_theme_weight")
+    assert "fossil_fuel_producer" not in dumped
+    # D11 (owner, 2026-11-15): the unapproved numeric theme rule is provisional only, never a firm limit.
+    assert all(isinstance(v, dict) and v.get("provisional") is True for v in (lim.get("max_theme_weight") or {}).values())
     assert sorted(lim["excluded_activities"]) == sorted(base["excluded_activities"])
-    assert trace == base_trace
+    assert {k: v for k, v in trace.items() if k != "max_theme_weight"} == \
+        {k: v for k, v in base_trace.items() if k != "max_theme_weight"}
 
 
 def test_approved_exclude_activity_reaches_excluded_activities(robert):
@@ -402,7 +404,8 @@ def test_only_the_approved_rule_of_a_mixed_batch_is_promoted(robert):
                               _rule(approved=False, applies_to="all", **THEME_RULE)])
     lim, _ = _build(p)
     assert "fossil_fuel_producer" in lim["excluded_activities"]
-    assert not lim.get("max_theme_weight")
+    # D11: the unapproved numeric theme rule is provisional only.
+    assert all(isinstance(v, dict) and v.get("provisional") is True for v in (lim.get("max_theme_weight") or {}).values())
 
 
 def test_approved_soft_rules_never_change_limits(robert):

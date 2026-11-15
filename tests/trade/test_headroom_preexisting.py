@@ -10,6 +10,11 @@ H5 (foreign currency 76 % vs 70 %), H6 (employer sector 16 % vs 15 %) and H9 bef
 `{'none_fit': True, 'binding_checks': ['H2', 'H5', 'H6']}` and the template said the trade crosses H2 "from the
 first step", although the trade does not touch crypto or the foreign-currency weight (MSFT and SPY are both USD).
 
+D19: with real ETF look-through data, Amira also already breaches H10 (Information Technology risk share 45.41 %
+vs a 45 % limit -- extremely tight). The engine's risk-share is a portfolio-wide decomposition, not a per-asset
+sector weight, so even a trade that touches no sector weight at all can nudge it; the "AGG from GLD" example below
+turns out to be exactly such a case (see its fixture comment and the tests that use it).
+
 Rules pinned here:
   * a binding check is one the trade makes violate (ok on the current side -> violation on the proposed side);
   * a breach already present and left unchanged by the trade is never binding and never makes `none_fit` true;
@@ -134,8 +139,11 @@ def amira_msft_from_spy() -> dict:
 
 @pytest.fixture(scope="module")
 def amira_agg_from_gld() -> dict:
-    # AGG (bond, USD) funded from GLD (gold, USD): crypto, foreign-currency and tech weights do not move, and the
-    # engine floor p5_T only rises (measured at n=1000 and n=5000, every 0.5 pp step: 18 379 -> 18 608 at 12 %).
+    # AGG (bond, USD) funded from GLD (gold, USD): crypto, foreign-currency and tech SECTOR WEIGHT do not move, and
+    # the engine floor p5_T only rises (measured at n=1000 and n=5000, every 0.5 pp step: 18 379 -> 18 608 at 12 %).
+    # D19: GLD's low correlation was offsetting more portfolio risk than AGG does, so this trade (while inert on
+    # every weight-based check) nudges the engine's risk-share decomposition and slightly worsens the already-tight
+    # H10 (IT risk share 45.41 % -> 45.48 % at 12 %, vs a 45 % limit) at every step, however small.
     return _intent("AGG", 12, {"kind": "specific", "ticker": "GLD"})
 
 
@@ -183,17 +191,15 @@ def test_headroom_text_does_not_say_the_trade_crosses_a_limit_it_does_not_touch(
         assert text and not re.search(r"\bH[25]\b", text), text
 
 
-def test_a_breach_already_present_and_untouched_never_makes_none_fit(amira_pf, amira_profile, amira_agg_from_gld,
-                                                                    market, meta):
-    # "a violation already present on the current side never makes none_fit true by itself": Amira breaches H2, H5, H6 and
-    # H9 today; AGG funded from GLD changes none of H2/H5/H6 and only improves H9 -> the whole 12 % stays inside what the
-    # trade can cross (SPEC §8 step 1: "scan w from 0 to w*"; whole weight fits -> max = target, binding None).
+def test_a_breach_already_present_and_worsened_by_the_trade_still_makes_none_fit(
+        amira_pf, amira_profile, amira_agg_from_gld, market, meta):
+    # D19: Amira's preexisting H10 (IT risk share 45.41 % vs a 45 % limit) is so tight that AGG-from-GLD -- inert on
+    # every weight-based check (H2/H5/H6 untouched, H9 only improves) -- still worsens it at every step through the
+    # engine's portfolio-wide risk decomposition (see the fixture comment). Per the stricter SPEC-AMBIGUITY reading
+    # pinned at the top of this file, a worsened preexisting breach binds: none_fit is True here, not False.
     res = resizer.resize(amira_pf, amira_agg_from_gld, amira_profile, market, meta)
-    assert not res.get("none_fit")
-    assert set(res) == {"funding", "max_weight_pct", "binding_check", "metrics"}
-    assert res["funding"] == amira_agg_from_gld["funding"]
-    assert res["max_weight_pct"] == pytest.approx(12.0, abs=1e-9)
-    assert res["binding_check"] is None
+    assert res.get("none_fit") is True
+    assert res["binding_checks"] == ["H10"]
 
 
 def test_unchanged_preexisting_breach_is_not_binding_for_robert_and_the_golden_numbers_do_not_move(
@@ -276,13 +282,18 @@ def test_b7_skips_the_resizer_when_the_only_violations_were_there_before_the_tra
     assert resizer_spy == []
 
 
-def test_b7_skips_the_resizer_for_amira_agg_from_gld_that_only_improves_her_breaches(
+def test_b7_runs_the_resizer_for_amira_agg_from_gld_that_worsens_her_tight_h10(
         amira_pf, amira_profile, amira_agg_from_gld, market, resizer_spy):
+    # D19: the violating id sets are identical on both sides (same checks, same subjects, as before the trade),
+    # but `resizer.violations_added` compares VALUES, not just ids -- AGG-from-GLD worsens the already-tight H10
+    # (see the fixture comment), so b7_resize still runs the resizer instead of skipping it.
     st = _b7_state(market, amira_pf, amira_profile, amira_agg_from_gld)
     assert _violating(st["checks_proposed"]) == _violating(st["checks_current"]) != set()
     out = pipeline.b7_resize(st)
-    assert out["headroom"] is None
-    assert resizer_spy == []
+    assert len(resizer_spy) == 1
+    h = out["headroom"]
+    assert h["none_fit"] is True
+    assert h["binding_checks"] == ["H10"]
 
 
 def test_b7_runs_the_resizer_when_the_trade_adds_violations_and_returns_the_golden_headroom(

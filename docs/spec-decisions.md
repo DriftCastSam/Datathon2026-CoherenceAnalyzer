@@ -181,3 +181,43 @@ import; nothing is executed.
 ## D18. Live LLM model = Claude Haiku 5.5 on Bedrock. Approved 2026-11-15 (owner)
 Live and record runs use `us.anthropic.claude-haiku-5-5`. Template fallbacks (D13 point 4) are accepted as the cost of
 the smaller model. The mock tests keep reading the hand-written cache entries (`fixture:hand-written`).
+
+## Scope cut for the demo (2026-11-15, owner)
+The demo runs on the three persona fixtures only (the mock data provided). Out of scope, code to be removed:
+- The intake questionnaire and user-created profiles (`intake.py`, intake routes, `POST /profiles`, `PUT /profiles/{id}/portfolio`,
+  skipped-answer and no-portfolio handling, the intake and new-user UI). §20.6 and D7 point 1 no longer apply.
+- AWS extras: the Step Functions version of Flow B (§17 item 15), the Lambda handler, the S3 store backend (§14 S3 part).
+  Bedrock + Guardrail stay.
+- Analytics extras: rate-stress block (§17 item 16), ETF sector look-through (§17 item 13; its data file was never provided),
+  the what-if precompute and `design.html`.
+- D12 (real-date today) and D15 (start date) are deferred: personas keep `portfolio.as_of` (D1 applies again).
+- D16 keeps only the seed text (there are no user-made profiles); D17 is moot.
+In scope and kept: engine, rules + limits, hard / soft checks, gate, N3 / N6 (and N1 / N4 for Flow B), the narration loop
+(verifier + retry + template), Flow B trade + headroom (D10, D14) with the D13 statements, D11 provisional limits, the
+correction loop, the static dashboard, the build loop.
+
+## D19. ETF look-through back in scope, with country and single-company exposure. Approved 2026-11-15 (owner)
+Reverses the "ETF sector look-through" line of the scope cut above (the rest of the cut stands).
+1. Data: `data/meta/etf_sector_weights.csv` (SPEC §3.2), plus two new files with the same sourcing rules (every row
+   has `source_url` and the issuer's holdings date `as_of`; weights are fractions):
+   `etf_country_weights.csv` (`etf, country, weight, source_url, as_of`) and
+   `etf_top_holdings.csv` (`etf, holding_ticker, holding_name, weight, source_url, as_of`, top holdings only).
+   The owner allows these three files to be fetched from issuer pages by an agent and **reviewed by a human** before
+   the demo (SOURCES.md records who fetched, when, and the review). `activity_tags.csv` stays human-only (inv. 6).
+2. Engine output gains `exposure` (`coherence_analyzer/exposure.py`, pure): per dimension (sector, country, asset
+   class with equity ETFs counted as stocks, listing currency) and per single company, each figure split into the
+   holdings it comes from (`direct` or via an ETF). An ETF with no rows keeps its own bucket and is listed in
+   `uncovered`; single-company figures are lower bounds (`partial: true`, top holdings only).
+3. `exposure` is descriptive (D10): no status, no limit, never in the verdict, no LLM reads it. Checks keep reading
+   `groups` (`groups.sector` is split by the sector file as SPEC §5 already says; `groups.country` stays per listing).
+4. The engine golden test runs with an empty meta dir: v0 has no look-through, and the split is data, not math.
+
+## D20. User-made profiles and the intake back in scope. Approved 2026-11-15 (owner)
+Reverses the first bullet and the D16 line of the scope cut above (the rest of the cut stands, as amended by D19). The
+team's demo app (`deploy/site/app.html`, branch `feat/site-e2e-flow`) builds a profile in conversation from the intake
+API, so the demo needs it.
+1. In scope again: `intake.py`, the intake routes, `POST /profiles`, `PUT /profiles/{id}/portfolio`, skipped-answer and
+   no-portfolio handling, and the intake and new-user UI. §20.6 and D7 point 1 apply again.
+2. D16 stands as approved: two fixed disclaimers, the seed text for persona profiles and the user text for profiles with
+   `meta.origin = "user"`. D17 stands.
+3. The queued removal task P7.CUTUSERS is dropped; its oracle tests (branch `loop/p7.cutusers`) are not merged.

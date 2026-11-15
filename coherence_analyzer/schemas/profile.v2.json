@@ -149,7 +149,8 @@
         "parsed_notes": {
           "allOf": [{"$ref": "#/$defs/llmField"}],
           "properties": {
-            "value": {"type": "array", "items": {"$ref": "#/$defs/parsedRule"}}
+            "value": {"type": "array", "items": {"$ref": "#/$defs/parsedRule"}},
+            "rejected_quotes": {"type": "array", "items": {"type": "string"}, "description": "D11.3: quotes of rules the user rejected; a rejected rule is never promoted as a provisional limit"}
           }
         }
       }
