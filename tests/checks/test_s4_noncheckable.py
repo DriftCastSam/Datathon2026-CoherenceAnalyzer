@@ -1,4 +1,4 @@
-"""P3.S4: S4 reminds about every parsed rule that is not promoted into limits, and the dead explain stubs are gone.
+"""P3.S4: S4 stays on unapproved parsed rules only (docs/spec-factors.md §20.2, §20.8), and the dead explain stubs are gone.
 
 Sources: SPEC §7.4 S4 ("Unapproved or non-checkable parsed values rules": info reminder "you wrote: '<quote>'"),
 §6.2 N3 + the §5 promotion note (only approved `exclude_activity` / `max_theme_weight` rules are promoted into
@@ -59,9 +59,13 @@ def _quotes(checks: list[dict]) -> list[str]:
 
 
 # ------------------------------------------------------------------ S4 emission rules
+# SPEC-AMBIGUITY: SPEC §7.4 says "Unapproved or non-checkable parsed values rules" and the §5 note says other kinds
+# "stay soft reminders (S4)", but docs/spec-factors.md (wins where more specific, CLAUDE.md) narrows S4 to
+# "unapproved parsed rules" (§20.2 preferences row) and §20.8 pins Robert, who has two APPROVED prefer/avoid rules, at
+# preferences `pass`. So: unapproved rules are reminded, approved rules (any kind) are not.
 
 def test_unapproved_rule_of_every_kind_gets_an_info_reminder():
-    """§7.4 S4: one info reminder per unapproved parsed rule, whatever its kind (unchanged behaviour)."""
+    """§7.4 S4 / §20.2: one info reminder per unapproved parsed rule, whatever its kind."""
     rules = [_rule("exclude_activity", {"tag": "fossil_fuel_producer"}, Q_TAG, False),
              _rule("max_theme_weight", {"theme": "tech_heavy", "max_pct": 40}, Q_THEME_NUM, False),
              _rule("prefer_attribute", {"attribute": "understandable_business"}, Q_PREFER, False),
@@ -77,64 +81,43 @@ def test_unapproved_rule_of_every_kind_gets_an_info_reminder():
     _rule("prefer_attribute", {"attribute": "understandable_business"}, Q_PREFER, True, "single_stocks"),
     _rule("avoid_attribute", {"attribute": "speculative"}, Q_AVOID, True),
     _rule("other", {}, Q_OTHER, True),
-], ids=["prefer_attribute", "avoid_attribute", "other"])
-def test_approved_rule_that_is_not_promoted_still_gets_a_reminder(rule):
-    """§7.4 S4 + §6.2 N3: approved prefer/avoid/other rules are not promoted into limits, so they stay S4 reminders."""
-    out = _s4([rule])
-    assert len(out) == 1
-    c = out[0]
-    assert _quotes(out) == [rule["quote"]]
-    assert c["kind"] == "soft" and c["status"] == "info"
-
-
-@pytest.mark.parametrize("rule", [
     _rule("exclude_activity", {"tag": "fossil_fuel_producer"}, Q_TAG, True),
     _rule("max_theme_weight", {"theme": "tech_heavy", "max_pct": 40}, Q_THEME_NUM, True),
-], ids=["exclude_activity", "max_theme_weight"])
-def test_approved_promoted_rule_gets_no_reminder(rule):
-    """§5 promotion note: approved exclude_activity / max_theme_weight (with a number) live in limits (H11/H13): no S4."""
+    _rule("max_theme_weight", {"theme": "tech_heavy"}, Q_THEME, True),
+], ids=["prefer_attribute", "avoid_attribute", "other", "exclude_activity", "max_theme_weight", "theme_without_number"])
+def test_approved_rule_gets_no_reminder(rule):
+    """§20.2 + §20.8: S4 covers unapproved rules only; an approved rule is the user's decision (promoted or not).
+    A theme rule with no number is asked for by the intake (contraintes.missing), not reminded by S4."""
     assert _s4([rule]) == []
 
 
-def test_approved_theme_rule_without_a_number_is_not_promoted_so_it_is_reminded():
-    """§6.2 N3 (amira: max_theme_weight with no number): until the number exists nothing is promoted into limits,
-    so the rule is still only a soft reminder."""
-    rule = _rule("max_theme_weight", {"theme": "tech_heavy"}, Q_THEME, True)
-    # SPEC-AMBIGUITY: the task says "every approved rule that is not promoted"; limits skips a theme rule with no
-    # numeric max_pct, so the stricter reading is that it still gets the reminder.
-    assert _quotes(_s4([rule])) == [Q_THEME]
-
-
-def test_mixed_batch_emits_exactly_the_non_promoted_rules():
-    """§7.4 S4: unapproved + approved-non-promoted are reminded; approved-promoted are not."""
-    promoted = [_rule("exclude_activity", {"tag": "fossil_fuel_producer"}, Q_TAG, True),
-                _rule("max_theme_weight", {"theme": "tech_heavy", "max_pct": 40}, Q_THEME_NUM, True)]
-    reminded = [_rule("prefer_attribute", {"attribute": "understandable_business"}, Q_PREFER, True),
-                _rule("avoid_attribute", {"attribute": "speculative"}, Q_AVOID, False),
-                _rule("other", {}, Q_OTHER, True),
-                _rule("exclude_activity", {"tag": "tobacco"}, "no tobacco", False)]
-    out = _s4(promoted + reminded)
-    assert sorted(_quotes(out)) == sorted(r["quote"] for r in reminded)
+def test_mixed_batch_emits_exactly_the_unapproved_rules():
+    rules = [_rule("exclude_activity", {"tag": "fossil_fuel_producer"}, Q_TAG, True),
+             _rule("prefer_attribute", {"attribute": "understandable_business"}, Q_PREFER, True),
+             _rule("avoid_attribute", {"attribute": "speculative"}, Q_AVOID, False),
+             _rule("exclude_activity", {"tag": "tobacco"}, "no tobacco", False)]
+    assert sorted(_quotes(_s4(rules))) == sorted([Q_AVOID, "no tobacco"])
 
 
 def test_reminder_quote_comes_from_the_rule_and_is_a_substring_of_the_notes():
     """§7.4 S4 'you wrote: <quote>' + §6.2 N3 (quote is an exact substring of notes): nothing is invented."""
-    rules = [_rule("prefer_attribute", {"attribute": "understandable_business"}, Q_PREFER, True),
+    rules = [_rule("prefer_attribute", {"attribute": "understandable_business"}, Q_PREFER, False),
              _rule("avoid_attribute", {"attribute": "speculative"}, Q_AVOID, False)]
     p = _profile(rules)
-    for c in soft.s4(p):
+    out = [c for c in soft.s4(p) if c["id"] == "S4"]
+    assert len(out) == 2
+    for c in out:
         assert c["subject"] in p["values"]["notes"]
 
 
 def test_no_rules_or_no_parsed_notes_gives_no_reminder():
-    """§7.4 S4: nothing parsed, nothing to remind about."""
     assert soft.s4({"values": {"notes": ""}}) == []
     assert _s4([]) == []
 
 
 def test_s4_is_info_only_never_violation_and_not_in_the_verdict():
     """Invariant 3 + D3 + §20.2 (preferences: S4, info only): reminders never change the verdict."""
-    rules = [_rule("prefer_attribute", {"attribute": "understandable_business"}, Q_PREFER, True),
+    rules = [_rule("prefer_attribute", {"attribute": "understandable_business"}, Q_PREFER, False),
              _rule("other", {}, Q_OTHER, False)]
     out = soft.run_all(_profile(rules), None)
     s4 = [c for c in out if c["id"] == "S4"]
@@ -144,9 +127,8 @@ def test_s4_is_info_only_never_violation_and_not_in_the_verdict():
     assert report.verdict(s4) == report.verdict([])
 
 
-def test_s4_reminders_are_not_a_limits_input_and_limits_do_not_change():
-    """Invariant 2: S4 reads the LLM-parsed field but only emits info; limits for approved prefer/avoid rules stay
-    identical to the same profile with no parsed rules (they are reminders, not promoted)."""
+def test_parsed_rules_are_not_a_limits_input_unless_approved_and_promotable():
+    """Invariant 2: approved prefer/avoid rules leave limits identical to a profile with no parsed rules."""
     prof = json.loads((ROOT / "fixtures" / "robert" / "profile.json").read_text(encoding="utf-8"))
 
     def lim(rules):
@@ -159,12 +141,11 @@ def test_s4_reminders_are_not_a_limits_input_and_limits_do_not_change():
     soft_rules = [_rule("prefer_attribute", {"attribute": "understandable_business"}, Q_PREFER, True),
                   _rule("avoid_attribute", {"attribute": "speculative"}, Q_AVOID, True)]
     assert lim(soft_rules) == lim([])
-    assert len(_s4(soft_rules)) == 2
 
 
 def test_reminder_text_in_the_check_does_not_prescribe():
     """D10: the reminder only echoes the user's own words; its message_key is a plain key, not advice."""
-    out = _s4([_rule("prefer_attribute", {"attribute": "understandable_business"}, Q_PREFER, True)])
+    out = _s4([_rule("prefer_attribute", {"attribute": "understandable_business"}, Q_PREFER, False)])
     assert len(out) == 1
     assert re.fullmatch(r"[a-z0-9_]+", out[0]["message_key"])
     assert explain.advisory_hits(out[0]["message_key"].replace("_", " ")) == []

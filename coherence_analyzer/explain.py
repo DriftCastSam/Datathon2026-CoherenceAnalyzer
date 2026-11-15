@@ -45,18 +45,9 @@ MAX_SEGMENTS = 4          # V5
 MAX_SEGMENT_CHARS = 300   # V5
 
 
-def build_payload(report: dict, profile: dict, events: list[dict], locale: str = "fr-CA") -> dict:
-    raise NotImplementedError
-
-
 def numcheck(text: str, payload: dict) -> list[str]:
     """Return numbers in `text` that don't match a payload number (empty list = pass). SPEC §9.3 item 2."""
     return _numcheck(text, payload)
-
-
-def template_explain(payload: dict) -> dict:
-    """Deterministic FR/EN explanation from the same checks. Always available."""
-    raise NotImplementedError
 
 
 # ---------------------------------------------------------------- template_section (§20.5)
