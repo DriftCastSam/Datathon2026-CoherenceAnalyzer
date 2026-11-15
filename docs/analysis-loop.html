@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CoherenceAnalyzer: the profile vs portfolio analysis loop</title>
+<style>
+  :root{--bg:#0f1218;--card:#171b24;--line:#2a3140;--fg:#e6e9ef;--mute:#9aa3b2;
+        --rule:#4fb38a;--llm:#d9a441;--gate:#c86b6b;--user:#6fa3e0;--tpl:#8f7fd6}
+  *{box-sizing:border-box}
+  body{margin:0;background:var(--bg);color:var(--fg);font:15px/1.5 system-ui,-apple-system,Segoe UI,sans-serif}
+  main{max-width:1060px;margin:0 auto;padding:32px 20px 60px}
+  h1{font-size:26px;margin:0 0 4px} h2{font-size:18px;margin:36px 0 12px}
+  p.lead{color:var(--mute);margin:0 0 20px;max-width:760px}
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-size:13px;color:var(--mute);margin-bottom:22px}
+  .legend span::before{content:"";display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;background:var(--c)}
+  .flow{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:10px;counter-reset:s}
+  .step{background:var(--card);border:1px solid var(--line);border-left:4px solid var(--c);border-radius:8px;padding:10px 12px;position:relative}
+  .step b{display:block;font-size:13px;color:var(--c);letter-spacing:.02em}
+  .step h3{margin:2px 0 4px;font-size:15px}
+  .step p{margin:0;font-size:13px;color:var(--mute)}
+  .r{--c:var(--rule)} .l{--c:var(--llm)} .g{--c:var(--gate)} .u{--c:var(--user)} .t{--c:var(--tpl)}
+  .loop{display:grid;grid-template-columns:1fr 60px 1fr 60px 1fr;align-items:center;gap:0;margin-top:8px}
+  .box{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--c);border-radius:8px;padding:12px;min-height:150px}
+  .box h3{margin:0 0 6px;font-size:15px} .box ul{margin:0;padding-left:18px;font-size:13px;color:var(--mute)}
+  .arrow{text-align:center;color:var(--mute);font-size:22px}
+  .back{margin:10px 0 0;padding:10px 14px;border:1px dashed var(--gate);border-radius:8px;font-size:13px;color:var(--mute)}
+  .back strong{color:var(--fg)}
+  .outcomes{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+  .pill{border:1px solid var(--c);color:var(--c);border-radius:999px;padding:3px 12px;font-size:13px}
+  table{width:100%;border-collapse:collapse;font-size:13px;background:var(--card);border-radius:8px;overflow:hidden}
+  th,td{padding:8px 10px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+  th{color:var(--mute);font-weight:600}
+  code{font:12.5px ui-monospace,SFMono-Regular,Menlo,monospace;color:#cfd6e4;background:#0c0f14;padding:1px 5px;border-radius:4px}
+  .lanes{display:grid;grid-template-columns:repeat(6,1fr);gap:8px}
+  .lane{background:var(--card);border:1px solid var(--line);border-radius:8px;padding:8px;text-align:center;font-size:13px}
+  .lane small{display:block;color:var(--mute)}
+  footer{margin-top:40px;color:var(--mute);font-size:12px}
+  @media(max-width:760px){.loop{grid-template-columns:1fr}.arrow{transform:rotate(90deg)}.lanes{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<main>
+<h1>The analysis loop: profile vs portfolio</h1>
+<p class="lead">How CoherenceAnalyzer measures the gap between an investor's own profile and their portfolio, or a trade
+they propose (Flow B, <code>pipeline.check</code>). It is a scripted DAG, not a free-roaming agent: code owns every
+limit and every verdict, and the LLM (Bedrock, forced tool use) fills narrow slots that a deterministic gate or
+verifier checks before anything is used.</p>
+
+<div class="legend">
+  <span style="--c:var(--user)">user-declared</span>
+  <span style="--c:var(--rule)">deterministic rule / engine</span>
+  <span style="--c:var(--llm)">LLM node (Bedrock)</span>
+  <span style="--c:var(--gate)">gate / verifier</span>
+  <span style="--c:var(--tpl)">template fallback</span>
+</div>
+
+<h2>1. The pipeline (B1 to B9)</h2>
+<div class="flow">
+  <div class="step l"><b>B1 · N4 intent_parser</b><h3>Parse the trade</h3><p>"10% NVDA" → draft intent. Ticker must be in the universe enum; ambiguous fields are listed, never guessed.</p></div>
+  <div class="step u"><b>B2 · confirm</b><h3>User confirms</h3><p>The confirmed intent is user data. The draft only prefills the form. Nothing auto-executes.</p></div>
+  <div class="step r"><b>B3 · Flow A refresh</b><h3>Rebuild the profile</h3><p>Derive horizon, capacity, effective risk → <code>limits</code> + trace. N1/N3 run here, but only through the gate.</p></div>
+  <div class="step r"><b>B4 · intent.apply</b><h3>Proposed portfolio</h3><p>Apply the user's own funding to the current weights.</p></div>
+  <div class="step r"><b>B5 · engine</b><h3>Analyse both sides</h3><p>Vol, max drawdown, P5 at horizon, goal probs. Same seed, same horizon, current vs proposed.</p></div>
+  <div class="step g"><b>B6 · checks + diff</b><h3>Measure the gap</h3><p>Hard checks H1–H14 (can be <em>violation</em>), soft S1–S4 (warning at most). Verdict + diff.</p></div>
+  <div class="step r"><b>B7 · resizer</b><h3>Headroom</h3><p>If the trade adds a violation: scan + binary search for how far <em>this</em> trade goes before it crosses a limit.</p></div>
+  <div class="step l"><b>B8 · N5 explainer loop</b><h3>Explain, verified</h3><p>Five factor sections narrated in parallel lanes + N6 consistency. See section 2.</p></div>
+  <div class="step r"><b>B9 · save</b><h3>Report + audit</h3><p>Every LLM call logged with model, prompt version, input hash and its gate decision.</p></div>
+</div>
+
+<h2>2. The inner loop: generate → verify → retry once → template</h2>
+<p class="lead" style="margin-bottom:8px">Per non-pass section (<code>explain.narrate_section</code>). At most two LLM calls; output that failed verification is never shown.</p>
+<div class="loop">
+  <div class="box r"><h3>Facts payload</h3><ul>
+    <li>Only the section's non-pass checks, metrics, diff, headroom, unknowns, evidence events</li>
+    <li>Numbers pre-formatted (<code>"7.4 %"</code>) so the model copies, never computes</li>
+    <li>The LLM sees nothing else</li></ul></div>
+  <div class="arrow">→</div>
+  <div class="box l"><h3>N5 explainer</h3><ul>
+    <li>Bedrock Converse, forced tool use, temperature 0</li>
+    <li>Segments tagged <code>fact | assumption | inference | unknown</code>, each with refs</li>
+    <li>Optional Guardrail: no personalised recommendations</li></ul></div>
+  <div class="arrow">→</div>
+  <div class="box g"><h3>Verifier V1–V5</h3><ul>
+    <li><b>V1</b> every ref resolves (check id, key path, event_id)</li>
+    <li><b>V2</b> numcheck: every number exists in the facts</li>
+    <li><b>V3</b> every violation/warning is cited</li>
+    <li><b>V4</b> advisory blocklist FR+EN ("you could", "rééquilibr", "next step"…)</li>
+    <li><b>V5</b> schema, kinds, lengths; inference only if backed by LLM field/evidence</li></ul></div>
+</div>
+<div class="back"><strong>↺ Fail on attempt 1:</strong> call N5 again with the list of failures appended.
+  <strong>Fail on attempt 2, cache miss, or Guardrail block:</strong> deterministic <code>template_section</code> (always passes V1–V5).</div>
+<div class="outcomes">
+  <span class="pill l">mode = llm</span><span class="pill l">mode = llm_retry</span><span class="pill t">mode = template</span>
+</div>
+
+<h2>3. Parallel lanes in B8</h2>
+<div class="lanes">
+  <div class="lane">Objectif<small>G1, O1</small></div>
+  <div class="lane">Horizon<small>owns H9</small></div>
+  <div class="lane">Risque<small>H4, H7, H8, H14, S1, S3</small></div>
+  <div class="lane">Contraintes<small>H1–H3, H5, H6, H10–H13, S2</small></div>
+  <div class="lane">Préférences<small>S4</small></div>
+  <div class="lane" style="border-color:var(--llm)">N6<small>profile consistency</small></div>
+</div>
+<p class="lead" style="margin-top:8px">ThreadPoolExecutor, max 5 section workers + N6 as a sixth lane. Output is identical to a sequential run. <code>pass</code> sections never call the LLM. Headline and disclaimer are always template text.</p>
+
+<h2>4. Where the LLM is allowed, and what stops it</h2>
+<table>
+  <tr><th>Node</th><th>Role</th><th>Can it change…</th><th>Guard</th></tr>
+  <tr><td><code>N1</code> behaviour_classifier</td><td>Risk appetite revealed by recent events (no profile fields, to avoid anchoring)</td><td><code>risk.behavioural</code> → S1/S3 warnings only</td><td>Gate: evidence event_ids exist, moves ≤ 1 level per run, confidence ≤ 0.8</td></tr>
+  <tr><td><code>N2</code> question_rubric</td><td>Sub-scores per question; code computes the score</td><td>knowledge term, clamped ±5 pts</td><td>EWMA + clamp; never feeds <code>limits</code></td></tr>
+  <tr><td><code>N3</code> values_parser</td><td>Notes → candidate rules</td><td>Nothing until the user approves a rule</td><td>Quote must be an exact substring of the notes</td></tr>
+  <tr><td><code>N4</code> intent_parser</td><td>Free text → draft intent</td><td>Nothing until the user confirms</td><td>Ticker enum built at runtime</td></tr>
+  <tr><td><code>N5</code> explainer</td><td>Plain-language sections</td><td>Wording only</td><td>V1–V5, one retry, template</td></tr>
+  <tr><td><code>N6</code> profile_consistency</td><td>Contradictions inside the profile</td><td>Its own info block, never the verdict</td><td>Gated, never <code>violation</code></td></tr>
+</table>
+
+<h2>5. The invariants the loop is built around</h2>
+<table>
+  <tr><td><code>limits</code> come from <code>rule:</code> fields and user-declared values only (test: <code>tests/profile/test_limits_no_llm_inputs.py</code>).</td></tr>
+  <tr><td>Only hard checks produce <em>violation</em>. LLM-derived checks: warning, info or unknown.</td></tr>
+  <tr><td>Describe, never prescribe: no trade, ticker, size or "next step" the user did not state. The headroom is the only trade figure, and it's template text.</td></tr>
+  <tr><td>Reproducible: cache keyed on node + prompt version + model + payload hash; <code>COHERENCE_ANALYZER_LLM=mock</code> replays offline.</td></tr>
+</table>
+
+<footer>Sources: SPEC.md §4, §6–§11; docs/spec-decisions.md D7, D8, D10; coherence_analyzer/pipeline.py (b1…b9, check); coherence_analyzer/explain.py (narrate_section, verify_section).<br>
+Educational simulation with fictional profiles. This is not personalised financial advice. No transaction is executed.</footer>
+</main>
+</body>
+</html>
