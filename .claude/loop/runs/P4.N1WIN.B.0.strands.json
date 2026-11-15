@@ -1,0 +1,14 @@
+{
+  "duration_s": 103.7,
+  "guard_cancellations": [],
+  "is_error": false,
+  "model_id": "us.anthropic.claude-sonnet-5-5",
+  "num_turns": 4,
+  "result": "The N1 gate now accepts only the event ids the model was shown. The full suite passes (2472 tests, no skips), including `tests/llm/test_n1_gate_window.py`.\n\nFiles changed:\n- `coherence_analyzer/pipeline.py`: in `_run_n1`, the gate context `event_ids` is now built from the `extractors.n1_events` window instead of every event. An answer citing a `quiz_result`, an event older than 30 days, or one cut by the 20-event cap is `rejected:evidence`. `risk.behavioural` keeps its previous value, and S1 and S3 follow it. The recorded Robert answer cites only shown events, so it is still accepted.\n- `README.md`: added a P4.N1WIN entry to \"Status\". No new assumption was needed.\n\nI didn't have to resolve any SPEC-AMBIGUITY.\n",
+  "stop_reason": "end_turn",
+  "usage": {
+    "inputTokens": 63703,
+    "outputTokens": 1228,
+    "totalTokens": 64931
+  }
+}

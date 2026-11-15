@@ -207,7 +207,8 @@ def _run_n1(profile: dict, events: list[dict], as_of: str) -> tuple[dict, list[d
     except (bedrock.LLMCacheMiss, bedrock.LLMOutputInvalid) as exc:
         return profile, [], [{"node": N1_NODE, "error": f"{type(exc).__name__}: {exc}"}]
     log = result["call_log"]
-    context = {"event_ids": {e["event_id"] for e in events}, "notes": "", "model_id": log["model_id"],
+    # SPEC §11 step 2: the gate accepts only the events the model was shown (the n1_events window), not every event
+    context = {"event_ids": {e["event_id"] for e in window}, "notes": "", "model_id": log["model_id"],
                "prompt_version": log["prompt_version"], "input_hash": log["input_hash"], "updated_at": _now()}
     old = profile.get("risk", {}).get("behavioural")
     new_field, status = gate.gate(N1_NODE, old, result["output"], context)
