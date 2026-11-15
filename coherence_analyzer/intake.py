@@ -16,6 +16,7 @@ from typing import Any
 FACTORS = ("objectif", "horizon", "risque", "contraintes", "preferences")
 LOCALES = ("fr-CA", "en-CA")
 SKIPPED_BY = "user:skipped"
+NOT_SKIPPABLE: frozenset[str] = frozenset({"objectives.horizon_years"})
 PARSED_RULES_PATH = "values.parsed_notes.value"
 THEME_NUMBER_KEY = "max_pct"
 
@@ -191,7 +192,7 @@ def missing(profile: dict, factor: str) -> list[str]:
 def next_question(profile: dict, factor: str, locale: str = "fr-CA") -> dict | None:
     """Fixed template question for the first missing path, or None. No LLM. Pure.
 
-    Returns {factor, path, text, locale}.
+    Returns {factor, path, text, locale, skippable}.
     """
     if locale not in LOCALES:
         raise ValueError(f"unknown locale {locale!r}; expected one of {LOCALES}")
@@ -205,7 +206,7 @@ def next_question(profile: dict, factor: str, locale: str = "fr-CA") -> dict | N
         rule = dict(_theme_rules_without_number(profile))[path]
         text = THEME_NUMBER_QUESTION[locale].format(quote=rule.get("quote", ""),
                                                     theme=(rule.get("params") or {}).get("theme", ""))
-    return {"factor": factor, "path": path, "text": text, "locale": locale}
+    return {"factor": factor, "path": path, "text": text, "locale": locale, "skippable": path not in NOT_SKIPPABLE}
 
 
 def _assign(profile: dict, path: str, value: Any) -> dict:

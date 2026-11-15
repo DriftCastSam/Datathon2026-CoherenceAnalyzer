@@ -87,12 +87,21 @@ def test_site_review_survives_skipped_answer(client: TestClient) -> None:
     assert not any(isinstance(value, dict) and "value" in value for value in card.values())
 
 
-def test_intake_skip_rejects_schema_required_path(client: TestClient) -> None:
+def test_intake_skip_allows_skippable_required_paths(client: TestClient) -> None:
     response = client.post(
         "/api/profiles/persona-robert/intake/skip", json={"path": "situation.planned_withdrawals"}
     )
 
+    assert response.status_code == 200
+
+
+def test_intake_skip_rejects_horizon(client: TestClient) -> None:
+    response = client.post(
+        "/api/profiles/persona-robert/intake/skip", json={"path": "objectives.horizon_years"}
+    )
+
     assert response.status_code == 422
+    assert "needed" in response.text.lower() and "analysis" in response.text.lower()
 
 
 def test_intake_answer_rejects_non_intake_path(client: TestClient) -> None:
