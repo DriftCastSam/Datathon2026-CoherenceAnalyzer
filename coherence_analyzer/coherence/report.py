@@ -119,7 +119,7 @@ def build_trade_check(*, run_id: str, profile_id: str, profile_version: int, por
                       checks_current: list[dict], checks_proposed: list[dict], metrics_current: dict,
                       metrics_proposed: dict, sections: list[dict], explanation: dict, headroom: dict | None,
                       assumptions: list[str], data_window: list[str], disclaimer: str,
-                      profile_coherence: dict) -> dict:
+                      profile_coherence: dict, goals: dict | None = None, stress: dict | None = None) -> dict:
     """The Flow B report (SPEC §13 + §20.4): the confirmed intent, both sides, the diff, the resizer headroom (user funding only, D10). The
     verdict is computed on the PROPOSED checks (the question is whether the trade is coherent) and must equal the one
     derived from the section statuses. `unknowns` = the proposed checks with status unknown. Pure."""
@@ -128,7 +128,7 @@ def build_trade_check(*, run_id: str, profile_id: str, profile_version: int, por
         raise AssertionError(f"section statuses give {sections_verdict(sections)!r}, checks give {verdict_!r}")
     d = diff(checks_current, checks_proposed, metrics_current, metrics_proposed)
     cur, new = sort_checks(checks_current), sort_checks(checks_proposed)
-    return {
+    rep = {
         "run_id": run_id, "flow": "B", "profile_id": profile_id, "profile_version": profile_version,
         "portfolio_id": portfolio_id, "intent": intent, "verdict": verdict_,
         "checks_current": cur, "checks_proposed": new, "diff": d,
@@ -137,3 +137,8 @@ def build_trade_check(*, run_id: str, profile_id: str, profile_version: int, por
         "explanation": explanation, "disclaimer": disclaimer, "sections": sections,
         "profile_coherence": profile_coherence,
     }
+    if goals is not None:
+        rep["goals"] = goals          # G1 block (P2.14), proposed side: info only, never in the verdict
+    if stress is not None:
+        rep["stress"] = stress        # rate stress (P2.16), proposed side: info only, feeds_limits false
+    return rep

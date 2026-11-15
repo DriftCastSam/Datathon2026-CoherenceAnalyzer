@@ -577,7 +577,13 @@ def b6_checks_and_diff(state: dict) -> dict:
     prop = (hard.run_all(w_new, state["metrics_proposed"], profile, assets, meta)
             + soft.run_all(profile, state["intent"], w_new, assets, behaviour=True))
     checks_current, checks_proposed = store.plain(report_mod.tag_checks(cur)), store.plain(report_mod.tag_checks(prop))
+    # G1 (P2.14, as Flow C): one goals block, on the PROPOSED side like the verdict and the sections (SPEC-AMBIGUITY,
+    # stricter reading). Info only: the G1 rows go to the objectif facts, never into the check lists or the verdict.
+    goals_pf = {"weights_pct": new["weights_pct"], "value_cad": new["value_cad"], "as_of": pf["as_of"]}
+    goals_block, goal_checks = _goals_block(engine.load_market(str(config.DATA_DIR)), goals_pf, profile,
+                                            state["horizon_months"], state["metrics_proposed"])
     return {**state, "checks_current": checks_current, "checks_proposed": checks_proposed,
+            "goals": store.plain(goals_block), "goal_checks": store.plain(goal_checks),
             "diff": report_mod.diff(checks_current, checks_proposed, state["metrics_current"],
                                     state["metrics_proposed"])}
 
@@ -601,7 +607,8 @@ def b8_explain(state: dict) -> dict:
     ctx = factors.SectionContext(profile=profile, limits=profile["limits"], limits_trace=profile["limits_trace"],
                                  checks_current=state["checks_current"], checks_proposed=state["checks_proposed"],
                                  metrics_current=state["metrics_current"], metrics_proposed=state["metrics_proposed"],
-                                 intent=state["intent"], events=state["events"], locale=locale)
+                                 intent=state["intent"], events=state["events"], locale=locale,
+                                 goal_checks=state.get("goal_checks") or [])
     sections = report_mod.build_sections(ctx)
     verdict = report_mod.verdict(state["checks_proposed"])
     with ThreadPoolExecutor(max_workers=1) as pool:
@@ -637,7 +644,12 @@ def b9_save(state: dict) -> dict:
         checks_proposed=state["checks_proposed"], metrics_current=state["metrics_current"],
         metrics_proposed=state["metrics_proposed"], sections=state["sections"], explanation=state["explanation"],
         headroom=res, assumptions=notes, data_window=state["data_window"],
-        disclaimer=config.DISCLAIMER[state["locale"]], profile_coherence=state["profile_coherence"])
+        disclaimer=config.DISCLAIMER[state["locale"]], profile_coherence=state["profile_coherence"],
+        goals=state.get("goals"),
+        stress=stress.stress_block(                  # P2.16, as Flow C, on the proposed portfolio: info only
+            {t: v / 100 for t, v in state["proposed"]["weights_pct"].items()}, state["proposed"]["value_cad"],
+            data.load_assets(), data.load_macro(), as_of=pf["as_of"], asset_meta=_meta()["asset_meta"],
+            locale=state["locale"]))
     store.save_portfolio(pf)
     store.save_report(rep)
     calls = state["llm_calls"] + refresh_["llm_calls"] + state["narration_calls"]
