@@ -14,6 +14,8 @@ Rules:
 - Import only the stub names that already exist (read the stub modules first). Tests must be collectable: they fail on NotImplementedError or wrong values, never on ImportError. If a name you need has no stub, import the module and call `getattr(module, "name")` inside the test, or write `.claude/loop/BLOCKED.md` naming the missing stub.
 - Keep each write or edit call under about 250 lines; build long test files in several edits.
 - Where the spec is ambiguous, pick the stricter reading and write a one-line `# SPEC-AMBIGUITY:` comment above the assertion explaining the choice. Never invent expected numbers the spec does not give; assert properties instead.
+- Your tests must be satisfiable together with every test already frozen in `.claude/loop/frozen.json`: the implementation phase may not edit those. Before finishing, grep `tests/` for the fields, keys, paths, check ids and fixture values you assert on, and read the existing asserts on them. If one of yours would contradict an existing one (a value it pins, a key it requires, a list it fixes, a report key name, a status a persona must keep), change yours to agree with it. If the existing test is stale against the spec, keep yours and name the stale test + the spec line in a `# STALE-ORACLE:` comment at the top of your file. Prefer the exact report / schema key names that existing tests and `schemas/` already use.
+- Assert on module-scoped fixtures only with snapshots taken at the moment you mean (e.g. "after the draft, before the confirm"), never on live shared state that a later step of the same fixture changes.
 - Do not run git commands that change state (no commit, stash, reset, checkout).
 
 When done, reply with one line per test function: `name: what it pins down (SPEC §x)`.
