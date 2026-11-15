@@ -393,9 +393,14 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
   }
   function explanationCard(rep) {
     const e = rep.explanation, title = f => (rep.sections.find(s => s.factor === f) || {}).title || f;
+    /* SPEC §8 / D10: flow B only (`headroom` is null for a review). One fact about the user's own funding: the report's
+       `line` (template text) is shown as is; the main template is rebuilt here from the headroom fields. */
+    const hr = rep.headroom ? rep.headroom : null, hrOk = hr && hr.funding && hr.funding.kind === "specific" && hr.binding_check && hr.binding_check !== "FUNDING";
+    const hrText = hr ? (hrOk ? `Avec le financement indiqué (${hr.funding.ticker}), la transaction franchit votre limite ${hr.binding_check} au-delà de ${hr.max_weight_pct.toFixed(1).replace(".", ",")} %.` : hr.line) : null;
+    const hrLine = hrText ? `<p class="lead" style="margin-top:8px">${segmentTag({kind: "fact"})} ${esc(hrText)}<span class="refs">headroom</span></p>` : "";
     return `<section class="card" id="explanation"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap"><h3>Explication du verdict</h3><span class="mode">texte : ${esc(e.mode)}</span></div>
       <p class="lead" style="margin-top:8px">${esc(e.headline)}</p>
-      <ul class="segs" style="margin-top:14px">${e.segments.map(g => `<li>${segmentTag(g)}<div>${g.factor ? `<b class="small">${esc(title(g.factor))}</b> ` : ""}${esc(g.text)}<span class="refs">${(g.refs || []).map(esc).join(", ")}</span></div></li>`).join("")}</ul></section>`;
+      <ul class="segs" style="margin-top:14px">${e.segments.map(g => `<li>${segmentTag(g)}<div>${g.factor ? `<b class="small">${esc(title(g.factor))}</b> ` : ""}${esc(g.text)}<span class="refs">${(g.refs || []).map(esc).join(", ")}</span></div></li>`).join("")}</ul>${hrLine}</section>`;
   }
   const whatifNote = () => `<div class="page"><section class="card"><h2>Simulation indisponible pour ce rapport</h2><p class="sub" style="margin-top:8px">La recherche et les scénarios précalculés portent sur le profil et le portefeuille de Robert. Choisissez un rapport de Robert dans le sélecteur pour les utiliser.</p></section></div>`;
 
