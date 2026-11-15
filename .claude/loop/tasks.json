@@ -688,6 +688,116 @@
     "README.md"
    ],
    "notes": "Run only after P2.D10C (and, for live wiring, the API Flow B routes) are merged. Gaps: index.html renders N3 approve/reject buttons disabled ('Affichage seulement'), has no B2 intent confirmation form, and cone() draws only metrics_current. Required: (1) when an API base URL is configured, approve/reject call POST /parsed-rules/{i}/decision and re-render; with no API (static demo) they stay disabled with the current note; (2) B2 form shows the draft intent fields (ticker, target weight, funding) editable by the user, nothing pre-filled that the user did not state (D10), submit -> POST /intents/{id}/confirm; static demo shows Robert in_0001; (3) Flow B report: cone overlays metrics_current and metrics_proposed (before/after), labelled. All strings pass the SPEC §9.3 blocklist apart from the fixed disclaimer. These P2 tasks run IN PARALLEL in separate worktrees: edit only the files your task owns (plus README.md and new test files). No network, no pip install, no real AWS calls in code paths the tests run. Never write the activity-tags meta CSV (humans only, CLAUDE.md). Golden test (tests/test_engine_golden.py) must stay green. D10 (describe, never prescribe) applies to every user-facing string. Constraint from the frozen P2.D10C oracle: the build_site reports listed in reports/index.json stay exactly the 4 flow C reviews with headroom null; load the flow B report from deploy/preview_report.py output (robert-nvda) as a separate file, not through index.json. Parallel note: P2.APIFB (coherence_analyzer/api.py: POST /profiles/{id}/events order_intent -> draft intent, POST /intents/{intent_id}/confirm -> Flow B report) is built at the same time in another worktree and is not in yours. Code the UI against the SPEC §12 route contract and that task's description; the tests and the static demo must not need the routes to exist (no network). Do not edit coherence_analyzer/api.py."
+  },
+  {
+   "id": "P3.SKIP",
+   "title": "Skipped intake answers ({value: null, by: user:skipped}) give unknown checks instead of crashing derive / limits / hard checks",
+   "spec": [
+    "docs/spec-factors.md §20.6",
+    "docs/spec-decisions.md D7 D3",
+    "§3.1",
+    "§7.1",
+    "§7.2",
+    "§7.3",
+    "§7.5",
+    "§1 inv. 1, 3"
+   ],
+   "tests": [
+    "tests/profile/test_skipped_fields.py"
+   ],
+   "code": [
+    "coherence_analyzer/rules/derive.py",
+    "coherence_analyzer/rules/limits.py",
+    "coherence_analyzer/coherence/hard.py",
+    "coherence_analyzer/levels.py",
+    "README.md"
+   ],
+   "notes": "Audit gap (reproduced): after intake.skip(robert, path) for each path in intake.REQUIRED, 7 of 15 paths crash the analysis: objectives.horizon_years, identity.retirement_target_age, situation.emergency_fund, situation.monthly_expenses -> TypeError in rules/derive.py; risk.declared -> ValueError in levels.idx; risk.max_acceptable_drawdown_pct -> max(int, dict) in rules/limits.py (user_dd is the skip object). POST /profiles/{id}/intake/skip accepts these, so the next POST /review fails. Required: for every REQUIRED path, skip -> derive_all, build_limits, hard.run_all / run_cheap and the full pipeline.review run without exceptions; a derived field or limit whose input is skipped is null / absent with a limits_trace entry saying which input was skipped (never a guessed default); each check that needs it reports `unknown` (never violation, never pass) naming the skipped path; the verdict follows D3 (unknown never changes it). Limits still come only from rule: fields and user-declared values (inv. 1). Parametrize over every REQUIRED path, on a deep copy of Robert. Do not edit intake.py, api.py or pipeline.py (other lanes). These P3 tasks run IN PARALLEL in separate worktrees: edit only the files (and, in pipeline.py / api.py, only the functions) your task owns, plus README.md and new test files. No network, no pip install, no real AWS calls in code paths the tests run. Never write the activity-tags meta CSV (humans only, CLAUDE.md). The engine golden test must stay green. D10 (describe, never prescribe) applies to every user-facing string. Do not change frozen tests; if one contradicts the spec write .claude/loop/BLOCKED.md."
+  },
+  {
+   "id": "P3.RESIZE",
+   "title": "Headroom counts only limits the trade crosses, not violations already present in the current portfolio",
+   "spec": [
+    "§8",
+    "§4 Flow B B7",
+    "docs/spec-decisions.md D2 D10",
+    "§7.5"
+   ],
+   "tests": [
+    "tests/trade/test_headroom_preexisting.py"
+   ],
+   "code": [
+    "coherence_analyzer/resizer.py",
+    "coherence_analyzer/pipeline.py (b7_resize only)",
+    "README.md"
+   ],
+   "notes": "Audit gap (reproduced): resizer._solve_mode counts every violation, including those the current portfolio already has, and pipeline.b7_resize triggers on any proposed violation. Probe: Amira buys 2% MSFT funded from SPY -> {'none_fit': True, 'binding_checks': ['H2','H5','H6']}, but her crypto H2 breach exists before the trade, and the template then says the trade crosses H2 from the first step. Required: binding checks are only checks the trade makes violate (not a violation on the current side -> violation on the proposed side); if §8 also counts a worsened pre-existing breach, take the stricter reading the spec supports and mark it # SPEC-AMBIGUITY; a violation already present on the current side never makes none_fit true by itself; b7 runs the resizer only when the trade adds a violation. Existing resizer / headroom tests for Robert + NVDA stay green with the same numbers (D2). Touch only resizer.py and the b7_resize function in pipeline.py. These P3 tasks run IN PARALLEL in separate worktrees: edit only the files (and, in pipeline.py / api.py, only the functions) your task owns, plus README.md and new test files. No network, no pip install, no real AWS calls in code paths the tests run. Never write the activity-tags meta CSV (humans only, CLAUDE.md). The engine golden test must stay green. D10 (describe, never prescribe) applies to every user-facing string. Do not change frozen tests; if one contradicts the spec write .claude/loop/BLOCKED.md."
+  },
+  {
+   "id": "P3.FLOWA",
+   "title": "POST /events runs Flow A for question / quiz_result / profile_edit / note events; quiz and edit payloads update the working profile",
+   "spec": [
+    "§4 Flow A",
+    "§3.4",
+    "§3.1",
+    "§12 API",
+    "§10",
+    "§11",
+    "docs/spec-decisions.md D7",
+    "§1 inv. 1, 2, 3"
+   ],
+   "tests": [
+    "tests/flows/test_flow_a_events.py"
+   ],
+   "code": [
+    "coherence_analyzer/api.py (post_event and helpers it alone uses)",
+    "coherence_analyzer/pipeline.py (_refresh and refresh only)",
+    "coherence_analyzer/store.py",
+    "README.md"
+   ],
+   "notes": "Audit gap: api.post_event only appends the event (only order_intent does more); quiz_result and profile_edit appear only in the API type enum; no code applies a profile_edit payload {path, old, new}; quiz_result.payload.score never updates knowledge.quiz_score; limits are recomputed only by /review; no API path can set values.notes, so the D7 'notes -> N3 -> gate' step is unreachable from the API. Required per §4 Flow A / §12: a question, quiz_result, profile_edit or note event triggers Flow A on the working copy (rules re-derived, limits rebuilt, N3 only when values.notes changed, through the gate, mock cache) and the response returns the event plus the refreshed profile version / diff; quiz_result sets knowledge.quiz_score as §3.1 says; profile_edit applies `new` at `path` only for user-editable declared fields (never limits, limits_trace or any llm: field, inv. 2; a mismatched `old` -> 409 or 422, document which); a profile_edit of values.notes reaches N3 through the gate (use the recorded Robert / Amira notes so the mock cache hits). The fixtures dir is never written. A profile_edit that sets a required field to null is P3.SKIP's concern: use non-null edits in your tests. Touch only post_event (and new helpers) in api.py and _refresh / refresh in pipeline.py: other lanes edit b7_resize and b9_save. These P3 tasks run IN PARALLEL in separate worktrees: edit only the files (and, in pipeline.py / api.py, only the functions) your task owns, plus README.md and new test files. No network, no pip install, no real AWS calls in code paths the tests run. Never write the activity-tags meta CSV (humans only, CLAUDE.md). The engine golden test must stay green. D10 (describe, never prescribe) applies to every user-facing string. Do not change frozen tests; if one contradicts the spec write .claude/loop/BLOCKED.md."
+  },
+  {
+   "id": "P3.FLOWBG1",
+   "title": "Flow B report carries the G1 goals block and the rate stress block, like Flow C",
+   "spec": [
+    "§13",
+    "§4 Flow B B9",
+    "§7.3 G1",
+    "docs/spec-factors.md §20.3",
+    "README P2.14 and P2.16 notes"
+   ],
+   "tests": [
+    "tests/flows/test_flow_b_goals_stress.py"
+   ],
+   "code": [
+    "coherence_analyzer/pipeline.py (b9_save and Flow B b5/b6 helpers only)",
+    "coherence_analyzer/coherence/report.py (build_trade_check)",
+    "coherence_analyzer/schemas/report.json",
+    "README.md"
+   ],
+   "notes": "Audit gap: only Flow C (pipeline.review) adds the G1 `goals` block and the P2.16 `stress` block; pipeline.b9_save / report.build_trade_check have no goals parameter, so the objectif section of a Flow B report never shows G1 and there is no stress table. Required: the Flow B report (pipeline.check with auto_confirm, and so the API confirm route) carries `goals` and `stress` (info only, feeds_limits false, never a check, never in the verdict), schema-valid; G1 goal checks reach the objectif section as in Flow C; verdicts and headroom unchanged. Read §13 and schemas/report.json to decide current vs proposed side. Reuse the Flow C helpers (_goals_block, stress.stress_block), do not duplicate logic. Do not edit _refresh / refresh or b7_resize (other lanes). Keep the Step Functions path (lambda_handler, tests/aws/test_stepfunctions.py) green. These P3 tasks run IN PARALLEL in separate worktrees: edit only the files (and, in pipeline.py / api.py, only the functions) your task owns, plus README.md and new test files. No network, no pip install, no real AWS calls in code paths the tests run. Never write the activity-tags meta CSV (humans only, CLAUDE.md). The engine golden test must stay green. D10 (describe, never prescribe) applies to every user-facing string. Do not change frozen tests; if one contradicts the spec write .claude/loop/BLOCKED.md."
+  },
+  {
+   "id": "P3.UIINTAKE",
+   "title": "Dashboard: B2 confirm sends only the editable fields and gets its draft from POST /events; intake form; theme max_pct input",
+   "spec": [
+    "§12 UI",
+    "§4 Flow B B2",
+    "docs/spec-factors.md §20.6 §20.7 §20.9",
+    "docs/spec-decisions.md D7 D8 D10",
+    "§16 Amira"
+   ],
+   "tests": [
+    "tests/dashboard/test_ui_intake_confirm.py"
+   ],
+   "code": [
+    "deploy/site/index.html",
+    "deploy/build_site.py",
+    "deploy/preview_report.py",
+    "README.md"
+   ],
+   "notes": "Audit gaps: (1) confirmIntent in deploy/site/index.html sends Object.assign({}, state.rep.intent, {ticker, target_weight_pct, funding}), so the body also carries intent_id, event_id, action, status...; api.ConfirmIn forbids extra keys -> 422 every time. The form is fed from a stored Flow B report whose intent is already confirmed (-> 409), and the UI never calls POST /profiles/{id}/events, so it cannot create a draft. Required: with an API base the UI posts an order_intent event, shows the returned draft (nothing pre-filled the user did not state, D10), and confirms with a body of exactly the keys ConfirmIn accepts; a test builds that body the way the page does and validates it with api.ConfirmIn (import it, do not edit api.py). (2) No intake form: the page has no use of the /profiles/{id}/intake, /intake/answer, /intake/skip routes; the 'Points à clarifier' card shows questions with nowhere to answer. Required: with an API base, show intake.next_question, answer / skip it via the routes, re-render; static demo embeds the missing list read-only. (3) decideRule sends only {approved}; for a max_theme_weight rule with no max_pct the page asks for the number (§16 Amira) and sends it. All strings pass the SPEC §9.3 blocklist apart from the fixed disclaimer. Frozen P2.D10C constraint: reports/index.json stays exactly the 4 flow C reviews. Do not edit api.py or anything under coherence_analyzer/ (other lanes). These P3 tasks run IN PARALLEL in separate worktrees: edit only the files (and, in pipeline.py / api.py, only the functions) your task owns, plus README.md and new test files. No network, no pip install, no real AWS calls in code paths the tests run. Never write the activity-tags meta CSV (humans only, CLAUDE.md). The engine golden test must stay green. D10 (describe, never prescribe) applies to every user-facing string. Do not change frozen tests; if one contradicts the spec write .claude/loop/BLOCKED.md."
   }
  ]
 }
