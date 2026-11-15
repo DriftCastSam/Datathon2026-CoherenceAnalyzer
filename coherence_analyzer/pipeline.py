@@ -398,13 +398,23 @@ def b1_parse_intent(fixture_dir: Path | str, intent_id: str) -> dict:
             "llm_errors": errors}
 
 
+def stated_draft(draft: dict | None) -> dict:
+    """D10 pt 1: the draft fields the user stated. Same rule as `api._draft_intent`: a field N4 lists in
+    `ambiguous_fields` (a default or a guess) is None; a missing list means none ambiguous. Returns a new dict."""
+    draft = draft or {}
+    ambiguous = set(draft.get("ambiguous_fields") or [])
+    return {k: (None if k in ambiguous else draft.get(k)) for k in INTENT_KEYS}
+
+
 def b2_confirm(state: dict, auto_confirm: bool = False) -> dict:
     """B2: the user confirms or edits the draft. The confirmed intent is user-declared data (the fixture intent);
-    the draft only prefills the form. Without `auto_confirm` the run stops here (`awaiting_confirmation`)."""
+    the draft only prefills the form. Without `auto_confirm` the run stops here (`awaiting_confirmation`).
+    `intent_edits` compare the confirmed intent with the blanked draft (D10 pt 1): a field N4 listed as ambiguous
+    that the user filled in is a user edit. The draft kept for the audit is not changed."""
     if not auto_confirm:
         return {**state, "awaiting_confirmation": True}
     intent = {**state["fixture_intent"], "status": "confirmed"}
-    draft = state.get("draft") or {}
+    draft = stated_draft(state.get("draft"))
     edits = [k for k in INTENT_KEYS if draft.get(k) != intent.get(k)]
     return {**state, "awaiting_confirmation": False, "intent": intent, "intent_edits": edits}
 
