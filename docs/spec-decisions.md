@@ -181,3 +181,17 @@ import; nothing is executed.
 ## D18. Live LLM model = Claude Haiku 5.5 on Bedrock. Approved 2026-11-15 (owner)
 Live and record runs use `us.anthropic.claude-haiku-5-5`. Template fallbacks (D13 point 4) are accepted as the cost of
 the smaller model. The mock tests keep reading the hand-written cache entries (`fixture:hand-written`).
+
+## Scope cut for the demo (2026-11-15, owner)
+The demo runs on the three persona fixtures only (the mock data provided). Out of scope, code to be removed:
+- The intake questionnaire and user-created profiles (`intake.py`, intake routes, `POST /profiles`, `PUT /profiles/{id}/portfolio`,
+  skipped-answer and no-portfolio handling, the intake and new-user UI). §20.6 and D7 point 1 no longer apply.
+- AWS extras: the Step Functions version of Flow B (§17 item 15), the Lambda handler, the S3 store backend (§14 S3 part).
+  Bedrock + Guardrail stay.
+- Analytics extras: rate-stress block (§17 item 16), ETF sector look-through (§17 item 13; its data file was never provided),
+  the what-if precompute and `design.html`.
+- D12 (real-date today) and D15 (start date) are deferred: personas keep `portfolio.as_of` (D1 applies again).
+- D16 keeps only the seed text (there are no user-made profiles); D17 is moot.
+In scope and kept: engine, rules + limits, hard / soft checks, gate, N3 / N6 (and N1 / N4 for Flow B), the narration loop
+(verifier + retry + template), Flow B trade + headroom (D10, D14) with the D13 statements, D11 provisional limits, the
+correction loop, the static dashboard, the build loop.
