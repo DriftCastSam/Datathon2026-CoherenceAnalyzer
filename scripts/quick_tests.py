@@ -6,7 +6,7 @@ Selection:
   2. A test file is selected when it depends on a changed file: it imports the changed module directly or through any
      chain of imports (static import graph of coherence_analyzer/, deploy/, scripts/, tests/), or it names the changed
      file's path in its source (tests load deploy/build_site.py and scripts by path, read README.md, etc.).
-  3. Data that every flow reads (data/, fixtures/, schemas, prompts, conftest.py, requirements.txt): every light test.
+  3. Data that every flow reads (data/, fixtures/, schemas, prompts, conftest.py): every light test.
   4. GUARDS always run: the invariant tests (limits never read llm: fields, the gate, numcheck, engine golden).
   5. HEAVY tests (the tests/dashboard modules that build the whole site, ~55 s each, about 80% of the suite's time)
      run only when something under deploy/ changed, or with --heavy.
@@ -40,7 +40,7 @@ GUARDS = (
 )
 # Changes here can move any flow's output: run every light test.
 GLOBAL = (re.compile(r"^(data|fixtures)/"), re.compile(r"^coherence_analyzer/(schemas|llm/prompts|llm/schemas)/"),
-          re.compile(r"^tests/conftest\.py$"), re.compile(r"^requirements\.txt$"), re.compile(r"^(pytest\.ini|pyproject\.toml)$"))
+          re.compile(r"^tests/conftest\.py$"), re.compile(r"^(pytest\.ini|pyproject\.toml)$"))
 HEAVY_MARKERS = re.compile(r"build_site|whatif\.py")
 
 

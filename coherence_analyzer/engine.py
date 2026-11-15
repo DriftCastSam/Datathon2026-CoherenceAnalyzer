@@ -218,15 +218,13 @@ def analyse(market: Market, weights_pct: dict[str, float], horizon_m: int, start
     rng = np.random.default_rng(seed)
     T = len(port)
     pv = port_b.values
-    paths = np.empty((n, horizon_m))
-    rets = np.empty((n, horizon_m))
-    for i in range(n):
-        idx: list[int] = []
-        while len(idx) < horizon_m:
-            s = rng.integers(T)
-            idx += [(s + k) % T for k in range(block)]
-        rets[i] = pv[idx[:horizon_m]]
-        paths[i] = np.cumprod(1 + rets[i])
+    # Vectorised, same draws as the original per-path loop (engine_v0): each path takes ceil(h/block) block
+    # starts in order, and Generator.integers(T, size=m) yields exactly m successive scalar integers(T) draws.
+    k = -(-horizon_m // block)
+    starts = rng.integers(T, size=n * k).reshape(n, k)
+    idx = ((starts[:, :, None] + np.arange(block)) % T).reshape(n, k * block)[:, :horizon_m]
+    rets = pv[idx]
+    paths = np.cumprod(1 + rets, axis=1)
     if c:
         # contributions: NAV_t = NAV_{t-1} (1 + r_t) + c, in CAD (not normalised); the draws do not depend on c
         nav_cad = np.empty_like(paths)
