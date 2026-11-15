@@ -13,6 +13,7 @@ Never wrap it in nohup / setsid / `&`.
 Usage:
   python scripts/loop_lane.py run P2.APIFB [--base loop/p0] [-- <agent_loop.py args>]
   python scripts/loop_lane.py status
+  python scripts/loop_lane.py merge P2.APIFB      # into the current branch; rolls back if the suite goes red
 
 Lane layout (matches the existing convention):
   worktree  .claude/worktrees/<id lower, '.' -> '-'>     e.g. .claude/worktrees/p2-apifb
@@ -24,6 +25,7 @@ from __future__ import annotations
 
 import argparse
 import fcntl
+import json
 import os
 import signal
 import subprocess
@@ -126,6 +128,53 @@ def status() -> int:
     return 0
 
 
+def merge(task_id: str) -> int:
+    """Merge lane loop/<id> into the current branch (the trunk). Known loop-file conflicts are resolved here:
+    .claude/loop/state.json = union of both sides (impl wins), .claude/loop/runs/* = trunk's copy. Any other conflict,
+    or a red full suite after the merge, aborts / rolls back the merge and returns non-zero."""
+    branch = f"loop/{task_id.lower()}"
+    if git("status", "--porcelain", "--untracked-files=no").stdout.strip():
+        print("tracked files have uncommitted changes: commit them first (the rollback would discard them)", file=sys.stderr)
+        return 4
+    head = git("rev-parse", "HEAD").stdout.strip()
+    r = git("merge", "--no-ff", branch, "-m", f"Merge {branch}")
+    if r.returncode != 0:
+        unmerged = git("diff", "--name-only", "--diff-filter=U").stdout.split()
+        other = [f for f in unmerged if f != ".claude/loop/state.json" and not f.startswith(".claude/loop/runs/")]
+        if other:
+            git("merge", "--abort")
+            print(f"merge of {branch} has real conflicts, aborted: {other}", file=sys.stderr)
+            return 4
+        for f in unmerged:
+            if f.startswith(".claude/loop/runs/"):
+                git("checkout", "--ours", f)
+        if ".claude/loop/state.json" in unmerged:
+            side = lambda n: json.loads(git("show", f":{n}:.claude/loop/state.json").stdout)
+            ours, theirs = side(2), side(3)
+            done = {**ours["done"], **theirs["done"]}
+            for k in done:
+                if "impl" in (ours["done"].get(k), theirs["done"].get(k)):
+                    done[k] = "impl"
+            (ROOT / ".claude/loop/state.json").write_text(json.dumps({**ours, "done": done}, indent=2, sort_keys=True) + "\n")
+        git("add", *unmerged)
+        c = git("commit", "--no-edit")
+        if c.returncode != 0:
+            print(c.stdout + c.stderr, file=sys.stderr)
+            return 4
+    env = {**os.environ, "COHERENCE_ANALYZER_LLM": "mock", "PYTHONHASHSEED": "0", "TZ": "UTC"}
+    py = ROOT / ".venv" / "bin" / "python"
+    t = subprocess.run([str(py if py.exists() else sys.executable), "-m", "pytest", "-q", "-p", "no:cacheprovider"],
+                       cwd=ROOT, env=env, text=True, capture_output=True)
+    tail = (t.stdout + t.stderr).strip().splitlines()[-1:] or [""]
+    if t.returncode != 0:
+        git("reset", "--hard", head)
+        print(f"full suite red after merging {branch}; merge rolled back to {head[:8]}\n" + (t.stdout + t.stderr)[-3000:],
+              file=sys.stderr)
+        return 5
+    print(f"merged {branch}: {tail[0]}")
+    return 0
+
+
 def _legacy_pid(d: Path) -> str:
     """Loops started the old way (setsid nohup) hold no lock: find them by cwd."""
     for p in Path("/proc").iterdir():
@@ -148,9 +197,13 @@ def main() -> int:
     r.add_argument("--base", default="loop/p0", help="branch a new lane starts from")
     r.add_argument("extra", nargs=argparse.REMAINDER, help="after --: passed to agent_loop.py")
     sub.add_parser("status")
+    m = sub.add_parser("merge", help="merge a finished lane into the current branch, then run the full suite")
+    m.add_argument("task")
     a = ap.parse_args()
     if a.cmd == "status":
         return status()
+    if a.cmd == "merge":
+        return merge(a.task)
     return run(a.task, a.base, [x for x in a.extra if x != "--"])
 
 
