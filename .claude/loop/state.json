@@ -38,6 +38,6 @@
     "P3.S4": "impl",
     "P3.SKIP": "impl",
     "P3.UIINTAKE": "impl",
-    "P4.CACHE": "tests"
+    "P4.CACHE": "impl"
   }
 }

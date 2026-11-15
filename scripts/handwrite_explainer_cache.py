@@ -10,14 +10,20 @@ The three non-pass sections each show one path of the narration loop, so the off
 Entries are keyed by the real cache_key() of the exact payload the loop sends (facts, or facts + retry_failures; the
 retry_failures are what `explain.verify_section` returns for the first answer). model_id `fixture:hand-written`.
 They are replaced by real recordings with COHERENCE_ANALYZER_LLM=record (P1.11).
+
+P4.CACHE: also one good first-attempt answer (mode `llm`) for every non-pass section of Amira (horizon, contraintes,
+preferences) and Mateo (contraintes, preferences) in `cli demo`, built from the real section facts at run time
+(`pipeline.review` in a temp dir, mock mode). `--dump` prints those facts instead of writing.
 """
 from __future__ import annotations
 
 import copy
 import json
+import os
 import sys
 from pathlib import Path
 
+os.environ["COHERENCE_ANALYZER_LLM"] = "mock"       # offline: the persona reviews below read the cache only
 ROOT = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(ROOT))
 
@@ -167,7 +173,174 @@ def main() -> None:
     cur_mode = explain.narrate_section(cur)["mode"]
     print("robert current, contraintes:", cur_mode)
     assert cur_mode == "llm", cur_mode
+    write_persona_entries()
+
+
+def _seg(kind: str, refs: list[str], text: str) -> dict:
+    return {"kind": kind, "refs": refs, "text": text}
+
+
+def _by_status(facts: dict, cid: str, status: str) -> list[dict]:
+    return [c for c in facts["checks"] if c["id"] == cid and c["status"] == status]
+
+
+def amira_horizon(facts: dict) -> dict:
+    """Amira: H9 violation, no planned withdrawal, effective horizon = declared horizon."""
+    h9 = _check(facts, "H9")
+    cur = facts["metrics"]["current"]
+    eff = facts["derived"]["objectives.effective_horizon_years"]["value"]
+    return {"segments": [
+        _seg("fact", ["H9", "metrics.current.p5_T"],
+             f"H9: le scénario bas (centile 5) à l'horizon est de {h9['value']}, sous le plancher de {h9['limit']}; "
+             f"le scénario médian est de {cur['p50_T']}."),
+        _seg("fact", ["derived.objectives.effective_horizon_years", "declared.objectives.horizon_years",
+                      "declared.situation.planned_withdrawals"],
+             f"Le plancher se mesure à un horizon effectif de {eff} ans, égal à l'horizon que vous déclarez; "
+             f"aucun retrait n'est planifié dans votre profil."),
+        _seg("assumption", ["metrics.current.p5_T", "metrics.current.p95_T"],
+             f"Hypothèse: ces scénarios sont une simulation fondée sur l'historique, pas une prévision; "
+             f"l'écart entre le scénario bas et le haut ({cur['p95_T']}) est large ({cur['width']})."),
+    ]}
+
+
+def amira_contraintes(facts: dict) -> dict:
+    """Amira: H2, H5, H6 violations, S2 warning, H6 / H10 unknown (ETF part without sector look-through)."""
+    h2, h5, h6 = _check(facts, "H2"), _check(facts, "H5"), _check(facts, "H6")
+    s2 = _check(facts, "S2", "warning")
+    h6u, h10u = _by_status(facts, "H6", "unknown")[0], _by_status(facts, "H10", "unknown")[0]
+    return {"segments": [
+        _seg("fact", ["H2", "H5"],
+             f"H2: les cryptoactifs pèsent {h2['value']}, au-delà du maximum de {h2['limit']}. "
+             f"H5: les actifs en devises étrangères pèsent {h5['value']}, au-delà du maximum de {h5['limit']}."),
+        _seg("fact", ["H6", "declared.identity.employer_sector"],
+             f"H6: le secteur de votre employeur ({h6['subject']}) pèse {h6['value']}, au-delà du maximum "
+             f"de {h6['limit']}."),
+        _seg("fact", ["S2", "derived.knowledge.score"],
+             f"S2 (avertissement): votre score de connaissances est de {s2['value']}, sous le seuil de {s2['limit']} "
+             f"pour la complexité de certains placements détenus ({s2['subject']})."),
+        _seg("unknown", ["H6", "H10"],
+             f"H6: la part des FNB ({h6u['value']}) n'est pas ventilée par secteur; le plafond de {h6u['limit']} ne "
+             f"peut pas être vérifié pour elle. H10: la part « {h10u['subject']} » ({h10u['value']} du risque) n'est "
+             f"pas ventilée non plus; le plafond de {h10u['limit']} ne peut pas être vérifié."),
+    ]}
+
+
+def amira_preferences(facts: dict) -> dict:
+    """Amira: S4 info, the "I love AI and new tech" note was parsed (llm:values_parser) but not approved."""
+    s4 = _by_status(facts, "S4", "info")[0]
+    interests = ", ".join(facts["declared"]["preferences.interests"])
+    notes = facts["declared"]["values.notes"]
+    assert s4["subject"] in notes
+    return {"segments": [
+        _seg("fact", ["declared.preferences.interests", "declared.values.notes"],
+             f"Vos intérêts déclarés sont {interests}; vos notes disent: « {notes} »"),
+        _seg("inference", ["S4", "derived.values.parsed_notes"],
+             f"Inférence: la phrase « {s4['subject']} » a été lue comme une préférence (prefer_attribute) que vous "
+             f"n'avez pas approuvée; S4 la signale sans la vérifier automatiquement."),
+    ]}
+
+
+def mateo_contraintes(facts: dict) -> dict:
+    """Mateo: every check is `unknown` (H6, H10: ETF part; H11: ETF without look-through or no activity-tag rows)."""
+    h6, h10 = _by_status(facts, "H6", "unknown")[0], _by_status(facts, "H10", "unknown")[0]
+    h11 = _by_status(facts, "H11", "unknown")
+    etf = sorted(c["subject"] for c in h11 if c["message_key"] == "excluded_activity_etf_no_lookthrough")
+    bare = sorted(c["subject"] for c in h11 if c["message_key"] == "excluded_activity_no_tag_rows")
+    assert etf and bare and len(etf) + len(bare) == len(h11)
+    d = facts["declared"]
+    refused = ", ".join(d["preferences.asset_types_refused"])
+    return {"segments": [
+        _seg("fact", ["declared.preferences.asset_types_refused", "declared.preferences.max_fee_mer_pct",
+                      "declared.values.environment.exclusions", "declared.values.social.exclusions"],
+             f"Vos limites déclarées: types d'actifs refusés ({refused}), frais maximaux de "
+             f"{d['preferences.max_fee_mer_pct']}, exclusion des controverses environnementales et sociales "
+             f"importantes."),
+        _seg("unknown", ["H6"],
+             f"H6: la part des FNB ({h6['value']}) n'est pas ventilée par secteur; le plafond de {h6['limit']} pour "
+             f"le secteur de votre employeur ({h6['subject']}) ne peut pas être vérifié."),
+        _seg("unknown", ["H10"],
+             f"H10: la part « {h10['subject']} » ({h10['value']} du risque) n'est pas ventilée par secteur; le "
+             f"plafond de {h10['limit']} ne peut pas être vérifié pour cette part."),
+        _seg("unknown", ["H11"],
+             f"H11: les activités exclues ne peuvent pas être vérifiées pour les FNB sans ventilation "
+             f"({', '.join(etf)}) ni pour les titres sans ligne d'activité dans les données ({', '.join(bare)})."),
+    ]}
+
+
+def mateo_preferences(facts: dict) -> dict:
+    """Mateo: two S4 info (parsed notes not approved)."""
+    s4 = _by_status(facts, "S4", "info")
+    d = facts["declared"]
+    interests = ", ".join(d["preferences.interests"])
+    assert d["preferences.prefers_dividends"] is True and d["preferences.prefers_large_caps"] is True
+    quotes = " et ".join(f"« {c['subject']} »" for c in s4)
+    return {"segments": [
+        _seg("fact", ["declared.preferences.prefers_dividends", "declared.preferences.prefers_large_caps",
+                      "declared.preferences.interests"],
+             f"Vous indiquez préférer les dividendes et les grandes capitalisations; vos intérêts déclarés sont "
+             f"{interests}. Importance déclarée: environnement {d['values.environment.importance']}, "
+             f"social {d['values.social.importance']}."),
+        _seg("inference", ["S4", "derived.values.parsed_notes"],
+             f"Inférence: deux phrases de vos notes, {quotes}, ont été lues comme des règles que vous n'avez pas "
+             f"approuvées; S4 les signale sans les vérifier automatiquement."),
+    ]}
+
+
+PERSONA_WRITERS = {
+    ("amira", "horizon"): amira_horizon, ("amira", "contraintes"): amira_contraintes,
+    ("amira", "preferences"): amira_preferences,
+    ("mateo", "contraintes"): mateo_contraintes, ("mateo", "preferences"): mateo_preferences,
+}
+
+
+def write_persona_entries() -> None:
+    """One hand-written answer per non-pass section of Amira and Mateo, keyed on the exact section facts, accepted by
+    the verifier on the first attempt (mode `llm`). `pass` sections never reach the writer: no entry."""
+    validator = Draft202012Validator(extractors.load_schema(NODE))
+    version = extractors.prompt_version(NODE)
+    for persona in ("amira", "mateo"):
+        for sec in persona_sections(persona):
+            facts = sec["facts"]
+            if sec["status"] == "pass":
+                continue
+            out = PERSONA_WRITERS[(persona, sec["factor"])](facts)
+            validator.validate(out)
+            failures = explain.verify_section(out, facts)
+            assert not failures, (persona, sec["factor"], failures)
+            assert out["segments"] != explain.template_section(facts)["segments"]
+            p = bedrock.write_entry(config.LLM_CACHE_DIR, NODE, version, bedrock.MOCK_MODEL_ID, facts, out, CALL_LOG)
+            print(p.relative_to(ROOT))
+    for persona in ("amira", "mateo"):
+        modes = {s["factor"]: explain.narrate_section(s["facts"])["mode"] for s in persona_sections(persona)
+                 if s["status"] != "pass"}
+        print(persona, modes)
+        assert set(modes.values()) == {"llm"}, modes
+
+
+def persona_sections(persona: str) -> list[dict]:
+    """The sections of `cli demo` for `persona` (flow C review of its own portfolio), produced by `pipeline.review` in a
+    throw-away working directory so the store never touches the repo. Mock mode: no network, explainer misses fall back
+    to the template, which does not change `facts`."""
+    import os
+    import tempfile
+
+    from coherence_analyzer import pipeline
+
+    here = os.getcwd()
+    with tempfile.TemporaryDirectory() as tmp:
+        os.chdir(tmp)
+        try:
+            return pipeline.review(ROOT / "fixtures" / persona, None)["sections"]
+        finally:
+            os.chdir(here)
 
 
 if __name__ == "__main__":
-    main()
+    if "--dump" in sys.argv:
+        for _p in ("amira", "mateo"):
+            for _s in persona_sections(_p):
+                if _s["status"] != "pass":
+                    print("=====", _p, _s["factor"], _s["status"])
+                    print(json.dumps(_s["facts"], ensure_ascii=False, indent=1))
+    else:
+        main()
