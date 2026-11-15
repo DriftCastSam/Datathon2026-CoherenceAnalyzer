@@ -887,6 +887,103 @@
     "README.md"
    ],
    "notes": "Gap: §20.6 says 'The answer is an event; free-text answers go through the existing N2/N3 extractors and the gate (§11)'. Today POST /profiles/{id}/intake/answer calls intake.answer, which writes the value at the path with no event and no extractor; /intake/skip likewise appends nothing. Required: (1) every intake answer and skip appends one event to the working copy's events.jsonl (reuse the existing profile_edit event shape and the Flow A event machinery P3.FLOWA added in api.py / pipeline.refresh: path, old, new, source `intake`; server-assigned event id), so the audit trail shows it; (2) a free-text answer (a string for a path whose value is free text, at least values.notes) goes through Flow A: N3 values_parser through the gate for notes (prompt values_parser.v2 after P3.GATE; use the recorded persona notes so the mock cache hits), N2 question_rubric for a question-type answer if §6.2 / §20.6 make one an intake answer; the value written is the gated result, never raw LLM output; a gate rejection keeps the previous value and the response says why; (3) structured answers keep today's behaviour (validated value, no LLM); (4) limits only from rule: fields and user-declared values (inv. 1). Read how P3.FLOWA implemented post_event and pipeline.refresh first and reuse them; do not edit pipeline.py. Edit only the files your task owns (in api.py only the intake routes and helpers they alone use), plus README.md and new test files. No network, no pip install, no real AWS calls in code paths the tests run. Never write the activity-tags meta CSV (humans only, CLAUDE.md). The engine golden test must stay green. D10 (describe, never prescribe) applies to every user-facing string. Do not change frozen tests; if one contradicts the spec write .claude/loop/BLOCKED.md naming the test and the spec line."
+  },
+  {
+   "id": "P4.DECISION",
+   "title": "Approving / rejecting a parsed rule records an event and runs the Flow A refresh (limits follow the decision)",
+   "spec": [
+    "docs/spec-decisions.md D7 (user approves/rejects each parsed rule -> Flow A refresh)",
+    "§6.2 N3",
+    "§7.2",
+    "§3.4",
+    "§12 API",
+    "§1 inv. 2"
+   ],
+   "tests": [
+    "tests/flows/test_rule_decision_refresh.py"
+   ],
+   "code": [
+    "coherence_analyzer/api.py (post_decision only)",
+    "README.md"
+   ],
+   "notes": "Audit gap (reproduced): api.post_decision only flips approved_by_user and saves. Rejecting Amira's approved tech_heavy rule leaves limits.max_theme_weight = {'tech_heavy': 0.5} in the response and in GET /profiles/persona-amira, version stays 1, no event, no audit. Required: a decision appends a profile_edit event (path values.parsed_notes.value[i].approved_by_user, old, new, source ui) and runs the same Flow A refresh P3.FLOWA's post_event path uses (reuse its helper, e.g. _flow_a / pipeline.refresh); the response and GET /profiles show limits rebuilt from the approved rules only (rejected -> gone from limits; approved with max_pct -> present), version bumped, limits_trace consistent. Keep the existing max_pct body field behaviour. Touch only post_decision (and a new private helper) in api.py. These P4 tasks run IN PARALLEL in separate worktrees: edit only the files (and, in pipeline.py / api.py / cli.py, only the functions) your task owns, plus README.md and new test files. No network, no pip install, no real AWS calls in code paths the tests run. Never write the activity-tags meta CSV (humans only, CLAUDE.md). The engine golden test must stay green. D10 (describe, never prescribe) applies to every user-facing string. Do not change frozen tests; if one contradicts the spec write .claude/loop/BLOCKED.md naming the test and the spec line."
+  },
+  {
+   "id": "P4.N4GATE",
+   "title": "The live N4 draft goes through gate.gate('intent_parser'); the duplicate pipeline._gate_intent is removed",
+   "spec": [
+    "CLAUDE.md invariant: every LLM output goes through gate.py",
+    "§11",
+    "§6.2 N4",
+    "§4 Flow B B1"
+   ],
+   "tests": [
+    "tests/flows/test_b1_uses_gate.py"
+   ],
+   "code": [
+    "coherence_analyzer/pipeline.py (b1_parse_intent and _gate_intent only)",
+    "README.md"
+   ],
+   "notes": "Audit gap: pipeline.b1_parse_intent calls its own copy pipeline._gate_intent, not gate.gate('intent_parser') (gate.py), so the N4 gate code P3.GATE added and tested is never on the live path (CLI, API _draft_intent, Lambda all go through b1). Required: b1 calls gate.gate for N4 and the copy is deleted; the audit gate status / call log and the returned draft are unchanged for every persona fixture and for the recorded N4 cache (same accepted / rejected outcomes, same fields); a sell draft is rejected through gate.gate. Do not edit gate.py (P4.WARNEN owns it); if gate.gate lacks a context the b1 call needs, pass it, and if that is impossible write BLOCKED.md. Touch only b1_parse_intent / _gate_intent in pipeline.py (P4.CLIDRAFT edits b2_confirm). These P4 tasks run IN PARALLEL in separate worktrees: edit only the files (and, in pipeline.py / api.py / cli.py, only the functions) your task owns, plus README.md and new test files. No network, no pip install, no real AWS calls in code paths the tests run. Never write the activity-tags meta CSV (humans only, CLAUDE.md). The engine golden test must stay green. D10 (describe, never prescribe) applies to every user-facing string. Do not change frozen tests; if one contradicts the spec write .claude/loop/BLOCKED.md naming the test and the spec line."
+  },
+  {
+   "id": "P4.CLIDRAFT",
+   "title": "CLI draft and audit intent_edits never show a field the user did not state (D10 point 1)",
+   "spec": [
+    "docs/spec-decisions.md D10",
+    "§3.6",
+    "§4 Flow B B1 B2",
+    "§12 CLI",
+    "§10 audit"
+   ],
+   "tests": [
+    "tests/flows/test_cli_draft_d10.py"
+   ],
+   "code": [
+    "coherence_analyzer/cli.py (_print_draft and check)",
+    "coherence_analyzer/pipeline.py (b2_confirm only)",
+    "README.md"
+   ],
+   "notes": "Audit gap (reproduced): `cli check fixtures/robert --intent in_0001` prints 'draft intent (N4, gate accepted): buy NVDA to 10 % (funding: pro_rata_all)' but the cached N4 output lists ambiguous_fields ['funding']; the API already blanks such fields (api._draft_intent), cli._print_draft does not, and audit.intent_edits is computed against the un-blanked draft. Required: the CLI prints a field N4 lists in ambiguous_fields as not stated (no value shown, no default), using the same rule as the API (reuse or move a shared helper; if you move one out of api.py, leave api.py's behaviour identical and keep the move minimal); intent_edits in the audit compare the confirmed intent with the blanked draft, so a field the user filled in counts as a user edit. Touch only _print_draft / check in cli.py and b2_confirm in pipeline.py. These P4 tasks run IN PARALLEL in separate worktrees: edit only the files (and, in pipeline.py / api.py / cli.py, only the functions) your task owns, plus README.md and new test files. No network, no pip install, no real AWS calls in code paths the tests run. Never write the activity-tags meta CSV (humans only, CLAUDE.md). The engine golden test must stay green. D10 (describe, never prescribe) applies to every user-facing string. Do not change frozen tests; if one contradicts the spec write .claude/loop/BLOCKED.md naming the test and the spec line."
+  },
+  {
+   "id": "P4.CACHE",
+   "title": "Hand-written N5 explainer cache entries for Amira and Mateo so the offline demo narrates every persona",
+   "spec": [
+    "§16",
+    "§9",
+    "docs/spec-factors.md §20.5",
+    "explain.numcheck",
+    "CLAUDE.md numbers rule"
+   ],
+   "tests": [
+    "tests/llm/test_persona_narration_cache.py"
+   ],
+   "code": [
+    "scripts/handwrite_explainer_cache.py",
+    "fixtures/llm_cache/",
+    "README.md"
+   ],
+   "notes": "Audit gap: in `cli demo` (mock) every Amira and Mateo section ends in `template`; llm_errors show LLMCacheMiss explainer.v2 for Amira horizon / contraintes / preferences and Mateo contraintes / preferences. SPEC §16 asks for hand-written plausible responses. Required: extend scripts/handwrite_explainer_cache.py to write explainer.v2 entries (model id fixture:hand-written, same key function as the existing Robert entries) for every non-pass section of Amira and Mateo in the demo, built from the real section facts at run time; each entry passes verify_section V1-V5 on the first attempt (every number exists in the facts, refs resolve, no advisory wording, D10), so those sections end in mode `llm`; Robert's existing entries and modes are unchanged (Robert + NVDA contraintes stays `template` by design). Run the script to write the files. Do not edit coherence_analyzer/ code. These P4 tasks run IN PARALLEL in separate worktrees: edit only the files (and, in pipeline.py / api.py / cli.py, only the functions) your task owns, plus README.md and new test files. No network, no pip install, no real AWS calls in code paths the tests run. Never write the activity-tags meta CSV (humans only, CLAUDE.md). The engine golden test must stay green. D10 (describe, never prescribe) applies to every user-facing string. Do not change frozen tests; if one contradicts the spec write .claude/loop/BLOCKED.md naming the test and the spec line."
+  },
+  {
+   "id": "P4.WARNEN",
+   "title": "Gate stamps warn_enabled on N1 / N2 / N3 outputs (§11 step 5)",
+   "spec": [
+    "§11",
+    "§3.3",
+    "§6.2 N1 N2 N3",
+    "§7.4 S1 S3"
+   ],
+   "tests": [
+    "tests/llm/test_gate_warn_enabled.py"
+   ],
+   "code": [
+    "coherence_analyzer/gate.py",
+    "coherence_analyzer/schemas/profile.v2.json",
+    "README.md"
+   ],
+   "notes": "Audit gap: SPEC §11 step 5 asks the gate to store warn_enabled; grep finds 0 hits in coherence_analyzer/. Behaviour is the same today (soft.py compares confidence with config.WARN_MIN_CONF directly). Required: read §11 for the exact rule, stamp warn_enabled on the gated llm: field for the N1, N2 and N3 branches as the spec says, accept it in schemas/profile.v2.json, keep every existing gate status and output otherwise identical; soft checks may keep their own comparison (do not edit soft.py). Do not edit pipeline.py (other lanes). These P4 tasks run IN PARALLEL in separate worktrees: edit only the files (and, in pipeline.py / api.py / cli.py, only the functions) your task owns, plus README.md and new test files. No network, no pip install, no real AWS calls in code paths the tests run. Never write the activity-tags meta CSV (humans only, CLAUDE.md). The engine golden test must stay green. D10 (describe, never prescribe) applies to every user-facing string. Do not change frozen tests; if one contradicts the spec write .claude/loop/BLOCKED.md naming the test and the spec line."
   }
  ]
 }
