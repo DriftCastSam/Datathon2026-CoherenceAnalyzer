@@ -1,0 +1,47 @@
+{
+  "duration_s": 329.6,
+  "guard_cancellations": [
+    {
+      "reason": "'python' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'def' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'^' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'\\\"status\\\"\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'employment\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "command substitution is not allowed; run the inner command on its own",
+      "tool": "shell"
+    },
+    {
+      "reason": "'COHERENCE_ANALYZER_LLM=mock' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'sys.path.insert(0,tests/flows)' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    }
+  ],
+  "is_error": false,
+  "model_id": "us.anthropic.claude-sonnet-5-5",
+  "num_turns": 34,
+  "result": "efaults (\u00a720.6, P3.SKIP, inv. 2).\n- `test_post_profiles_assigns_distinct_server_side_ids`: ids are URL-safe, distinct, never a persona id, and a client-chosen `profile_id` is a 422 (\u00a712).\n- `test_post_profiles_rejects_bad_bodies_and_writes_nothing[10 cases]`: missing or bad locale, bad `display_name`, `limits`, `limits_trace`, `llm:*`, `risk`, `meta` or any unknown key give 422 and write nothing (inv. 2).\n- `test_post_profiles_with_a_non_object_body_is_422`: malformed JSON or a list body gives 422 and nothing is written (\u00a712).\n- `test_put_portfolio_writes_portfolio_json_and_one_audit_event`: portfolio.json has `profile_id`, a `portfolio_id` and the submitted holdings, and `data.load_portfolio` accepts it. One `profile_edit` event is appended with payload `{path, old: None, new: holdings}` (\u00a73.4, \u00a73.5).\n- `test_put_portfolio_replaces_holdings_and_records_the_previous_ones`: a second PUT replaces the file and the event's `old` holds the first holdings.\n- `test_put_portfolio_accepts_a_sum_within_the_tolerance`: a total of 100.005 is accepted (\u00a73.5, \u00b10.01).\n- `test_put_portfolio_rejects_invalid_bodies_and_changes_nothing[20 cases]`: unknown ticker, sums of 99.5, 100.02 and 99.98, empty or negative or string weights, bad `value_cad`, bad `as_of`, missing fields, and extra keys all give 422 with no file or event written (\u00a73.5, inv. 2).\n- `test_a_rejected_put_keeps_the_previous_portfolio`: a rejected PUT leaves portfolio.json and events.jsonl byte-identical.\n- `test_unknown_profile_is_404_and_creates_nothing_in_the_store`: neither a seed nor a store directory gives 404 on every route, with no directory created.\n- `test_put_portfolio_on_a_seed_persona_writes_the_store_copy_only`: a PUT on a persona edits only the store copy, appends exactly one event, and leaves `fixtures/` hashes unchanged.\n- `test_profiles_list_has_seeds_and_store_only_users_once_each`: an empty store lists seeds only. Seeds, API-created users and hand-made store users are then each listed once, and `display_name` becomes `name`.\n- `test_a_user_without_display_name_still_has_a_listed_name`: the list `name` falls back to a non-empty string.\n- `test_listing_skips_directories_that_are_not_profiles`: empty, junk, invalid-JSON and portfolio-less directories are skipped without a 500.\n- `test_store_only_directory_user_is_served_and_reviewed`: a hand-made store directory (no fixture) is served by GET, `/intake` and `/review`, with the right `profile_id` and a valid verdict.\n- `test_a_seed_persona_is_copied_to_the_store_on_first_access_and_fixtures_stay_untouched`: first access copies the three files byte-for-byte and `fixtures/` is unchanged.\n- `test_review_before_any_portfolio_is_a_client_error`: review with no holdings gives a 4xx, not a 500, and stores no report.\n- `test_review_works_end_to_end_for_a_new_user[en-CA/fr-CA]`: POST, PUT and review work in mock mode. Sections are in the five-factor order, every non-pass section and the explanation end in the template, and the disclaimer is the fixed text in the user's locale. The report and audit are retrievable, `as_of` is the portfolio date, and `events_considered` matches the event log (D1, D5, \u00a79.4).\n- `test_review_of_a_new_user_reports_unanswered_limits_as_unknown_never_violation`: a heavy NVDA/QQQ/BTC portfolio gives no violation and all H1\u2013H5 and H7\u2013H10 checks are `unknown`. The verdict is not `incoherent`, and the profile's table limits stay null (D3, inv. 3, P3.SKIP).\n- `test_intake_answers_work_for_a_new_user_and_are_audited`: answers on a new user are 200, update the profile, and are audited as `profile_edit` events from source `intake` with `old` None. `limits.*` as an answer path is a 422 (\u00a720.6, inv. 2).\n- `test_zz_fixtures_are_unchanged_after_the_whole_module`: no file or byte under `fixtures/` changed over the whole module (seed data stays read-only).\n\nI did not test the optional `COHERENCE_ANALYZER_SEED_DIR`. I found no contradiction with any frozen test, so there is no `BLOCKED.md` or `STALE-ORACLE` note.\n",
+  "stop_reason": "end_turn",
+  "usage": {
+    "inputTokens": 2780466,
+    "outputTokens": 41336,
+    "totalTokens": 2821802
+  }
+}
