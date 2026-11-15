@@ -1,0 +1,87 @@
+{
+  "duration_s": 299.5,
+  "guard_cancellations": [
+    {
+      "reason": "'^###' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'D16\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'origin\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'def' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'origin\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'^def' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'approved\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'H1[0-9]\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'approved' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'theme\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'AAPL' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'cut' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'^class' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'refs\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'dst=Path(/tmp/scr/robert)' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'ERROR' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'rep.keys()' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'meta.*)' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    }
+  ],
+  "is_error": false,
+  "model_id": "us.anthropic.claude-sonnet-5-5",
+  "num_turns": 74,
+  "result": "op/BLOCKED.md`. It names three frozen asserts that contradict D16: `tests/flows/test_any_user.py` lines 503-504 and `tests/flows/test_new_user_no_portfolio.py` line 484. Each pins `config.DISCLAIMER[locale]` (the seed text) for a user-made profile.\n\nThe Flow B tests run three offline CLI checks on copies of the Robert fixture, so `fixtures/` is never touched:\n- **French, as shipped:** the persona case.\n- **English, `meta.origin=\"user\"`:** adds an approved note rule, tech_heavy \u2264 5 %, quoting Robert's own notes.\n- **English, `meta.origin=\"demo\"`:** NVDA already held at 9 % and a 3 % BTC-USD holding, so one breach is worsened and two stay unchanged.\n\nI picked these readings where the spec is ambiguous:\n- **One statement per limit id**, matching what `resizer.violations_added` returns for the headroom.\n- **Value before:** shown when the breach already existed.\n- **`config.DISCLAIMER[locale]` stays the seed string.** The frozen `test_cli_disclaimer.py` pins that. The user text can live under any `config.DISCLAIMER*` attribute.\n- **No FR wording is pinned.** FR statements are only checked for facts, numcheck, D10 and no question.\n\nTest functions:\n- `test_config_holds_both_fixed_texts_for_each_locale`: config carries the seed text and the exact D16 user text for fr-CA and en-CA, and the user text has no fictional-profiles clause (D16, \u00a79.4).\n- `test_seed_text_is_unchanged_in_config`: `config.DISCLAIMER[locale]` is still the seed text byte for byte (D16).\n- `test_persona_flow_b_report_keeps_the_seed_text_byte_for_byte`: Robert's Flow B report and its explanation carry the seed FR text (D16).\n- `test_user_origin_flow_b_report_carries_the_user_text`: with `meta.origin=\"user\"`, the report and explanation carry the user EN text (D16).\n- `test_any_other_origin_is_a_seed`: origin \"demo\" still gets the seed EN text (D16).\n- `test_post_profiles_sets_origin_user_and_its_review_uses_the_user_text` (fr-CA and en-CA): POST /profiles sets `meta.origin=\"user\"` and its Flow C review carries the user text with no `trade_statements` (D16, D13).\n- `test_persona_review_through_the_api_keeps_the_seed_text`: a persona-robert review through the API keeps the seed FR text, with no `trade_statements` (D16).\n- `test_flow_b_report_has_trade_statements_for_each_crossed_limit`: statement ids equal `violations_added` (H3, H4, H7, H8, H9, H10 for Robert), one per id, and the headroom's binding check is among them (D13, D14, \u00a78).\n- `test_statement_shape_and_schema`: entries are exactly {check_id, text, refs}, with no question mark, no D10 advisory wording, numbers passing numcheck against the facts, and the report validating against `report.json` (D13, D10, invariant 6).\n- `test_status_and_verdict_are_unchanged_by_the_statements`: violations, the `incoherent` verdict and the five section statuses are unchanged (D13 point 1).\n- `test_fr_statements_carry_their_facts_and_no_quote_for_rule_limits`: FR H3 and H4 statements give the value after (10 %, 25 %) and the limit (8 %, 30 %), with no quote part for rule-derived limits (D13 point 2).\n- `test_en_statement_follows_the_d13_template_with_a_quote_when_the_limit_is_the_users_words`: the EN H13 text starts \"Making this trade takes you outside your profile: \", then \"Facts: \", then the verbatim quote and \"(<source>)\". Only the note-rule limit carries a quote, and the other statements have none (D13, D11).\n- `test_user_origin_run_keeps_status_and_adds_a_statement_for_the_note_limit`: the note-rule limit gives an H13 violation, the verdict stays `incoherent`, and the statement set still equals `violations_added` (D13, D11).\n- `test_a_worsened_breach_gets_a_statement_with_the_value_before`: NVDA going from 9 % to 10 % against an 8 % limit gets an H3 statement with after, before and limit values, and no quote (D14, D13).\n- `test_an_unchanged_breach_gets_no_statement`: the H1 and H2 breaches the trade leaves as is get no statement (D14).\n\nThe file's header has a `# STALE-ORACLE:` comment naming the three frozen asserts above.\n",
+  "stop_reason": "end_turn",
+  "usage": {
+    "inputTokens": 3320488,
+    "outputTokens": 34923,
+    "totalTokens": 3355411
+  }
+}
