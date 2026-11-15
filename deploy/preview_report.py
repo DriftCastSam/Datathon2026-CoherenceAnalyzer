@@ -170,6 +170,8 @@ CHECK_LABEL = {"H1": "Excluded asset types", "H2": "Crypto weight", "H3": "Singl
                "H7": "Volatility", "H8": "Worst drawdown since 2022", "H9": "Pessimistic value at horizon",
                "H10": "Sector risk concentration", "H14": "Stated reaction vs history", "S1": "Behaviour vs effective risk"}
 RANK = {"violation": 0, "warning": 1, "unknown": 2, "info": 3, "pass": 4}
+# display wording for the profile's asset-type codes (the preview text never uses the word of the code `options`)
+_ASSET_TYPE_LABEL = {"options": "derivative contracts"}
 
 
 def _fmt(c: dict, v):
@@ -209,7 +211,7 @@ def sections(prof: dict, lim: dict, checks: list[dict], metrics: dict) -> list[d
                    ("inference", f"Behaviour (LLM, conf. {r['behavioural'].get('confidence')})", lvl(r["behavioural"]))],
         "contraintes": [("derived", "Emergency fund", f"{_val(s['emergency_fund_months'])} months"),
                         ("declared", "Employer sector", prof["identity"].get("employer_sector") or "none"),
-                        ("declared", "Refused asset types", ", ".join(pr.get("asset_types_refused", [])) or "none"),
+                        ("declared", "Refused asset types", ", ".join(_ASSET_TYPE_LABEL.get(x, x) for x in pr.get("asset_types_refused", [])) or "none"),
                         ("declared", "Excluded activities", ", ".join(x.replace("_", " ") for x in excl) or "none"),
                         ("declared", "Max fee (MER)", f"{pr.get('max_fee_mer_pct')} %"),
                         ("derived", "Single stock max", pct(lim["max_single_stock_weight"], 0)),
@@ -345,7 +347,7 @@ def cad(x):
     return f"{x:,.0f} $".replace(",", " ")
 
 
-def explain(intent, cur, prop, checks_p, alts, profile, lim) -> dict:
+def explain(intent, cur, prop, checks_p, headroom, profile, lim) -> dict:
     v = [c for c in checks_p if c["status"] == "violation"]
     seg = [{"kind": "fact", "text": f"You asked to bring {intent['ticker']} to {intent['target_weight_pct']} % of the portfolio, funded from {intent['funding'].get('ticker', intent['funding']['kind'])}.",
             "refs": ["intent"]},
@@ -364,9 +366,9 @@ def explain(intent, cur, prop, checks_p, alts, profile, lim) -> dict:
     seg.append({"kind": "inference", "text": f"Inference (confidence {b['confidence']}): your recent questions suggest a risk appetite of {b['value'].replace('_', '-')}, above your effective level. This is a reading of behaviour, never a block.",
                 "refs": ["risk.behavioural"]})
     seg.append({"kind": "unknown", "text": "We cannot verify sector or employer exposure inside broad ETFs (no look-through data yet).", "refs": ["H6", "H10"]})
-    for a in alts:
-        seg.append({"kind": "option", "text": f"Within your own limits, funding {a['funding_label']} would fit up to {a['max_weight_pct']} % (binding check: {a['binding_check']}).",
-                    "refs": ["alternatives"]})
+    if headroom and not headroom.get("none_fit"):    # SPEC §8 EN template, flow B only; a fact, never a proposal (D10)
+        seg.append({"kind": "fact", "text": f"With the funding you gave ({intent['funding'].get('ticker', intent['funding']['kind'])}), this trade crosses your limit {headroom['binding_check']} above {headroom['max_weight_pct']:.1f} %.",
+                    "refs": ["headroom"]})
     return {"mode": "template", "headline": f"Asking for {intent['ticker']} at {intent['target_weight_pct']} % crosses {len(v)} of your own limits.",
             "segments": seg, "disclaimer": DISCLAIMER["en"]}
 
@@ -399,42 +401,35 @@ def build(out_dir: Path) -> list[Path]:
     cur = run(w0)
     cur_checks = checks(w0, cur)  # S1/S3 deferred to P2 (D7); behaviour stays a labelled inference fact
 
-    # what-if grid for the dashboard slider (and the preview resizer)
-    fundings = [("from ZST.TO", intent["funding"]), ("pro rata, all holdings", {"kind": "pro_rata_all"}),
-                ("pro rata, equity ETFs", {"kind": "pro_rata_class", "asset_class": "etf_equity"}),
-                ("pro rata, single stocks", {"kind": "pro_rata_class", "asset_class": "equity"})]
-    whatif = {}
-    for label, f in fundings:
-        rows = []
-        for i in range(0, int(intent["target_weight_pct"] * 2) + 1):
-            tw = i / 2
-            w = apply_intent(w0, assets, intent["ticker"], tw, f)
-            if w is None:
-                continue
-            m = run(w)
-            ch = checks(w, m)
-            rows.append({"w": tw, "vol": m["vol"], "mdd": m["mdd"], "p5_T": m["p5_T"], "p50_T": m["p50_T"],
-                         "loss_prob": m["loss_prob"], "cone": {k: m["cone"][k] for k in ("p5", "p50", "p95")},
-                         "violations": [c["id"] for c in ch if c["status"] == "violation"]})
-        whatif[label] = {"funding": f, "rows": rows}
+    # what-if grid for the user's own funding only (D10): the stand-in for the resizer
+    f = intent["funding"]
+    rows = []
+    for i in range(0, int(intent["target_weight_pct"] * 2) + 1):
+        tw = i / 2
+        w = apply_intent(w0, assets, intent["ticker"], tw, f)
+        if w is None:
+            continue
+        m = run(w)
+        ch = checks(w, m)
+        rows.append({"w": tw, "vol": m["vol"], "mdd": m["mdd"], "p5_T": m["p5_T"], "p50_T": m["p50_T"],
+                     "loss_prob": m["loss_prob"], "cone": {k: m["cone"][k] for k in ("p5", "p50", "p95")},
+                     "violations": [c["id"] for c in ch if c["status"] == "violation"]})
+    whatif = {f"from {f.get('ticker', f['kind'])}": {"funding": f, "rows": rows}}
 
-    alts = []
-    for label, d in whatif.items():
-        ok = [r for r in d["rows"] if not r["violations"]]
-        first_bad = next((r for r in d["rows"] if r["violations"]), None)
-        mx = max((r["w"] for r in ok), default=0.0)
-        # only contiguous passing prefix counts (scan stops at first failure, SPEC §8)
-        prefix = 0.0
-        for r in d["rows"]:
-            if r["violations"]:
-                break
-            prefix = r["w"]
-        mx = prefix
-        if mx > 0:
-            alts.append({"funding": d["funding"], "funding_label": label, "max_weight_pct": mx,
-                         "binding_check": ",".join(first_bad["violations"]) if first_bad else None,
-                         "metrics": next(r for r in d["rows"] if r["w"] == mx)})
-    alts = sorted(alts, key=lambda a: -a["max_weight_pct"])[:3]
+    # headroom (SPEC §8 step 4): the contiguous passing prefix of the grid, for the user's funding only
+    prefix, first_bad = None, None
+    for r in rows:
+        if r["violations"]:
+            first_bad = r
+            break
+        prefix = r
+    if first_bad is None:
+        headroom = None                      # the whole requested weight crosses no limit
+    elif prefix is None:
+        headroom = {"none_fit": True, "binding_checks": sorted(first_bad["violations"])}
+    else:
+        headroom = {"funding": f, "max_weight_pct": prefix["w"], "binding_check": sorted(first_bad["violations"])[0],
+                    "metrics": prefix}
 
     w1 = apply_intent(w0, assets, intent["ticker"], intent["target_weight_pct"], intent["funding"])
     prop = run(w1)
@@ -456,7 +451,7 @@ def build(out_dir: Path) -> list[Path]:
             "ef_months": _val(prof["situation"]["emergency_fund_months"]), "knowledge_score": _val(prof["knowledge"]["score"]),
             "value_cad": value, "as_of": as_of, "first_withdrawal": prof["situation"]["planned_withdrawals"][0]}
     preview = {"real": ["engine.analyse", "rules.derive", "rules.limits", "limits_trace", "hard checks H1-H10, H14"],
-               "preview": ["what-if grid + options (stand-in for intent.apply + resizer)",
+               "preview": ["what-if grid for the funding the user gave + headroom (stand-in for intent.apply + resizer)",
                            "factor sections + template text (P0.7)", "LLM narration (P0.8, not run)", "report assembly (P0.9)",
                            "profile coherence C1-C5 + hand-written N6 (P0.11)"],
                "built_by": "deploy/preview_report.py"}
@@ -475,7 +470,7 @@ def build(out_dir: Path) -> list[Path]:
     reports = {
         "robert-review-nvda": {"run_id": "preview-robert-review-nvda", "flow": "C", "intent": None, "verdict": verdict(rev_checks),
                                "checks_current": rev_checks, "checks_proposed": None, "diff": None, "metrics_current": rev,
-                               "metrics_proposed": None, "alternatives": [], "whatif": None, "weights_current": w_rev,
+                               "metrics_proposed": None, "headroom": None, "whatif": None, "weights_current": w_rev,
                                "unknowns": [c for c in rev_checks if c["status"] == "unknown"], "sections": rev_secs,
                                "explanation": {"mode": "template",
                                                "headline": f"This portfolio diverges from Robert's profile on {len(diverging)} of 5 factors: {', '.join(diverging)}.",
@@ -485,11 +480,11 @@ def build(out_dir: Path) -> list[Path]:
         "robert-nvda": {"run_id": "preview-robert-nvda", "flow": "B", "intent": intent, "verdict": verdict(prop_checks),
                         "checks_current": cur_checks, "checks_proposed": prop_checks,
                         "diff": {"flipped": flipped, "metrics_delta": delta}, "metrics_current": cur,
-                        "metrics_proposed": prop, "weights_proposed": w1, "alternatives": alts, "unknowns": unknowns,
-                        "explanation": explain(intent, cur, prop, prop_checks, alts, prof, lim), "whatif": whatif, **common},
+                        "metrics_proposed": prop, "weights_proposed": w1, "headroom": headroom, "unknowns": unknowns,
+                        "explanation": explain(intent, cur, prop, prop_checks, headroom, prof, lim), "whatif": whatif, **common},
         "robert-review": {"run_id": "preview-robert-review", "flow": "C", "intent": None, "verdict": verdict(cur_checks),
                           "checks_current": cur_checks, "checks_proposed": None, "diff": None, "metrics_current": cur,
-                          "metrics_proposed": None, "alternatives": [], "whatif": None,
+                          "metrics_proposed": None, "headroom": None, "whatif": None,
                           "unknowns": [c for c in cur_checks if c["status"] == "unknown"],
                           "explanation": {"mode": "template", "headline": "Robert's current portfolio stays within all of his own limits.",
                                           "segments": [{"kind": "fact", "text": f"Volatility {pct(cur['vol'])}, inside his band of {pct(lim['vol_band_annual'][0], 0)} to {pct(lim['vol_band_annual'][1], 0)}; worst drawdown {pct(cur['mdd'])} ({cur['mdd_date']}).", "refs": ["H7", "H8"]},
