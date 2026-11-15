@@ -1,0 +1,47 @@
+{
+  "duration_s": 253.3,
+  "guard_cancellations": [
+    {
+      "reason": "'\\\"value\\\"\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'none_fit\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'none_fit\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'none_fit\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "command substitution is not allowed; run the inner command on its own",
+      "tool": "shell"
+    },
+    {
+      "reason": "'python' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'resiz\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'esiz\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    }
+  ],
+  "is_error": false,
+  "model_id": "us.anthropic.claude-sonnet-5-5",
+  "num_turns": 26,
+  "result": "The headroom now counts only violations the trade adds. The frozen `tests/trade/test_headroom_preexisting.py` passes, and the full suite is green (1800 passed, no skips). Robert + NVDA is unchanged at 1.5 % bound by H9 (D2).\n\nFiles changed:\n- `coherence_analyzer/resizer.py`:\n  - **New helper:** `violations_added(current, proposed)` keeps a proposed-side violation only if the current side didn't have it, or had it and the trade made it worse.\n  - **Evaluator:** it now compares each grid point against a current-portfolio baseline, computed with the same engine seed and `n`.\n  - **Grid:** index 0 is the current portfolio, so a pre-existing breach never makes `none_fit` true by itself and never shows up in `binding_checks`.\n- `coherence_analyzer/pipeline.py` (`b7_resize` only): it runs the resizer only when `violations_added(checks_current, checks_proposed)` is non-empty.\n- `README.md`: added a Status line for P3.RESIZE and an entry in Assumptions.\n\nThe Amira probe now gives `none_fit` bound by H6 (16 % to 18 %) instead of `['H2', 'H5', 'H6']`, so the headroom text no longer says the trade crosses H2.\n\n**SPEC-AMBIGUITY resolved:** \u00a78 doesn't say whether pushing further past an already-breached limit counts as crossing it. I took the stricter reading: a pre-existing breach the trade makes worse counts. \"Worse\" means a lower value for H4, H8 and H9, and a higher value for the other checks, by more than 1e-9. An unchanged or improved breach does not count. Frozen tests also pin this reading: the 370 000 floor case and the BTC-USD case.\n",
+  "stop_reason": "end_turn",
+  "usage": {
+    "inputTokens": 651146,
+    "outputTokens": 14874,
+    "totalTokens": 666020
+  }
+}

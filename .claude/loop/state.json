@@ -30,6 +30,7 @@
     "P2.SITE": "impl",
     "P2.UI": "impl",
     "P3.FLOWA": "impl",
-    "P3.FLOWBG1": "impl"
+    "P3.FLOWBG1": "impl",
+    "P3.RESIZE": "impl"
   }
 }

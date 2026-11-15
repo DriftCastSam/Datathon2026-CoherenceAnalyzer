@@ -30,22 +30,69 @@ def _grid(w0: float, target: float, step: float) -> list[float]:
     return pts
 
 
-def _violations(checks: list, ids: tuple[str, ...] | None = None) -> list[str]:
+_LOWER_IS_WORSE = frozenset({"H4", "H8", "H9"})     # minimum-type limits: a smaller value is a deeper breach
+_TOL = 1e-9
+
+
+def _key(c: dict) -> tuple:
+    return (c["id"], c.get("subject"), c["value"] if isinstance(c.get("value"), str) else None)   # H11: value = tag
+
+
+def _metric(c: dict) -> float | None:
+    v = c.get("weight") if c["id"] == "H11" else c.get("value")      # H11 reports the held weight in `weight`
+    return None if isinstance(v, str) or v is None else float(v)
+
+
+def violations_added(current: list, proposed: list, ids: tuple[str, ...] | None = None) -> list[str]:
+    """Ids of the hard violations the TRADE adds: violated on the proposed side and either not violated on the current
+    side, or violated there and made worse by the trade (SPEC §8: "the first of the user's limits the trade crosses").
+
+    # SPEC-AMBIGUITY: §8 does not say whether pushing further past a limit that is already breached counts as
+    # crossing it. Stricter reading taken: a worsened pre-existing breach counts; an unchanged or improved one does not.
+    """
+    before = {_key(c): _metric(c) for c in current if c["status"] == "violation"}
     out: list[str] = []
-    for c in checks:
-        if c["status"] == "violation" and (ids is None or c["id"] in ids) and c["id"] not in out:
-            out.append(c["id"])
+    for c in proposed:
+        if c["status"] != "violation" or (ids is not None and c["id"] not in ids) or c["id"] in out:
+            continue
+        k = _key(c)
+        if k in before:
+            b, a = before[k], _metric(c)
+            if b is None or a is None:
+                continue
+            worse = a < b - _TOL if c["id"] in _LOWER_IS_WORSE else a > b + _TOL
+            if not worse:
+                continue
+        out.append(c["id"])
     return out
 
 
 class _Evaluator:
-    """Memoised cheap / engine evaluation of one weight point, with the user's funding."""
+    """Memoised cheap / engine evaluation of one weight point, with the user's funding. Grid index 0 is the current
+    portfolio (no trade yet); only the violations the trade adds to the current side's are reported."""
 
     def __init__(self, portfolio: dict, intent: dict, profile: dict, market, meta: dict, funding: dict):
         self.pf, self.intent, self.profile, self.market, self.meta = portfolio, intent, profile, market, meta
         self.funding = funding
         self._cheap: dict[float, tuple[list[str], dict | None, float]] = {}
         self._eng: dict[tuple[float, int], tuple[list[str], dict]] = {}
+        self._base_cheap: list | None = None
+        self._base_eng: dict[int, list] = {}
+
+    def _held(self) -> dict[str, float]:
+        return {t: v for t, v in self.pf["weights_pct"].items() if v > 0}
+
+    def base_cheap(self) -> list:
+        if self._base_cheap is None:
+            frac = {t: v / 100 for t, v in self._held().items()}
+            self._base_cheap = hard.run_cheap(frac, self.profile, self.market.assets, self.meta)
+        return self._base_cheap
+
+    def base_engine(self, n: int) -> list:
+        if n not in self._base_eng:
+            m = engine.analyse(self.market, self._held(), int(self.pf["horizon_months"]), self.pf["value_cad"], n=n)
+            self._base_eng[n] = hard.run_engine(m, self.profile)
+        return self._base_eng[n]
 
     def weights(self, w: float) -> tuple[dict[str, float], float]:
         it = dict(self.intent, target_weight_pct=w, funding=self.funding)
@@ -59,8 +106,8 @@ class _Evaluator:
                 self._cheap[w] = ([FUNDING_BINDING], None, 0.0)
             else:
                 frac = {t: v / 100 for t, v in weights.items() if v > 0}
-                ids = _violations(hard.run_cheap(frac, self.profile, self.market.assets, self.meta))
-                self._cheap[w] = (ids, weights, value)
+                checks = hard.run_cheap(frac, self.profile, self.market.assets, self.meta)
+                self._cheap[w] = (violations_added(self.base_cheap(), checks, hard.CHEAP), weights, value)
         return self._cheap[w][0]
 
     def engine(self, w: float, n: int) -> tuple[list[str], dict]:
@@ -69,26 +116,25 @@ class _Evaluator:
             _, weights, value = self._cheap[w]
             m = engine.analyse(self.market, {t: v for t, v in weights.items() if v > 0},
                                int(self.pf["horizon_months"]), value, n=n)
-            self._eng[(w, n)] = (_violations(hard.run_engine(m, self.profile), hard.ENGINE), m)
+            checks = hard.run_engine(m, self.profile)
+            self._eng[(w, n)] = (violations_added(self.base_engine(n), checks, hard.ENGINE), m)
         return self._eng[(w, n)]
 
 
 def _solve_mode(ev: _Evaluator, grid: list[float]) -> dict:
     """Largest grid weight that passes every check; returns {idx, binding, metrics}."""
-    # 1. cheap scan: stop at the first failing step
-    cheap_idx, stop_ids = -1, []
-    for i, w in enumerate(grid):
-        ids = ev.cheap(w)
+    # 1. cheap scan: grid[0] is the current portfolio (no trade yet, nothing crossed); stop at the first failing step
+    cheap_idx, stop_ids = 0, []
+    for i in range(1, len(grid)):
+        ids = ev.cheap(grid[i])
         if ids:
             stop_ids = ids
             break
         cheap_idx = i
-    if cheap_idx < 0:
-        return {"idx": 0, "binding": stop_ids, "metrics": None, "fits": False}
 
     # 2. engine checks at the last cheap-passing weight with n=1000, binary search downward if they fail
     def ok_cheap_n(i: int) -> bool:
-        return not ev.engine(grid[i], config.ENGINE_N_CHEAP)[0]
+        return i == 0 or not ev.engine(grid[i], config.ENGINE_N_CHEAP)[0]
 
     idx = cheap_idx
     if not ok_cheap_n(idx):
@@ -103,10 +149,8 @@ def _solve_mode(ev: _Evaluator, grid: list[float]) -> dict:
 
     # 3. confirm with the full n: step down while it fails, step up while the next grid point still passes
     while True:
-        ids, m = ev.engine(grid[idx], config.ENGINE_N)
+        ids, m = ([], None) if idx == 0 else ev.engine(grid[idx], config.ENGINE_N)
         if ids:
-            if idx == 0:
-                return {"idx": 0, "binding": ids, "metrics": None, "fits": False}
             idx -= 1
             continue
         if idx == len(grid) - 1:
@@ -119,7 +163,8 @@ def _solve_mode(ev: _Evaluator, grid: list[float]) -> dict:
                 idx += 1
                 continue
             binding = nids
-        return {"idx": idx, "binding": binding, "metrics": {k: m[k] for k in _METRIC_KEYS}, "fits": True}
+        return {"idx": idx, "binding": binding, "fits": idx > 0,
+                "metrics": {k: m[k] for k in _METRIC_KEYS} if m else None}
 
 
 def resize(portfolio: dict, intent: dict, profile: dict, market, meta: dict) -> dict:

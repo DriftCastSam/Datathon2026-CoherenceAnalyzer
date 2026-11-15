@@ -34,6 +34,7 @@
     "tests/profile/test_profile_schema.py": "1e295cd7636b43186e40e4bd3e4bd3d824be8c09dc0d1946850e5d0d799cc790",
     "tests/profile/test_rules.py": "5f16153a954d571c2a42594add9e8a157315f07c751d85aefccd203e2321f2b8",
     "tests/test_d10.py": "e85d554694d07701baa72dd1d81a3496834098ba9bcc7c7535bf2da7c5689cd1",
+    "tests/trade/test_headroom_preexisting.py": "b1eb3664bd5a07dbedf53b5ae59d06ed0161f4d8aa1a442c071293fe33b54c79",
     "tests/trade/test_intent.py": "7f215b5c521a8fdfb0073deeea766204633a2b75d8e8740c5cb4c693ea811795",
     "tests/trade/test_resizer.py": "adb4f567dee7061e7b46835e8507234a4844a99fcbae308170245f89b4dbf082"
   }

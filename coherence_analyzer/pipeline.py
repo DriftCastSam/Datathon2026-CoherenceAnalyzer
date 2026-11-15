@@ -596,10 +596,11 @@ def b6_checks_and_diff(state: dict) -> dict:
 
 
 def b7_resize(state: dict) -> dict:
-    """B7: the resizer (SPEC §8, D2, D10) when the proposed portfolio has a hard violation. `headroom` = its result
-    for the user's own funding (or its `none_fit` record); None when nothing violates."""
-    violated = any(c["status"] == "violation" for c in state["checks_proposed"])
-    if not violated:
+    """B7: the resizer (SPEC §8, D2, D10) when the TRADE adds a hard violation (one absent on the current side, or a
+    breach already there that the trade makes worse; SPEC-AMBIGUITY, see `resizer.violations_added`). A breach the
+    current portfolio already has and the trade leaves as is does not trigger it. `headroom` = its result for the
+    user's own funding (or its `none_fit` record); None otherwise."""
+    if not resizer.violations_added(state["checks_current"], state["checks_proposed"]):
         return {**state, "headroom": None}
     pf = {**state["portfolio"], "horizon_months": state["horizon_months"]}
     res = resizer.resize(pf, state["intent"], state["profile"], engine.load_market(str(config.DATA_DIR)), _meta())
