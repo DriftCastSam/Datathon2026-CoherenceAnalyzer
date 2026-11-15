@@ -1,8 +1,8 @@
 # Figma-exported assets
 
 Static assets (SVG icons, brand mark, plot graphics) exported from the Figma file
-"Profile Coherence — Datathon Polyfinance" for use by app.html.
-Referenced by deploy/site/app.html; copied to the built site by deploy/build_site.py.
+"Profile Coherence — Datathon Polyfinance" for use by index.html.
+Referenced by deploy/site/index.html; copied to the built site by deploy/build_site.py.
 
 All files below were downloaded from the Figma MCP asset API for file
 `szuK4mYLcfWsO7s0TDxt3x` (screen node `7:222`, "Accounts / Summary", plus the
