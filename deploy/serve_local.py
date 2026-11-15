@@ -59,7 +59,7 @@ def live_review(profile_id: str) -> dict[str, Any]:
         HTTPException: 404 for an unknown profile, 422 when the review rejects it.
     """
     report = api.post_review(profile_id, locale=build_site.SITE_LOCALE)
-    work, fixture = api.workdir(profile_id)
+    work, fixture = api._workdir(profile_id)
     pers = build_site.load_persona(fixture.name)
     report["site"] = {
         **build_site.site_extras(work, pers.name, PORTFOLIO_FILE),
@@ -85,7 +85,7 @@ def live_whatif(profile_id: str, body: WhatifRequest) -> dict[str, Any]:
     Raises:
         HTTPException: 404 for unknown profile, 422 for invalid tickers or count
     """
-    work, _ = api.workdir(profile_id)
+    work, _ = api._workdir(profile_id)
     assets = data.load_assets()
     valid_tickers = set(assets.index)
     for ticker in body.tickers:
