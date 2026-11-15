@@ -79,7 +79,11 @@ def site_extras(profile_dir: Path, name: str, portfolio_file: str, whatif_files:
     value, as_of = float(pf["value_cad"]), pf["as_of"]
     p = derive.derive_all(copy.deepcopy(profile), portfolio_value_cad=value, as_of=as_of)
     lim, trace = limits_mod.build_limits(p, value)
-    first = (p["situation"].get("planned_withdrawals") or [{}])[0]
+    withdrawals = p["situation"].get("planned_withdrawals")
+    if isinstance(withdrawals, list) and len(withdrawals) > 0:
+        first = withdrawals[0]
+    else:
+        first = {}
     return {
         "as_of": as_of, "value_cad": value, "portfolio_file": portfolio_file, "whatif": dict(whatif_files) if whatif_files else False,
         "weights_pct": {k: float(v) for k, v in pf["weights_pct"].items() if float(v) > 0},

@@ -25,7 +25,7 @@ from typing import Any
 
 from jsonschema import Draft202012Validator
 
-from . import config, data, engine, explain, factors, gate, intent as intent_mod, resizer, store, stress
+from . import config, data, engine, explain, factors, gate, intake, intent as intent_mod, resizer, store, stress
 from .coherence import hard, internal, report as report_mod, soft
 from .llm import bedrock, extractors
 from .rules import derive, limits as limits_mod
