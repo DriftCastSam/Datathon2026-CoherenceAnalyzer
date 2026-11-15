@@ -1003,6 +1003,49 @@
     "README.md"
    ],
    "notes": "Audit gap: in pipeline.py (~line 209) the N1 gate context `event_ids` is every event up to the order intent, not the window that extractors.n1_events sends to the model; an N1 answer citing an event outside that window (e.g. ev_robert_0001, a quiz_result, or an event older than the window) passes the gate. §11 step 2 checks evidence against 'the context events'. Required: build event_ids from exactly the events in the N1 payload; an answer citing any other id is rejected by the gate (status as gate.py names it), the previous risk.behavioural value is kept, S1/S3 follow; the recorded Robert N1 answer (mock cache) is still accepted with the same outcome. Touch only the N1 gate-context code in pipeline.py. No network, no pip install. Do not change frozen tests; if one contradicts the spec write .claude/loop/BLOCKED.md naming the test and the spec line. D10 applies to every user-facing string."
+  },
+  {
+   "id": "P5.USERS",
+   "title": "Any user: profiles live in the store, POST /profiles creates one, PUT /profiles/{id}/portfolio sets holdings; personas are seed data",
+   "spec": [
+    "§12 API",
+    "§3.1 §3.3 profile v2",
+    "§3.5 portfolio",
+    "§10 store",
+    "docs/spec-factors.md §20.6 intake",
+    "§1 inv. 1, 2",
+    "docs/spec-decisions.md D1 D7"
+   ],
+   "tests": [
+    "tests/flows/test_any_user.py"
+   ],
+   "code": [
+    "coherence_analyzer/api.py (profile discovery / _fixture_dirs / _workdir / list_profiles / get_profile, new create-profile and portfolio routes)",
+    "coherence_analyzer/config.py",
+    "README.md"
+   ],
+   "notes": "Owner request: profiles and their analysis must not be tied to the persona fixtures. Today api._fixture_dirs only scans fixtures/ and _workdir 404s for anything else, so a real user cannot exist. Required: (1) a profile is any directory under <store>/profiles/<profile_id>/ with profile.json + events.jsonl + portfolio.json; fixtures/ are seed data copied on first access as today (unchanged behaviour); GET /profiles lists seeds and store-only users. (2) POST /profiles with {locale, display_name?} (no client-chosen limits, limits_trace or llm: fields, inv. 2; unknown keys 422) creates a profile v2 that validates against schemas/profile.v2.json with every intake.REQUIRED path missing so GET /profiles/{id}/intake asks for them, server-assigned profile_id (e.g. user-<ulid or counter>), empty events.jsonl, empty parsed notes; limits are not computed until answered (P3.SKIP convention for unanswered values: null / unknown, never a default). (3) PUT /profiles/{id}/portfolio {as_of, value_cad, weights_pct} validates tickers against the data universe and weights summing to 100 (+- 0.01), writes portfolio.json with the profile_id, appends a profile_edit-style event for the audit trail. (4) POST /profiles/{id}/review then works for that user end to end in mock mode (sections without a recorded N5 answer end in the template, which is correct). (5) Seed personas are never written under fixtures/. Optional: COHERENCE_ANALYZER_SEED_DIR (default fixtures/) in config.py. Do not edit pipeline.py, intake.py or anything under deploy/. These P5 tasks run IN PARALLEL in separate worktrees (P4.N1WIN edits the N1 gate context in pipeline.py at the same time): edit only the files your task owns, plus README.md and new test files. No network, no pip install, no real AWS calls in code paths the tests run. Never write the activity-tags meta CSV (humans only). The engine golden test must stay green. D10 (describe, never prescribe) and the fixed disclaimer apply to every user-facing string. Do not change frozen tests; if one contradicts the spec write .claude/loop/BLOCKED.md naming the test and the spec line. Product decision (owner request, 2026-11-14): the app must work for any user, not only the three personas; the personas stay as seed data and every existing persona behaviour, report and test stays identical."
+  },
+  {
+   "id": "P5.DASH",
+   "title": "Dashboard works for any user when an API base is set: profile picker from GET /profiles, live review, new-user form; what-if for any profile",
+   "spec": [
+    "§12 UI",
+    "docs/spec-factors.md §20.6 §20.7",
+    "docs/spec-decisions.md D7 D10",
+    "§13"
+   ],
+   "tests": [
+    "tests/dashboard/test_any_user_dashboard.py"
+   ],
+   "code": [
+    "deploy/site/index.html",
+    "deploy/build_site.py",
+    "deploy/whatif.py",
+    "deploy/preview_report.py",
+    "README.md"
+   ],
+   "notes": "Owner request: the dashboard must not be Robert / persona specific. Today the picker is the 4 static reports + a hard-coded 'Robert · transaction demandée (flux B)' option, fetches reports/robert-nvda.json directly, and whatif is precomputed for Robert only (build_site.WHATIF_PERSONA, the 'Simulation indisponible ... profil de Robert' note). Required: (1) with an API base configured, the picker lists GET /profiles (seeds + store users, P5.USERS adds create routes in parallel: code against POST /profiles {locale, display_name?} -> profile, PUT /profiles/{id}/portfolio {as_of, value_cad, weights_pct}, POST /profiles/{id}/review -> report) and renders the live review; a 'new profile' form creates a user, then the intake form P3.UIINTAKE added walks the missing answers, then a portfolio form; (2) without an API (static demo) the page stays exactly as today (frozen P2.D10C constraint: reports/index.json is exactly the 4 flow C reviews; the flow B demo report stays a separate file); (3) whatif.py precomputes for any profile directory passed to it (no persona name in code paths, persona choice comes from build_site's REPORTS list), and the page's what-if note names no persona; (4) no user-facing string names Robert, Amira or Mateo except labels read from data (report index labels, profile display names). All strings pass the SPEC §9.3 blocklist apart from the fixed disclaimer. Tests run offline (no browser, no network): parse the HTML / JS as the existing dashboard tests do. These P5 tasks run IN PARALLEL in separate worktrees (P4.N1WIN edits the N1 gate context in pipeline.py at the same time): edit only the files your task owns, plus README.md and new test files. No network, no pip install, no real AWS calls in code paths the tests run. Never write the activity-tags meta CSV (humans only). The engine golden test must stay green. D10 (describe, never prescribe) and the fixed disclaimer apply to every user-facing string. Do not change frozen tests; if one contradicts the spec write .claude/loop/BLOCKED.md naming the test and the spec line. Product decision (owner request, 2026-11-14): the app must work for any user, not only the three personas; the personas stay as seed data and every existing persona behaviour, report and test stays identical."
   }
  ]
 }
