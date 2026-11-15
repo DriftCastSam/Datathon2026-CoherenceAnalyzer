@@ -564,12 +564,11 @@ h3{font:600 16px/24px var(--f)}
   .scr-conversation .cols{display:flex;align-items:stretch;gap:16px;min-width:0}
   .scr-conversation .conv{flex:1 1 0;display:flex;flex-direction:column;min-width:0}
   .scr-conversation .agent{font:600 12px/18px var(--f);color:var(--label)}
-  .scr-conversation .answered{display:flex;flex-direction:column;width:100%;margin-top:12px;border-top:1px solid var(--line)}
   .scr-conversation .qa{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;width:100%;padding:12px 0;border-bottom:1px solid var(--line)}
   .scr-conversation .qa__q,
   .scr-conversation .qa__a{display:flex;flex-direction:column;gap:2px;min-width:0}
   .scr-conversation .qa__a{align-items:flex-end;text-align:right}
-  .scr-conversation .current{display:flex;flex:1 1 auto;flex-direction:column;justify-content:space-between;gap:12px;width:100%;padding-top:20px;min-height:0}
+  .scr-conversation .current{display:flex;flex:1 1 auto;flex-direction:column;justify-content:flex-start;gap:12px;width:100%;padding-top:20px;min-height:0}
   .scr-conversation .current__q{font:600 20px/28px var(--f);color:var(--ink)}
   .scr-conversation .sugs{display:flex;align-items:flex-start;gap:8px;flex-wrap:wrap;padding:4px 0}
   .scr-conversation .sug[aria-pressed="true"]{background:var(--ink);border-color:var(--ink);color:var(--surface)}
