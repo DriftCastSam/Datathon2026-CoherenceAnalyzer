@@ -110,252 +110,419 @@
     </div>
   </div>
 
-  <footer class="foot">
-    <div class="wrap foot__wrap">
-      <p class="foot__legal">This analysis is informational only and does not constitute investment advice, an offer, or a solicitation. Trading securities involves risk. Past performance does not guarantee future results. Consult a professional before making investment decisions.</p>
+  <div class="sum__split">
+    <div class="card sum__projection">
+      <div class="sum__head">
+        <h2 class="t-h3">Projected portfolio value</h2>
+        <p class="sum__head-note" data-chart-note>5 years, CAD, as of 2026-11-12</p>
+      </div>
+      <div data-chart="summary"><p class="t-small muted">Chart unavailable</p></div>
+      <div class="sum__legend">
+        <span class="sum__legend-item"><img src="assets/swatch-band.svg" alt="" width="20" height="10">P5 to P95</span>
+        <span class="sum__legend-item"><img src="assets/swatch-iqr.svg" alt="" width="20" height="10">P25 to P75</span>
+        <span class="sum__legend-item"><img src="assets/swatch-line-ink.svg" alt="" width="20" height="4">Median</span>
+        <span class="sum__legend-item"><img src="assets/swatch-line-red.svg" alt="" width="20" height="4">Pessimistic scenario (P5)</span>
+        <span class="sum__legend-item"><img src="assets/swatch-line-floor.svg" alt="" width="20" height="4">Floor</span>
+      </div>
+      <div class="sum__tiles" data-tiles>
+        <div class="sum__tile"><p class="sum__tile-label">Pessimistic (P5)</p><p class="sum__tile-value sum__tile-value--down num">$214,000</p><p class="sum__tile-note">−14% vs today</p></div>
+        <div class="sum__tile"><p class="sum__tile-label">Median</p><p class="sum__tile-value num">$298,000</p><p class="sum__tile-note">+19% vs today</p></div>
+        <div class="sum__tile"><p class="sum__tile-label">Optimistic (P95)</p><p class="sum__tile-value sum__tile-value--up num">$371,000</p><p class="sum__tile-note">+48% vs today</p></div>
+      </div>
+      <p data-mode-stamp class="sum__note">12-month block simulation on monthly returns, 2022-01-31 to 2026-10-31, 5,000 paths, expected returns set by the team. This is not a forecast. Figures on this draft are illustrative sample data.</p>
     </div>
-  </footer>
-</div>
-  </section>
 
+    <div class="card sum__keydata">
+      <h2 class="t-h3">Portfolio key data</h2>
+      <div class="sum__kbody" data-keydata>
+        <div class="sum__kv">
+          <div><p class="sum__kv-label">Current value</p><p class="sum__kv-value num">$250,000</p></div>
+          <div><p class="sum__kv-label">Annual volatility</p><p class="sum__kv-value num">16.8%</p></div>
+        </div>
+        <div class="sum__kv">
+          <div><p class="sum__kv-label">Max drawdown</p><p class="sum__kv-value num">−24%</p></div>
+          <div><p class="sum__kv-label">Holdings</p><p class="sum__kv-value num">6</p></div>
+        </div>
+        <div class="sum__alloc">
+          <p class="sum__alloc-title">Allocation</p>
+          <div class="sum__bar" aria-hidden="true">
+            <span class="sum__bar-seg" style="flex-grow:35;background:var(--navy)"></span>
+            <span class="sum__bar-seg" style="flex-grow:25;background:var(--alloc-steel)"></span>
+            <span class="sum__bar-seg" style="flex-grow:22;background:var(--brand)"></span>
+            <span class="sum__bar-seg" style="flex-grow:8;background:var(--alloc-sky)"></span>
+            <span class="sum__bar-seg" style="flex-grow:5;background:var(--blue)"></span>
+            <span class="sum__bar-seg" style="flex-grow:5;background:var(--alloc-grey)"></span>
+          </div>
+        </div>
+        <table class="table sum__hold-table">
+          <colgroup><col><col style="width:48px"><col style="width:72px"></colgroup>
+          <thead><tr><th>Holding</th><th class="r">Weight</th><th class="r">Value</th></tr></thead>
+          <tbody>
+            <tr><td><span class="sum__hold"><span class="sum__dot" style="background:var(--navy)"></span><span class="sum__hold-row"><span class="sum__hold-text">Aggregate bond ETF</span></span></span></td><td class="r sum__weight">35%</td><td class="r">$87,500</td></tr>
+            <tr><td><span class="sum__hold"><span class="sum__dot" style="background:var(--alloc-steel)"></span><span class="sum__hold-row"><span class="sum__hold-text">Canadian equities</span></span></span></td><td class="r sum__weight">25%</td><td class="r">$62,500</td></tr>
+            <tr class="is-flag"><td><span class="sum__hold"><span class="sum__dot" style="background:var(--brand)"></span><span class="sum__hold-name"><span class="sum__hold-text">US technology stock [TICKER]</span><span class="sum__tag sum__tag--flag">Flagged</span></span></span></td><td class="r sum__weight">22%</td><td class="r">$55,000</td></tr>
+            <tr><td><span class="sum__hold"><span class="sum__dot" style="background:var(--alloc-sky)"></span><span class="sum__hold-row"><span class="sum__hold-text">Gold ETF</span></span></span></td><td class="r sum__weight">8%</td><td class="r">$20,000</td></tr>
+            <tr><td><span class="sum__hold"><span class="sum__dot" style="background:var(--blue)"></span><span class="sum__hold-row"><span class="sum__hold-text">Bitcoin</span><span class="sum__tag sum__tag--warn">Warning</span></span></span></td><td class="r sum__weight">5%</td><td class="r">$12,500</td></tr>
+            <tr><td><span class="sum__hold"><span class="sum__dot" style="background:var(--alloc-grey)"></span><span class="sum__hold-row"><span class="sum__hold-text">Cash</span></span></span></td><td class="r sum__weight">5%</td><td class="r">$12,500</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="sum__menu" id="summary-analysis-menu" role="menu" aria-label="Analysis">
+    <a class="sum__menu-item sum__menu-item--active" role="menuitem" href="#/summary">Summary</a>
+    <a class="sum__menu-item" role="menuitem" href="#/objectives">Objectives and horizon</a>
+    <a class="sum__menu-item" role="menuitem" href="#/risk">Risk</a>
+    <a class="sum__menu-item" role="menuitem" href="#/constraints">Constraints</a>
+    <a class="sum__menu-item" role="menuitem" href="#/preferences">Preferences</a>
+    <a class="sum__menu-item" role="menuitem" href="#/coherence">Profile coherence</a>
+  </div>
+</div>
+</section>
   <section data-route="objectives" hidden>
-<div class="scr scr-factor wrap">
-  <div class="sum__menu" aria-label="Factor navigation">
-    <a class="sum__menu-item sum__menu-item--active" role="menuitem" href="#/summary">Summary</a>
-    <a class="sum__menu-item" role="menuitem" href="#/objectives">Objectives and horizon</a>
-    <a class="sum__menu-item" role="menuitem" href="#/risk">Risk</a>
-    <a class="sum__menu-item" role="menuitem" href="#/constraints">Constraints</a>
-    <a class="sum__menu-item" role="menuitem" href="#/preferences">Preferences</a>
-    <a class="sum__menu-item" role="menuitem" href="#/coherence">Profile coherence</a>
-  </div>
-
-  <h1 class="t-h2 scr-factor__title">Objectives and horizon</h1>
+<div class="scr scr-objectives wrap">
   <a class="back" href="#/summary"><img class="i16" src="assets/icon-back.svg" alt="" width="16" height="16"><span>Accounts summary</span></a>
-  <div class="card" data-factor-detail>
-    <p>Content loaded dynamically.</p>
+  <div class="title-row">
+    <h1 class="t-title">Objectives and horizon</h1>
   </div>
+  <p class="t-body muted">Loading the objectives and horizon analysis…</p>
 </div>
-  </section>
-
+</section>
   <section data-route="risk" hidden>
-<div class="scr scr-factor wrap">
-  <div class="sum__menu" aria-label="Factor navigation">
-    <a class="sum__menu-item sum__menu-item--active" role="menuitem" href="#/summary">Summary</a>
-    <a class="sum__menu-item" role="menuitem" href="#/objectives">Objectives and horizon</a>
-    <a class="sum__menu-item" role="menuitem" href="#/risk">Risk</a>
-    <a class="sum__menu-item" role="menuitem" href="#/constraints">Constraints</a>
-    <a class="sum__menu-item" role="menuitem" href="#/preferences">Preferences</a>
-    <a class="sum__menu-item" role="menuitem" href="#/coherence">Profile coherence</a>
+<div class="scr scr-risk wrap">
+  <a class="back" href="#/summary"><img class="i16" src="assets/icon-back.svg" alt="" width="16" height="16"><span>Accounts summary</span></a>
+  <div class="title-row">
+    <h1 class="t-title">Risk</h1>
   </div>
-
-  <h1 class="t-h2 scr-factor__title">Risk</h1>
-  <a class="back" href="#/summary">
-    <img class="i16" src="assets/icon-back.svg" alt="" width="16" height="16"><span>Accounts summary</span>
-  </a>
-  <div class="card" data-factor-detail>
-    <p>Content loaded dynamically.</p>
-  </div>
+  <p class="t-body muted">Loading the risk analysis…</p>
 </div>
-  </section>
-
+</section>
   <section data-route="constraints" hidden>
-<div class="scr scr-factor wrap">
-  <div class="sum__menu" aria-label="Factor navigation">
-    <a class="sum__menu-item sum__menu-item--active" role="menuitem" href="#/summary">Summary</a>
-    <a class="sum__menu-item" role="menuitem" href="#/objectives">Objectives and horizon</a>
-    <a class="sum__menu-item" role="menuitem" href="#/risk">Risk</a>
-    <a class="sum__menu-item" role="menuitem" href="#/constraints">Constraints</a>
-    <a class="sum__menu-item" role="menuitem" href="#/preferences">Preferences</a>
-    <a class="sum__menu-item" role="menuitem" href="#/coherence">Profile coherence</a>
+<div class="scr scr-constraints wrap">
+  <a class="back" href="#/summary">
+    <img class="i16" src="assets/icon-back.svg" alt="" width="16" height="16">
+    <span class="t-body-strong">Accounts summary</span>
+  </a>
+  <div class="title-row">
+    <h1 class="t-title">Constraints</h1>
+    <span data-title-chip></span>
   </div>
-
-  <h1 class="t-h2 scr-factor__title">Constraints</h1>
-  <a class="back" href="#/summary"><img class="i16" src="assets/icon-back.svg" alt="" width="16" height="16"><span>Accounts summary</span></a>
-  <div class="card" data-factor-detail>
-    <p>Content loaded dynamically.</p>
-  </div>
+  <p class="t-body muted intro" data-intro>One of three hard rules is broken, which fails the pillar.</p>
+  <div class="rules" data-rules></div>
+  <p class="t-small muted note">Figures are computed first, then explained by a language model. Illustrative sample data. Simulation only, not financial advice.</p>
+  <div data-detail></div>
 </div>
-  </section>
-
+</section>
   <section data-route="preferences" hidden>
-<div class="scr scr-factor wrap">
-  <div class="sum__menu" aria-label="Factor navigation">
-    <a class="sum__menu-item sum__menu-item--active" role="menuitem" href="#/summary">Summary</a>
-    <a class="sum__menu-item" role="menuitem" href="#/objectives">Objectives and horizon</a>
-    <a class="sum__menu-item" role="menuitem" href="#/risk">Risk</a>
-    <a class="sum__menu-item" role="menuitem" href="#/constraints">Constraints</a>
-    <a class="sum__menu-item" role="menuitem" href="#/preferences">Preferences</a>
-    <a class="sum__menu-item" role="menuitem" href="#/coherence">Profile coherence</a>
+<div class="scr scr-preferences wrap">
+  <a class="back" href="#/summary">
+    <img class="i16" src="assets/icon-back.svg" alt="" width="16" height="16">
+    <span class="t-body-strong">Accounts summary</span>
+  </a>
+  <div class="title-row">
+    <h1 class="t-title">Preferences</h1>
+    <span data-title-chip></span>
   </div>
-
-  <h1 class="t-h2 scr-factor__title">Preferences</h1>
-    <a class="back" href="#/summary"><img class="i16" src="assets/icon-back.svg" alt="" width="16" height="16"><span class="t-body-strong">Accounts summary</span></a>
-    <div class="card" data-factor-detail>
-      <p>Content loaded dynamically.</p>
-    </div>
+  <p class="t-body muted intro" data-intro>Two of three preferences are not met. Preferences are soft, so this is a warning and not a failure.</p>
+  <div class="rules" data-rules></div>
+  <p class="t-small muted note">Figures are computed first, then explained by a language model. Illustrative sample data. Simulation only, not financial advice.</p>
+  <div data-detail></div>
 </div>
-  </section>
-
+</section>
   <section data-route="coherence" hidden>
-<div class="scr scr-factor wrap">
-  <div class="sum__menu" aria-label="Factor navigation">
-    <a class="sum__menu-item sum__menu-item--active" role="menuitem" href="#/summary">Summary</a>
-    <a class="sum__menu-item" role="menuitem" href="#/objectives">Objectives and horizon</a>
-    <a class="sum__menu-item" role="menuitem" href="#/risk">Risk</a>
-    <a class="sum__menu-item" role="menuitem" href="#/constraints">Constraints</a>
-    <a class="sum__menu-item" role="menuitem" href="#/preferences">Preferences</a>
-    <a class="sum__menu-item" role="menuitem" href="#/coherence">Profile coherence</a>
-  </div>
-
-  <h1 class="t-h2 scr-factor__title">Profile coherence</h1>
+<div class="scr scr-coherence wrap">
   <a class="back" href="#/summary"><img class="i16" src="assets/icon-back.svg" alt="" width="16" height="16"><span>Accounts summary</span></a>
-  <div class="card" data-factor-detail>
-    <p>Content loaded dynamically.</p>
+  <div class="coh-title">
+    <h1 class="t-title">Profile coherence</h1>
+    <span data-coh-verdict><span class="st st--pass"><img class="st__icon" src="assets/icon-check.svg" alt="" width="16" height="16"><span class="st__label">Aligned</span></span></span>
   </div>
-</div>
-  </section>
-
-  <section data-route="conversation" hidden>
-<div class="scr scr-conv wrap">
-  <h1 class="t-h2 scr-conv__title">Your profile</h1>
-
-  <div class="conv" id="conv-root">
-    <div class="conv__msgs" id="conv-msgs">
-      <div class="bot-card">
-        <img class="bot-card__logo" src="assets/brand.png" alt="National Bank Direct Brokerage">
-        <p class="bot-card__greeting">Hi! Let's set up your profile.</p>
+  <p class="t-body coh-summary" data-coh-summary>Risk level, horizon and objective point the same way. One tension: an interest in publicized stocks.</p>
+  <div class="card coh-score">
+    <p class="t-num-xl coh-score__num" data-coh-score>3 of 4</p>
+    <div class="coh-score__detail">
+      <p class="t-body coh-score__label">internal checks are consistent</p>
+      <div class="coh-dots" aria-hidden="true" data-coh-dots>
+        <span class="coh-dot"></span><span class="coh-dot"></span><span class="coh-dot"></span><span class="coh-dot coh-dot--warning"></span>
       </div>
     </div>
-    <form class="conv__form" id="conv-form">
-      <div class="conv__input-wrap">
-        <textarea class="conv__input" id="conv-input" rows="1" placeholder="Type your response" aria-label="Message"></textarea>
-        <button class="btn btn--primary conv__send" type="submit" disabled>Send</button>
-      </div>
-    </form>
   </div>
-
-  <footer class="foot">
-    <div class="wrap foot__wrap">
-      <p class="foot__legal">This analysis is informational only and does not constitute investment advice, an offer, or a solicitation. Trading securities involves risk. Past performance does not guarantee future results. Consult a professional before making investment decisions.</p>
-    </div>
-  </footer>
+  <div class="coh-checks" data-coh-checks></div>
+  <p class="coh-note">Figures are computed first, then explained by a language model. Illustrative sample data. Simulation only, not financial advice.</p>
 </div>
-  </section>
-
+</section>
   <section data-route="search" hidden>
-<div class="scr scr-search wrap">
-  <h1 class="t-h2 scr-search__title">Search</h1>
-
-  <div class="chat" id="chat-root">
-    <div class="chat__msgs" id="chat-msgs">
-      <div class="bot-msg">
-        <img class="bot-msg__av" src="assets/av-bot.png" alt="">
-        <div class="bot-msg__bubble">
-          <p>Hi! Ask me anything about an asset in your portfolio, or one you're thinking of adding.</p>
-        </div>
-      </div>
+<div class="scr scr-search">
+  <div class="wrap sq-inner">
+    <a class="back" href="#/summary"><img class="i16" src="assets/icon-back.svg" alt="" width="16" height="16"><span class="t-body-strong">Accounts summary</span></a>
+    <div class="sq-titlerow">
+      <h1 class="t-title">Search and ask</h1>
+      <p class="sq-note t-small" data-note></p>
     </div>
-    <form class="chat__form" id="chat-form">
-      <div class="chat__input-wrap">
-        <textarea class="chat__input" id="chat-input" rows="1" placeholder="Ask or describe a search" aria-label="Ask about an asset, or describe what to search for"></textarea>
-        <button class="btn btn--primary chat__send" type="submit">Send</button>
-      </div>
-    </form>
+    <div class="sq-panes">
+      <section class="card sq-chat" aria-label="Conversation">
+        <h2 class="t-h3">Conversation</h2>
+        <div class="sq-thread" data-thread aria-live="polite">
+          <div class="sq-msg sq-msg--you"><p class="sq-msg__who">You</p><p class="sq-msg__text">Show me US technology stocks and technology ETFs.</p></div>
+          <div class="sq-msg sq-msg--agent"><p class="sq-msg__who">Agent</p><p class="sq-msg__text">I applied 3 filters to the 31-asset universe. 6 assets match. The list is sorted A to Z and is not a recommendation.</p></div>
+          <div class="sq-msg sq-msg--you"><p class="sq-msg__who">You</p><p class="sq-msg__text">Which one of these is best for me?</p></div>
+          <div class="sq-msg sq-msg--agent"><p class="sq-msg__who">Agent · outside what I can do</p><p class="sq-msg__text">I can't rank or recommend assets. I can add filters to narrow the list, or run a coherence analysis on the assets you select yourself.</p></div>
+        </div>
+        <div class="sq-composer">
+          <div class="sq-suggests">
+            <button class="sq-suggest" type="button" data-say="Only ETFs">Only ETFs</button>
+            <button class="sq-suggest" type="button" data-say="Add Canadian listings">Add Canadian listings</button>
+          </div>
+          <form class="sq-composer__row" data-message-form novalidate>
+            <label class="sq-field sq-field--message">
+              <span class="sr-only">Ask about an asset, or describe what to search for</span>
+              <input class="sq-input" type="text" name="message" data-message-input autocomplete="off" placeholder="Ask or describe a search">
+            </label>
+            <button class="btn btn--primary sq-send" type="submit">Send</button>
+          </form>
+          <p class="sq-scope">
+            <img class="sq-scope__icon i14" src="assets/icon-info.svg" alt="" width="14" height="14">
+            <span class="t-small label">The agent applies filters and analyzes the assets you pick. It never ranks or recommends assets.</span>
+          </p>
+        </div>
+      </section>
+      <section class="card sq-results" aria-label="Results">
+        <div class="sq-results__head">
+          <h2 class="t-h3">Filters applied from your request</h2>
+          <button class="sq-link" type="button" data-clear>Clear all</button>
+        </div>
+        <div class="sq-chips">
+          <span class="sq-chips__list" data-chips>
+            <span class="sq-chip"><span class="sq-chip__label">Asset class: Equity, ETF</span><button class="sq-chip__x" type="button" data-drop="cls" aria-label="Remove filter Asset class: Equity, ETF"><img src="assets/icon-x-blue.svg" alt="" width="12" height="12"></button></span>
+            <span class="sq-chip"><span class="sq-chip__label">Market: United States</span><button class="sq-chip__x" type="button" data-drop="mkt" aria-label="Remove filter Market: United States"><img src="assets/icon-x-blue.svg" alt="" width="12" height="12"></button></span>
+            <span class="sq-chip"><span class="sq-chip__label">Sector: Technology</span><button class="sq-chip__x" type="button" data-drop="sec" aria-label="Remove filter Sector: Technology"><img src="assets/icon-x-blue.svg" alt="" width="12" height="12"></button></span>
+          </span>
+          <select class="sq-add" data-add aria-label="Add a filter">
+            <option value="">+ Add filter</option>
+          </select>
+        </div>
+        <div class="sq-countrow">
+          <p class="t-body-strong" data-count>6 of 31 assets match</p>
+          <p class="t-small label">Sorted A to Z. Order carries no ranking.</p>
+        </div>
+        <div class="tbl sq-results__table-wrapper">
+          <table class="table sq-tbl">
+            <colgroup>
+              <col class="sq-col--select"><col><col class="sq-col--ticker"><col class="sq-col--class"><col class="sq-col--sector"><col class="sq-col--currency">
+            </colgroup>
+            <thead>
+              <tr><th scope="col">Select</th><th scope="col">Name</th><th scope="col">Ticker</th><th scope="col">Asset class</th><th scope="col">Sector</th><th scope="col">Currency</th></tr>
+            </thead>
+            <tbody data-rows>
+              <tr class="sq-row sq-row--on"><td><input class="sq-check" type="checkbox" data-key="sample-1" checked aria-label="Select Technology sector ETF"></td><td class="sq-name">Technology sector ETF</td><td>[TICKER]</td><td>ETF</td><td>Technology</td><td>USD</td></tr>
+              <tr class="sq-row"><td><input class="sq-check" type="checkbox" data-key="sample-2" aria-label="Select US cloud software company"></td><td class="sq-name">US cloud software company</td><td>[TICKER]</td><td>Equity</td><td>Technology</td><td>USD</td></tr>
+              <tr class="sq-row"><td><input class="sq-check" type="checkbox" data-key="sample-3" aria-label="Select US consumer electronics company"></td><td class="sq-name">US consumer electronics company</td><td>[TICKER]</td><td>Equity</td><td>Technology</td><td>USD</td></tr>
+              <tr class="sq-row sq-row--on"><td><input class="sq-check" type="checkbox" data-key="sample-4" checked aria-label="Select US semiconductor company A"></td><td class="sq-name">US semiconductor company A</td><td>[TICKER]</td><td>Equity</td><td>Technology</td><td>USD</td></tr>
+              <tr class="sq-row"><td><input class="sq-check" type="checkbox" data-key="sample-5" aria-label="Select US semiconductor company B"></td><td class="sq-name">US semiconductor company B</td><td>[TICKER]</td><td>Equity</td><td>Technology</td><td>USD</td></tr>
+              <tr class="sq-row"><td><input class="sq-check" type="checkbox" data-key="sample-6" aria-label="Select US social media company"></td><td class="sq-name">US social media company</td><td>[TICKER]</td><td>Equity</td><td>Technology</td><td>USD</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="sq-selection">
+          <p class="t-body-strong" data-selected>2 assets selected</p>
+          <button class="btn btn--primary" type="button" data-analyze>Analyze coherence of selected</button>
+        </div>
+      </section>
+    </div>
+    <p data-mode-stamp class="t-small muted">This list is the result of your filters only. Your profile is not used to choose or order assets. Asset names on this draft are illustrative sample data. Simulation only, not financial advice.</p>
   </div>
 </div>
+</section>
+  <section data-route="whatif" hidden>
+<div class="wrap scr scr-whatif">
+  <a class="back" href="#/search"><img class="wf-back__icon" src="assets/icon-back.svg" alt="" width="16" height="16"><span>Back to search results</span></a>
+
+  <section class="card wf-empty" data-wf="empty" hidden aria-label="No assets selected">
+    <p class="t-body-strong" data-wf="empty-title">No assets selected</p>
+    <p class="t-body" data-wf="empty-text">Choose one or more assets in the search results to see how the portfolio changes with each of them.</p>
+    <a class="btn btn--primary" href="#/search">Go to search</a>
   </section>
 
-  <section data-route="whatif" hidden>
-<div class="scr scr-wf wrap">
-  <a class="wf-back" href="#/search"><img class="wf-back__icon" src="assets/icon-back.svg" alt="" width="16" height="16"><span>Back to search results</span></a>
-
-  <div class="wf-noasset" id="wf-noasset" hidden>
-    <h1 class="t-h2 wf-noasset__title">Simulate a What-if</h1>
-    <a class="btn btn--primary" href="#/search">Go to search</a>
+  <div data-wf="content">
+  <div class="wf-title">
+    <h1 class="t-title">What-if report</h1>
+    <select class="select wf-asset" id="whatif-asset" aria-label="Asset">
+      <option></option>
+    </select>
+    <p class="wf-meta" data-wf="meta"></p>
   </div>
 
-  <div class="wf-main" id="wf-main" hidden>
-    <div class="wf-hdr">
-      <div class="wf-hdr__top">
-        <div class="wf-hdr__title-group">
-          <h1 class="t-h2 wf-hdr__title" id="wf-asset-name">Apple Inc.</h1>
-          <p class="wf-hdr__meta"><span class="t-body-strong" id="wf-asset-ticker">AAPL</span> · <span id="wf-asset-market">NASDAQ</span> · <span id="wf-asset-currency">USD</span></p>
-        </div>
+  <section class="card wf-scn" aria-label="Scenario">
+    <div class="wf-scn__fig">
+      <span class="wf-scn__label">Scenario</span>
+      <span class="wf-scn__value">Add to current portfolio</span>
+    </div>
+    <div class="wf-scn__fig">
+      <label class="wf-scn__label" for="whatif-amount">Amount</label>
+      <select class="wf-scn__select" id="whatif-amount">
+        <option></option>
+      </select>
+    </div>
+    <div class="wf-scn__fig">
+      <label class="wf-scn__label" for="whatif-funding">Funded from</label>
+      <select class="wf-scn__select" id="whatif-funding">
+        <option></option>
+      </select>
+    </div>
+    <div class="wf-scn__fig">
+      <span class="wf-scn__label">Profile</span>
+      <span class="wf-scn__value" data-wf="profile"></span>
+    </div>
+  </section>
+  <p class="wf-note" data-wf="profile-note" hidden></p>
+
+  <p class="t-body-strong wf-error" data-wf="error" role="alert" hidden></p>
+
+  <div data-wf="results">
+  <section class="card wf-verdict" aria-label="Verdict">
+    <div class="wf-verdict__main">
+      <p class="wf-verdict__label">Does this asset fit the profile?</p>
+      <div data-wf="verdict-chip"><span class="st st--violation"><img class="st__icon" src="assets/icon-x.svg" alt="" width="16" height="16"><span class="st__label">Misaligned</span></span></div>
+      <p class="t-body" data-wf="finding">Adding this stock raises the median projection slightly, but it moves the portfolio further from Robert&rsquo;s low-to-moderate risk level. The estimated bad-scenario loss grows from 60,000 to 72,500, against a tolerance of 25,000. The position itself stays within the 10% single-stock limit. This is an analysis of the asset you chose, not a suggestion to buy or avoid it.</p>
+    </div>
+    <div class="wf-verdict__side">
+      <div class="wf-verdict__item">
+        <p class="wf-verdict__label">Portfolio today</p>
+        <div data-wf="today-verdict"><span class="st st--violation"><img class="st__icon" src="assets/icon-x.svg" alt="" width="16" height="16"><span class="st__label">Misaligned</span></span></div>
+      </div>
+      <div class="wf-verdict__item">
+        <p class="wf-verdict__label">With this asset</p>
+        <div data-wf="with-verdict"><span class="st st--violation"><img class="st__icon" src="assets/icon-x.svg" alt="" width="16" height="16"><span class="st__label">Misaligned</span></span></div>
       </div>
     </div>
+  </section>
 
-    <div class="wf-controls card">
-      <div class="wf-ctrl">
-        <label class="wf-ctrl__label" for="wf-target">Target position (% of portfolio)</label>
-        <div class="wf-ctrl__field">
-          <input class="wf-ctrl__input" type="number" id="wf-target" value="5" min="0" max="100" step="1">
-          <span class="wf-ctrl__unit">%</span>
+  <div class="wf-cols">
+    <section class="card wf-proj" aria-label="Adjusted projection">
+      <div class="wf-proj__head">
+        <h3>Adjusted projection</h3>
+        <p class="wf-proj__meta" data-wf="as-of">5 years, CAD, as of 2026-11-12</p>
+      </div>
+      <div class="wf-fan">
+        <div data-chart="whatif"><p class="t-small muted">Chart unavailable</p></div>
+      </div>
+      <div class="wf-legend">
+        <span class="wf-legend__item"><span class="wf-legend__swatch wf-legend__swatch--band"></span><span class="wf-legend__text">P5 to P95</span></span>
+        <span class="wf-legend__item"><span class="wf-legend__swatch wf-legend__swatch--iqr"></span><span class="wf-legend__text">P25 to P75</span></span>
+        <span class="wf-legend__item"><span class="wf-legend__swatch wf-legend__swatch--ink"></span><span class="wf-legend__text">Median with asset</span></span>
+        <span class="wf-legend__item"><span class="wf-legend__swatch wf-legend__swatch--blue"></span><span class="wf-legend__text">Current median</span></span>
+        <span class="wf-legend__item"><span class="wf-legend__swatch wf-legend__swatch--red"></span><span class="wf-legend__text">Pessimistic (P5)</span></span>
+        <span class="wf-legend__item"><span class="wf-legend__swatch wf-legend__swatch--floor"></span><span class="wf-legend__text">Floor</span></span>
+      </div>
+      <div class="wf-tiles">
+        <div class="wf-tile">
+          <p class="wf-tile__label">Pessimistic (P5)</p>
+          <p class="wf-tile__value wf-tile__value--bad" data-wf="tile-p5">$201,000</p>
+          <p class="wf-tile__delta" data-wf="tile-p5-delta">−$13,000 vs current portfolio</p>
+        </div>
+        <div class="wf-tile">
+          <p class="wf-tile__label">Median</p>
+          <p class="wf-tile__value wf-tile__value--mid" data-wf="tile-p50">$309,000</p>
+          <p class="wf-tile__delta" data-wf="tile-p50-delta">+$11,000 vs current portfolio</p>
+        </div>
+        <div class="wf-tile">
+          <p class="wf-tile__label">Optimistic (P95)</p>
+          <p class="wf-tile__value wf-tile__value--good" data-wf="tile-p95">$392,000</p>
+          <p class="wf-tile__delta" data-wf="tile-p95-delta">+$21,000 vs current portfolio</p>
         </div>
       </div>
+      <p data-mode-stamp class="wf-note">12-month block simulation on monthly returns, 2022-01-31 to 2026-10-31, 5,000 paths, recomputed with the new weights. This is not a forecast. Figures on this draft are illustrative sample data.</p>
+    </section>
 
-      <div class="wf-ctrl">
-        <label class="wf-ctrl__label" for="wf-funding">Fund the purchase from</label>
-        <select class="select wf-ctrl__select" id="wf-funding">
-          <option value="pro_rata">Pro rata from all positions</option>
-        </select>
-      </div>
+    <section class="card wf-ba" aria-label="Before and after">
+      <h3>Before and after</h3>
+      <table class="table wf-ba__table">
+        <thead><tr><th>Measure</th><th class="r">Today</th><th class="r">With asset</th></tr></thead>
+        <tbody data-wf="ba-rows"></tbody>
+      </table>
+    </section>
+  </div>
 
-      <button class="btn btn--primary wf-compute" id="wf-compute" type="button">Calculate</button>
+  <section class="card wf-coh" aria-label="Coherence with this asset added">
+    <h3>Coherence with this asset added</h3>
+    <div class="wf-tbl">
+      <table class="table">
+        <thead><tr><th>Pillar</th><th>Today</th><th>With asset</th><th>Finding</th></tr></thead>
+        <tbody data-wf="coh-rows"></tbody>
+      </table>
     </div>
+  </section>
 
-    <div class="wf-loading" id="wf-loading" hidden>
-      <p>Computing scenario...</p>
-    </div>
-
-    <div class="wf-error card" id="wf-error" hidden>
-      <p class="wf-error__text"></p>
-    </div>
-
-    <div class="wf-results" id="wf-results" hidden>
-      <div class="wf-verdict card" id="wf-verdict">
-        <div class="wf-verdict__row">
-          <p class="wf-verdict__label">Verdict</p>
-          <span class="st" id="wf-verdict-badge"></span>
-        </div>
-        <div class="wf-verdict__row">
-          <p class="wf-verdict__label">Key changes</p>
-          <ul class="wf-verdict__list" id="wf-verdict-changes"></ul>
-        </div>
-      </div>
-
-      <div class="wf-sections" id="wf-sections"></div>
-
-      <div class="wf-charts card">
-        <h2 class="t-h3 wf-charts__title">Projection comparison</h2>
-        <div class="wf-charts__wrapper">
-          <canvas class="wf-chart" id="wf-chart-before" width="400" height="300"></canvas>
-          <canvas class="wf-chart" id="wf-chart-after" width="400" height="300"></canvas>
-        </div>
-      </div>
-    </div>
+  </div>
   </div>
 
   <a class="btn btn--outline-blue wf-another" href="#/search">Ask about another asset</a>
 
-  <footer class="foot">
-    <div class="wrap foot__wrap">
-      <p class="foot__legal">This analysis is informational only and does not constitute investment advice, an offer, or a solicitation. Trading securities involves risk. Past performance does not guarantee future results. Consult a professional before making investment decisions.</p>
-    </div>
-  </footer>
+  <p data-mode-stamp class="wf-note">Method: the portfolio is recomputed with the new weights, then the same four pillar checks are run again. All values on this draft are illustrative sample data. Simulation only, not financial advice.</p>
 </div>
-  </section>
+</section>
+  <section data-route="conversation" hidden>
+<div class="wrap scr scr-conversation">
+  <div class="lead">
+    <p class="t-small label">Step 1 of 2</p>
+    <h1 class="t-title">Build your profile</h1>
+    <p class="t-body muted">Pick a suggestion or type an answer. The questions are fixed; your answers are saved to the fictional profile before the analysis is run. Any question can be skipped.</p>
+  </div>
+
+  <div class="cols">
+    <section class="card conv" aria-label="Conversation">
+      <p class="agent">Agent</p>
+      <p class="t-body">Hello. I will ask a few questions to build your investor profile, then check that it holds together before looking at your portfolio.</p>
+      <p class="t-small muted" data-conversation-notice hidden></p>
+
+      <div class="current" data-conversation-current></div>
+    </section>
+
+    <aside class="card prof" aria-label="Profile summary">
+      <h2 class="t-h3">Your profile so far</h2>
+      <p class="t-small label" data-profile-count></p>
+      <div class="prog" aria-hidden="true" data-profile-progress></div>
+      <div class="rule" aria-hidden="true"></div>
+      <div data-profile-rows></div>
+      <div class="skip">
+        <p class="field__error" data-run-error role="alert" hidden></p>
+        <button class="btn btn--outline-blue" type="button" data-run>Run analysis</button>
+      </div>
+    </aside>
+  </div>
+
+  <div class="footnote">
+    <p class="t-small muted">Simulation only. Fictional profiles and portfolios, not personalized financial advice.</p>
+  </div>
+</div>
+</section>
 </main>
 
-<script src="js/core/state.js"></script>
-<script src="js/core/data_source.js"></script>
-<script src="js/core/router.js"></script>
-<script src="js/core/intake_questions.js"></script>
+<footer class="foot">
+  <div class="wrap foot__inner">
+    <p data-mode-stamp class="foot__line">Data: starter dataset, 12 Nov 2021 to 12 Nov 2026. Figures are computed deterministically; explanations and constraint checks are written by a language model from those figures. All values on this draft are illustrative sample data. Simulation only, not financial advice.</p>
+    <p class="foot__line foot__line--disclaimer">Educational simulation with fictional profiles. This is not personalised financial advice. No transaction is executed.</p>
+    <p class="foot__line">No buy/sell recommendations.</p>
+  </div>
+</footer>
+
+<a class="fab" href="#/search" aria-label="Ask about this profile"><img class="fab__icon" src="assets/icon-ask.svg" alt="" width="28" height="28"></a>
+
+<script src="js/core/shell.js"></script>
+<script src="js/core/format.js"></script>
 <script src="js/core/charts.js"></script>
-<script src="js/screens/summary.js"></script>
-<script src="js/screens/factor.js"></script>
-<script src="js/screens/conversation.js"></script>
+<script src="js/core/data_source.js"></script>
+<script src="js/core/intake_questions.js"></script>
+<script src="js/screens/summary/summary.js"></script>
+<script src="js/screens/summary/summary_holdings.js"></script>
+<script src="js/screens/pillars/objectives.js"></script>
+<script src="js/screens/pillars/risk.js"></script>
+<script src="js/screens/pillars/constraints.js"></script>
+<script src="js/screens/pillars/preferences.js"></script>
+<script src="js/screens/pillars/coherence.js"></script>
 <script src="js/screens/search.js"></script>
-<script src="js/screens/whatif.js"></script>
-<script src="js/main.js"></script>
+<script src="js/screens/whatif/whatif_view.js"></script>
+<script src="js/screens/whatif/whatif.js"></script>
+<script src="js/screens/conversation.js"></script>
 </body>
 </html>
