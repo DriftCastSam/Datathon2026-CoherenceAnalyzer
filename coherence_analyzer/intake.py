@@ -206,3 +206,25 @@ def skip(profile: dict, path: str) -> dict:
 def answer(profile: dict, path: str, value: Any) -> dict:
     """Store a user-declared answer at `path` (plain value, §3.3 convention); returns a new profile."""
     return _assign(profile, path, copy.deepcopy(value))
+
+
+# ---------------------------------------------------------------- intake answers as events (§20.6, P3.FREETEXT)
+
+# Paths whose answer is free text for N3 (§6.2 N3 input = values.notes). They are answerable but not part of the
+# checklist, and not skippable. Every other answerable path is a declared structured value (no LLM).
+FREE_TEXT_PATHS = ("values.notes",)
+
+
+def is_free_text(path: str) -> bool:
+    return path in FREE_TEXT_PATHS
+
+
+def current_value(profile: dict, path: str) -> Any:
+    """What the user saw at `path` (the `old` of the event): the value, the skip marker, or None when absent. Pure."""
+    node = _lookup(profile, path)
+    return None if node is _ABSENT else copy.deepcopy(node)
+
+
+def event_text(path: str, skipped: bool = False) -> str:
+    """Fixed description of the recorded answer or skip (D10: describes, never prescribes). No LLM."""
+    return f"Intake question skipped for {path}." if skipped else f"Intake answer recorded for {path}."

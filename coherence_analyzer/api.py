@@ -40,6 +40,7 @@ EVENT_TYPES = ("question", "order_intent", "quiz_result", "profile_edit", "note"
 COPY_PATTERNS = ("profile.json", "events.jsonl", "portfolio*.json", "intents.json")
 DEFAULT_LOCALE = "fr-CA"
 DEFAULT_SOURCE = "ui_chat"
+INTAKE_SOURCE = "intake"
 
 _INTENT_ID = re.compile(r"^in_(\d{4,})$")
 _RUN_ID = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
@@ -198,32 +199,85 @@ def get_intake(profile_id: str, locale: Literal["fr-CA", "en-CA"] | None = Query
             for f in intake.FACTORS}
 
 
+def _intake_messages(res: dict) -> list[str]:
+    """Plain statements about the free-text reading (N3), from the audit's gate statuses and errors. D10: they say
+    what was recorded and what was kept, nothing else."""
+    out = []
+    for call in res["audit"]["llm_calls"]:
+        if call.get("gate") != "accepted":
+            out.append(f"The notes were saved. Their reading ({call.get('node')}) was not updated: gate result "
+                       f"{call.get('gate')}. The previous reading is kept.")
+    for err in res["audit"]["llm_errors"]:
+        out.append(f"The notes were saved. Their reading ({err.get('node')}) was not updated: no usable answer "
+                   "was returned. The previous reading is kept.")
+    return out
+
+
+def _record_intake(work: Path, profile_id: str, fixture: Path, path: str, edited: dict, old: Any, new: Any,
+                   skipped: bool) -> dict:
+    """§20.6: the answer (or skip) is one `profile_edit` event from source `intake` (server-assigned id and ts), then
+    Flow A runs on the working copy (`pipeline.refresh` with the edited profile): N3 through the gate when the notes
+    changed, limits rebuilt from rule: fields and declared values. The edited profile is validated before anything is
+    written; a failure after the append restores events.jsonl and profile.json. Returns the refreshed profile plus an
+    `intake` block (event, run, diff, gate results)."""
+    try:
+        pipeline.validate_profile(edited, "edited profile")
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    events_path = work / "events.jsonl"
+    event = {"event_id": _next_event_id(store.read_events(events_path), fixture), "profile_id": profile_id,
+             "ts": pipeline._now(), "type": "profile_edit", "text": intake.event_text(path, skipped),
+             "payload": {"path": path, "old": old, "new": new}, "source": INTAKE_SOURCE}
+    events_before = events_path.read_bytes() if events_path.exists() else b""
+    profile_before = (work / "profile.json").read_bytes()
+    try:
+        _append_event(work, event)
+        try:
+            res = pipeline.refresh(work, edited=edited)
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        _save(work, res["profile"])
+    except BaseException:
+        events_path.write_bytes(events_before)
+        (work / "profile.json").write_bytes(profile_before)
+        raise
+    audit = res["audit"]
+    return {**res["profile"],
+            "intake": {"event": event, "run_id": res["run_id"], "profile_version": audit["profile_version_out"],
+                       "profile_diff": res["profile_diff"], "llm_calls": audit["llm_calls"],
+                       "llm_errors": audit["llm_errors"], "messages": _intake_messages(res)}}
+
+
 @app.post("/profiles/{profile_id}/intake/answer")
 def post_intake_answer(profile_id: str, body: AnswerIn) -> dict:
-    work, _ = _workdir(profile_id)
+    work, fixture = _workdir(profile_id)
     with _LOCK:
         profile = _load(work)
-        _check_intake_path(profile, body.path)
+        if not intake.is_free_text(body.path):
+            _check_intake_path(profile, body.path)
         if body.value is None:
             raise HTTPException(status_code=422, detail="value must not be null (use /intake/skip to skip a question)")
         if _THEME_NUMBER_PATH.match(body.path):
             v = body.value
             if isinstance(v, bool) or not isinstance(v, (int, float)) or not 0 < v <= 100:
                 raise HTTPException(status_code=422, detail="a theme share is a percentage in (0, 100]")
-        updated = intake.answer(profile, body.path, body.value)
-        _save(work, updated)
-    return updated
+        if intake.is_free_text(body.path) and (not isinstance(body.value, str) or not body.value.strip()):
+            raise HTTPException(status_code=422, detail="a free-text answer is a non-blank string")
+        old = intake.current_value(profile, body.path)
+        edited = intake.answer(profile, body.path, body.value)
+        return _record_intake(work, profile_id, fixture, body.path, edited, old, copy.deepcopy(body.value), False)
 
 
 @app.post("/profiles/{profile_id}/intake/skip")
 def post_intake_skip(profile_id: str, body: SkipIn) -> dict:
-    work, _ = _workdir(profile_id)
+    work, fixture = _workdir(profile_id)
     with _LOCK:
         profile = _load(work)
         _check_intake_path(profile, body.path)
-        updated = intake.skip(profile, body.path)
-        _save(work, updated)
-    return updated
+        old = intake.current_value(profile, body.path)
+        edited = intake.skip(profile, body.path)
+        marker = {"value": None, "by": intake.SKIPPED_BY}
+        return _record_intake(work, profile_id, fixture, body.path, edited, old, marker, True)
 
 
 # ---------------------------------------------------------------- events (§3.4)

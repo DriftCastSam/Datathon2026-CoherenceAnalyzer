@@ -51,6 +51,13 @@ ROBERT_PARSE = {("prefer_attribute", "I prefer companies I understand."),
 NO_NUMBER_QUOTE = "No hype stocks unless I can explain the business."     # exact substring of Robert's notes
 SKIPPED = {"value": None, "by": "user:skipped"}
 LLM_PREFIXES = ("values.parsed_notes", "risk.behavioural", "knowledge.question_quality")
+# The user-approved subset of the parsed rules is a user declaration (§6.2 N3, §7.2) and is the one parsed_notes path the
+# trace may name (rules/limits.APPROVED_PARSED_RULES; also pinned by test_intake.py and test_personas.py).
+APPROVED_PATH = "values.parsed_notes[approved_by_user]"
+
+
+def _llm_deps(deps: list[str]) -> list[str]:
+    return [d for d in deps if d.startswith(LLM_PREFIXES) and d != APPROVED_PATH]
 
 
 def _hashes(base: Path) -> dict[str, str]:
@@ -266,7 +273,7 @@ def test_declared_risk_answer_rebuilds_limits_from_rule_and_declared_fields_only
             assert after["limits"][k] == v, k
     assert after["limits"] != before["limits"]
     for deps in after["limits_trace"].values():
-        assert not [d for d in deps if d.startswith(LLM_PREFIXES)], deps
+        assert not _llm_deps(deps), deps
 
 
 # ---------------------------------------------------------------- skips are events too
@@ -387,7 +394,7 @@ def test_notes_answer_unapproved_rules_do_not_reach_limits(client, store_dir):
         if k != "_note":
             assert after["limits"][k] == v, k
     for deps in after["limits_trace"].values():
-        assert not [d for d in deps if d.startswith(LLM_PREFIXES)], deps
+        assert not _llm_deps(deps), deps
 
 
 def test_gate_rejection_keeps_the_previous_parse_and_the_response_says_why(client, store_dir, monkeypatch):
