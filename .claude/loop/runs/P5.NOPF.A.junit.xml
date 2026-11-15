@@ -1,0 +1,623 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="21" skipped="0" tests="24" time="0.911" timestamp="2026-11-15T04:26:17.105039+00:00" hostname="bomboclat-laptop"><testcase classname="tests.flows.test_new_user_no_portfolio" name="test_derive_all_without_value_and_date_nulls_only_the_dependent_fields" time="0.003"><failure message="TypeError: 'NoneType' object is not subscriptable">def test_derive_all_without_value_and_date_nulls_only_the_dependent_fields():
+        # §7.1 + D1: no TypeError; capacity / effective risk / effective horizon are null (rule: stamp kept, schema
+        # `ruleField`), everything that needs neither input equals the full derivation.
+        base, _, _ = _baseline()
+        before = copy.deepcopy(_ROBERT)
+&gt;       out = derive.derive_all(_ROBERT, portfolio_value_cad=None, as_of=None)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/tests/flows/test_new_user_no_portfolio.py:192: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/rules/derive.py:220: in derive_all
+    put("objectives.effective_horizon_years",
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/rules/derive.py:210: in put
+    _set(p, output, _field(output, None if missing else fn(*args)))
+                                                        ^^^^^^^^^
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/rules/derive.py:221: in &lt;lambda&gt;
+    lambda h, w: effective_horizon_years(h, w, as_of), g("objectives.horizon_years"), withdrawals)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/rules/derive.py:105: in effective_horizon_years
+    first = min(max(0, months_between(as_of, w["date"])) for w in planned_withdrawals)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/rules/derive.py:105: in &lt;genexpr&gt;
+    first = min(max(0, months_between(as_of, w["date"])) for w in planned_withdrawals)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/rules/derive.py:44: in months_between
+    return _month_index(date) - _month_index(as_of)
+                                ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+date = None
+
+    def _month_index(date: str) -&gt; int:
+        """'YYYY-MM' or 'YYYY-MM-DD' -&gt; absolute month count."""
+&gt;       y, m = int(date[0:4]), int(date[5:7])
+                   ^^^^^^^^^
+E       TypeError: 'NoneType' object is not subscriptable
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/rules/derive.py:38: TypeError</failure></testcase><testcase classname="tests.flows.test_new_user_no_portfolio" name="test_derive_all_with_only_one_of_value_and_date_missing[None-2026-11-12-3.6]" time="0.001"><failure message="TypeError: unsupported operand type(s) for *: 'float' and 'NoneType'">value = None, as_of = '2026-11-12', horizon = 3.6
+
+    @pytest.mark.parametrize("value, as_of, horizon", [(None, AS_OF, 3.6), (ROBERT_VALUE, None, None)])
+    def test_derive_all_with_only_one_of_value_and_date_missing(value, as_of, horizon):
+        # D1: the horizon needs the date only (Robert 2026-11 -&gt; 2030-06 = 43 months = 3.6 y), the capacity needs both.
+&gt;       out = derive.derive_all(copy.deepcopy(_ROBERT), portfolio_value_cad=value, as_of=as_of)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/tests/flows/test_new_user_no_portfolio.py:208: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/rules/derive.py:222: in derive_all
+    put("risk.capacity",
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/rules/derive.py:210: in put
+    _set(p, output, _field(output, None if missing else fn(*args)))
+                                                        ^^^^^^^^^
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/rules/derive.py:223: in &lt;lambda&gt;
+    lambda eh, efm, stab, w: capacity(eh, efm, stab, w, portfolio_value_cad, as_of),
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+effective_horizon_years = 3.6, ef_months = 4.6, income_stability = 'high'
+planned_withdrawals = [{'date': '2030-06', 'amount': 60000, 'purpose': 'retirement income, year 1'}]
+portfolio_value_cad = None, as_of = '2026-11-12'
+
+    @rule("capacity", "risk.capacity",
+          ["objectives.effective_horizon_years", "situation.emergency_fund_months",
+           "situation.income_stability", "situation.planned_withdrawals"])
+    def capacity(effective_horizon_years: float, ef_months: float, income_stability: str,
+                 planned_withdrawals: list[dict], portfolio_value_cad: float, as_of: str) -&gt; str:
+        level = _base_capacity(effective_horizon_years)
+        notches = 0
+        if ef_months &lt; LOW_EF_MONTHS:
+            notches += 1
+        if income_stability == "low":
+            notches += 1
+        near = sum(float(w["amount"]) for w in planned_withdrawals
+                   if 0 &lt;= months_between(as_of, w["date"]) &lt;= NEAR_WITHDRAWAL_MONTHS)
+&gt;       if near &gt; NEAR_WITHDRAWAL_SHARE * portfolio_value_cad:
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: unsupported operand type(s) for *: 'float' and 'NoneType'
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/rules/derive.py:135: TypeError</failure></testcase><testcase classname="tests.flows.test_new_user_no_portfolio" name="test_derive_all_with_only_one_of_value_and_date_missing[400000-None-None]" time="0.001"><failure message="TypeError: 'NoneType' object is not subscriptable">value = 400000, as_of = None, horizon = None
+
+    @pytest.mark.parametrize("value, as_of, horizon", [(None, AS_OF, 3.6), (ROBERT_VALUE, None, None)])
+    def test_derive_all_with_only_one_of_value_and_date_missing(value, as_of, horizon):
+        # D1: the horizon needs the date only (Robert 2026-11 -&gt; 2030-06 = 43 months = 3.6 y), the capacity needs both.
+&gt;       out = derive.derive_all(copy.deepcopy(_ROBERT), portfolio_value_cad=value, as_of=as_of)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/tests/flows/test_new_user_no_portfolio.py:208: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/rules/derive.py:220: in derive_all
+    put("objectives.effective_horizon_years",
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/rules/derive.py:210: in put
+    _set(p, output, _field(output, None if missing else fn(*args)))
+                                                        ^^^^^^^^^
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/rules/derive.py:221: in &lt;lambda&gt;
+    lambda h, w: effective_horizon_years(h, w, as_of), g("objectives.horizon_years"), withdrawals)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/rules/derive.py:105: in effective_horizon_years
+    first = min(max(0, months_between(as_of, w["date"])) for w in planned_withdrawals)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/rules/derive.py:105: in &lt;genexpr&gt;
+    first = min(max(0, months_between(as_of, w["date"])) for w in planned_withdrawals)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/rules/derive.py:44: in months_between
+    return _month_index(date) - _month_index(as_of)
+                                ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+date = None
+
+    def _month_index(date: str) -&gt; int:
+        """'YYYY-MM' or 'YYYY-MM-DD' -&gt; absolute month count."""
+&gt;       y, m = int(date[0:4]), int(date[5:7])
+                   ^^^^^^^^^
+E       TypeError: 'NoneType' object is not subscriptable
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/rules/derive.py:38: TypeError</failure></testcase><testcase classname="tests.flows.test_new_user_no_portfolio" name="test_derive_all_empty_withdrawals_still_needs_the_inputs_it_declares" time="0.001"><failure message="TypeError: unsupported operand type(s) for *: 'float' and 'NoneType'">def test_derive_all_empty_withdrawals_still_needs_the_inputs_it_declares():
+        # SPEC-AMBIGUITY: strict reading (see the module note): an empty withdrawals list does not make capacity computable.
+        p = copy.deepcopy(_ROBERT)
+        p["situation"]["planned_withdrawals"] = []
+&gt;       out = derive.derive_all(p, portfolio_value_cad=None, as_of=None)
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/tests/flows/test_new_user_no_portfolio.py:222: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/rules/derive.py:222: in derive_all
+    put("risk.capacity",
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/rules/derive.py:210: in put
+    _set(p, output, _field(output, None if missing else fn(*args)))
+                                                        ^^^^^^^^^
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/rules/derive.py:223: in &lt;lambda&gt;
+    lambda eh, efm, stab, w: capacity(eh, efm, stab, w, portfolio_value_cad, as_of),
+                             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+effective_horizon_years = 4.0, ef_months = 4.6, income_stability = 'high'
+planned_withdrawals = [], portfolio_value_cad = None, as_of = None
+
+    @rule("capacity", "risk.capacity",
+          ["objectives.effective_horizon_years", "situation.emergency_fund_months",
+           "situation.income_stability", "situation.planned_withdrawals"])
+    def capacity(effective_horizon_years: float, ef_months: float, income_stability: str,
+                 planned_withdrawals: list[dict], portfolio_value_cad: float, as_of: str) -&gt; str:
+        level = _base_capacity(effective_horizon_years)
+        notches = 0
+        if ef_months &lt; LOW_EF_MONTHS:
+            notches += 1
+        if income_stability == "low":
+            notches += 1
+        near = sum(float(w["amount"]) for w in planned_withdrawals
+                   if 0 &lt;= months_between(as_of, w["date"]) &lt;= NEAR_WITHDRAWAL_MONTHS)
+&gt;       if near &gt; NEAR_WITHDRAWAL_SHARE * portfolio_value_cad:
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       TypeError: unsupported operand type(s) for *: 'float' and 'NoneType'
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/rules/derive.py:135: TypeError</failure></testcase><testcase classname="tests.flows.test_new_user_no_portfolio" name="test_build_limits_without_value_nulls_only_the_floor_and_traces_the_missing_input" time="0.001"><failure message="TypeError: unsupported operand type(s) for *: 'NoneType' and 'float'">def test_build_limits_without_value_nulls_only_the_floor_and_traces_the_missing_input():
+        # §7.2: floor_at_horizon = value x floor_ratio needs the value; every other limit is what the full profile gives.
+        base_p, base_lim, base_trace = _baseline()
+&gt;       lim, trace = limits_mod.build_limits(base_p, None)
+                     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/tests/flows/test_new_user_no_portfolio.py:233: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+profile = {'_conventions': {'plain_value': 'Declared by the user. Only the user changes it.', 'object_with_by': "Computed or est...high', 'by': 'rule:income_stability', 'confidence': 1.0}, 'monthly_expenses': 6500, 'emergency_fund': 30000, ...}, ...}
+portfolio_value_cad = None
+
+    def build_limits(profile: dict, portfolio_value_cad: float) -&gt; tuple[dict, dict[str, list[str]]]:
+        """Return (limits, limits_trace). Only approved parsed rules are promoted.
+    
+        Reads `risk.effective` (rule:) and user-declared values only (invariant 2). Weights are fractions;
+        drawdown and MER stay in percent, like the profile fields they come from.
+    
+        A limit whose input is skipped or null (`{value: null, by: user:skipped}`, docs/spec-factors.md §20.6) is
+        None, never a default; `limits_trace` names the skipped input ("&lt;path&gt; (skipped)") and the checks that need
+        the limit report `unknown`.
+        """
+        level = _rule_value(profile, "risk", "effective")
+        row = LIMITS_TABLE[level] if level is not None else None
+        risk, prefs, values = profile["risk"], profile.get("preferences", {}), profile.get("values", {})
+    
+        def table(key: str) -&gt; Any:
+            return row[key] if row is not None else None
+    
+        max_dd = table("max_dd_pct")
+        user_dd_node = risk.get("max_acceptable_drawdown_pct")
+        user_dd = _val(user_dd_node)
+        if registry.is_skipped(user_dd_node):
+            max_dd = None            # the user's own drawdown is unknown: the limit is not computable
+        elif user_dd is not None and max_dd is not None:
+            max_dd = max(max_dd, user_dd)   # the less negative one
+    
+        refused_node = prefs.get("asset_types_refused", [])
+        excluded_types: list[str] | None
+        if registry.is_skipped(refused_node) or row is None:
+            excluded_types = None
+        else:
+            excluded_types = _dedupe(list(_val(refused_node) or []))
+            if row["max_crypto"] == 0 and "crypto" not in excluded_types:
+                excluded_types.append("crypto")
+    
+        activities: list[str] = []
+        for pillar in PILLARS:
+            activities.extend(values.get(pillar, {}).get("exclusions", []))
+        activities.extend(r["params"]["tag"] for r in _approved_parsed_rules(profile, "exclude_activity")
+                          if isinstance(r.get("params", {}).get("tag"), str))
+    
+        themes: dict[str, float] = {}
+        themeless = 0
+        for r in _approved_parsed_rules(profile, "max_theme_weight"):
+            params = r.get("params")
+            params = params if isinstance(params, dict) else {}
+            theme = params.get("theme")
+            if not isinstance(theme, str) or not theme:
+                themeless += 1   # approved but names no theme: nothing to limit, skipped and traced (never a KeyError)
+                continue
+            pct = params.get("max_pct")
+            if isinstance(pct, bool) or not isinstance(pct, (int, float)):
+                continue   # approved but the number is still unanswered (or skipped): nothing to promote yet
+            frac = pct / 100   # percent -&gt; fraction, once
+            themes[theme] = min(frac, themes.get(theme, frac))                # stricter wins
+    
+        limits: dict[str, Any] = {
+            "_note": LIMITS_NOTE,
+            "by": "rule:limits_table[risk.effective] + goals + preferences",
+            "vol_band_annual": list(row["vol_band"]) if row is not None else None,
+&gt;           "floor_at_horizon": round(portfolio_value_cad * row["floor_ratio"], 2) if row is not None else None,
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            "max_drawdown_pct": max_dd,
+            "min_fixed_income_weight": table("min_fixed_income"),
+            "max_single_stock_weight": table("max_single_stock"),
+            "max_sector_risk_share": table("max_sector_risk_share"),
+            "max_crypto_weight": table("max_crypto"),
+            "max_foreign_currency_weight": table("max_foreign_ccy"),
+            "max_employer_sector_weight": MAX_EMPLOYER_SECTOR_WEIGHT,
+            "excluded_asset_types": excluded_types,
+            "excluded_activities": _dedupe(activities),
+        }
+E       TypeError: unsupported operand type(s) for *: 'NoneType' and 'float'
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/rules/limits.py:164: TypeError</failure></testcase><testcase classname="tests.flows.test_new_user_no_portfolio" name="test_build_limits_on_a_profile_derived_without_portfolio_has_no_table_limit" time="0.001"><failure message="TypeError: 'NoneType' object is not subscriptable">def test_build_limits_on_a_profile_derived_without_portfolio_has_no_table_limit():
+        # §7.2 + inv. 1: no risk.effective -&gt; no LIMITS_TABLE row -&gt; null (never a default row, never an llm: input).
+        base_p, base_lim, base_trace = _baseline()
+&gt;       p = derive.derive_all(copy.deepcopy(_ROBERT), portfolio_value_cad=None, as_of=None)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/tests/flows/test_new_user_no_portfolio.py:250: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/rules/derive.py:220: in derive_all
+    put("objectives.effective_horizon_years",
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/rules/derive.py:210: in put
+    _set(p, output, _field(output, None if missing else fn(*args)))
+                                                        ^^^^^^^^^
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/rules/derive.py:221: in &lt;lambda&gt;
+    lambda h, w: effective_horizon_years(h, w, as_of), g("objectives.horizon_years"), withdrawals)
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/rules/derive.py:105: in effective_horizon_years
+    first = min(max(0, months_between(as_of, w["date"])) for w in planned_withdrawals)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/rules/derive.py:105: in &lt;genexpr&gt;
+    first = min(max(0, months_between(as_of, w["date"])) for w in planned_withdrawals)
+                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/rules/derive.py:44: in months_between
+    return _month_index(date) - _month_index(as_of)
+                                ^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+date = None
+
+    def _month_index(date: str) -&gt; int:
+        """'YYYY-MM' or 'YYYY-MM-DD' -&gt; absolute month count."""
+&gt;       y, m = int(date[0:4]), int(date[5:7])
+                   ^^^^^^^^^
+E       TypeError: 'NoneType' object is not subscriptable
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/rules/derive.py:38: TypeError</failure></testcase><testcase classname="tests.flows.test_new_user_no_portfolio" name="test_refresh_runs_without_a_portfolio_and_records_a_null_reference_date" time="0.005"><failure message="FileNotFoundError: portfolio file not found: /tmp/pytest-of-safraa/pytest-561/test_refresh_runs_without_a_po0/work/portfolio.json">tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-561/test_refresh_runs_without_a_po0')
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-561/test_refresh_runs_without_a_po0/store')
+
+    def test_refresh_runs_without_a_portfolio_and_records_a_null_reference_date(tmp_path, store_dir):
+        # §4 Flow A + D1: no FileNotFoundError; the audit record has as_of null (the date used), flow A, every event.
+        work = _robert_workdir(tmp_path, with_portfolio=False)
+&gt;       res = pipeline.refresh(work)
+              ^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/tests/flows/test_new_user_no_portfolio.py:270: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/pipeline.py:314: in refresh
+    pf = _load_portfolio(fixture_dir, portfolio, profile_in, data.load_assets())
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/pipeline.py:101: in _load_portfolio
+    path = _resolve_portfolio(fixture_dir, portfolio)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+fixture_dir = PosixPath('/tmp/pytest-of-safraa/pytest-561/test_refresh_runs_without_a_po0/work')
+portfolio = None
+
+    def _resolve_portfolio(fixture_dir: Path, portfolio: str | Path | None) -&gt; Path:
+        name = Path(portfolio) if portfolio else Path(DEFAULT_PORTFOLIO)
+        path = name if name.is_absolute() else Path(fixture_dir) / name
+        if not path.exists() and portfolio and Path(portfolio).exists():
+            path = Path(portfolio)
+        if not path.exists():
+&gt;           raise FileNotFoundError(f"portfolio file not found: {path}")
+E           FileNotFoundError: portfolio file not found: /tmp/pytest-of-safraa/pytest-561/test_refresh_runs_without_a_po0/work/portfolio.json
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/pipeline.py:96: FileNotFoundError</failure></testcase><testcase classname="tests.flows.test_new_user_no_portfolio" name="test_refresh_without_a_portfolio_nulls_the_dependent_fields_and_keeps_the_rest" time="0.004"><failure message="FileNotFoundError: portfolio file not found: /tmp/pytest-of-safraa/pytest-561/test_refresh_without_a_portfol0/work/portfolio.json">tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-561/test_refresh_without_a_portfol0')
+
+    def test_refresh_without_a_portfolio_nulls_the_dependent_fields_and_keeps_the_rest(tmp_path):
+        # §7.1/§7.2 + P3.SKIP convention: null + a trace entry naming the missing input; the rest as the full profile.
+        base_p, base_lim, base_trace = _baseline()
+&gt;       res = pipeline.refresh(_robert_workdir(tmp_path, with_portfolio=False))
+              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/tests/flows/test_new_user_no_portfolio.py:283: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/pipeline.py:314: in refresh
+    pf = _load_portfolio(fixture_dir, portfolio, profile_in, data.load_assets())
+         ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/pipeline.py:101: in _load_portfolio
+    path = _resolve_portfolio(fixture_dir, portfolio)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+fixture_dir = PosixPath('/tmp/pytest-of-safraa/pytest-561/test_refresh_without_a_portfol0/work')
+portfolio = None
+
+    def _resolve_portfolio(fixture_dir: Path, portfolio: str | Path | None) -&gt; Path:
+        name = Path(portfolio) if portfolio else Path(DEFAULT_PORTFOLIO)
+        path = name if name.is_absolute() else Path(fixture_dir) / name
+        if not path.exists() and portfolio and Path(portfolio).exists():
+            path = Path(portfolio)
+        if not path.exists():
+&gt;           raise FileNotFoundError(f"portfolio file not found: {path}")
+E           FileNotFoundError: portfolio file not found: /tmp/pytest-of-safraa/pytest-561/test_refresh_without_a_portfol0/work/portfolio.json
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/coherence_analyzer/pipeline.py:96: FileNotFoundError</failure></testcase><testcase classname="tests.flows.test_new_user_no_portfolio" name="test_refresh_with_a_portfolio_is_unchanged_for_a_persona" time="0.006" /><testcase classname="tests.flows.test_new_user_no_portfolio" name="test_every_intake_answer_before_a_portfolio_is_a_200_and_one_event[fr-CA]" time="0.013"><failure message="AssertionError: ('objectives.primary', 500, 'Internal Server Error')&#10;assert 500 == 200&#10; +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x7d3cfc3cbe00&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-561/test_every_intake_answer_befor0/store')
+locale = 'fr-CA'
+
+    @pytest.mark.parametrize("locale", ["fr-CA", "en-CA"])
+    def test_every_intake_answer_before_a_portfolio_is_a_200_and_one_event(client, store_dir, locale):
+        # The reported 500: create -&gt; answer. Each answer: 200, one `intake` profile_edit event, valid profile, no number
+        # invented for a limit whose inputs are missing.
+        pid = _create(client, locale)
+        assert not (store_dir / "profiles" / pid / "portfolio.json").exists()
+        for n, (path, value) in enumerate(ANSWERS.items(), start=1):
+            r = client.post(f"/profiles/{pid}/intake/answer", json={"path": path, "value": value})
+&gt;           assert r.status_code == 200, (path, r.status_code, r.text)
+E           AssertionError: ('objectives.primary', 500, 'Internal Server Error')
+E           assert 500 == 200
+E            +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/tests/flows/test_new_user_no_portfolio.py:325: AssertionError</failure></testcase><testcase classname="tests.flows.test_new_user_no_portfolio" name="test_every_intake_answer_before_a_portfolio_is_a_200_and_one_event[en-CA]" time="0.014"><failure message="AssertionError: ('objectives.primary', 500, 'Internal Server Error')&#10;assert 500 == 200&#10; +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x7d3cfc1cf610&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-561/test_every_intake_answer_befor1/store')
+locale = 'en-CA'
+
+    @pytest.mark.parametrize("locale", ["fr-CA", "en-CA"])
+    def test_every_intake_answer_before_a_portfolio_is_a_200_and_one_event(client, store_dir, locale):
+        # The reported 500: create -&gt; answer. Each answer: 200, one `intake` profile_edit event, valid profile, no number
+        # invented for a limit whose inputs are missing.
+        pid = _create(client, locale)
+        assert not (store_dir / "profiles" / pid / "portfolio.json").exists()
+        for n, (path, value) in enumerate(ANSWERS.items(), start=1):
+            r = client.post(f"/profiles/{pid}/intake/answer", json={"path": path, "value": value})
+&gt;           assert r.status_code == 200, (path, r.status_code, r.text)
+E           AssertionError: ('objectives.primary', 500, 'Internal Server Error')
+E           assert 500 == 200
+E            +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/tests/flows/test_new_user_no_portfolio.py:325: AssertionError</failure></testcase><testcase classname="tests.flows.test_new_user_no_portfolio" name="test_skip_a_note_and_a_quiz_result_before_a_portfolio_are_not_server_errors" time="0.012"><failure message="AssertionError: Internal Server Error&#10;assert 500 == 200&#10; +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x7d3cfc06e490&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-561/test_skip_a_note_and_a_quiz_re0/store')
+
+    def test_skip_a_note_and_a_quiz_result_before_a_portfolio_are_not_server_errors(client, store_dir):
+        # Flow A triggers (SPEC §4): skip, note and quiz_result events run the refresh on a user with no portfolio.
+        pid = _create(client, "en-CA")
+        r = client.post(f"/profiles/{pid}/intake/skip", json={"path": "risk.declared"})
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: Internal Server Error
+E       assert 500 == 200
+E        +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/tests/flows/test_new_user_no_portfolio.py:345: AssertionError</failure></testcase><testcase classname="tests.flows.test_new_user_no_portfolio" name="test_before_the_portfolio_the_audit_has_no_date_and_derived_inputs_are_computed" time="0.013"><failure message="AssertionError: Internal Server Error&#10;assert 500 == 200&#10; +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x7d3cfc048c30&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-561/test_before_the_portfolio_the_0/store')
+
+    def test_before_the_portfolio_the_audit_has_no_date_and_derived_inputs_are_computed(client, store_dir):
+        # (1): everything not needing the portfolio is derived as usual from the declared answers (§7.1), the trace names
+        # the missing portfolio for every limit that needs it, and each refresh audit says as_of null (D1).
+        pid = _create(client, "en-CA")
+&gt;       _declare_employment(client, pid)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/tests/flows/test_new_user_no_portfolio.py:362: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x7d3cfc048c30&gt;
+pid = 'user-0001'
+
+    def _declare_employment(client: TestClient, pid: str) -&gt; None:
+        body = {"type": "profile_edit", "text": "Employment type declared.", "ts": TS, "source": "ui",
+                "payload": {"path": "identity.employment_type", "old": None, "new": "salaried"}}
+        r = client.post(f"/profiles/{pid}/events", json=body)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: Internal Server Error
+E       assert 500 == 200
+E        +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/tests/flows/test_new_user_no_portfolio.py:126: AssertionError</failure></testcase><testcase classname="tests.flows.test_new_user_no_portfolio" name="test_put_portfolio_computes_the_limits_from_the_new_value_and_date" time="0.010"><failure message="AssertionError: Internal Server Error&#10;assert 500 == 200&#10; +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x7d3cfc04a780&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-561/test_put_portfolio_computes_th0/store')
+
+    def test_put_portfolio_computes_the_limits_from_the_new_value_and_date(client, store_dir):
+        # (2) + §7.2 table row low_moderate (declared moderate, capacity low_moderate from the 3.6-year effective horizon):
+        # floor = 120 000 x 0.90, min fixed income 0.30, single stock 0.08, sector share 0.30, crypto 0.00, foreign 0.40,
+        # vol band 0.05-0.09, drawdown = the less negative of -12 (table) and -15 (declared).
+        pid = _create(client, "en-CA")
+&gt;       _declare_employment(client, pid)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/tests/flows/test_new_user_no_portfolio.py:387: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x7d3cfc04a780&gt;
+pid = 'user-0001'
+
+    def _declare_employment(client: TestClient, pid: str) -&gt; None:
+        body = {"type": "profile_edit", "text": "Employment type declared.", "ts": TS, "source": "ui",
+                "payload": {"path": "identity.employment_type", "old": None, "new": "salaried"}}
+        r = client.post(f"/profiles/{pid}/events", json=body)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: Internal Server Error
+E       assert 500 == 200
+E        +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/tests/flows/test_new_user_no_portfolio.py:126: AssertionError</failure></testcase><testcase classname="tests.flows.test_new_user_no_portfolio" name="test_put_portfolio_without_any_intake_answer_is_fine_and_limits_stay_null" time="0.015"><failure message="assert ([])">client = &lt;starlette.testclient.TestClient object at 0x7d3cfc0d9eb0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-561/test_put_portfolio_without_any0/store')
+
+    def test_put_portfolio_without_any_intake_answer_is_fine_and_limits_stay_null(client, store_dir):
+        # (2) + P3.SKIP: a refresh with every required answer missing is not a crash and invents no limit.
+        pid = _create(client, "fr-CA")
+        r = _put(client, pid)
+        assert r.status_code == 200, r.text
+        p = _profile(client, pid)
+        assert _PROFILE_SCHEMA.is_valid(p)
+        for name in TABLE_LIMITS:
+            assert (p.get("limits") or {}).get(name) is None, name
+        audits = list(_audits(store_dir, pid).values())
+&gt;       assert audits and all(a["flow"] == "A" and a["as_of"] == PF["as_of"] for a in audits)
+E       assert ([])
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/tests/flows/test_new_user_no_portfolio.py:429: AssertionError</failure></testcase><testcase classname="tests.flows.test_new_user_no_portfolio" name="test_put_portfolio_on_a_persona_refreshes_limits_from_the_new_value_and_date" time="0.009"><failure message="assert 360000 == 180000 ± 1.0e-09&#10;  &#10;  comparison failed&#10;  Obtained: 360000&#10;  Expected: 180000 ± 1.0e-09">client = &lt;starlette.testclient.TestClient object at 0x7d3cfc1c7ac0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-561/test_put_portfolio_on_a_person0/store')
+
+    def test_put_portfolio_on_a_persona_refreshes_limits_from_the_new_value_and_date(client, store_dir):
+        # (2) + D1 + §7.1/§7.2 on Robert (fixtures/ stay untouched, the store copy takes the edit):
+        # 2026-11-12 / 200 000: effective horizon 3.6 y -&gt; low_moderate, floor = 200 000 x 0.90.
+        # 2028-01-15 / 200 000: 29 months to 2030-06 = 2.4 y -&gt; capacity low, effective low, floor = 200 000 x 0.95.
+        pid = "persona-robert"
+        first = {"as_of": "2026-11-12", "value_cad": 200000, "weights_pct": {"XIU.TO": 50, "XBB.TO": 50}}
+        assert _put(client, pid, first).status_code == 200
+        p = _profile(client, pid)
+&gt;       assert p["limits"]["floor_at_horizon"] == pytest.approx(180_000, abs=1e-9)
+E       assert 360000 == 180000 ± 1.0e-09
+E         
+E         comparison failed
+E         Obtained: 360000
+E         Expected: 180000 ± 1.0e-09
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/tests/flows/test_new_user_no_portfolio.py:440: AssertionError</failure></testcase><testcase classname="tests.flows.test_new_user_no_portfolio" name="test_full_order_create_answer_put_review_gives_a_valid_report[fr-CA-False]" time="0.012"><failure message="AssertionError: ('objectives.primary', 500, 'Internal Server Error')&#10;assert 500 == 200&#10; +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x7d3cfbfcc050&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-561/test_full_order_create_answer_0/store')
+locale = 'fr-CA', with_employment = False
+
+    @pytest.mark.parametrize("with_employment", [False, True])
+    @pytest.mark.parametrize("locale", ["fr-CA", "en-CA"])
+    def test_full_order_create_answer_put_review_gives_a_valid_report(client, store_dir, locale, with_employment):
+        # §4 Flow C + §13 + §9.4: the natural order works end to end in mock mode.
+        pid = _create(client, locale)
+        if with_employment:
+            _declare_employment(client, pid)
+&gt;       _answer_all(client, pid)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/tests/flows/test_new_user_no_portfolio.py:462: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x7d3cfbfcc050&gt;
+pid = 'user-0001'
+
+    def _answer_all(client: TestClient, pid: str) -&gt; None:
+        assert set(ANSWERS) == {p for paths in intake.REQUIRED.values() for p in paths}     # every REQUIRED path, once
+        for path, value in ANSWERS.items():
+            r = client.post(f"/profiles/{pid}/intake/answer", json={"path": path, "value": value})
+&gt;           assert r.status_code == 200, (path, r.status_code, r.text)
+E           AssertionError: ('objectives.primary', 500, 'Internal Server Error')
+E           assert 500 == 200
+E            +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/tests/flows/test_new_user_no_portfolio.py:119: AssertionError</failure></testcase><testcase classname="tests.flows.test_new_user_no_portfolio" name="test_full_order_create_answer_put_review_gives_a_valid_report[fr-CA-True]" time="0.011"><failure message="AssertionError: Internal Server Error&#10;assert 500 == 200&#10; +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x7d3cfbfccc00&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-561/test_full_order_create_answer_1/store')
+locale = 'fr-CA', with_employment = True
+
+    @pytest.mark.parametrize("with_employment", [False, True])
+    @pytest.mark.parametrize("locale", ["fr-CA", "en-CA"])
+    def test_full_order_create_answer_put_review_gives_a_valid_report(client, store_dir, locale, with_employment):
+        # §4 Flow C + §13 + §9.4: the natural order works end to end in mock mode.
+        pid = _create(client, locale)
+        if with_employment:
+&gt;           _declare_employment(client, pid)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/tests/flows/test_new_user_no_portfolio.py:461: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x7d3cfbfccc00&gt;
+pid = 'user-0001'
+
+    def _declare_employment(client: TestClient, pid: str) -&gt; None:
+        body = {"type": "profile_edit", "text": "Employment type declared.", "ts": TS, "source": "ui",
+                "payload": {"path": "identity.employment_type", "old": None, "new": "salaried"}}
+        r = client.post(f"/profiles/{pid}/events", json=body)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: Internal Server Error
+E       assert 500 == 200
+E        +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/tests/flows/test_new_user_no_portfolio.py:126: AssertionError</failure></testcase><testcase classname="tests.flows.test_new_user_no_portfolio" name="test_full_order_create_answer_put_review_gives_a_valid_report[en-CA-False]" time="0.011"><failure message="AssertionError: ('objectives.primary', 500, 'Internal Server Error')&#10;assert 500 == 200&#10; +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x7d3cfbfcd150&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-561/test_full_order_create_answer_2/store')
+locale = 'en-CA', with_employment = False
+
+    @pytest.mark.parametrize("with_employment", [False, True])
+    @pytest.mark.parametrize("locale", ["fr-CA", "en-CA"])
+    def test_full_order_create_answer_put_review_gives_a_valid_report(client, store_dir, locale, with_employment):
+        # §4 Flow C + §13 + §9.4: the natural order works end to end in mock mode.
+        pid = _create(client, locale)
+        if with_employment:
+            _declare_employment(client, pid)
+&gt;       _answer_all(client, pid)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/tests/flows/test_new_user_no_portfolio.py:462: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x7d3cfbfcd150&gt;
+pid = 'user-0001'
+
+    def _answer_all(client: TestClient, pid: str) -&gt; None:
+        assert set(ANSWERS) == {p for paths in intake.REQUIRED.values() for p in paths}     # every REQUIRED path, once
+        for path, value in ANSWERS.items():
+            r = client.post(f"/profiles/{pid}/intake/answer", json={"path": path, "value": value})
+&gt;           assert r.status_code == 200, (path, r.status_code, r.text)
+E           AssertionError: ('objectives.primary', 500, 'Internal Server Error')
+E           assert 500 == 200
+E            +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/tests/flows/test_new_user_no_portfolio.py:119: AssertionError</failure></testcase><testcase classname="tests.flows.test_new_user_no_portfolio" name="test_full_order_create_answer_put_review_gives_a_valid_report[en-CA-True]" time="0.012"><failure message="AssertionError: Internal Server Error&#10;assert 500 == 200&#10; +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x7d3cfbfcd7b0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-561/test_full_order_create_answer_3/store')
+locale = 'en-CA', with_employment = True
+
+    @pytest.mark.parametrize("with_employment", [False, True])
+    @pytest.mark.parametrize("locale", ["fr-CA", "en-CA"])
+    def test_full_order_create_answer_put_review_gives_a_valid_report(client, store_dir, locale, with_employment):
+        # §4 Flow C + §13 + §9.4: the natural order works end to end in mock mode.
+        pid = _create(client, locale)
+        if with_employment:
+&gt;           _declare_employment(client, pid)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/tests/flows/test_new_user_no_portfolio.py:461: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x7d3cfbfcd7b0&gt;
+pid = 'user-0001'
+
+    def _declare_employment(client: TestClient, pid: str) -&gt; None:
+        body = {"type": "profile_edit", "text": "Employment type declared.", "ts": TS, "source": "ui",
+                "payload": {"path": "identity.employment_type", "old": None, "new": "salaried"}}
+        r = client.post(f"/profiles/{pid}/events", json=body)
+&gt;       assert r.status_code == 200, r.text
+E       AssertionError: Internal Server Error
+E       assert 500 == 200
+E        +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/tests/flows/test_new_user_no_portfolio.py:126: AssertionError</failure></testcase><testcase classname="tests.flows.test_new_user_no_portfolio" name="test_review_before_any_portfolio_is_a_clear_4xx_and_writes_nothing[False]" time="0.009" /><testcase classname="tests.flows.test_new_user_no_portfolio" name="test_review_before_any_portfolio_is_a_clear_4xx_and_writes_nothing[True]" time="0.011"><failure message="AssertionError: ('objectives.primary', 500, 'Internal Server Error')&#10;assert 500 == 200&#10; +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x7d3cfbfce470&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-561/test_review_before_any_portfol1/store')
+answered = True
+
+    @pytest.mark.parametrize("answered", [False, True])
+    def test_review_before_any_portfolio_is_a_clear_4xx_and_writes_nothing(client, store_dir, answered):
+        # (3): 4xx with a message that says what is missing; never a 500; no report, no audit, no event.
+        pid = _create(client, "en-CA")
+        if answered:
+&gt;           _answer_all(client, pid)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/tests/flows/test_new_user_no_portfolio.py:494: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x7d3cfbfce470&gt;
+pid = 'user-0001'
+
+    def _answer_all(client: TestClient, pid: str) -&gt; None:
+        assert set(ANSWERS) == {p for paths in intake.REQUIRED.values() for p in paths}     # every REQUIRED path, once
+        for path, value in ANSWERS.items():
+            r = client.post(f"/profiles/{pid}/intake/answer", json={"path": path, "value": value})
+&gt;           assert r.status_code == 200, (path, r.status_code, r.text)
+E           AssertionError: ('objectives.primary', 500, 'Internal Server Error')
+E           assert 500 == 200
+E            +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/tests/flows/test_new_user_no_portfolio.py:119: AssertionError</failure></testcase><testcase classname="tests.flows.test_new_user_no_portfolio" name="test_a_refused_review_does_not_stop_the_user_from_setting_the_portfolio_afterwards" time="0.011"><failure message="AssertionError: ('objectives.primary', 500, 'Internal Server Error')&#10;assert 500 == 200&#10; +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x7d3cfbfce250&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-561/test_a_refused_review_does_not0/store')
+
+    def test_a_refused_review_does_not_stop_the_user_from_setting_the_portfolio_afterwards(client, store_dir):
+        pid = _create(client, "en-CA")
+&gt;       _answer_all(client, pid)
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/tests/flows/test_new_user_no_portfolio.py:509: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x7d3cfbfce250&gt;
+pid = 'user-0001'
+
+    def _answer_all(client: TestClient, pid: str) -&gt; None:
+        assert set(ANSWERS) == {p for paths in intake.REQUIRED.values() for p in paths}     # every REQUIRED path, once
+        for path, value in ANSWERS.items():
+            r = client.post(f"/profiles/{pid}/intake/answer", json={"path": path, "value": value})
+&gt;           assert r.status_code == 200, (path, r.status_code, r.text)
+E           AssertionError: ('objectives.primary', 500, 'Internal Server Error')
+E           assert 500 == 200
+E            +  where 500 = &lt;Response [500 Internal Server Error]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p5-nopf/tests/flows/test_new_user_no_portfolio.py:119: AssertionError</failure></testcase><testcase classname="tests.flows.test_new_user_no_portfolio" name="test_seed_fixtures_are_untouched_by_this_module" time="0.001" /></testsuite></testsuites>
