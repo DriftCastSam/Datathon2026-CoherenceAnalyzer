@@ -16,14 +16,15 @@ the old single-file oracle, different real architecture:
      (`PUT /profiles/{id}/portfolio {as_of, value_cad, weights_pct}`).
   3. `deploy/whatif.py` `build(out, profile_dir)` precomputes for any profile directory (untouched: no persona is
      hard-coded there, before or after this task); `deploy/build_site.py` builds the EN what-if files once per
-     persona in `REPORTS` and embeds them by naming convention (`data_source.js`'s `personaFile`), not a
-     `site.whatif` dict; the FR pipeline backing `index.html` is unchanged (its own `site.whatif` convention stays).
+     persona in `PERSONA_DIRS` and embeds them by naming convention (`data_source.js`'s `personaFile`), not a
+     `site.whatif` dict. `index.html` and the FR report pipeline that backed it are retired (deleted; this file's
+     old §5 FR-pipeline tests went with them -- see git history).
   4. No user-facing string names Robert, Amira or Mateo (labels come from data); every new string passes the
      SPEC §9.3 blocklist and the D10 vocabulary.
 
 Offline and deterministic: COHERENCE_ANALYZER_LLM=mock, JS read as text (no browser, no network, no clock), the
-build runs the real pipeline in mock mode into temp dirs. `deploy/site/index.html` is untouched here (it is
-retired separately); `deploy/site/js/core/data_source.js` is a read-only reference, not owned by this task: this
+build runs the real pipeline in mock mode into temp dirs. `deploy/site/js/core/data_source.js` is a read-only
+reference, not owned by this task: this
 file points assertions at its real function and route names, it does not reimplement them. The JS scanner and the
 SPEC §9.3 blocklist / D10 vocabulary of the (also retargeted) `tests/dashboard/test_ui_flow_b.py`, and the generic
 JS-expression helpers of `tests/dashboard/test_ui_intake_confirm.py`, are reused here, not copied.
@@ -470,8 +471,8 @@ def test_whatif_build_precomputes_for_any_profile_directory(whatif, tmp_path, mo
 
 def test_whatif_and_build_site_code_has_no_persona_in_its_paths(whatif):
     """Task (3): no persona name in whatif.py (constants, names, docstrings: the profile directory is a
-    parameter) and no `WHATIF_PERSONA` / persona comparison in build_site.py (the persona list is data: REPORTS,
-    labels and the flow B file)."""
+    parameter) and no `WHATIF_PERSONA` / persona comparison in build_site.py (the persona list is data:
+    `PERSONA_DIRS`, labels and the flow B demo report)."""
     wi_tree = ast.parse((DEPLOY / "whatif.py").read_text(encoding="utf-8"))
     seen = [n.value for n in ast.walk(wi_tree) if isinstance(n, ast.Constant) and isinstance(n.value, str)]
     seen += [n.id for n in ast.walk(wi_tree) if isinstance(n, ast.Name)] + [n.attr for n in ast.walk(wi_tree) if isinstance(n, ast.Attribute)]
@@ -484,97 +485,3 @@ def test_whatif_and_build_site_code_has_no_persona_in_its_paths(whatif):
             consts = [c.value for c in ast.walk(node) if isinstance(c, ast.Constant) and isinstance(c.value, str)]
             assert not [c for c in consts if PERSONA_RE.search(c)], ast.unparse(node)[:80]
 
-
-# ---------------------------------------------------------------- 5. the built static site (FR pipeline, index.html)
-
-def _build_site(mod, out: Path) -> Path:
-    saved = os.environ.get("COHERENCE_ANALYZER_STORE_DIR")
-    sys.path.insert(0, str(DEPLOY))                     # build_site does `import whatif` / `import preview_report`
-    try:
-        built = mod.build(out)
-    finally:
-        sys.path.remove(str(DEPLOY))
-        if saved is None:
-            os.environ.pop("COHERENCE_ANALYZER_STORE_DIR", None)
-        else:
-            os.environ["COHERENCE_ANALYZER_STORE_DIR"] = saved
-    return Path(built or out)
-
-
-def _read_site(out: Path) -> dict:
-    rdir = out / "reports"
-    index = json.loads((rdir / "index.json").read_text(encoding="utf-8"))
-    reports = {e["file"]: json.loads((rdir / e["file"]).read_text(encoding="utf-8")) for e in index}
-    return {"out": out, "rdir": rdir, "index": index, "reports": reports}
-
-
-@pytest.fixture(scope="module")
-def built(tmp_path_factory) -> dict:
-    out = tmp_path_factory.mktemp("any_user_site") / "site"
-    mod = _load_deploy("build_site_any_user", "build_site.py")
-    return _read_site(_build_site(mod, out))
-
-
-def _json(path: Path):
-    return json.loads(path.read_text(encoding="utf-8"))
-
-
-def test_static_index_is_still_the_four_flow_c_reviews(built):
-    """Task (2), frozen P2.D10C constraint: the FR `reports/index.json` (backing `index.html`, being retired
-    separately) is exactly the 4 flow C reviews (same files, same order); the flow B demo report stays a separate
-    file that is not listed. Untouched by the app.html port: build_site.py's FR pipeline is unchanged."""
-    files = [e["file"] for e in built["index"]]
-    assert files == ["robert-review-nvda.json", "robert-review.json", "amira-review.json", "mateo-review.json"]
-    assert (built["rdir"] / "robert-nvda.json").is_file() and "robert-nvda.json" not in files
-    assert all(r["flow"] == "C" for r in built["reports"].values())
-
-
-def test_every_built_fr_review_has_the_what_if_of_its_own_profile(built):
-    """Task (3): `site.whatif` is `{"universe": f, "scenarios": g}` (files inside reports/) for every FR review,
-    not only Robert's: the base of each universe file is that report's profile directory (value, date, weights of
-    its portfolio.json), the two reviews of one profile share their files, the three profiles have three
-    different ones, and the legacy reports/universe.json + whatif.json are the first review's. (The EN pipeline
-    for app.html uses a naming convention instead of a `site.whatif` dict -- see
-    `test_what_if_files_are_named_from_the_persona_id_not_two_fixed_files` above.)"""
-    by_profile: dict[str, tuple[str, str]] = {}
-    for entry in built["index"]:
-        rep = built["reports"][entry["file"]]
-        wf = rep["site"]["whatif"]
-        assert isinstance(wf, dict) and {"universe", "scenarios"} <= set(wf), entry["file"]
-        for key in ("universe", "scenarios"):
-            assert wf[key] == Path(wf[key]).name and (built["rdir"] / wf[key]).is_file(), (entry["file"], key)
-        who = rep["profile_id"].removeprefix("persona-")
-        pf = _portfolio(FIXTURES / who)
-        uni, scen = _json(built["rdir"] / wf["universe"]), _json(built["rdir"] / wf["scenarios"])
-        assert uni["base"]["value_cad"] == pytest.approx(pf["value_cad"], abs=1e-9), entry["file"]
-        assert uni["base"]["as_of"] == pf["as_of"] and uni["base"]["weights_pct"] == pf["weights_pct"], entry["file"]
-        assert "NVDA" in scen and scen["NVDA"]["scenarios"], entry["file"]
-        assert by_profile.setdefault(rep["profile_id"], (wf["universe"], wf["scenarios"])) == (wf["universe"], wf["scenarios"])
-    assert len(by_profile) == 3 and len({u for u, _ in by_profile.values()}) == 3 == len({s for _, s in by_profile.values()})
-    first = built["reports"][built["index"][0]["file"]]["site"]["whatif"]
-    assert _json(built["rdir"] / "universe.json") == _json(built["rdir"] / first["universe"])
-    assert _json(built["rdir"] / "whatif.json") == _json(built["rdir"] / first["scenarios"])
-
-
-def test_the_reports_list_and_not_a_persona_constant_choose_the_fr_what_if_profile(tmp_path):
-    """Task (3): `build_site` precomputes the FR what-if of whatever profiles `REPORTS` names: a `REPORTS` list
-    holding one profile directory with a neutral name (a copy of a seed, outside the repo) gives a one-entry
-    index whose what-if is that directory's, and the legacy reports/universe.json + whatif.json are its own."""
-    fx = tmp_path / "fx"
-    shutil.copytree(FIXTURES / "robert", fx / "robert")                  # the flow B demo report still reads it
-    shutil.copytree(FIXTURES / "mateo", fx / "someone-new")
-    mod = _load_deploy("build_site_any_user_reports", "build_site.py")
-    assert not hasattr(mod, "WHATIF_PERSONA")
-    mod.FIXTURES = fx
-    mod.REPORTS = [("someone-review", "someone-new", "portfolio.json", "Profil de test")]
-    site_out = _read_site(_build_site(mod, tmp_path / "site"))
-    assert [e["file"] for e in site_out["index"]] == ["someone-review.json"]
-    rep = site_out["reports"]["someone-review.json"]
-    wf = rep["site"]["whatif"]
-    assert isinstance(wf, dict) and (site_out["rdir"] / wf["universe"]).is_file() and (site_out["rdir"] / wf["scenarios"]).is_file()
-    pf = _portfolio(fx / "someone-new")
-    for name in (wf["universe"], "universe.json"):
-        base = _json(site_out["rdir"] / name)["base"]
-        assert base["value_cad"] == pytest.approx(pf["value_cad"], abs=1e-9) and base["weights_pct"] == pf["weights_pct"], name
-    assert "NVDA" in _json(site_out["rdir"] / "whatif.json")
-    assert (site_out["rdir"] / "robert-nvda.json").is_file(), "the flow B demo report is its own file, whatever REPORTS says"

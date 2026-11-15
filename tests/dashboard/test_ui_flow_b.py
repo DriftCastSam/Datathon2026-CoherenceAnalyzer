@@ -410,8 +410,9 @@ def test_intent_form_is_wired_into_the_page(trade_src):
 
 
 def test_index_listing_stays_the_four_flow_c_reviews():
-    """P2.D10C frozen oracle: build_site's FR report list is unchanged (4 flow C reviews); Flow B is not in
-    it. build_site.py is untouched by this change."""
+    """P2.D10C oracle, retargeted: build_site's EN report list is 4 flow C reviews (Robert current, Robert with
+    NVDA, Amira, Mateo); the Flow B demo report (robert-nvda.json) is not one of them (checked separately by
+    test_build_site_publishes_the_flow_b_demo_under_reports_en_ca_too, tests/dashboard/test_ui_intake_confirm.py)."""
     spec = importlib.util.spec_from_file_location("build_site_flow_b_ui", BUILD_SITE)
     mod = importlib.util.module_from_spec(spec)
     sys.path.insert(0, str(DEPLOY))
@@ -419,8 +420,8 @@ def test_index_listing_stays_the_four_flow_c_reviews():
         spec.loader.exec_module(mod)
     finally:
         sys.path.remove(str(DEPLOY))
-    reports = getattr(mod, "REPORTS")
-    names = [r[0] for r in reports]
+    personas = [mod.load_persona(d) for d in mod.PERSONA_DIRS]
+    names = [stem for p in personas for stem, _, _ in mod.report_specs_en(p)]
     assert len(names) == 4
     assert all(n.endswith("-review") or n.endswith("-review-nvda") for n in names), names
     assert not [n for n in names if n == "robert-nvda"]

@@ -405,19 +405,17 @@ def built_site(tmp_path_factory) -> Path:
 
 
 def test_build_site_publishes_the_flow_b_demo_under_reports_en_ca_too(site, built_site):
-    """trade.js's offline/static demo fetches `reports/en-CA/robert-nvda.json` directly (never through either
-    locale's index.json); `deploy/build_site.py` must publish it there via `deploy/preview_report.py`'s
-    `build_en_ca` (same intent/metrics/verdict as the legacy `reports/robert-nvda.json`, but with `headroom.line`
-    filled in -- see `tests/dashboard/test_ui_flow_b.py`'s `test_build_en_ca_...`)."""
+    """trade.js's offline/static demo fetches `reports/en-CA/robert-nvda.json` directly (never through
+    index.json); `deploy/build_site.py` must publish it there via `deploy/preview_report.py`'s `build_en_ca`
+    (Robert's NVDA 10% intent, with `headroom.line` filled in -- see `tests/dashboard/test_ui_flow_b.py`'s
+    `test_build_en_ca_...`, which checks `build_en_ca`'s own output against `preview_report.build()` directly)."""
     assert site["trade.js"].count("reports/en-CA/robert-nvda.json") >= 1
-    legacy = json.loads((built_site / "reports" / "robert-nvda.json").read_text(encoding="utf-8"))
     en = json.loads((built_site / "reports" / "en-CA" / "robert-nvda.json").read_text(encoding="utf-8"))
-    for key in ("intent", "metrics_current", "metrics_proposed", "verdict"):
-        assert en[key] == legacy[key], key
+    assert en["intent"]["ticker"] == "NVDA" and en["intent"]["target_weight_pct"] == 10
+    assert en["verdict"] in ("coherent", "coherent_with_warnings", "incoherent")
+    assert "metrics_current" in en and "metrics_proposed" in en
     assert isinstance(en["headroom"].get("line"), str) and en["headroom"]["line"]
-    index_fr = json.loads((built_site / "reports" / "index.json").read_text(encoding="utf-8"))
     index_en = json.loads((built_site / "reports" / "en-CA" / "index.json").read_text(encoding="utf-8"))
-    assert "robert-nvda.json" not in [e["file"] for e in index_fr]
     assert "robert-nvda.json" not in [e["file"] for e in index_en]
 
 

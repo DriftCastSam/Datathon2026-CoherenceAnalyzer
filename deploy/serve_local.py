@@ -44,10 +44,17 @@ LIVE_LABEL_SUFFIX = " · live analysis"
 STORE_DIR_ENV = build_site.STORE_DIR_ENV
 STORE_DIR_PREFIX = "coherence-serve-"
 MAX_WHATIF_TICKERS = 10
+MAX_WHATIF_AMOUNT_CAD = 1e9
 
 
 class WhatifRequest(BaseModel):
     tickers: list[str] = Field(..., min_length=1, max_length=MAX_WHATIF_TICKERS)
+
+
+class WhatifAmountRequest(BaseModel):
+    ticker: str
+    amount_cad: float = Field(..., gt=0, le=MAX_WHATIF_AMOUNT_CAD)
+    funding: str
 
 
 def live_review(profile_id: str) -> dict[str, Any]:
@@ -114,11 +121,37 @@ def live_whatif(profile_id: str, body: WhatifRequest) -> dict[str, Any]:
     return {"universe": univ, "whatif": scen}
 
 
+def live_whatif_amount(profile_id: str, body: WhatifAmountRequest) -> dict[str, Any]:
+    """Compute one what-if scenario for a user-typed CAD amount, from the working copy profile.
+
+    Args:
+        profile_id: persona id (e.g. "persona-robert")
+        body: ticker, amount_cad (> 0) and funding id ("pro_rata_all", "specific:<T>" or "cash")
+
+    Returns:
+        {"scenario": {...}}, the same shape as one entry of whatif.json's scenarios plus value_cad
+
+    Raises:
+        HTTPException: 404 for unknown profile, 422 for an unknown ticker or funding, or an amount that the
+        chosen funding cannot cover
+    """
+    if body.ticker not in set(data.load_assets().index):
+        raise HTTPException(status_code=422, detail=f"ticker {body.ticker!r} is not in the universe")
+    with api._LOCK:
+        work = api.workdir(profile_id)
+        try:
+            ctx = whatif.context(work, build_site.SITE_LOCALE)
+            scen = whatif.scenario_for_amount(ctx, body.ticker, body.amount_cad, body.funding)
+        except (ValueError, TypeError) as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+    return {"scenario": scen}
+
+
 def create_app(site_dir: Path) -> FastAPI:
     """Build the one-origin app.
 
     Args:
-        site_dir: directory holding the built static site (`index.html`, `app.html`, ...).
+        site_dir: directory holding the built static site (`app.html`, `design.html`, ...).
 
     Returns:
         A FastAPI app with the API mounted at `/api` and the static site at `/`.
@@ -136,6 +169,9 @@ def create_app(site_dir: Path) -> FastAPI:
     )
     root_app.add_api_route(
         f"{SITE_API_PREFIX}/profiles/{{profile_id}}/whatif", live_whatif, methods=["POST"]
+    )
+    root_app.add_api_route(
+        f"{SITE_API_PREFIX}/profiles/{{profile_id}}/whatif/amount", live_whatif_amount, methods=["POST"]
     )
     root_app.mount(API_MOUNT_PATH, api_app)
     root_app.mount("/", StaticFiles(directory=site_dir, html=True), name="site")

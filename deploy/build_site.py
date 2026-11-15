@@ -2,19 +2,22 @@
 """Build the static dashboard for CloudFront (deploy/cloudfront.yaml) from the REAL pipeline.
 
 Output (<out>, default .cache/site/):
-  index.html, design.html   deploy/site/ (the dashboard and the static design board)
-  reports/index.json        the reports the dashboard can open (Robert current, Robert + NVDA, Amira, Mateo)
-  reports/robert-nvda.json  the Flow B demo report (deploy/preview_report.py, Robert NVDA 10 %): its own file, not in the index
-  reports/universe.json     starter universe + base metrics (Search and ask) of the first review's profile (legacy file)
-  reports/whatif.json       precomputed What-if scenarios (deploy/whatif.py) of the first review's profile (legacy file)
-  reports/universe-<dir>.json, reports/whatif-<dir>.json   the same for each profile directory REPORTS names; every built review
-                            names its own pair in `site.whatif`
-  reports/<name>.json       `pipeline.review(...)` reports (SPEC §13 + §20.4 sections + §20.9 profile_coherence, plus the
+  app.html, design.html     deploy/site/ (the app and the static design board)
+  reports/en-CA/index.json  the reports the app can open (Robert current, Amira, Mateo + Robert's NVDA scenario)
+  reports/en-CA/robert-nvda.json   trade.js's offline worked example (Robert, NVDA 10 %): its own file, not in the index
+  reports/en-CA/universe-<dir>.json, reports/en-CA/whatif-<dir>.json   per-profile what-if (deploy/whatif.py); every
+                            built review names its own pair in `site.whatif`
+  reports/en-CA/intake.json the intake question manifest (deploy/site/js/screens/conversation.js's static demo path)
+  reports/en-CA/<name>.json `pipeline.review(...)` reports (SPEC §13 + §20.4 sections + §20.9 profile_coherence, plus the
                             P2 blocks `stress`, `goals`, `metrics_current.lookthrough`) and `site`: display extras
                             computed by the same rules code (profile card, limits)
 
 Runs offline in mock mode (recorded LLM outputs, fixtures/llm_cache/). The store is a temp dir, so building
 the site never writes to reports/ or profiles/. `build(out)` is importable (tests/dashboard/test_site.py).
+
+`deploy/site/index.html` (the earlier French single-page dashboard) is retired: every feature it had is now in
+app.html, and the four-plus frozen oracles that used to pin it as text were retargeted to app.html's real modules
+(see git history / README.md's P8.UNIFY entry). This module's French report pipeline was dropped with it.
 """
 from __future__ import annotations
 
@@ -31,20 +34,13 @@ sys.path.insert(0, str(ROOT))
 os.environ.setdefault("COHERENCE_ANALYZER_LLM", "mock")
 
 FIXTURES = ROOT / "fixtures"
-FR_LOCALE = "fr-CA"
 EN_LOCALE = "en-CA"
 SITE_LOCALE = EN_LOCALE
 INTAKE_FILE = "intake.json"
 STORE_DIR_ENV = "COHERENCE_ANALYZER_STORE_DIR"
 
-# French labels for dashboard (index.html) - must match origin/loop/p0 for frozen tests
-REPORTS_FR = [  # (file name, persona fixture dir, portfolio file, picker label); the index keeps this order
-    ("robert-review-nvda", "robert", "portfolio_review.json", "Robert · portefeuille avec NVDA à {NVDA} %"),
-    ("robert-review", "robert", "portfolio.json", "Robert · portefeuille actuel"),
-    ("amira-review", "amira", "portfolio.json", "Amira · portefeuille actuel"),
-    ("mateo-review", "mateo", "portfolio.json", "Mateo · portefeuille actuel"),
-]
-REPORTS = REPORTS_FR  # Alias for test patching
+# The persona fixture directories the site builds for, in picker order.
+PERSONA_DIRS = ["robert", "amira", "mateo"]
 
 # English labels for app (app.html)
 LABEL_SEPARATOR = " · "
@@ -53,10 +49,7 @@ EXTRA_PORTFOLIOS = {  # dir name -> [(report stem suffix, portfolio file, label)
     "robert": [("-nvda", "portfolio_review.json", "portfolio with NVDA at 10%")],
 }
 
-# The Flow B demo report (deploy/preview_report.py output): its own file, and the profile directory it was built from.
-FLOW_B_NAME, FLOW_B_PROFILE = "robert-nvda", "robert"
-
-# The profiles the what-if is precomputed for are the ones REPORTS_FR names (deploy/whatif.py takes the profile directory).
+# The profiles the what-if is precomputed for are the ones PERSONA_DIRS names (deploy/whatif.py takes the profile directory).
 
 
 def _val(x):
@@ -129,11 +122,6 @@ def site_extras(profile_dir: Path, name: str, portfolio_file: str, whatif_files:
     }
 
 
-def _label(template: str, extras: dict) -> str:
-    """Picker label; any figure in it is read from the portfolio file (`{NVDA}` = that weight in percent)."""
-    return template.format(**{t.replace(".", "_"): f"{w:g}" for t, w in extras["weights_pct"].items()})
-
-
 def missing_by_factor(persona: str) -> dict:
     """{factor: [missing intake path, ...]} = `intake.missing` on the persona's profile (paths only: no AI output, no limit).
     The static demo has no server, so the « Points à clarifier » card reads this list, read-only."""
@@ -151,9 +139,8 @@ def intake_payload(locale: str) -> dict:
 
 
 def _build_whatif(out: Path, personas: list[tuple[str, str]], locale: str, legacy_first: bool = True) -> dict[str, dict]:
-    """Precompute what-if for personas. Each tuple is (dir_name, key_for_filename).
-    For French: key is dir_name. For English: key is profile_id.
-    Returns {dir_name: {"universe": file, "scenarios": file}} for French, empty dict for English."""
+    """Precompute what-if for personas. Each tuple is (dir_name, key_for_filename): key is profile_id.
+    Returns {dir_name: {"universe": file, "scenarios": file}}."""
     import whatif  # deploy/whatif.py
     out.mkdir(parents=True, exist_ok=True)
     files: dict[str, dict] = {}
@@ -171,71 +158,39 @@ def _build_whatif(out: Path, personas: list[tuple[str, str]], locale: str, legac
     return files
 
 
-def build_whatif_fr(out: Path) -> dict[str, dict]:
-    """Precompute the what-if (deploy/whatif.py: universe + scenarios, real engine, no LLM) for each profile directory REPORTS
-    names, once per directory. Files: reports/universe-<dir>.json and reports/whatif-<dir>.json; the legacy reports/universe.json
-    and reports/whatif.json are those of the first review. Returns {dir name: {"universe": file, "scenarios": file}}."""
-    seen = set()
-    personas = []
-    for _, dir_name, _, _ in REPORTS:
-        if dir_name not in seen:
-            seen.add(dir_name)
-            personas.append((dir_name, dir_name))
-    return _build_whatif(out, personas, FR_LOCALE)
-
-
 def build_whatif_en(out: Path, personas: list[Persona]) -> None:
     """Precompute the what-if for each persona. Files: reports/en-CA/universe-<profile_id>.json and whatif-<profile_id>.json."""
     persona_tuples = [(p.dir_name, p.profile_id) for p in personas]
     _build_whatif(out, persona_tuples, EN_LOCALE)
 
 
-def _build_reports(out: Path, locale: str, report_specs: list[tuple], whatif_files: dict[str, dict] | None = None,
+def _build_reports(out: Path, locale: str, report_specs: list[tuple],
                    include_intake: bool = False) -> list[dict]:
-    """Build reports for given locale and specs. report_specs format depends on locale:
-    French: (name, dir_name, pf_file, label_template)
-    English: (Persona, stem, pf_file, label_suffix)"""
+    """Build reports for given locale and specs: (Persona, stem, pf_file, label_suffix)."""
     from coherence_analyzer import pipeline
     out.mkdir(parents=True, exist_ok=True)
     index = []
 
-    if locale == FR_LOCALE:
-        for name, dir_name, pf_file, template in report_specs:
-            rep = pipeline.review(FIXTURES / dir_name, pf_file, locale=locale)
-            pers = load_persona(dir_name)
-            extras = site_extras(FIXTURES / dir_name, pers.name, pf_file,
-                               whatif_files.get(dir_name) if whatif_files else None)
-            label = _label(template, extras)
-            rep["site"] = {**extras, "label": label, "intake": missing_by_factor(dir_name)}
-            (out / f"{name}.json").write_text(json.dumps(rep, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-            index.append({"file": f"{name}.json", "label": label, "verdict": rep["verdict"],
-                         "profile": rep.get("profile_coherence", {}).get("status")})
-    else:
-        for persona, stem, pf_file, label_suffix in report_specs:
-            rep = pipeline.review(FIXTURES / persona.dir_name, pf_file, locale=locale)
-            extras = site_extras(FIXTURES / persona.dir_name, persona.name, pf_file, whatif_files=None)
-            label = f"{persona.name}{LABEL_SEPARATOR}{label_suffix}"
-            rep["site"] = {**extras, "label": label, "intake": missing_by_factor(persona.dir_name)}
-            (out / f"{stem}.json").write_text(json.dumps(rep, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
-            index.append({
-                "persona_id": persona.profile_id,
-                "name": persona.name,
-                "file": f"{stem}.json",
-                "label": label,
-                "portfolio": pf_file,
-                "verdict": rep["verdict"],
-                "profile": rep.get("profile_coherence", {}).get("status")
-            })
+    for persona, stem, pf_file, label_suffix in report_specs:
+        rep = pipeline.review(FIXTURES / persona.dir_name, pf_file, locale=locale)
+        extras = site_extras(FIXTURES / persona.dir_name, persona.name, pf_file, whatif_files=None)
+        label = f"{persona.name}{LABEL_SEPARATOR}{label_suffix}"
+        rep["site"] = {**extras, "label": label, "intake": missing_by_factor(persona.dir_name)}
+        (out / f"{stem}.json").write_text(json.dumps(rep, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+        index.append({
+            "persona_id": persona.profile_id,
+            "name": persona.name,
+            "file": f"{stem}.json",
+            "label": label,
+            "portfolio": pf_file,
+            "verdict": rep["verdict"],
+            "profile": rep.get("profile_coherence", {}).get("status")
+        })
 
     (out / "index.json").write_text(json.dumps(index, ensure_ascii=False), encoding="utf-8")
     if include_intake:
         (out / INTAKE_FILE).write_text(json.dumps(intake_payload(locale), ensure_ascii=False), encoding="utf-8")
     return index
-
-
-def build_reports_fr(out: Path, whatif_files: dict[str, dict]) -> list[dict]:
-    """Build French reports for dashboard (index.html). Entry shape: {file, label, verdict, profile} - must match origin/loop/p0."""
-    return _build_reports(out, FR_LOCALE, REPORTS, whatif_files)
 
 
 def build_reports_en(out: Path, personas: list[Persona]) -> list[dict]:
@@ -244,25 +199,6 @@ def build_reports_en(out: Path, personas: list[Persona]) -> list[dict]:
              for p in personas
              for stem, pf_file, label_suffix in report_specs_en(p)]
     return _build_reports(out, EN_LOCALE, specs, include_intake=True)
-
-
-def build_flow_b(out: Path) -> Path:
-    """Flow B demo report (Robert, NVDA 10 %, funding specific ZST.TO): `deploy/preview_report.py` `build()` into a temp dir,
-    then ONLY `robert-nvda.json` is published, as its own file. It is not listed in reports/index.json (that index stays the
-    four flow C reviews, tests/dashboard/test_ui_flow_b.py); the page loads it with loadFlowB()."""
-    import importlib.util
-    spec = importlib.util.spec_from_file_location("preview_report_site", ROOT / "deploy" / "preview_report.py")
-    mod = importlib.util.module_from_spec(spec)
-    spec.loader.exec_module(mod)
-    out.mkdir(parents=True, exist_ok=True)
-    with tempfile.TemporaryDirectory() as tmp:
-        paths = mod.build(Path(tmp))
-        src = next(p for p in paths if p.stem == FLOW_B_NAME)
-        dest = out / f"{FLOW_B_NAME}.json"
-        doc = json.loads(src.read_text(encoding="utf-8"))
-        doc["intake"] = missing_by_factor(FLOW_B_PROFILE)  # static demo: the missing list, read-only (same profile as the report)
-        dest.write_text(json.dumps(doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
-    return dest
 
 
 def build(out: Path) -> Path:
@@ -280,24 +216,13 @@ def build(out: Path) -> Path:
     try:
         with tempfile.TemporaryDirectory() as store:
             os.environ[STORE_DIR_ENV] = store
-            # French reports for dashboard (index.html) - must match origin/loop/p0 for frozen tests
-            fr_files = build_whatif_fr(out / "reports")
-            build_reports_fr(out / "reports", fr_files)
-            build_flow_b(out / "reports")
             # English reports for app (app.html) - full shape with persona_id, name, etc.
-            # Preserve order and deduplicate persona directories from REPORTS
-            seen = set()
-            persona_dirs = []
-            for _, dir_name, _, _ in REPORTS:
-                if dir_name not in seen:
-                    seen.add(dir_name)
-                    persona_dirs.append(dir_name)
-            personas = [load_persona(dir_name) for dir_name in persona_dirs]
+            personas = [load_persona(dir_name) for dir_name in PERSONA_DIRS]
             build_whatif_en(out / "reports" / "en-CA", personas)
             build_reports_en(out / "reports" / "en-CA", personas)
             # app.html's trade.js reads its own offline/static worked example directly at
-            # reports/en-CA/robert-nvda.json (STATIC_DEMO_PATH), never through either locale's index.json. Built by
-            # deploy/preview_report.py's `build_en_ca` (additive to its FR `build()`/`build_flow_b` above), which
+            # reports/en-CA/robert-nvda.json (STATIC_DEMO_PATH), never through index.json. Built by
+            # deploy/preview_report.py's `build_en_ca` (additive to its own `build()`/`build_flow_b`), which
             # fills in `headroom.line` with the real SPEC §8 EN template (tests/dashboard/test_ui_flow_b.py).
             import preview_report  # deploy/preview_report.py (deploy/ is on sys.path below, like `import whatif`)
             preview_report.build_en_ca(out / "reports" / "en-CA")

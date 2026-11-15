@@ -67,51 +67,19 @@ def test_build_reports_en_produces_full_index_shape(tmp_path, monkeypatch):
     assert rep["explanation"]["disclaimer"] == "Educational simulation with fictional profiles. This is not personalised financial advice. No transaction is executed."
 
 
-def test_build_reports_fr_produces_simple_index_shape(tmp_path, monkeypatch):
-    """French reports have file, label, verdict, profile (no persona_id/name/portfolio) to match origin/loop/p0."""
-    out = tmp_path / "reports"
-    with tempfile.TemporaryDirectory() as store:
-        monkeypatch.setenv(build_site.STORE_DIR_ENV, store)
-        fr_files = build_site.build_whatif_fr(out)
-        index = build_site.build_reports_fr(out, fr_files)
-
-    assert len(index) > 0
-    entry = index[0]
-    assert "file" in entry
-    assert "label" in entry
-    assert "verdict" in entry
-    assert "profile" in entry
-    # These should NOT be present in French index
-    assert "persona_id" not in entry
-    assert "name" not in entry
-    assert "portfolio" not in entry
-    assert "portefeuille" in entry["label"]
 
 
-def test_build_emits_app_html_and_index_html(tmp_path, monkeypatch):
+def test_build_emits_app_html(tmp_path, monkeypatch):
     with tempfile.TemporaryDirectory() as store:
         monkeypatch.setenv(build_site.STORE_DIR_ENV, store)
         build_site.build(tmp_path)
 
     assert (tmp_path / "app.html").is_file(), "app.html (English app) should exist"
-    assert (tmp_path / "index.html").is_file(), "index.html (French dashboard) should exist"
+    assert not (tmp_path / "index.html").is_file(), "index.html (the retired French dashboard) should not exist"
     assert not (tmp_path / "legacy.html").is_file(), "legacy.html should not exist"
 
     # Check report directories
-    assert (tmp_path / "reports" / "index.json").is_file(), "French reports index"
     assert (tmp_path / "reports" / "en-CA" / "index.json").is_file(), "English reports index"
-
-    # Verify French reports (simple shape)
-    fr_index = json.loads((tmp_path / "reports" / "index.json").read_text(encoding="utf-8"))
-    assert len(fr_index) > 0
-    fr_entry = fr_index[0]
-    assert "file" in fr_entry and "label" in fr_entry and "verdict" in fr_entry
-    assert "persona_id" not in fr_entry, "French index should not have persona_id"
-    assert "portefeuille" in fr_entry["label"]
-
-    fr_rep = json.loads((tmp_path / "reports" / "robert-review.json").read_text(encoding="utf-8"))
-    assert "portefeuille" in fr_rep["explanation"]["headline"].lower()
-    assert fr_rep["explanation"]["disclaimer"].startswith("Simulation éducative")
 
     # Verify English reports (full shape with persona_id, name, etc.)
     en_index = json.loads((tmp_path / "reports" / "en-CA" / "index.json").read_text(encoding="utf-8"))
@@ -144,9 +112,6 @@ def test_build_emits_app_html_and_index_html(tmp_path, monkeypatch):
     app_html = (tmp_path / "app.html").read_text(encoding="utf-8")
     assert 'lang="en-CA"' in app_html
     assert "Compass" in app_html
-
-    index_html = (tmp_path / "index.html").read_text(encoding="utf-8")
-    assert 'lang="fr"' in index_html
 
 
 def test_whatif_respects_locale_parameter(tmp_path):

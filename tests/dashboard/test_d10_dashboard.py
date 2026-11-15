@@ -39,7 +39,7 @@ SHELL = DEPLOY / "site" / "js" / "core" / "shell.js"
 PREVIEW = DEPLOY / "preview_report.py"
 BUILD_SITE = DEPLOY / "build_site.py"
 SCHEMA = ROOT / "coherence_analyzer" / "schemas" / "report.json"
-INDEX = DEPLOY / "site" / "index.html"  # still built by build_site.py (FR dashboard); not retired yet, not touched
+TRADE_JS = DEPLOY / "site" / "js" / "screens" / "trade.js"  # headroom rendering lives here now (index.html retired)
 
 # SPEC §9.3 item 3, verbatim list (matched case- and accent-insensitively).
 BLOCKLIST = (
@@ -414,13 +414,13 @@ def site(tmp_path_factory) -> dict:
             os.environ.pop("COHERENCE_ANALYZER_STORE_DIR", None)
         else:
             os.environ["COHERENCE_ANALYZER_STORE_DIR"] = saved_env
-    rdir = built / "reports"
+    rdir = built / "reports" / "en-CA"
     index = json.loads((rdir / "index.json").read_text(encoding="utf-8"))
     reports = {e["file"]: json.loads((rdir / e["file"]).read_text(encoding="utf-8")) for e in index}
     return {"out": built, "index": index, "reports": reports,
             "universe": json.loads((rdir / "universe.json").read_text(encoding="utf-8")),
             "whatif": json.loads((rdir / "whatif.json").read_text(encoding="utf-8")),
-            "html": (built / "index.html").read_text(encoding="utf-8")}
+            "html": (DEPLOY / "site" / "js" / "screens" / "trade.js").read_text(encoding="utf-8")}
 
 
 def test_schema_has_headroom_and_no_alternatives():
@@ -491,10 +491,9 @@ def test_built_whatif_and_universe_have_no_option_or_ranking_fields(site):
 
 
 def test_built_dashboard_is_the_headroom_page(site):
-    """The page copied into the site is the one that reads `headroom` and never `alternatives` (SPEC §13); the
-    FR dashboard (index.html) is unaffected by the app port and is still built as is -- it is retired separately,
-    not by this change."""
-    assert site["html"] == INDEX.read_text(encoding="utf-8")
+    """The script copied into the site is the one that reads `headroom` and never `alternatives` (SPEC §13):
+    trade.js (app.html's Flow B screen, since index.html is retired)."""
+    assert site["html"] == TRADE_JS.read_text(encoding="utf-8")
     assert "headroom" in site["html"] and "alternatives" not in site["html"].lower()
 
 
