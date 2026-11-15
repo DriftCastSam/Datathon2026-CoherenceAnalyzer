@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="9" skipped="0" tests="16" time="0.309" timestamp="2026-11-15T01:29:43.433483+00:00" hostname="bomboclat-laptop"><testcase classname="tests.checks.test_s4_noncheckable" name="test_unapproved_rule_of_every_kind_gets_an_info_reminder" time="0.001" /><testcase classname="tests.checks.test_s4_noncheckable" name="test_approved_rule_that_is_not_promoted_still_gets_a_reminder[prefer_attribute]" time="0.001"><failure message="assert 0 == 1&#10; +  where 0 = len([])">rule = {'rule_kind': 'prefer_attribute', 'params': {'attribute': 'understandable_business'}, 'applies_to': 'single_stocks', 'quote': 'I prefer businesses I understand', ...}
+
+    @pytest.mark.parametrize("rule", [
+        _rule("prefer_attribute", {"attribute": "understandable_business"}, Q_PREFER, True, "single_stocks"),
+        _rule("avoid_attribute", {"attribute": "speculative"}, Q_AVOID, True),
+        _rule("other", {}, Q_OTHER, True),
+    ], ids=["prefer_attribute", "avoid_attribute", "other"])
+    def test_approved_rule_that_is_not_promoted_still_gets_a_reminder(rule):
+        """§7.4 S4 + §6.2 N3: approved prefer/avoid/other rules are not promoted into limits, so they stay S4 reminders."""
+        out = _s4([rule])
+&gt;       assert len(out) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-s4/tests/checks/test_s4_noncheckable.py:84: AssertionError</failure></testcase><testcase classname="tests.checks.test_s4_noncheckable" name="test_approved_rule_that_is_not_promoted_still_gets_a_reminder[avoid_attribute]" time="0.001"><failure message="assert 0 == 1&#10; +  where 0 = len([])">rule = {'rule_kind': 'avoid_attribute', 'params': {'attribute': 'speculative'}, 'applies_to': 'all', 'quote': 'I avoid speculative things', ...}
+
+    @pytest.mark.parametrize("rule", [
+        _rule("prefer_attribute", {"attribute": "understandable_business"}, Q_PREFER, True, "single_stocks"),
+        _rule("avoid_attribute", {"attribute": "speculative"}, Q_AVOID, True),
+        _rule("other", {}, Q_OTHER, True),
+    ], ids=["prefer_attribute", "avoid_attribute", "other"])
+    def test_approved_rule_that_is_not_promoted_still_gets_a_reminder(rule):
+        """§7.4 S4 + §6.2 N3: approved prefer/avoid/other rules are not promoted into limits, so they stay S4 reminders."""
+        out = _s4([rule])
+&gt;       assert len(out) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-s4/tests/checks/test_s4_noncheckable.py:84: AssertionError</failure></testcase><testcase classname="tests.checks.test_s4_noncheckable" name="test_approved_rule_that_is_not_promoted_still_gets_a_reminder[other]" time="0.000"><failure message="assert 0 == 1&#10; +  where 0 = len([])">rule = {'rule_kind': 'other', 'params': {}, 'applies_to': 'all', 'quote': 'I like round numbers', ...}
+
+    @pytest.mark.parametrize("rule", [
+        _rule("prefer_attribute", {"attribute": "understandable_business"}, Q_PREFER, True, "single_stocks"),
+        _rule("avoid_attribute", {"attribute": "speculative"}, Q_AVOID, True),
+        _rule("other", {}, Q_OTHER, True),
+    ], ids=["prefer_attribute", "avoid_attribute", "other"])
+    def test_approved_rule_that_is_not_promoted_still_gets_a_reminder(rule):
+        """§7.4 S4 + §6.2 N3: approved prefer/avoid/other rules are not promoted into limits, so they stay S4 reminders."""
+        out = _s4([rule])
+&gt;       assert len(out) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-s4/tests/checks/test_s4_noncheckable.py:84: AssertionError</failure></testcase><testcase classname="tests.checks.test_s4_noncheckable" name="test_approved_promoted_rule_gets_no_reminder[exclude_activity]" time="0.000" /><testcase classname="tests.checks.test_s4_noncheckable" name="test_approved_promoted_rule_gets_no_reminder[max_theme_weight]" time="0.000" /><testcase classname="tests.checks.test_s4_noncheckable" name="test_approved_theme_rule_without_a_number_is_not_promoted_so_it_is_reminded" time="0.000"><failure message="AssertionError: assert [] == ['not too much tech']&#10;  &#10;  Right contains one more item: 'not too much tech'&#10;  Use -v to get more diff">def test_approved_theme_rule_without_a_number_is_not_promoted_so_it_is_reminded():
+        """§6.2 N3 (amira: max_theme_weight with no number): until the number exists nothing is promoted into limits,
+        so the rule is still only a soft reminder."""
+        rule = _rule("max_theme_weight", {"theme": "tech_heavy"}, Q_THEME, True)
+        # SPEC-AMBIGUITY: the task says "every approved rule that is not promoted"; limits skips a theme rule with no
+        # numeric max_pct, so the stricter reading is that it still gets the reminder.
+&gt;       assert _quotes(_s4([rule])) == [Q_THEME]
+E       AssertionError: assert [] == ['not too much tech']
+E         
+E         Right contains one more item: 'not too much tech'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-s4/tests/checks/test_s4_noncheckable.py:105: AssertionError</failure></testcase><testcase classname="tests.checks.test_s4_noncheckable" name="test_mixed_batch_emits_exactly_the_non_promoted_rules" time="0.001"><failure message="AssertionError: assert ['I avoid spe... 'no tobacco'] == ['I avoid spe... 'no tobacco']&#10;  &#10;  At index 1 diff: 'no tobacco' != 'I like round numbers'&#10;  Right contains 2 more items, first extra item: 'I prefer businesses I understand'&#10;  Use -v to get more diff">def test_mixed_batch_emits_exactly_the_non_promoted_rules():
+        """§7.4 S4: unapproved + approved-non-promoted are reminded; approved-promoted are not."""
+        promoted = [_rule("exclude_activity", {"tag": "fossil_fuel_producer"}, Q_TAG, True),
+                    _rule("max_theme_weight", {"theme": "tech_heavy", "max_pct": 40}, Q_THEME_NUM, True)]
+        reminded = [_rule("prefer_attribute", {"attribute": "understandable_business"}, Q_PREFER, True),
+                    _rule("avoid_attribute", {"attribute": "speculative"}, Q_AVOID, False),
+                    _rule("other", {}, Q_OTHER, True),
+                    _rule("exclude_activity", {"tag": "tobacco"}, "no tobacco", False)]
+        out = _s4(promoted + reminded)
+&gt;       assert sorted(_quotes(out)) == sorted(r["quote"] for r in reminded)
+E       AssertionError: assert ['I avoid spe... 'no tobacco'] == ['I avoid spe... 'no tobacco']
+E         
+E         At index 1 diff: 'no tobacco' != 'I like round numbers'
+E         Right contains 2 more items, first extra item: 'I prefer businesses I understand'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-s4/tests/checks/test_s4_noncheckable.py:117: AssertionError</failure></testcase><testcase classname="tests.checks.test_s4_noncheckable" name="test_reminder_quote_comes_from_the_rule_and_is_a_substring_of_the_notes" time="0.000" /><testcase classname="tests.checks.test_s4_noncheckable" name="test_no_rules_or_no_parsed_notes_gives_no_reminder" time="0.000" /><testcase classname="tests.checks.test_s4_noncheckable" name="test_s4_is_info_only_never_violation_and_not_in_the_verdict" time="0.000"><failure message="AssertionError: assert 1 == 2&#10; +  where 1 = len([{'id': 'S4', 'kind': 'soft', 'status': 'info', 'subject': 'I like round numbers', 'value': None, 'limit': None, 'unit...values.notes'], 'source': 'rule:unapproved_parsed_rule', 'confidence': 0.8, 'message_key': 'parsed_rule_not_approved'}])">def test_s4_is_info_only_never_violation_and_not_in_the_verdict():
+        """Invariant 3 + D3 + §20.2 (preferences: S4, info only): reminders never change the verdict."""
+        rules = [_rule("prefer_attribute", {"attribute": "understandable_business"}, Q_PREFER, True),
+                 _rule("other", {}, Q_OTHER, False)]
+        out = soft.run_all(_profile(rules), None)
+        s4 = [c for c in out if c["id"] == "S4"]
+&gt;       assert len(s4) == 2
+E       AssertionError: assert 1 == 2
+E        +  where 1 = len([{'id': 'S4', 'kind': 'soft', 'status': 'info', 'subject': 'I like round numbers', 'value': None, 'limit': None, 'unit...values.notes'], 'source': 'rule:unapproved_parsed_rule', 'confidence': 0.8, 'message_key': 'parsed_rule_not_approved'}])
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-s4/tests/checks/test_s4_noncheckable.py:141: AssertionError</failure></testcase><testcase classname="tests.checks.test_s4_noncheckable" name="test_s4_reminders_are_not_a_limits_input_and_limits_do_not_change" time="0.001"><failure message="AssertionError: assert 0 == 2&#10; +  where 0 = len([])&#10; +    where [] = _s4([{'rule_kind': 'prefer_attribute', 'params': {'attribute': 'understandable_business'}, 'applies_to': 'all', 'quote': '...d_attribute', 'params': {'attribute': 'speculative'}, 'applies_to': 'all', 'quote': 'I avoid speculative things', ...}])">def test_s4_reminders_are_not_a_limits_input_and_limits_do_not_change():
+        """Invariant 2: S4 reads the LLM-parsed field but only emits info; limits for approved prefer/avoid rules stay
+        identical to the same profile with no parsed rules (they are reminders, not promoted)."""
+        prof = json.loads((ROOT / "fixtures" / "robert" / "profile.json").read_text(encoding="utf-8"))
+    
+        def lim(rules):
+            p = copy.deepcopy(prof)
+            p["values"]["parsed_notes"]["value"] = rules
+            derived = derive.derive_all(p, portfolio_value_cad=ROBERT_VALUE, as_of=AS_OF)
+            block, _ = limits_mod.build_limits(derived, ROBERT_VALUE)
+            return {k: v for k, v in block.items() if k not in ("_note", "by")}
+    
+        soft_rules = [_rule("prefer_attribute", {"attribute": "understandable_business"}, Q_PREFER, True),
+                      _rule("avoid_attribute", {"attribute": "speculative"}, Q_AVOID, True)]
+        assert lim(soft_rules) == lim([])
+&gt;       assert len(_s4(soft_rules)) == 2
+E       AssertionError: assert 0 == 2
+E        +  where 0 = len([])
+E        +    where [] = _s4([{'rule_kind': 'prefer_attribute', 'params': {'attribute': 'understandable_business'}, 'applies_to': 'all', 'quote': '...d_attribute', 'params': {'attribute': 'speculative'}, 'applies_to': 'all', 'quote': 'I avoid speculative things', ...}])
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-s4/tests/checks/test_s4_noncheckable.py:162: AssertionError</failure></testcase><testcase classname="tests.checks.test_s4_noncheckable" name="test_reminder_text_in_the_check_does_not_prescribe" time="0.000"><failure message="assert 0 == 1&#10; +  where 0 = len([])">def test_reminder_text_in_the_check_does_not_prescribe():
+        """D10: the reminder only echoes the user's own words; its message_key is a plain key, not advice."""
+        out = _s4([_rule("prefer_attribute", {"attribute": "understandable_business"}, Q_PREFER, True)])
+&gt;       assert len(out) == 1
+E       assert 0 == 1
+E        +  where 0 = len([])
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-s4/tests/checks/test_s4_noncheckable.py:168: AssertionError</failure></testcase><testcase classname="tests.checks.test_s4_noncheckable" name="test_dead_explain_stubs_are_removed" time="0.000"><failure message="AssertionError: assert not True&#10; +  where True = hasattr(explain, 'build_payload')">def test_dead_explain_stubs_are_removed():
+        """D5: build_payload / template_explain were replaced by section facts and template_section; the NotImplemented
+        stubs are deleted (nothing in code or tests imports them)."""
+&gt;       assert not hasattr(explain, "build_payload")
+E       AssertionError: assert not True
+E        +  where True = hasattr(explain, 'build_payload')
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-s4/tests/checks/test_s4_noncheckable.py:178: AssertionError</failure></testcase><testcase classname="tests.checks.test_s4_noncheckable" name="test_explain_keeps_the_live_entry_points" time="0.000" /><testcase classname="tests.checks.test_s4_noncheckable" name="test_nothing_in_the_package_or_tests_references_the_removed_names" time="0.010" /></testsuite></testsuites>

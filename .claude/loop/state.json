@@ -32,6 +32,7 @@
     "P3.FLOWA": "impl",
     "P3.FLOWBG1": "impl",
     "P3.RESIZE": "impl",
+    "P3.S4": "tests",
     "P3.SKIP": "impl"
   }
 }
