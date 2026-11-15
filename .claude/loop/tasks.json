@@ -1082,7 +1082,9 @@
     "docs/spec-decisions.md D3 D7"
    ],
    "tests": [
-    "tests/profile/test_intake_covers_rule_inputs.py"
+    "tests/profile/test_intake_covers_rule_inputs.py",
+    "tests/profile/test_skipped_fields.py",
+    "tests/flows/test_new_user_no_portfolio.py"
    ],
    "code": [
     "coherence_analyzer/intake.py",
