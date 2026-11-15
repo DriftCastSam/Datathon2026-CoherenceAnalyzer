@@ -1,104 +1,368 @@
 (() => {
   "use strict";
 
-  const AMOUNT_DIGITS = 2;
-  const MIN_AMOUNT = 0;
+  const {KIND, KEEP_VALUE, specFor} = App.intakeSpec;
+  const SUMMARY_HASH = "#/summary";
+  const CONVERSATION_ROUTE = "conversation";
+  const MODE_LIVE = "live";
+  const BOOLEAN_WORDS = {yes: true, y: true, true: true, no: false, n: false, false: false};
+  const NONE_WORDS = ["none", "no", "nothing", "empty"];
+  const NUMBER_NOISE = /[$\s,%]|cad|years?|yrs?/gi;
+  const STATIC_NOTICE = "Offline demo: answers are not analysed; showing the prebuilt analysis.";
+  const RUN_LABEL = "Run analysis";
+  const RUN_BUSY_LABEL = "Running analysis…";
+  const STATIC_RUN_LABEL = "Go to the analysis";
+  const STATE_ANSWERED = "answered";
+  const STATE_SKIPPED = "skipped";
+  const STATE_OPEN = "open";
 
-  /* Client-side only: answers live in this module and survive re-renders, never sent anywhere. */
-  const answer = { choice: "", amount: null, draft: "" };
+  /* Screen state survives re-renders; it is rebuilt when the persona changes or the screen is re-entered. */
+  const screen = {
+    persona: null, questions: [], index: -1, busy: false, saving: false,
+    loading: false, error: "", fieldError: "", runError: ""
+  };
+  let activeSection = null;
 
-  App.navSpec.conversation = { tabs: [], chrome: "bare" };
+  App.navSpec.conversation = {tabs: [], chrome: "bare"};
 
-  function formatAmount(value) {
-    const digits = Number.isInteger(value) ? 0 : AMOUNT_DIGITS;
-    return "$" + App.fmtCad(value, digits) + " CAD";
+  const esc = value => App.esc(value);
+  const isLive = () => App.source.mode === MODE_LIVE;
+
+  /* ---------- value formatting ---------- */
+
+  function enumLabel(spec, value) {
+    const chip = spec.chips.find(item => item.value === value);
+    return chip ? chip.label : String(value).replace(/_/g, " ");
   }
 
-  function formatDraft(value) {
-    return App.fmtCad(value, Number.isInteger(value) ? 0 : AMOUNT_DIGITS);
+  function listText(value) {
+    if (!value.length) return "None";
+    const names = value.map(item => (item && typeof item === "object" ? item.name || item.purpose || item.date : item));
+    return names.map(name => String(name).replace(/_/g, " ")).join("; ");
   }
 
-  function parseAmount(raw) {
-    const cleaned = String(raw || "").replace(/[$\s,]/g, "").replace(/cad/gi, "");
-    if (!cleaned) return null;
-    const value = Number(cleaned);
-    return Number.isFinite(value) && value > MIN_AMOUNT ? value : null;
+  function displayValue(spec, value) {
+    if (Array.isArray(value)) return listText(value);
+    if (typeof value === "boolean") return value ? "Yes" : "No";
+    if (spec.kind === KIND.ENUM) return enumLabel(spec, value);
+    if (spec.kind === KIND.AMOUNT) return "$" + App.fmtCad(value, Number.isInteger(value) ? 0 : 2) + " CAD";
+    if (spec.unit === "years") return value + (value === 1 ? " year" : " years");
+    if (spec.unit === "drawdown" || spec.unit === "percent") return value + "%";
+    return String(value);
   }
 
-  function applyAnswer(section) {
-    section.querySelectorAll("[data-choice]").forEach(button => {
-      const selected = button.dataset.choice === answer.choice;
-      button.setAttribute("aria-pressed", selected ? "true" : "false");
-    });
+  /* ---------- input parsing ---------- */
 
-    const chosen = section.querySelector("[data-chosen]");
-    const chosenValue = section.querySelector("[data-chosen-value]");
-    const text = answer.amount === null ? answer.choice : formatAmount(answer.amount);
-    chosen.hidden = !text;
-    chosenValue.textContent = text;
-
-    const input = section.querySelector("[data-amount]");
-    if (input && document.activeElement !== input) input.value = answer.draft;
-    const error = section.querySelector("[data-amount-error]");
-    if (error) error.hidden = true;
-    if (input) input.removeAttribute("aria-invalid");
+  function parseEnum(spec, raw) {
+    const wanted = raw.toLowerCase().replace(/[\s_]+/g, " ");
+    const chip = spec.chips.find(item => item.label.toLowerCase() === wanted
+      || String(item.value).replace(/_/g, " ") === wanted);
+    if (chip) return {value: chip.value};
+    return {error: "Choose one of the suggestions: " + spec.chips.map(item => item.label).join(", ") + "."};
   }
 
-  function chooseSuggestion(section, label) {
-    answer.choice = label;
-    answer.amount = null;
-    answer.draft = "";
-    const input = section.querySelector("[data-amount]");
-    if (input) input.value = "";
-    applyAnswer(section);
+  function parseNumber(spec, raw) {
+    const cleaned = raw.replace(NUMBER_NOISE, "");
+    let value = cleaned === "" ? NaN : Number(cleaned);
+    if (!Number.isFinite(value)) return {error: "Enter a number."};
+    if (spec.negateOnInput && value > 0) value = -value;
+    if (spec.integer && !Number.isInteger(value)) return {error: "Enter a whole number."};
+    if (spec.min !== undefined && value < spec.min) return {error: "Enter " + spec.min + " or more."};
+    if (spec.exclusiveMin !== undefined && value <= spec.exclusiveMin) {
+      return {error: "Enter a number greater than " + spec.exclusiveMin + "."};
+    }
+    if (spec.max !== undefined && value > spec.max) return {error: "Enter " + spec.max + " or less."};
+    return {value};
   }
 
-  function submitAmount(section) {
-    const input = section.querySelector("[data-amount]");
-    const error = section.querySelector("[data-amount-error]");
-    const value = parseAmount(input.value);
-    if (value === null) {
-      input.setAttribute("aria-invalid", "true");
-      if (error) error.hidden = false;
-      input.focus();
+  function parseBoolean(raw) {
+    const word = raw.toLowerCase();
+    if (Object.prototype.hasOwnProperty.call(BOOLEAN_WORDS, word)) return {value: BOOLEAN_WORDS[word]};
+    return {error: "Answer yes or no."};
+  }
+
+  function parseList(raw) {
+    if (NONE_WORDS.includes(raw.toLowerCase())) return {value: []};
+    const items = raw.split(/[,;]/).map(item => item.trim().toLowerCase().replace(/\s+/g, "_")).filter(Boolean);
+    return items.length ? {value: items} : {error: "List the items separated by commas, or answer None."};
+  }
+
+  function parseInput(spec, raw) {
+    const text = String(raw || "").trim();
+    if (!text) return {error: "Type an answer or pick a suggestion."};
+    if (spec.kind === KIND.ENUM) return parseEnum(spec, text);
+    if (spec.kind === KIND.NUMBER || spec.kind === KIND.AMOUNT) return parseNumber(spec, text);
+    if (spec.kind === KIND.BOOLEAN) return parseBoolean(text);
+    if (spec.kind === KIND.LIST) return parseList(text);
+    return {value: text};
+  }
+
+  /* ---------- question state ---------- */
+
+  function questionState(question) {
+    if (question.skipped) return STATE_SKIPPED;
+    return question.current === null || question.current === undefined ? STATE_OPEN : STATE_ANSWERED;
+  }
+
+  function firstOpenAfter(start) {
+    const total = screen.questions.length;
+    for (let step = 1; step <= total; step += 1) {
+      const position = (start + step + total) % total;
+      if (questionState(screen.questions[position]) === STATE_OPEN) return position;
+    }
+    return -1;
+  }
+
+  async function loadQuestions() {
+    screen.loading = true;
+    screen.error = "";
+    screen.persona = App.state.persona;
+    try {
+      const result = await App.source.intake(App.state.persona, App.state.report);
+      screen.questions = result.questions.map(question => ({...question, skipped: false}));
+      screen.index = firstOpenAfter(-1);
+    } catch (error) {
+      console.error("[conversation] could not load the questions", error);
+      screen.questions = [];
+      screen.error = "Could not load the questions: " + error.message;
+    } finally {
+      screen.loading = false;
+    }
+  }
+
+  /* Saves (or skips) the current question through the data source, then moves on. */
+  async function commit(action, failure) {
+    const question = screen.questions[screen.index];
+    if (screen.saving || !question) return;
+    screen.saving = true;
+    screen.fieldError = "";
+    render();
+    try {
+      await action(question);
+      screen.index = firstOpenAfter(screen.questions.indexOf(question));
+    } catch (error) {
+      console.error("[conversation] " + failure, error);
+      screen.fieldError = "Could not " + failure + ": " + error.message;
+    } finally {
+      screen.saving = false;
+      render();
+    }
+  }
+
+  function saveAnswer(value) {
+    return commit(async question => {
+      if (value === KEEP_VALUE) return;
+      await App.source.answer(App.state.persona, question.path, value);
+      question.current = value;
+      question.skipped = false;
+    }, "save the answer");
+  }
+
+  function skipQuestion() {
+    return commit(async question => {
+      await App.source.skip(App.state.persona, question.path);
+      question.current = null;
+      question.skipped = true;
+    }, "skip the question");
+  }
+
+  function submitInput(section) {
+    const question = screen.questions[screen.index];
+    const input = section.querySelector("[data-answer-input]");
+    if (!question || !input) return;
+    const parsed = parseInput(specFor(question.path), input.value);
+    if (parsed.error) {
+      screen.fieldError = parsed.error;
+      render();
       return;
     }
-    answer.amount = value;
-    answer.choice = "";
-    answer.draft = formatDraft(value);
-    applyAnswer(section);
-    input.value = answer.draft;
+    saveAnswer(parsed.value);
+  }
+
+  /* ---------- rendering ---------- */
+
+  function answeredRow(question, position) {
+    const spec = specFor(question.path);
+    const skipped = questionState(question) === STATE_SKIPPED;
+    const text = skipped ? "Skipped" : displayValue(spec, question.current);
+    return '<button type="button" class="qa qa--edit" data-edit="' + position + '" aria-label="Change answer: ' + esc(spec.label) + '">'
+      + '<span class="qa__q"><span class="t-small label">' + esc(spec.label) + "</span>"
+      + '<span class="t-body">' + esc(question.text) + "</span></span>"
+      + '<span class="qa__a"><span class="t-small label">Your answer</span>'
+      + '<span class="t-body-strong">' + esc(text) + "</span></span></button>";
+  }
+
+  function chipHtml(chip, position) {
+    return '<button class="btn btn--outline-dark sug" type="button" data-chip="' + position + '"'
+      + (screen.saving ? " disabled" : "") + ">" + esc(chip.label) + "</button>";
+  }
+
+  function inputHtml(spec) {
+    if (spec.readOnlyList) return "";
+    return '<form class="field" data-answer-form novalidate>'
+      + '<label class="sr-only" for="conv-answer">Your answer</label>'
+      + '<input class="field__input" id="conv-answer" type="text" autocomplete="off" data-answer-input'
+      + (spec.placeholder ? ' placeholder="' + esc(spec.placeholder) + '"' : "")
+      + (screen.fieldError ? ' aria-invalid="true"' : "") + ">"
+      + '<button class="btn btn--primary" type="submit"' + (screen.saving ? " disabled" : "") + ">Send</button></form>";
+  }
+
+  function currentHtml() {
+    const question = screen.questions[screen.index];
+    const spec = specFor(question.path);
+    const hasAnswer = questionState(question) !== STATE_OPEN;
+    const chips = spec.chips.filter(chip => chip.value !== KEEP_VALUE || hasAnswer);
+    const readOnly = spec.readOnlyList && Array.isArray(question.current)
+      ? '<p class="t-body current__readonly">Current: ' + esc(listText(question.current)) + "</p>" : "";
+    return '<p class="t-small label">Question ' + (screen.index + 1) + " of " + screen.questions.length + " · required</p>"
+      + '<p class="current__q">' + esc(question.text) + "</p>" + readOnly
+      + '<div class="sugs" role="group" aria-label="Suggested answers">'
+      + chips.map(chip => chipHtml(chip, spec.chips.indexOf(chip))).join("") + "</div>"
+      + inputHtml(spec)
+      + '<p class="field__error" role="alert"' + (screen.fieldError ? "" : " hidden") + ">" + esc(screen.fieldError) + "</p>"
+      + '<div class="current__actions"><button class="btn btn--outline-dark" type="button" data-skip-question'
+      + (screen.saving ? " disabled" : "") + ">Skip this question</button></div>";
+  }
+
+  function doneHtml() {
+    return '<p class="t-body-strong">All questions have an answer.</p>'
+      + '<p class="t-body muted">Select an answer above to change it, or run the analysis.</p>';
+  }
+
+  function renderList(section) {
+    const rows = screen.questions.map((question, position) => (
+      position !== screen.index && questionState(question) !== STATE_OPEN ? answeredRow(question, position) : ""));
+    section.querySelector("[data-conversation-list]").innerHTML = rows.join("");
+  }
+
+  function renderCurrent(section) {
+    const container = section.querySelector("[data-conversation-current]");
+    if (!isLive()) {
+      container.innerHTML = "";
+    } else if (screen.loading) {
+      container.innerHTML = '<p class="t-body muted">Loading the questions…</p>';
+    } else if (screen.error) {
+      container.innerHTML = '<p class="field__error" role="alert">' + esc(screen.error) + "</p>";
+    } else {
+      container.innerHTML = screen.index < 0 ? doneHtml() : currentHtml();
+    }
+    const input = container.querySelector("[data-answer-input]");
+    if (input && screen.fieldError) input.focus();
+  }
+
+  function rowValue(question, position) {
+    const state = questionState(question);
+    if (position === screen.index) return ["Answering now", "prow__val--now"];
+    if (state === STATE_OPEN) return ["Required", "prow__val--opt"];
+    if (state === STATE_SKIPPED) return ["Skipped", "prow__val--opt"];
+    return [displayValue(specFor(question.path), question.current), "prow__val--done"];
+  }
+
+  function panelRow(question, position) {
+    const [text, cls] = rowValue(question, position);
+    const label = esc(specFor(question.path).label);
+    const value = '<p class="prow__val ' + cls + '">' + esc(text) + "</p>";
+    if (!isLive() || questionState(question) === STATE_OPEN) return '<div class="prow"><p>' + label + "</p>" + value + "</div>";
+    return '<button type="button" class="prow prow--btn" data-edit="' + position + '"><p>' + label + "</p>" + value + "</button>";
+  }
+
+  function renderPanel(section) {
+    const total = screen.questions.length;
+    const done = screen.questions.filter(question => questionState(question) !== STATE_OPEN).length;
+    section.querySelector("[data-profile-count]").textContent = done + " of " + total + " required answers";
+    section.querySelector("[data-profile-progress]").innerHTML = screen.questions
+      .map(question => '<span class="prog__seg' + (questionState(question) === STATE_OPEN ? "" : " prog__seg--on") + '"></span>')
+      .join("");
+    section.querySelector("[data-profile-rows]").innerHTML = screen.questions.map(panelRow).join("");
+  }
+
+  function renderRun(section) {
+    const button = section.querySelector("[data-run]");
+    button.textContent = screen.busy ? RUN_BUSY_LABEL : (isLive() ? RUN_LABEL : STATIC_RUN_LABEL);
+    button.disabled = screen.busy;
+    button.setAttribute("aria-busy", screen.busy ? "true" : "false");
+    const error = section.querySelector("[data-run-error]");
+    error.hidden = !screen.runError;
+    error.textContent = screen.runError;
+    const notice = section.querySelector("[data-conversation-notice]");
+    notice.hidden = isLive();
+    notice.textContent = isLive() ? "" : STATIC_NOTICE;
+  }
+
+  function render() {
+    if (!activeSection) return;
+    renderList(activeSection);
+    renderCurrent(activeSection);
+    renderPanel(activeSection);
+    renderRun(activeSection);
+  }
+
+  /* ---------- run analysis ---------- */
+
+  async function runAnalysis() {
+    if (!isLive()) {
+      App.go(SUMMARY_HASH);
+      return;
+    }
+    if (screen.busy) return;
+    screen.busy = true;
+    screen.runError = "";
+    render();
+    try {
+      const report = await App.source.rerun(App.state.persona, App.state.entryFile);
+      if (App.source.usedFallback()) throw new Error("the live analysis failed; see the server log");
+      screen.busy = false;
+      App.setReport(report);
+      App.go(SUMMARY_HASH);
+    } catch (error) {
+      console.error("[conversation] analysis failed", error);
+      screen.busy = false;
+      screen.runError = "The analysis could not be run: " + error.message;
+      render();
+    }
+  }
+
+  /* ---------- wiring ---------- */
+
+  function onClick(event) {
+    const edit = event.target.closest("[data-edit]");
+    const chip = event.target.closest("[data-chip]");
+    if (edit && !screen.saving) {
+      screen.index = Number(edit.dataset.edit);
+      screen.fieldError = "";
+      render();
+    } else if (chip && !screen.saving) {
+      const spec = specFor(screen.questions[screen.index].path);
+      saveAnswer(spec.chips[Number(chip.dataset.chip)].value);
+    } else if (event.target.closest("[data-skip-question]")) {
+      skipQuestion();
+    } else if (event.target.closest("[data-run]")) {
+      runAnalysis();
+    }
   }
 
   function bindOnce(section) {
     if (section.dataset.conversationBound === "1") return;
     section.dataset.conversationBound = "1";
-
-    section.addEventListener("click", event => {
-      const suggestion = event.target.closest("[data-choice]");
-      if (suggestion) {
-        chooseSuggestion(section, suggestion.dataset.choice);
-        return;
-      }
-      if (event.target.closest("[data-skip]")) App.go("#/coherence");
-    });
-
-    const form = section.querySelector("[data-amount-form]");
-    form.addEventListener("submit", event => {
+    section.addEventListener("click", onClick);
+    section.addEventListener("submit", event => {
       event.preventDefault();
-      submitAmount(section);
+      submitInput(section);
     });
-
-    section.querySelector("[data-amount]").addEventListener("input", event => {
-      answer.draft = event.target.value;
-      event.target.removeAttribute("aria-invalid");
-      const error = section.querySelector("[data-amount-error]");
-      if (error) error.hidden = true;
+    window.addEventListener("hashchange", () => {
+      if (App.route !== CONVERSATION_ROUTE) screen.persona = null;
     });
   }
 
   App.renderers.conversation = function (section) {
     bindOnce(section);
-    applyAnswer(section);
+    activeSection = section;
+    const needsLoad = App.state.persona && screen.persona !== App.state.persona && !screen.loading;
+    render();
+    if (needsLoad) {
+      screen.fieldError = "";
+      screen.runError = "";
+      loadQuestions().then(render);
+    }
   };
 })();

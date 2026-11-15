@@ -1,0 +1,14 @@
+/* Build-your-profile screen: additions for the dynamic question list. */
+.scr-conversation .qa--edit{cursor:pointer;background:none;border-left:0;border-right:0;border-top:0;font:inherit;color:inherit;text-align:left}
+.scr-conversation .qa--edit:hover .qa__a .t-body-strong,
+.scr-conversation .qa--edit:focus-visible .qa__a .t-body-strong{color:var(--blue);text-decoration:underline}
+.scr-conversation .qa__a .t-body-strong{overflow-wrap:anywhere}
+.scr-conversation .qa__q .t-body{display:block}
+.scr-conversation .current__actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.scr-conversation .current__readonly{margin:0;padding:8px 12px;border:1px solid var(--line);border-radius:12px}
+.scr-conversation .prow--btn{cursor:pointer;background:none;border-left:0;border-right:0;border-top:0;text-align:left;font:inherit}
+.scr-conversation .prow--btn p{margin:0}
+.scr-conversation .prow--btn:hover p:first-child{text-decoration:underline}
+.scr-conversation .prow__val--done{font-weight:600;color:var(--ink)}
+.scr-conversation [data-run][aria-busy="true"]{opacity:.6;cursor:progress}
+.scr-conversation .skip .field__error{padding-bottom:8px}
