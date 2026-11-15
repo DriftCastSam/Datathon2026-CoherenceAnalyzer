@@ -1,0 +1,548 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="38" skipped="0" tests="44" time="0.690" timestamp="2026-11-15T01:58:58.607440+00:00" hostname="bomboclat-laptop"><testcase classname="tests.flows.test_b1_uses_gate" name="test_pipeline_no_longer_defines_its_own_n4_gate" time="0.002"><failure message="AssertionError: assert not True&#10; +  where True = hasattr(pipeline, '_gate_intent')">def test_pipeline_no_longer_defines_its_own_n4_gate():
+        # CLAUDE.md: every LLM output goes through gate.py; a second N4 gate in pipeline.py is the audit gap.
+&gt;       assert not hasattr(pipeline, "_gate_intent")
+E       AssertionError: assert not True
+E        +  where True = hasattr(pipeline, '_gate_intent')
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:96: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_calls_gate_gate_once_for_the_n4_node" time="0.006"><failure message="AssertionError: assert [] == ['intent_parser']&#10;  &#10;  Right contains one more item: 'intent_parser'&#10;  Use -v to get more diff">gate_spy = []
+
+    def test_b1_calls_gate_gate_once_for_the_n4_node(gate_spy):
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       assert [c["node"] for c in gate_spy] == [N4]
+E       AssertionError: assert [] == ['intent_parser']
+E         
+E         Right contains one more item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:101: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_gate_context_lets_the_gate_see_the_real_universe" time="0.005"><failure message="IndexError: list index out of range">gate_spy = []
+
+    def test_b1_gate_context_lets_the_gate_see_the_real_universe(gate_spy):
+        pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       ctx = gate_spy[0]["context"]
+              ^^^^^^^^^^^
+E       IndexError: list index out of range
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:112: IndexError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_recorded_n4_cache_is_accepted_and_the_draft_is_unchanged" time="0.005" /><testcase classname="tests.flows.test_b1_uses_gate" name="test_recorded_n4_audit_call_entry_is_unchanged" time="0.005"><failure message="IndexError: list index out of range">gate_spy = []
+
+    def test_recorded_n4_audit_call_entry_is_unchanged(gate_spy):
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+        (entry,) = state["llm_calls"]
+        assert set(entry) == CALL_KEYS
+        assert entry["node"] == N4
+        assert entry["prompt_version"] == "intent_parser.v1"
+        assert entry["gate"] == "accepted"
+&gt;       assert entry["gate"] == gate_spy[0]["result"][1]
+                                ^^^^^^^^^^^
+E       IndexError: list index out of range
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:141: IndexError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_accepted_draft_is_a_copy_not_the_model_output_object" time="0.004" /><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_accepts_the_same_drafts_as_before_through_gate_gate[cash_contribution]" time="0.004"><failure message="AssertionError: assert [] == ['intent_parser']&#10;  &#10;  Right contains one more item: 'intent_parser'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d69db9e50&gt;
+gate_spy = [], name = 'cash_contribution'
+
+    @pytest.mark.parametrize("name", sorted(ACCEPTED))
+    def test_b1_accepts_the_same_drafts_as_before_through_gate_gate(monkeypatch, gate_spy, name):
+        out = ACCEPTED[name]
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       assert [c["node"] for c in gate_spy] == [N4]
+E       AssertionError: assert [] == ['intent_parser']
+E         
+E         Right contains one more item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:192: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_accepts_the_same_drafts_as_before_through_gate_gate[float_weight]" time="0.004"><failure message="AssertionError: assert [] == ['intent_parser']&#10;  &#10;  Right contains one more item: 'intent_parser'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d69dbe4e0&gt;
+gate_spy = [], name = 'float_weight'
+
+    @pytest.mark.parametrize("name", sorted(ACCEPTED))
+    def test_b1_accepts_the_same_drafts_as_before_through_gate_gate(monkeypatch, gate_spy, name):
+        out = ACCEPTED[name]
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       assert [c["node"] for c in gate_spy] == [N4]
+E       AssertionError: assert [] == ['intent_parser']
+E         
+E         Right contains one more item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:192: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_accepts_the_same_drafts_as_before_through_gate_gate[pro_rata_all]" time="0.004"><failure message="AssertionError: assert [] == ['intent_parser']&#10;  &#10;  Right contains one more item: 'intent_parser'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d69dbf020&gt;
+gate_spy = [], name = 'pro_rata_all'
+
+    @pytest.mark.parametrize("name", sorted(ACCEPTED))
+    def test_b1_accepts_the_same_drafts_as_before_through_gate_gate(monkeypatch, gate_spy, name):
+        out = ACCEPTED[name]
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       assert [c["node"] for c in gate_spy] == [N4]
+E       AssertionError: assert [] == ['intent_parser']
+E         
+E         Right contains one more item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:192: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_accepts_the_same_drafts_as_before_through_gate_gate[pro_rata_class]" time="0.004"><failure message="AssertionError: assert [] == ['intent_parser']&#10;  &#10;  Right contains one more item: 'intent_parser'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d69d52190&gt;
+gate_spy = [], name = 'pro_rata_class'
+
+    @pytest.mark.parametrize("name", sorted(ACCEPTED))
+    def test_b1_accepts_the_same_drafts_as_before_through_gate_gate(monkeypatch, gate_spy, name):
+        out = ACCEPTED[name]
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       assert [c["node"] for c in gate_spy] == [N4]
+E       AssertionError: assert [] == ['intent_parser']
+E         
+E         Right contains one more item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:192: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_accepts_the_same_drafts_as_before_through_gate_gate[specific]" time="0.004"><failure message="AssertionError: assert [] == ['intent_parser']&#10;  &#10;  Right contains one more item: 'intent_parser'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d69d51e10&gt;
+gate_spy = [], name = 'specific'
+
+    @pytest.mark.parametrize("name", sorted(ACCEPTED))
+    def test_b1_accepts_the_same_drafts_as_before_through_gate_gate(monkeypatch, gate_spy, name):
+        out = ACCEPTED[name]
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       assert [c["node"] for c in gate_spy] == [N4]
+E       AssertionError: assert [] == ['intent_parser']
+E         
+E         Right contains one more item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:192: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_accepts_the_same_drafts_as_before_through_gate_gate[weight_100]" time="0.004"><failure message="AssertionError: assert [] == ['intent_parser']&#10;  &#10;  Right contains one more item: 'intent_parser'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d6a1bf860&gt;
+gate_spy = [], name = 'weight_100'
+
+    @pytest.mark.parametrize("name", sorted(ACCEPTED))
+    def test_b1_accepts_the_same_drafts_as_before_through_gate_gate(monkeypatch, gate_spy, name):
+        out = ACCEPTED[name]
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       assert [c["node"] for c in gate_spy] == [N4]
+E       AssertionError: assert [] == ['intent_parser']
+E         
+E         Right contains one more item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:192: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_accepts_the_same_drafts_as_before_through_gate_gate[weight_fraction]" time="0.004"><failure message="AssertionError: assert [] == ['intent_parser']&#10;  &#10;  Right contains one more item: 'intent_parser'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d6a123a10&gt;
+gate_spy = [], name = 'weight_fraction'
+
+    @pytest.mark.parametrize("name", sorted(ACCEPTED))
+    def test_b1_accepts_the_same_drafts_as_before_through_gate_gate(monkeypatch, gate_spy, name):
+        out = ACCEPTED[name]
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       assert [c["node"] for c in gate_spy] == [N4]
+E       AssertionError: assert [] == ['intent_parser']
+E         
+E         Right contains one more item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:192: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_rejects_the_same_drafts_as_before_through_gate_gate[Sell]" time="0.005"><failure message="AssertionError: assert [] == ['intent_parser']&#10;  &#10;  Right contains one more item: 'intent_parser'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d6a048f50&gt;
+gate_spy = [], name = 'Sell'
+
+    @pytest.mark.parametrize("name", sorted(REJECTED))
+    def test_b1_rejects_the_same_drafts_as_before_through_gate_gate(monkeypatch, gate_spy, name):
+        out = REJECTED[name]
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       assert [c["node"] for c in gate_spy] == [N4]
+E       AssertionError: assert [] == ['intent_parser']
+E         
+E         Right contains one more item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:204: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_rejects_the_same_drafts_as_before_through_gate_gate[action_null]" time="0.004"><failure message="AssertionError: assert [] == ['intent_parser']&#10;  &#10;  Right contains one more item: 'intent_parser'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d69d331d0&gt;
+gate_spy = [], name = 'action_null'
+
+    @pytest.mark.parametrize("name", sorted(REJECTED))
+    def test_b1_rejects_the_same_drafts_as_before_through_gate_gate(monkeypatch, gate_spy, name):
+        out = REJECTED[name]
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       assert [c["node"] for c in gate_spy] == [N4]
+E       AssertionError: assert [] == ['intent_parser']
+E         
+E         Right contains one more item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:204: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_rejects_the_same_drafts_as_before_through_gate_gate[cash_missing_amount]" time="0.004"><failure message="AssertionError: assert [] == ['intent_parser']&#10;  &#10;  Right contains one more item: 'intent_parser'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d69d32f10&gt;
+gate_spy = [], name = 'cash_missing_amount'
+
+    @pytest.mark.parametrize("name", sorted(REJECTED))
+    def test_b1_rejects_the_same_drafts_as_before_through_gate_gate(monkeypatch, gate_spy, name):
+        out = REJECTED[name]
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       assert [c["node"] for c in gate_spy] == [N4]
+E       AssertionError: assert [] == ['intent_parser']
+E         
+E         Right contains one more item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:204: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_rejects_the_same_drafts_as_before_through_gate_gate[cash_negative]" time="0.004"><failure message="AssertionError: assert [] == ['intent_parser']&#10;  &#10;  Right contains one more item: 'intent_parser'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d6a05f2f0&gt;
+gate_spy = [], name = 'cash_negative'
+
+    @pytest.mark.parametrize("name", sorted(REJECTED))
+    def test_b1_rejects_the_same_drafts_as_before_through_gate_gate(monkeypatch, gate_spy, name):
+        out = REJECTED[name]
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       assert [c["node"] for c in gate_spy] == [N4]
+E       AssertionError: assert [] == ['intent_parser']
+E         
+E         Right contains one more item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:204: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_rejects_the_same_drafts_as_before_through_gate_gate[cash_zero]" time="0.004"><failure message="AssertionError: assert [] == ['intent_parser']&#10;  &#10;  Right contains one more item: 'intent_parser'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d6a05fcf0&gt;
+gate_spy = [], name = 'cash_zero'
+
+    @pytest.mark.parametrize("name", sorted(REJECTED))
+    def test_b1_rejects_the_same_drafts_as_before_through_gate_gate(monkeypatch, gate_spy, name):
+        out = REJECTED[name]
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       assert [c["node"] for c in gate_spy] == [N4]
+E       AssertionError: assert [] == ['intent_parser']
+E         
+E         Right contains one more item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:204: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_rejects_the_same_drafts_as_before_through_gate_gate[class_empty_asset_class]" time="0.004"><failure message="AssertionError: assert [] == ['intent_parser']&#10;  &#10;  Right contains one more item: 'intent_parser'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d69f96060&gt;
+gate_spy = [], name = 'class_empty_asset_class'
+
+    @pytest.mark.parametrize("name", sorted(REJECTED))
+    def test_b1_rejects_the_same_drafts_as_before_through_gate_gate(monkeypatch, gate_spy, name):
+        out = REJECTED[name]
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       assert [c["node"] for c in gate_spy] == [N4]
+E       AssertionError: assert [] == ['intent_parser']
+E         
+E         Right contains one more item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:204: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_rejects_the_same_drafts_as_before_through_gate_gate[class_without_asset_class]" time="0.004"><failure message="AssertionError: assert [] == ['intent_parser']&#10;  &#10;  Right contains one more item: 'intent_parser'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d6a0db2d0&gt;
+gate_spy = [], name = 'class_without_asset_class'
+
+    @pytest.mark.parametrize("name", sorted(REJECTED))
+    def test_b1_rejects_the_same_drafts_as_before_through_gate_gate(monkeypatch, gate_spy, name):
+        out = REJECTED[name]
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       assert [c["node"] for c in gate_spy] == [N4]
+E       AssertionError: assert [] == ['intent_parser']
+E         
+E         Right contains one more item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:204: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_rejects_the_same_drafts_as_before_through_gate_gate[funding_missing]" time="0.004"><failure message="AssertionError: assert [] == ['intent_parser']&#10;  &#10;  Right contains one more item: 'intent_parser'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d69c07e50&gt;
+gate_spy = [], name = 'funding_missing'
+
+    @pytest.mark.parametrize("name", sorted(REJECTED))
+    def test_b1_rejects_the_same_drafts_as_before_through_gate_gate(monkeypatch, gate_spy, name):
+        out = REJECTED[name]
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       assert [c["node"] for c in gate_spy] == [N4]
+E       AssertionError: assert [] == ['intent_parser']
+E         
+E         Right contains one more item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:204: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_rejects_the_same_drafts_as_before_through_gate_gate[funding_not_a_dict]" time="0.004"><failure message="AssertionError: assert [] == ['intent_parser']&#10;  &#10;  Right contains one more item: 'intent_parser'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d69d9aac0&gt;
+gate_spy = [], name = 'funding_not_a_dict'
+
+    @pytest.mark.parametrize("name", sorted(REJECTED))
+    def test_b1_rejects_the_same_drafts_as_before_through_gate_gate(monkeypatch, gate_spy, name):
+        out = REJECTED[name]
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       assert [c["node"] for c in gate_spy] == [N4]
+E       AssertionError: assert [] == ['intent_parser']
+E         
+E         Right contains one more item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:204: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_rejects_the_same_drafts_as_before_through_gate_gate[funding_unknown_kind]" time="0.004"><failure message="AssertionError: assert [] == ['intent_parser']&#10;  &#10;  Right contains one more item: 'intent_parser'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d69d9b070&gt;
+gate_spy = [], name = 'funding_unknown_kind'
+
+    @pytest.mark.parametrize("name", sorted(REJECTED))
+    def test_b1_rejects_the_same_drafts_as_before_through_gate_gate(monkeypatch, gate_spy, name):
+        out = REJECTED[name]
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       assert [c["node"] for c in gate_spy] == [N4]
+E       AssertionError: assert [] == ['intent_parser']
+E         
+E         Right contains one more item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:204: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_rejects_the_same_drafts_as_before_through_gate_gate[sell]" time="0.004"><failure message="AssertionError: assert [] == ['intent_parser']&#10;  &#10;  Right contains one more item: 'intent_parser'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d69d99b70&gt;
+gate_spy = [], name = 'sell'
+
+    @pytest.mark.parametrize("name", sorted(REJECTED))
+    def test_b1_rejects_the_same_drafts_as_before_through_gate_gate(monkeypatch, gate_spy, name):
+        out = REJECTED[name]
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       assert [c["node"] for c in gate_spy] == [N4]
+E       AssertionError: assert [] == ['intent_parser']
+E         
+E         Right contains one more item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:204: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_rejects_the_same_drafts_as_before_through_gate_gate[short]" time="0.004"><failure message="AssertionError: assert [] == ['intent_parser']&#10;  &#10;  Right contains one more item: 'intent_parser'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d69d99ef0&gt;
+gate_spy = [], name = 'short'
+
+    @pytest.mark.parametrize("name", sorted(REJECTED))
+    def test_b1_rejects_the_same_drafts_as_before_through_gate_gate(monkeypatch, gate_spy, name):
+        out = REJECTED[name]
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       assert [c["node"] for c in gate_spy] == [N4]
+E       AssertionError: assert [] == ['intent_parser']
+E         
+E         Right contains one more item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:204: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_rejects_the_same_drafts_as_before_through_gate_gate[specific_unknown_ticker]" time="0.004"><failure message="AssertionError: assert [] == ['intent_parser']&#10;  &#10;  Right contains one more item: 'intent_parser'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d69d9add0&gt;
+gate_spy = [], name = 'specific_unknown_ticker'
+
+    @pytest.mark.parametrize("name", sorted(REJECTED))
+    def test_b1_rejects_the_same_drafts_as_before_through_gate_gate(monkeypatch, gate_spy, name):
+        out = REJECTED[name]
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       assert [c["node"] for c in gate_spy] == [N4]
+E       AssertionError: assert [] == ['intent_parser']
+E         
+E         Right contains one more item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:204: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_rejects_the_same_drafts_as_before_through_gate_gate[specific_without_ticker]" time="0.004"><failure message="AssertionError: assert [] == ['intent_parser']&#10;  &#10;  Right contains one more item: 'intent_parser'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d69d9b690&gt;
+gate_spy = [], name = 'specific_without_ticker'
+
+    @pytest.mark.parametrize("name", sorted(REJECTED))
+    def test_b1_rejects_the_same_drafts_as_before_through_gate_gate(monkeypatch, gate_spy, name):
+        out = REJECTED[name]
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       assert [c["node"] for c in gate_spy] == [N4]
+E       AssertionError: assert [] == ['intent_parser']
+E         
+E         Right contains one more item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:204: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_rejects_the_same_drafts_as_before_through_gate_gate[ticker_not_in_universe]" time="0.007"><failure message="AssertionError: assert [] == ['intent_parser']&#10;  &#10;  Right contains one more item: 'intent_parser'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d69d9b850&gt;
+gate_spy = [], name = 'ticker_not_in_universe'
+
+    @pytest.mark.parametrize("name", sorted(REJECTED))
+    def test_b1_rejects_the_same_drafts_as_before_through_gate_gate(monkeypatch, gate_spy, name):
+        out = REJECTED[name]
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       assert [c["node"] for c in gate_spy] == [N4]
+E       AssertionError: assert [] == ['intent_parser']
+E         
+E         Right contains one more item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:204: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_rejects_the_same_drafts_as_before_through_gate_gate[ticker_null]" time="0.004"><failure message="AssertionError: assert [] == ['intent_parser']&#10;  &#10;  Right contains one more item: 'intent_parser'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d69c74130&gt;
+gate_spy = [], name = 'ticker_null'
+
+    @pytest.mark.parametrize("name", sorted(REJECTED))
+    def test_b1_rejects_the_same_drafts_as_before_through_gate_gate(monkeypatch, gate_spy, name):
+        out = REJECTED[name]
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       assert [c["node"] for c in gate_spy] == [N4]
+E       AssertionError: assert [] == ['intent_parser']
+E         
+E         Right contains one more item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:204: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_rejects_the_same_drafts_as_before_through_gate_gate[weight_negative]" time="0.004"><failure message="AssertionError: assert [] == ['intent_parser']&#10;  &#10;  Right contains one more item: 'intent_parser'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d69c74670&gt;
+gate_spy = [], name = 'weight_negative'
+
+    @pytest.mark.parametrize("name", sorted(REJECTED))
+    def test_b1_rejects_the_same_drafts_as_before_through_gate_gate(monkeypatch, gate_spy, name):
+        out = REJECTED[name]
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       assert [c["node"] for c in gate_spy] == [N4]
+E       AssertionError: assert [] == ['intent_parser']
+E         
+E         Right contains one more item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:204: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_rejects_the_same_drafts_as_before_through_gate_gate[weight_null]" time="0.004"><failure message="AssertionError: assert [] == ['intent_parser']&#10;  &#10;  Right contains one more item: 'intent_parser'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d69c748a0&gt;
+gate_spy = [], name = 'weight_null'
+
+    @pytest.mark.parametrize("name", sorted(REJECTED))
+    def test_b1_rejects_the_same_drafts_as_before_through_gate_gate(monkeypatch, gate_spy, name):
+        out = REJECTED[name]
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       assert [c["node"] for c in gate_spy] == [N4]
+E       AssertionError: assert [] == ['intent_parser']
+E         
+E         Right contains one more item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:204: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_rejects_the_same_drafts_as_before_through_gate_gate[weight_over_100]" time="0.004"><failure message="AssertionError: assert [] == ['intent_parser']&#10;  &#10;  Right contains one more item: 'intent_parser'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d69c74b40&gt;
+gate_spy = [], name = 'weight_over_100'
+
+    @pytest.mark.parametrize("name", sorted(REJECTED))
+    def test_b1_rejects_the_same_drafts_as_before_through_gate_gate(monkeypatch, gate_spy, name):
+        out = REJECTED[name]
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       assert [c["node"] for c in gate_spy] == [N4]
+E       AssertionError: assert [] == ['intent_parser']
+E         
+E         Right contains one more item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:204: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_rejects_the_same_drafts_as_before_through_gate_gate[weight_string]" time="0.004"><failure message="AssertionError: assert [] == ['intent_parser']&#10;  &#10;  Right contains one more item: 'intent_parser'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d69c74de0&gt;
+gate_spy = [], name = 'weight_string'
+
+    @pytest.mark.parametrize("name", sorted(REJECTED))
+    def test_b1_rejects_the_same_drafts_as_before_through_gate_gate(monkeypatch, gate_spy, name):
+        out = REJECTED[name]
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       assert [c["node"] for c in gate_spy] == [N4]
+E       AssertionError: assert [] == ['intent_parser']
+E         
+E         Right contains one more item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:204: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_rejects_the_same_drafts_as_before_through_gate_gate[weight_zero]" time="0.004"><failure message="AssertionError: assert [] == ['intent_parser']&#10;  &#10;  Right contains one more item: 'intent_parser'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d69c75080&gt;
+gate_spy = [], name = 'weight_zero'
+
+    @pytest.mark.parametrize("name", sorted(REJECTED))
+    def test_b1_rejects_the_same_drafts_as_before_through_gate_gate(monkeypatch, gate_spy, name):
+        out = REJECTED[name]
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       assert [c["node"] for c in gate_spy] == [N4]
+E       AssertionError: assert [] == ['intent_parser']
+E         
+E         Right contains one more item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:204: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_sell_draft_is_rejected_through_gate_gate_and_never_reaches_the_state" time="0.004"><failure message="assert (0 == 1)&#10; +  where 0 = len([])">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d69c75390&gt;
+gate_spy = []
+
+    def test_sell_draft_is_rejected_through_gate_gate_and_never_reaches_the_state(monkeypatch, gate_spy):
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(_draft(action="sell")))
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+&gt;       assert len(gate_spy) == 1 and gate_spy[0]["node"] == N4
+E       assert (0 == 1)
+E        +  where 0 = len([])
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:217: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_sell_draft_does_not_become_a_confirmable_intent" time="0.004" /><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_takes_its_status_from_gate_gate_not_from_a_local_rule" time="0.004"><failure message="AssertionError: assert [] == ['intent_parser']&#10;  &#10;  Right contains one more item: 'intent_parser'&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d69c74bb0&gt;
+
+    def test_b1_takes_its_status_from_gate_gate_not_from_a_local_rule(monkeypatch):
+        seen = []
+    
+        def fake_gate(node, old_field, llm_output, context):
+            seen.append(node)
+            return None, "rejected:evidence"
+    
+        monkeypatch.setattr(gate, "gate", fake_gate)
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")      # the recorded draft is a valid buy
+&gt;       assert seen == [N4]
+E       AssertionError: assert [] == ['intent_parser']
+E         
+E         Right contains one more item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:247: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_b1_uses_the_draft_the_gate_returns_for_an_accepted_status" time="0.005"><failure message="AssertionError: assert {'action': 'b...pct': 10, ...} == {'action': 'b...ZST.TO'}, ...}&#10;  &#10;  Omitting 3 identical items, use -vv to show&#10;  Differing items:&#10;  {'ambiguous_fields': ['funding']} != {'ambiguous_fields': []}&#10;  {'target_weight_pct': 10} != {'target_weight_pct': 12}&#10;  {'funding': {'kind': 'pro_rata_all'}} != {'funding': {'kind': 'specific', 'ticker': 'ZST.TO'}}&#10;  Use -v to get more diff">monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d69c75940&gt;
+
+    def test_b1_uses_the_draft_the_gate_returns_for_an_accepted_status(monkeypatch):
+        returned = _draft(target_weight_pct=12)
+    
+        def fake_gate(node, old_field, llm_output, context):
+            return copy.deepcopy(returned), "accepted"
+    
+        monkeypatch.setattr(gate, "gate", fake_gate)
+        state = pipeline.b1_parse_intent(ROBERT, "in_0001")
+        # SPEC-AMBIGUITY: either reading (gate's draft or the parsed output) is defensible when they are equal, which is
+        # always so for the real gate; here they differ, and the stricter reading is: only what the gate returns is used.
+&gt;       assert state["draft"] == returned
+E       AssertionError: assert {'action': 'b...pct': 10, ...} == {'action': 'b...ZST.TO'}, ...}
+E         
+E         Omitting 3 identical items, use -vv to show
+E         Differing items:
+E         {'ambiguous_fields': ['funding']} != {'ambiguous_fields': []}
+E         {'target_weight_pct': 10} != {'target_weight_pct': 12}
+E         {'funding': {'kind': 'pro_rata_all'}} != {'funding': {'kind': 'specific', 'ticker': 'ZST.TO'}}
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:263: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_llm_error_never_reaches_the_gate_and_is_reported_as_before[exc0]" time="0.004" /><testcase classname="tests.flows.test_b1_uses_gate" name="test_llm_error_never_reaches_the_gate_and_is_reported_as_before[exc1]" time="0.004" /><testcase classname="tests.flows.test_b1_uses_gate" name="test_unknown_intent_id_is_a_value_error_before_any_llm_or_gate_call" time="0.001" /><testcase classname="tests.flows.test_b1_uses_gate" name="test_every_persona_fixture_goes_through_gate_gate_with_the_same_outcome[robert]" time="0.008"><failure message="AssertionError: assert [] == ['intent_pars...ntent_parser']&#10;  &#10;  Right contains 2 more items, first extra item: 'intent_parser'&#10;  Use -v to get more diff">tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-488/test_every_persona_fixture_goe0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d69c76a50&gt;
+gate_spy = [], persona = 'robert'
+
+    @pytest.mark.parametrize("persona", ["robert", "amira", "mateo"])
+    def test_every_persona_fixture_goes_through_gate_gate_with_the_same_outcome(tmp_path, monkeypatch, gate_spy, persona):
+        fixture = ROBERT if persona == "robert" else _persona_dir(tmp_path, persona)
+        intent_id = "in_0001" if persona == "robert" else "in_9001"
+        out = _draft(funding={"kind": "pro_rata_all"})
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        ok = pipeline.b1_parse_intent(fixture, intent_id)
+        assert ok["draft_gate"] == "accepted" and ok["draft"] == out
+        assert ok["llm_calls"][0]["gate"] == "accepted"
+    
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(_draft(action="sell")))
+        bad = pipeline.b1_parse_intent(fixture, intent_id)
+        assert bad["draft_gate"] == "rejected:schema" and bad["draft"] is None
+&gt;       assert [c["node"] for c in gate_spy] == [N4, N4]
+E       AssertionError: assert [] == ['intent_pars...ntent_parser']
+E         
+E         Right contains 2 more items, first extra item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:306: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_every_persona_fixture_goes_through_gate_gate_with_the_same_outcome[amira]" time="0.009"><failure message="AssertionError: assert [] == ['intent_pars...ntent_parser']&#10;  &#10;  Right contains 2 more items, first extra item: 'intent_parser'&#10;  Use -v to get more diff">tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-488/test_every_persona_fixture_goe1')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d69c76cf0&gt;
+gate_spy = [], persona = 'amira'
+
+    @pytest.mark.parametrize("persona", ["robert", "amira", "mateo"])
+    def test_every_persona_fixture_goes_through_gate_gate_with_the_same_outcome(tmp_path, monkeypatch, gate_spy, persona):
+        fixture = ROBERT if persona == "robert" else _persona_dir(tmp_path, persona)
+        intent_id = "in_0001" if persona == "robert" else "in_9001"
+        out = _draft(funding={"kind": "pro_rata_all"})
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        ok = pipeline.b1_parse_intent(fixture, intent_id)
+        assert ok["draft_gate"] == "accepted" and ok["draft"] == out
+        assert ok["llm_calls"][0]["gate"] == "accepted"
+    
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(_draft(action="sell")))
+        bad = pipeline.b1_parse_intent(fixture, intent_id)
+        assert bad["draft_gate"] == "rejected:schema" and bad["draft"] is None
+&gt;       assert [c["node"] for c in gate_spy] == [N4, N4]
+E       AssertionError: assert [] == ['intent_pars...ntent_parser']
+E         
+E         Right contains 2 more items, first extra item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:306: AssertionError</failure></testcase><testcase classname="tests.flows.test_b1_uses_gate" name="test_every_persona_fixture_goes_through_gate_gate_with_the_same_outcome[mateo]" time="0.008"><failure message="AssertionError: assert [] == ['intent_pars...ntent_parser']&#10;  &#10;  Right contains 2 more items, first extra item: 'intent_parser'&#10;  Use -v to get more diff">tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-488/test_every_persona_fixture_goe2')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x7b2d69c76890&gt;
+gate_spy = [], persona = 'mateo'
+
+    @pytest.mark.parametrize("persona", ["robert", "amira", "mateo"])
+    def test_every_persona_fixture_goes_through_gate_gate_with_the_same_outcome(tmp_path, monkeypatch, gate_spy, persona):
+        fixture = ROBERT if persona == "robert" else _persona_dir(tmp_path, persona)
+        intent_id = "in_0001" if persona == "robert" else "in_9001"
+        out = _draft(funding={"kind": "pro_rata_all"})
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(out))
+        ok = pipeline.b1_parse_intent(fixture, intent_id)
+        assert ok["draft_gate"] == "accepted" and ok["draft"] == out
+        assert ok["llm_calls"][0]["gate"] == "accepted"
+    
+        monkeypatch.setattr(extractors, "intent_parser_call", _canned(_draft(action="sell")))
+        bad = pipeline.b1_parse_intent(fixture, intent_id)
+        assert bad["draft_gate"] == "rejected:schema" and bad["draft"] is None
+&gt;       assert [c["node"] for c in gate_spy] == [N4, N4]
+E       AssertionError: assert [] == ['intent_pars...ntent_parser']
+E         
+E         Right contains 2 more items, first extra item: 'intent_parser'
+E         Use -v to get more diff
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p4-n4gate/tests/flows/test_b1_uses_gate.py:306: AssertionError</failure></testcase></testsuite></testsuites>
