@@ -13,7 +13,8 @@ import re
 from datetime import datetime
 from typing import Literal
 
-from .config import BEHAVIOUR_MAX_CONF, BEHAVIOUR_MAX_STEP
+from . import data
+from .config import BEHAVIOUR_MAX_CONF, BEHAVIOUR_MAX_STEP, META_DIR
 from .levels import LEVELS, clamp_move
 from .rules.derive import N2_SUBSCORES, question_quality_confidence, question_quality_ewma, question_score
 
@@ -24,6 +25,24 @@ SIGNALS = ("hype_chasing", "concentration_request", "panic_selling_intent", "los
 RULE_KINDS = ("exclude_activity", "max_theme_weight", "prefer_attribute", "avoid_attribute", "other")
 APPLIES_TO = ("all", "single_stocks", "etf")
 VALUES_DEFAULT_CONF = 0.8   # N3 emits no confidence; used when there is no previous value to inherit from
+# SPEC §3.2 names exactly these activity tags (the vocabulary of N3 `exclude_activity` params.tag). A code constant:
+# the activity_tags CSV is human-sourced data and is never read here.
+ACTIVITY_TAG_VOCABULARY = ("accounting_fraud_last_5y", "fossil_fuel_producer", "significant_environmental_controversy",
+                           "significant_social_controversy", "tobacco")
+MAX_PCT_RANGE = (0, 100)    # N3 max_theme_weight params.max_pct, percent: 0 < max_pct <= 100
+N4_FUNDING_KINDS = ("specific", "pro_rata_all", "pro_rata_class", "cash_contribution")
+
+
+def theme_vocabulary(meta_dir: object = None) -> tuple[str, ...]:
+    """Sorted themes present in data/meta/asset_meta.csv (read-only; SPEC §3.2). Empty when the file is not built or
+    does not validate: nothing is guessed, so a theme rule cannot pass the gate then."""
+    try:
+        df = data.load_meta("asset_meta", meta_dir if meta_dir is not None else META_DIR)
+    except ValueError:
+        return ()
+    if df is None:
+        return ()
+    return tuple(sorted({t for themes in df["themes"] for t in themes}))
 
 
 def _kept(old_field: dict | None, status: GateStatus) -> tuple[dict | None, GateStatus]:
@@ -76,6 +95,19 @@ def _behaviour(old_field: dict | None, out: dict, context: dict) -> tuple[dict |
 
 # ---------------------------------------------------------------- N3 values_parser
 
+def _n3_params_ok(rule: dict, tags: tuple[str, ...], themes: tuple[str, ...]) -> bool:
+    params = rule["params"]
+    if rule["rule_kind"] == "exclude_activity":
+        return isinstance(params.get("tag"), str) and params["tag"] in tags
+    if rule["rule_kind"] == "max_theme_weight":
+        if not (isinstance(params.get("theme"), str) and params["theme"] in themes):
+            return False
+        if "max_pct" in params:     # only when the user gave a number (D7)
+            pct = params["max_pct"]
+            return _is_num(pct) and MAX_PCT_RANGE[0] < pct <= MAX_PCT_RANGE[1]
+    return True
+
+
 def _values(old_field: dict | None, out: dict, context: dict) -> tuple[dict | None, GateStatus]:
     node = "values_parser"
     rules = out.get("rules")
@@ -93,6 +125,12 @@ def _values(old_field: dict | None, out: dict, context: dict) -> tuple[dict | No
     if not all(r.get("rule_kind") in RULE_KINDS and isinstance(r.get("params"), dict)
                and r.get("applies_to") in APPLIES_TO for r in rules):
         return _kept(old_field, "rejected:schema")
+    # SPEC §3.2 / §6.2 N3: the tag and theme vocabularies and the max_pct range. A rule that fails rejects the output
+    # (never coerced to a vocabulary value; the previous value stays, §1 inv. 4).
+    tags = tuple(context.get("activity_tags") or ACTIVITY_TAG_VOCABULARY)
+    themes = tuple(context["themes"]) if context.get("themes") is not None else theme_vocabulary()
+    if not all(_n3_params_ok(r, tags, themes) for r in rules):
+        return _kept(old_field, "rejected:schema")
 
     # Parsed rules start unapproved (SPEC §3.3 #4, §6.2 N3). A rule identical to one the user already approved
     # keeps that approval (re-parsing must not silently drop a user action).
@@ -106,6 +144,37 @@ def _values(old_field: dict | None, out: dict, context: dict) -> tuple[dict | No
     if not _is_num(conf) or not 0 <= conf <= 1:
         return _kept(old_field, "rejected:schema")
     return {"value": value, "confidence": conf, **_stamp(node, context)}, "accepted"
+
+
+# ---------------------------------------------------------------- N4 intent_parser (SPEC §6.2 N4, §3.6)
+
+def _universe_tickers(context: dict) -> set[str]:
+    """Tickers the draft may name: context["tickers"], else context["universe"] (tickers or {ticker, name} dicts),
+    else the real universe."""
+    raw = context.get("tickers") if context.get("tickers") is not None else context.get("universe")
+    if raw is None:
+        return {str(t) for t in data.load_assets().index}
+    return {u["ticker"] if isinstance(u, dict) else u for u in raw}
+
+
+def _intent(old_field: dict | None, out: dict, context: dict) -> tuple[dict | None, GateStatus]:
+    """A draft is a buy (intent.apply has no sell semantics, §3.6): any other action is rejected, never confirmable.
+    Also: universe ticker, weight in (0, 100], a known funding kind with its parameter."""
+    tickers = _universe_tickers(context)
+    f = out.get("funding")
+    weight = out.get("target_weight_pct")
+    try:
+        ok = (out.get("action") == "buy" and out.get("ticker") in tickers
+              and _is_num(weight) and 0 < weight <= 100
+              and isinstance(f, dict) and f.get("kind") in N4_FUNDING_KINDS
+              and (f["kind"] != "specific" or f.get("ticker") in tickers)
+              and (f["kind"] != "pro_rata_class" or bool(f.get("asset_class")))
+              and (f["kind"] != "cash_contribution" or (_is_num(f.get("amount_cad")) and f["amount_cad"] > 0)))
+    except (TypeError, KeyError):
+        ok = False
+    if not ok:
+        return _kept(old_field, "rejected:schema")
+    return copy.deepcopy(out), "accepted"
 
 
 # ---------------------------------------------------------------- N6 profile_consistency (docs/spec-factors.md §20.9)
@@ -207,6 +276,8 @@ def gate(node: str, old_field: dict | None, llm_output: dict, context: dict) -> 
         return _values(old_field, llm_output, context)
     if node == "profile_consistency":
         return _profile_consistency(old_field, llm_output, context)
+    if node == "intent_parser":
+        return _intent(old_field, llm_output, context)
     return _kept(old_field, "rejected:schema")   # unknown node
 
 

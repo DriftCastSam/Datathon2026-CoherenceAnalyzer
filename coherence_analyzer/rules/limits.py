@@ -143,11 +143,18 @@ def build_limits(profile: dict, portfolio_value_cad: float) -> tuple[dict, dict[
                       if isinstance(r.get("params", {}).get("tag"), str))
 
     themes: dict[str, float] = {}
+    themeless = 0
     for r in _approved_parsed_rules(profile, "max_theme_weight"):
-        pct = r.get("params", {}).get("max_pct")
+        params = r.get("params")
+        params = params if isinstance(params, dict) else {}
+        theme = params.get("theme")
+        if not isinstance(theme, str) or not theme:
+            themeless += 1   # approved but names no theme: nothing to limit, skipped and traced (never a KeyError)
+            continue
+        pct = params.get("max_pct")
         if isinstance(pct, bool) or not isinstance(pct, (int, float)):
             continue   # approved but the number is still unanswered (or skipped): nothing to promote yet
-        theme, frac = r["params"]["theme"], pct / 100   # percent -> fraction, once
+        frac = pct / 100   # percent -> fraction, once
         themes[theme] = min(frac, themes.get(theme, frac))                # stricter wins
 
     limits: dict[str, Any] = {
@@ -170,4 +177,8 @@ def build_limits(profile: dict, portfolio_value_cad: float) -> tuple[dict, dict[
     if themes:
         limits["max_theme_weight"] = {k: themes[k] for k in sorted(themes)}
     trace, _ = _skip_trace(profile, build_trace())
+    if themeless:
+        trace["max_theme_weight"] = [*trace.get("max_theme_weight", []),
+                                     f"values.parsed_notes (skipped: {themeless} approved max_theme_weight rule(s) "
+                                     "without a theme)"]
     return limits, trace

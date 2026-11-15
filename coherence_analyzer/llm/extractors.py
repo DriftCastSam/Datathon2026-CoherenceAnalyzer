@@ -89,8 +89,23 @@ def n3_payload(notes: str) -> dict:
     return {"notes": notes}
 
 
+def n3_schema() -> dict:
+    """The static schema plus the vocabularies generated at runtime, like N4's ticker enum (SPEC §3.2, §6.2 N3, §11):
+    `tag` from the §3.2 activity-tag constant, `theme` from the themes in asset_meta.csv (read-only). The cache key does
+    not include the schema, so the recorded mock entries are unchanged. The gate re-asserts both."""
+    from .. import gate    # lazy: gate imports the data layer
+
+    schema = copy.deepcopy(load_schema(N3_NODE))
+    props = schema["properties"]["rules"]["items"]["properties"]["params"]["properties"]
+    props["tag"]["enum"] = list(gate.ACTIVITY_TAG_VOCABULARY)
+    themes = list(gate.theme_vocabulary())
+    if themes:
+        props["theme"]["enum"] = themes
+    return schema
+
+
 def values_parser_call(notes: str) -> dict:
-    return bedrock.call_tool(N3_NODE, load_schema(N3_NODE), load_prompt(N3_NODE), n3_payload(notes),
+    return bedrock.call_tool(N3_NODE, n3_schema(), load_prompt(N3_NODE), n3_payload(notes),
                              prompt_version(N3_NODE))
 
 
