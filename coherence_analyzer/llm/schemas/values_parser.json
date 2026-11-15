@@ -19,7 +19,7 @@
             "properties": {
               "tag": {"type": "string"},
               "theme": {"type": "string"},
-              "max_pct": {"type": "number", "minimum": 0, "maximum": 100},
+              "max_pct": {"type": "number", "exclusiveMinimum": 0, "maximum": 100},
               "attribute": {"type": "string"},
               "note": {"type": "string"}
             }
