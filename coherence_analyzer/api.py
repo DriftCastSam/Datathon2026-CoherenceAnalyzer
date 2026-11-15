@@ -25,6 +25,7 @@ import json
 import math
 import os
 import re
+import tempfile
 import threading
 from contextlib import contextmanager
 from datetime import date, datetime
@@ -188,6 +189,13 @@ def _fixture_dirs() -> dict[str, Path]:
 
 
 def _store_profiles_root() -> Path:
+    """A real, local, writable directory holding working copies, for both backends. `store.py`'s own `root()` is a
+    display-only `s3:/...` pseudo-path for the s3 backend (never used for file access); this module's working-copy
+    layer predates the s3 backend and does plain file I/O throughout, so for s3 it gets a local scratch directory
+    instead, synced with the real S3 objects at the request boundaries (`_workdir`, and `store.sync_profile_up`
+    after every mutation below) rather than adapting every read/write individually."""
+    if store.backend() == "s3":
+        return Path(tempfile.gettempdir()) / "coherence-analyzer-work" / "profiles"
     return store.root() / "profiles"
 
 
@@ -195,18 +203,24 @@ def _store_dirs() -> dict[str, Path]:
     """{profile_id: dir} for every profile in the store: `<store>/profiles/<profile_id>/` holding a readable
     profile.json + events.jsonl + portfolio.json whose `meta.profile_id` is the directory name."""
     out: dict[str, Path] = {}
+    s3 = store.backend() == "s3"
     root = _store_profiles_root()
-    if not root.is_dir():
-        return out
-    for d in sorted(p for p in root.iterdir() if p.is_dir()):
-        if not _PROFILE_ID.match(d.name) or not all((d / f).is_file() for f in _PROFILE_FILES):
+    candidates = store.list_profile_ids() if s3 else (
+        [p.name for p in root.iterdir() if p.is_dir()] if root.is_dir() else [])
+    for name in sorted(candidates):
+        if not _PROFILE_ID.match(name):
+            continue
+        d = root / name
+        if s3:
+            store.sync_profile_down(d, name)
+        if not all((d / f).is_file() for f in _PROFILE_FILES):
             continue
         try:
             meta = json.loads((d / "profile.json").read_text(encoding="utf-8"))["meta"]
         except (OSError, ValueError, KeyError, TypeError):
             continue
-        if isinstance(meta, dict) and meta.get("profile_id") == d.name:
-            out[d.name] = d
+        if isinstance(meta, dict) and meta.get("profile_id") == name:
+            out[name] = d
     return out
 
 
@@ -230,6 +244,9 @@ def _workdir(profile_id: str) -> tuple[Path, Path]:
     if not isinstance(profile_id, str) or not _PROFILE_ID.match(profile_id):
         raise HTTPException(status_code=404, detail=f"unknown profile {profile_id!r}")
     work = _store_profiles_root() / profile_id
+    s3 = store.backend() == "s3"
+    if s3:
+        store.sync_profile_down(work, profile_id)
     seed = _fixture_dirs().get(profile_id)
     if seed is None:
         if not all((work / f).is_file() for f in ("profile.json", "events.jsonl")):
@@ -243,6 +260,8 @@ def _workdir(profile_id: str) -> tuple[Path, Path]:
                     dst = work / src.name
                     if src.is_file() and not dst.exists():
                         dst.write_bytes(src.read_bytes())
+            if s3:
+                store.sync_profile_up(work, profile_id)
     return work, seed
 
 
@@ -339,9 +358,12 @@ def _new_user_profile(profile_id: str, body: ProfileIn) -> dict:
 def _next_user_id() -> str:
     """user-NNNN: highest number among the store directories and the seeds + 1 (assigned by the server, under _LOCK)."""
     taken = set(_fixture_dirs())
-    root = _store_profiles_root()
-    if root.is_dir():
-        taken.update(p.name for p in root.iterdir() if p.is_dir())
+    if store.backend() == "s3":
+        taken.update(store.list_profile_ids())
+    else:
+        root = _store_profiles_root()
+        if root.is_dir():
+            taken.update(p.name for p in root.iterdir() if p.is_dir())
     highest = max((int(m.group(1)) for m in map(_USER_ID.match, taken) if m), default=0)
     return f"user-{highest + 1:04d}"
 
@@ -361,6 +383,8 @@ def create_profile(body: ProfileIn) -> dict:
         work.mkdir(parents=True, exist_ok=False)
         (work / "events.jsonl").write_text("", encoding="utf-8")
         _save(work, profile)
+        if store.backend() == "s3":
+            store.sync_profile_up(work, profile_id)
     return profile
 
 
@@ -406,6 +430,8 @@ def put_portfolio(profile_id: str, body: PortfolioIn) -> dict:
             else:
                 pf_path.write_bytes(pf_before)
             raise
+        if store.backend() == "s3":
+            store.sync_profile_up(work, profile_id)
     return {**doc, "event_id": event["event_id"]}
 
 
@@ -468,6 +494,8 @@ def _record_intake(work: Path, profile_id: str, fixture: Path, path: str, edited
         events_path.write_bytes(events_before)
         (work / "profile.json").write_bytes(profile_before)
         raise
+    if store.backend() == "s3":
+        store.sync_profile_up(work, profile_id)
     audit = res["audit"]
     return {**res["profile"],
             "intake": {"event": event, "run_id": res["run_id"], "profile_version": audit["profile_version_out"],
@@ -637,6 +665,8 @@ def _flow_a(work: Path, profile_id: str, fixture: Path, body: EventIn) -> dict:
         path.write_bytes(events_before)
         (work / "profile.json").write_bytes(profile_before)
         raise
+    if store.backend() == "s3":
+        store.sync_profile_up(work, profile_id)
     return {"event": event, "run_id": res["run_id"], "profile_diff": res["profile_diff"],
             "profile_version": audit["profile_version_out"]}
 
@@ -657,7 +687,12 @@ def post_event(profile_id: str, body: EventIn) -> dict:
             event["parent_event_id"] = body.parent_event_id
         _append_event(work, event)
         if body.type == "order_intent":
-            return {"event": event, "intent": _draft_intent(work, event)}
+            intent = _draft_intent(work, event)
+            if store.backend() == "s3":
+                store.sync_profile_up(work, profile_id)
+            return {"event": event, "intent": intent}
+        if store.backend() == "s3":
+            store.sync_profile_up(work, profile_id)
     return event
 
 
@@ -822,6 +857,8 @@ def confirm_intent(intent_id: str, body: ConfirmIn) -> dict:
             events_path.write_bytes(events_before)
             intents_path.write_bytes(intents_before)
             raise
+        if store.backend() == "s3":
+            store.sync_profile_up(work, profile_id)
     return state["report"]
 
 
@@ -858,6 +895,8 @@ def _record_decision(work: Path, profile_id: str, fixture: Path, index: int, edi
         events_path.write_bytes(events_before)
         (work / "profile.json").write_bytes(profile_before)
         raise
+    if store.backend() == "s3":
+        store.sync_profile_up(work, profile_id)
     return final
 
 
@@ -1031,6 +1070,8 @@ def post_correction(profile_id: str, body: CorrectionIn) -> dict:
             events_path.write_bytes(events_before)
             (work / "profile.json").write_bytes(profile_before)
             raise
+        if store.backend() == "s3":
+            store.sync_profile_up(work, profile_id)
     return {"event": event, "profile_diff": res["profile_diff"], "report": report,
             "messages": _correction_messages(res)}
 
@@ -1059,6 +1100,8 @@ def post_review(profile_id: str, locale: str | None = Query(None)) -> dict:
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
         _adopt_refreshed_profile(work, report)
+        if store.backend() == "s3":
+            store.sync_profile_up(work, profile_id)
     return report
 
 

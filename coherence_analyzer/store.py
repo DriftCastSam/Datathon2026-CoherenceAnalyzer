@@ -80,6 +80,89 @@ def _s3_put(key: str, body: bytes) -> str:
     return prefix + key
 
 
+def _s3_list_keys(prefix: str) -> list[str]:
+    """Every object key (relative to the configured bucket prefix) under `prefix`, paginated."""
+    bucket, base = _s3_target()
+    client = _s3_client()
+    keys: list[str] = []
+    token = None
+    while True:
+        kwargs = {"Bucket": bucket, "Prefix": base + prefix}
+        if token:
+            kwargs["ContinuationToken"] = token
+        resp = client.list_objects_v2(**kwargs)
+        keys.extend(obj["Key"][len(base):] for obj in resp.get("Contents", []))
+        if not resp.get("IsTruncated"):
+            return keys
+        token = resp.get("NextContinuationToken")
+
+
+def _s3_list_profile_ids() -> list[str]:
+    """Immediate `profiles/<id>/` names that hold a profile.json object (CommonPrefixes, one list call)."""
+    bucket, base = _s3_target()
+    client = _s3_client()
+    ids: list[str] = []
+    token = None
+    while True:
+        kwargs = {"Bucket": bucket, "Prefix": base + "profiles/", "Delimiter": "/"}
+        if token:
+            kwargs["ContinuationToken"] = token
+        resp = client.list_objects_v2(**kwargs)
+        for entry in resp.get("CommonPrefixes", []):
+            name = entry["Prefix"][len(base) + len("profiles/"):].rstrip("/")
+            if name:
+                ids.append(name)
+        if not resp.get("IsTruncated"):
+            break
+        token = resp.get("NextContinuationToken")
+    return [pid for pid in ids if _s3_get(f"profiles/{pid}/profile.json") is not None]
+
+
+def list_profile_ids() -> list[str]:
+    """Every profile id in the store (local: directory scan; s3: a listing call), unvalidated beyond
+    "has a profile.json". The caller still checks the other required files and `meta.profile_id` once the
+    files are local (sync_profile_down for s3)."""
+    if backend() == "s3":
+        return _s3_list_profile_ids()
+    root_dir = Path(os.getenv("COHERENCE_ANALYZER_STORE_DIR") or Path.cwd()) / "profiles"
+    if not root_dir.is_dir():
+        return []
+    return [p.name for p in root_dir.iterdir() if p.is_dir() and (p / "profile.json").is_file()]
+
+
+def sync_profile_down(local_dir: Path, profile_id: str) -> None:
+    """s3 only (local backend: no-op, `local_dir` already is the store). Downloads every object under
+    `profiles/<profile_id>/` into `local_dir`, so the rest of the codebase can keep working with it as a plain
+    local directory (api.py's working-copy layer predates the s3 backend and never became s3-aware itself)."""
+    if backend() != "s3":
+        return
+    prefix = f"profiles/{profile_id}/"
+    for key in _s3_list_keys(prefix):
+        rel = key[len(prefix):]
+        if not rel:
+            continue
+        data = _s3_get(key)
+        if data is None:
+            continue
+        dest = local_dir / rel
+        dest.parent.mkdir(parents=True, exist_ok=True)
+        dest.write_bytes(data)
+
+
+def sync_profile_up(local_dir: Path, profile_id: str) -> None:
+    """s3 only (local backend: no-op). Uploads every file currently in `local_dir` to `profiles/<profile_id>/...`
+    so a write made through the local working copy (api.py) is visible to the next request, however it lands on
+    this or another Lambda instance. Call after every mutation, not after every individual write: one directory
+    sync per request is enough and matches how api.py already snapshots/restores whole files on failure."""
+    if backend() != "s3":
+        return
+    if not local_dir.is_dir():
+        return
+    for path in local_dir.rglob("*"):
+        if path.is_file():
+            _s3_put(f"profiles/{profile_id}/{path.relative_to(local_dir).as_posix()}", path.read_bytes())
+
+
 def root() -> Path:
     """Local store root. For s3 a display-only s3:/<bucket>/<prefix> path (never used for file access)."""
     if backend() == "s3":
