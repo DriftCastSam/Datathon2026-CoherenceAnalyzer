@@ -18,6 +18,8 @@
   const STATE_ANSWERED = "answered";
   const STATE_SKIPPED = "skipped";
   const STATE_OPEN = "open";
+  const DONE_ALL_ANSWERED = "All questions have an answer.";
+  const DONE_RUN_PROMPT = "Run the analysis to check your profile against your portfolio.";
 
   /* Screen state survives re-renders; it is rebuilt when the persona changes or the screen is re-entered. */
   const screen = {
@@ -27,6 +29,7 @@
   /* Only the most recent question load for the current persona may fill the screen. */
   let loadSeq = 0;
   let activeSection = null;
+  let pathSelectionApplied = false;
 
   App.navSpec.conversation = {tabs: [], chrome: "bare"};
 
@@ -163,7 +166,7 @@
     render();
     try {
       await action(question);
-      if (token === loadSeq) screen.index = firstOpenAfter(screen.questions.indexOf(question));
+      if (token === loadSeq) screen.index = firstOpenAfter(-1);
     } catch (error) {
       console.error("[conversation] " + failure, error);
       if (token === loadSeq) screen.fieldError = "Could not " + failure + ": " + error.message;
@@ -207,17 +210,6 @@
 
   /* ---------- rendering ---------- */
 
-  function answeredRow(question, position) {
-    const spec = specFor(question.path);
-    const skipped = questionState(question) === STATE_SKIPPED;
-    const text = skipped ? "Skipped" : displayValue(spec, question.current);
-    return '<button type="button" class="qa qa--edit" data-edit="' + position + '" aria-label="Change answer: ' + esc(spec.label) + '">'
-      + '<span class="qa__q"><span class="t-small label">' + esc(spec.label) + "</span>"
-      + '<span class="t-body">' + esc(question.text) + "</span></span>"
-      + '<span class="qa__a"><span class="t-small label">Your answer</span>'
-      + '<span class="t-body-strong">' + esc(text) + "</span></span></button>";
-  }
-
   function chipHtml(chip, position) {
     return '<button class="btn btn--outline-dark sug" type="button" data-chip="' + position + '"'
       + (screen.saving ? " disabled" : "") + ">" + esc(chip.label) + "</button>";
@@ -251,14 +243,8 @@
   }
 
   function doneHtml() {
-    return '<p class="t-body-strong">All questions have an answer.</p>'
-      + '<p class="t-body muted">Select an answer above to change it, or run the analysis.</p>';
-  }
-
-  function renderList(section) {
-    const rows = screen.questions.map((question, position) => (
-      position !== screen.index && questionState(question) !== STATE_OPEN ? answeredRow(question, position) : ""));
-    section.querySelector("[data-conversation-list]").innerHTML = rows.join("");
+    return '<p class="t-body-strong">' + esc(DONE_ALL_ANSWERED) + "</p>"
+      + '<p class="t-body">' + esc(DONE_RUN_PROMPT) + "</p>";
   }
 
   function renderCurrent(section) {
@@ -288,7 +274,7 @@
     const [text, cls] = rowValue(question, position);
     const label = esc(specFor(question.path).label);
     const value = '<p class="prow__val ' + cls + '">' + esc(text) + "</p>";
-    if (!isLive() || questionState(question) === STATE_OPEN) return '<div class="prow"><p>' + label + "</p>" + value + "</div>";
+    if (!isLive()) return '<div class="prow"><p>' + label + "</p>" + value + "</div>";
     return '<button type="button" class="prow prow--btn" data-edit="' + position + '"><p>' + label + "</p>" + value + "</button>";
   }
 
@@ -317,7 +303,6 @@
 
   function render() {
     if (!activeSection) return;
-    renderList(activeSection);
     renderCurrent(activeSection);
     renderPanel(activeSection);
     renderRun(activeSection);
@@ -380,8 +365,21 @@
       submitInput(section);
     });
     window.addEventListener("hashchange", () => {
+      pathSelectionApplied = false;
       if (App.route !== CONVERSATION_ROUTE) screen.persona = null;
     });
+  }
+
+  function applyPathSelection() {
+    if (pathSelectionApplied) return;
+    const pathParam = App.routeParams().get("path");
+    if (!pathParam || !screen.questions.length) return;
+    const matchIndex = screen.questions.findIndex(question => question.path === pathParam);
+    if (matchIndex >= 0) {
+      screen.index = matchIndex;
+      screen.fieldError = "";
+      pathSelectionApplied = true;
+    }
   }
 
   App.renderers.conversation = function (section) {
@@ -389,8 +387,14 @@
     activeSection = section;
     const needsLoad = Boolean(App.state.persona) && screen.persona !== App.state.persona;
     if (needsLoad) {
-      loadQuestions().then(render);
+      pathSelectionApplied = false;
+      loadQuestions().then(() => {
+        applyPathSelection();
+        render();
+      });
+    } else {
+      if (!pathSelectionApplied) applyPathSelection();
+      render();
     }
-    render();
   };
 })();
