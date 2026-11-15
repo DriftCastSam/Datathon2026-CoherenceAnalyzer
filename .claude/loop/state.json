@@ -28,6 +28,7 @@
     "P2.FB": "impl",
     "P2.N2": "impl",
     "P2.SITE": "impl",
-    "P2.UI": "impl"
+    "P2.UI": "impl",
+    "P3.RESIZE": "tests"
   }
 }
