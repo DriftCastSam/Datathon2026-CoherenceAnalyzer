@@ -1,0 +1,1546 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="58" skipped="0" tests="60" time="1.413" timestamp="2026-11-15T01:16:27.406398+00:00" hostname="bomboclat-laptop"><testcase classname="tests.flows.test_flow_a_events" name="test_every_flow_a_event_type_runs_flow_a_and_returns_event_run_and_version[question-What does duration mean for a bond fund?-None]" time="0.012"><failure message="KeyError: 'event'">client = &lt;starlette.testclient.TestClient object at 0x76e2d550bcb0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_every_flow_a_event_type_r0/store')
+etype = 'question', text = 'What does duration mean for a bond fund?'
+payload = None
+
+    @pytest.mark.parametrize("etype,text,payload", [
+        ("question", "What does duration mean for a bond fund?", None),
+        ("note", "Thinking about my retirement date.", None),
+        ("quiz_result", "Knowledge quiz kq_v1 completed.", {"score": 0.8, "quiz_id": "kq_v1"}),
+        ("profile_edit", "Changed my fee ceiling.", _edit("preferences.max_fee_mer_pct", 0.5, 0.5)),
+    ])
+    def test_every_flow_a_event_type_runs_flow_a_and_returns_event_run_and_version(client, store_dir, etype, text, payload):
+        # §4 Trigger + §12: a question / quiz_result / profile_edit / note event appends the event, runs Flow A (run_id,
+        # audit flow "A") and the response returns the event plus the refreshed profile version and diff.
+        before = _profile(client, ROBERT)
+        body = _ok(client, ROBERT, etype, text, payload)
+&gt;       ev = body["event"]
+             ^^^^^^^^^^^^^
+E       KeyError: 'event'
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:151: KeyError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_every_flow_a_event_type_runs_flow_a_and_returns_event_run_and_version[note-Thinking about my retirement date.-None]" time="0.009"><failure message="KeyError: 'event'">client = &lt;starlette.testclient.TestClient object at 0x76e2a7293890&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_every_flow_a_event_type_r1/store')
+etype = 'note', text = 'Thinking about my retirement date.', payload = None
+
+    @pytest.mark.parametrize("etype,text,payload", [
+        ("question", "What does duration mean for a bond fund?", None),
+        ("note", "Thinking about my retirement date.", None),
+        ("quiz_result", "Knowledge quiz kq_v1 completed.", {"score": 0.8, "quiz_id": "kq_v1"}),
+        ("profile_edit", "Changed my fee ceiling.", _edit("preferences.max_fee_mer_pct", 0.5, 0.5)),
+    ])
+    def test_every_flow_a_event_type_runs_flow_a_and_returns_event_run_and_version(client, store_dir, etype, text, payload):
+        # §4 Trigger + §12: a question / quiz_result / profile_edit / note event appends the event, runs Flow A (run_id,
+        # audit flow "A") and the response returns the event plus the refreshed profile version and diff.
+        before = _profile(client, ROBERT)
+        body = _ok(client, ROBERT, etype, text, payload)
+&gt;       ev = body["event"]
+             ^^^^^^^^^^^^^
+E       KeyError: 'event'
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:151: KeyError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_every_flow_a_event_type_runs_flow_a_and_returns_event_run_and_version[quiz_result-Knowledge quiz kq_v1 completed.-payload2]" time="0.006"><failure message="KeyError: 'event'">client = &lt;starlette.testclient.TestClient object at 0x76e2a723d450&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_every_flow_a_event_type_r2/store')
+etype = 'quiz_result', text = 'Knowledge quiz kq_v1 completed.'
+payload = {'score': 0.8, 'quiz_id': 'kq_v1'}
+
+    @pytest.mark.parametrize("etype,text,payload", [
+        ("question", "What does duration mean for a bond fund?", None),
+        ("note", "Thinking about my retirement date.", None),
+        ("quiz_result", "Knowledge quiz kq_v1 completed.", {"score": 0.8, "quiz_id": "kq_v1"}),
+        ("profile_edit", "Changed my fee ceiling.", _edit("preferences.max_fee_mer_pct", 0.5, 0.5)),
+    ])
+    def test_every_flow_a_event_type_runs_flow_a_and_returns_event_run_and_version(client, store_dir, etype, text, payload):
+        # §4 Trigger + §12: a question / quiz_result / profile_edit / note event appends the event, runs Flow A (run_id,
+        # audit flow "A") and the response returns the event plus the refreshed profile version and diff.
+        before = _profile(client, ROBERT)
+        body = _ok(client, ROBERT, etype, text, payload)
+&gt;       ev = body["event"]
+             ^^^^^^^^^^^^^
+E       KeyError: 'event'
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:151: KeyError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_every_flow_a_event_type_runs_flow_a_and_returns_event_run_and_version[profile_edit-Changed my fee ceiling.-payload3]" time="0.010"><failure message="KeyError: 'event'">client = &lt;starlette.testclient.TestClient object at 0x76e2a724c510&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_every_flow_a_event_type_r3/store')
+etype = 'profile_edit', text = 'Changed my fee ceiling.'
+payload = {'path': 'preferences.max_fee_mer_pct', 'old': 0.5, 'new': 0.5}
+
+    @pytest.mark.parametrize("etype,text,payload", [
+        ("question", "What does duration mean for a bond fund?", None),
+        ("note", "Thinking about my retirement date.", None),
+        ("quiz_result", "Knowledge quiz kq_v1 completed.", {"score": 0.8, "quiz_id": "kq_v1"}),
+        ("profile_edit", "Changed my fee ceiling.", _edit("preferences.max_fee_mer_pct", 0.5, 0.5)),
+    ])
+    def test_every_flow_a_event_type_runs_flow_a_and_returns_event_run_and_version(client, store_dir, etype, text, payload):
+        # §4 Trigger + §12: a question / quiz_result / profile_edit / note event appends the event, runs Flow A (run_id,
+        # audit flow "A") and the response returns the event plus the refreshed profile version and diff.
+        before = _profile(client, ROBERT)
+        body = _ok(client, ROBERT, etype, text, payload)
+&gt;       ev = body["event"]
+             ^^^^^^^^^^^^^
+E       KeyError: 'event'
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:151: KeyError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_question_event_runs_rules_only_no_n1_n3_and_keeps_llm_fields" time="0.006"><failure message="AssertionError: Flow A response must carry its run_id (§4)&#10;assert (False)&#10; +  where False = isinstance(None, str)&#10; +    where None = &lt;built-in method get of dict object at 0x76e2a605d780&gt;('run_id')&#10; +      where &lt;built-in method get of dict object at 0x76e2a605d780&gt; = {'event_id': 'ev_robert_0008', 'profile_id': 'persona-robert', 'ts': '2026-11-15T09:30:00-05:00', 'type': 'question', ...}.get">client = &lt;starlette.testclient.TestClient object at 0x76e2a7277a80&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_question_event_runs_rules0/store')
+
+    def test_question_event_runs_rules_only_no_n1_n3_and_keeps_llm_fields(client, store_dir):
+        # D7 + §4: Flow A on a question event is rules only (no N1/N2 in the P0 pipeline, N3 only when values.notes
+        # changed). The recorded llm: fields stay as they were and limits do not move.
+        before = _profile(client, ROBERT)
+        body = _ok(client, ROBERT, "question", "What does duration mean for a bond fund?")
+&gt;       audit = _audit(client, body)
+                ^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:175: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x76e2a7277a80&gt;
+body = {'event_id': 'ev_robert_0008', 'profile_id': 'persona-robert', 'ts': '2026-11-15T09:30:00-05:00', 'type': 'question', ...}
+
+    def _audit(client: TestClient, body: dict) -&gt; dict:
+&gt;       assert isinstance(body.get("run_id"), str) and body["run_id"], "Flow A response must carry its run_id (§4)"
+E       AssertionError: Flow A response must carry its run_id (§4)
+E       assert (False)
+E        +  where False = isinstance(None, str)
+E        +    where None = &lt;built-in method get of dict object at 0x76e2a605d780&gt;('run_id')
+E        +      where &lt;built-in method get of dict object at 0x76e2a605d780&gt; = {'event_id': 'ev_robert_0008', 'profile_id': 'persona-robert', 'ts': '2026-11-15T09:30:00-05:00', 'type': 'question', ...}.get
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:105: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_note_event_does_not_edit_values_notes_and_does_not_call_n3" time="0.008"><failure message="AssertionError: Flow A response must carry its run_id (§4)&#10;assert (False)&#10; +  where False = isinstance(None, str)&#10; +    where None = &lt;built-in method get of dict object at 0x76e2a60efd00&gt;('run_id')&#10; +      where &lt;built-in method get of dict object at 0x76e2a60efd00&gt; = {'event_id': 'ev_robert_0008', 'profile_id': 'persona-robert', 'ts': '2026-11-15T09:30:00-05:00', 'type': 'note', ...}.get">client = &lt;starlette.testclient.TestClient object at 0x76e2d6393410&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_note_event_does_not_edit_0/store')
+
+    def test_note_event_does_not_edit_values_notes_and_does_not_call_n3(client, store_dir):
+        # §4 A2: N3 runs only if values.notes changed. A note event is free text in the event log; it is not a declared
+        # profile field.
+        # SPEC-AMBIGUITY: §3.4 does not say a `note` event rewrites values.notes; stricter reading = it does not
+        # (values.notes is declared by the user, only through profile_edit).
+        before = _profile(client, ROBERT)
+        body = _ok(client, ROBERT, "note", AMIRA_NOTES)
+&gt;       audit = _audit(client, body)
+                ^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:197: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x76e2d6393410&gt;
+body = {'event_id': 'ev_robert_0008', 'profile_id': 'persona-robert', 'ts': '2026-11-15T09:30:00-05:00', 'type': 'note', ...}
+
+    def _audit(client: TestClient, body: dict) -&gt; dict:
+&gt;       assert isinstance(body.get("run_id"), str) and body["run_id"], "Flow A response must carry its run_id (§4)"
+E       AssertionError: Flow A response must carry its run_id (§4)
+E       assert (False)
+E        +  where False = isinstance(None, str)
+E        +    where None = &lt;built-in method get of dict object at 0x76e2a60efd00&gt;('run_id')
+E        +      where &lt;built-in method get of dict object at 0x76e2a60efd00&gt; = {'event_id': 'ev_robert_0008', 'profile_id': 'persona-robert', 'ts': '2026-11-15T09:30:00-05:00', 'type': 'note', ...}.get
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:105: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_quiz_result_sets_knowledge_quiz_score_and_rederives_knowledge_score[0.5]" time="0.012"><failure message="assert 0.8 == 0.5 ± 1.0e-09&#10;  &#10;  comparison failed&#10;  Obtained: 0.8&#10;  Expected: 0.5 ± 1.0e-09">client = &lt;starlette.testclient.TestClient object at 0x76e2a733d6a0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_quiz_result_sets_knowledg0/store')
+score = 0.5
+
+    @pytest.mark.parametrize("score", [0.5, 0.95, 0.0, 1.0])
+    def test_quiz_result_sets_knowledge_quiz_score_and_rederives_knowledge_score(client, store_dir, score):
+        # §3.1 / §3.4: quiz_result.payload.score becomes knowledge.quiz_score (a user-declared plain value, 0-1); A4
+        # re-derives knowledge.score (rule:, 0.4*quiz + ...). Limits do not depend on knowledge (§7.2, inv. 2).
+        before = _baseline(client, ROBERT)
+        assert before["knowledge"]["quiz_score"] == pytest.approx(0.8, abs=1e-9)
+        body = _ok(client, ROBERT, "quiz_result", "Knowledge quiz kq_v1 completed.", {"score": score, "quiz_id": "kq_v1"})
+        after = _profile(client, ROBERT)
+&gt;       assert after["knowledge"]["quiz_score"] == pytest.approx(score, abs=1e-9)
+E       assert 0.8 == 0.5 ± 1.0e-09
+E         
+E         comparison failed
+E         Obtained: 0.8
+E         Expected: 0.5 ± 1.0e-09
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:214: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_quiz_result_sets_knowledge_quiz_score_and_rederives_knowledge_score[0.95]" time="0.015"><failure message="assert 0.8 == 0.95 ± 1.0e-09&#10;  &#10;  comparison failed&#10;  Obtained: 0.8&#10;  Expected: 0.95 ± 1.0e-09">client = &lt;starlette.testclient.TestClient object at 0x76e2a733e360&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_quiz_result_sets_knowledg1/store')
+score = 0.95
+
+    @pytest.mark.parametrize("score", [0.5, 0.95, 0.0, 1.0])
+    def test_quiz_result_sets_knowledge_quiz_score_and_rederives_knowledge_score(client, store_dir, score):
+        # §3.1 / §3.4: quiz_result.payload.score becomes knowledge.quiz_score (a user-declared plain value, 0-1); A4
+        # re-derives knowledge.score (rule:, 0.4*quiz + ...). Limits do not depend on knowledge (§7.2, inv. 2).
+        before = _baseline(client, ROBERT)
+        assert before["knowledge"]["quiz_score"] == pytest.approx(0.8, abs=1e-9)
+        body = _ok(client, ROBERT, "quiz_result", "Knowledge quiz kq_v1 completed.", {"score": score, "quiz_id": "kq_v1"})
+        after = _profile(client, ROBERT)
+&gt;       assert after["knowledge"]["quiz_score"] == pytest.approx(score, abs=1e-9)
+E       assert 0.8 == 0.95 ± 1.0e-09
+E         
+E         comparison failed
+E         Obtained: 0.8
+E         Expected: 0.95 ± 1.0e-09
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:214: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_quiz_result_sets_knowledge_quiz_score_and_rederives_knowledge_score[0.0]" time="0.013"><failure message="assert 0.8 == 0.0 ± 1.0e-09&#10;  &#10;  comparison failed&#10;  Obtained: 0.8&#10;  Expected: 0.0 ± 1.0e-09">client = &lt;starlette.testclient.TestClient object at 0x76e2a733c160&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_quiz_result_sets_knowledg2/store')
+score = 0.0
+
+    @pytest.mark.parametrize("score", [0.5, 0.95, 0.0, 1.0])
+    def test_quiz_result_sets_knowledge_quiz_score_and_rederives_knowledge_score(client, store_dir, score):
+        # §3.1 / §3.4: quiz_result.payload.score becomes knowledge.quiz_score (a user-declared plain value, 0-1); A4
+        # re-derives knowledge.score (rule:, 0.4*quiz + ...). Limits do not depend on knowledge (§7.2, inv. 2).
+        before = _baseline(client, ROBERT)
+        assert before["knowledge"]["quiz_score"] == pytest.approx(0.8, abs=1e-9)
+        body = _ok(client, ROBERT, "quiz_result", "Knowledge quiz kq_v1 completed.", {"score": score, "quiz_id": "kq_v1"})
+        after = _profile(client, ROBERT)
+&gt;       assert after["knowledge"]["quiz_score"] == pytest.approx(score, abs=1e-9)
+E       assert 0.8 == 0.0 ± 1.0e-09
+E         
+E         comparison failed
+E         Obtained: 0.8
+E         Expected: 0.0 ± 1.0e-09
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:214: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_quiz_result_sets_knowledge_quiz_score_and_rederives_knowledge_score[1.0]" time="0.011"><failure message="assert 0.8 == 1.0 ± 1.0e-09&#10;  &#10;  comparison failed&#10;  Obtained: 0.8&#10;  Expected: 1.0 ± 1.0e-09">client = &lt;starlette.testclient.TestClient object at 0x76e2a733e7a0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_quiz_result_sets_knowledg3/store')
+score = 1.0
+
+    @pytest.mark.parametrize("score", [0.5, 0.95, 0.0, 1.0])
+    def test_quiz_result_sets_knowledge_quiz_score_and_rederives_knowledge_score(client, store_dir, score):
+        # §3.1 / §3.4: quiz_result.payload.score becomes knowledge.quiz_score (a user-declared plain value, 0-1); A4
+        # re-derives knowledge.score (rule:, 0.4*quiz + ...). Limits do not depend on knowledge (§7.2, inv. 2).
+        before = _baseline(client, ROBERT)
+        assert before["knowledge"]["quiz_score"] == pytest.approx(0.8, abs=1e-9)
+        body = _ok(client, ROBERT, "quiz_result", "Knowledge quiz kq_v1 completed.", {"score": score, "quiz_id": "kq_v1"})
+        after = _profile(client, ROBERT)
+&gt;       assert after["knowledge"]["quiz_score"] == pytest.approx(score, abs=1e-9)
+E       assert 0.8 == 1.0 ± 1.0e-09
+E         
+E         comparison failed
+E         Obtained: 0.8
+E         Expected: 1.0 ± 1.0e-09
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:214: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_quiz_result_with_the_same_score_leaves_the_profile_version" time="0.010"><failure message="KeyError: 'profile_diff'">client = &lt;starlette.testclient.TestClient object at 0x76e2a733ebe0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_quiz_result_with_the_same0/store')
+
+    def test_quiz_result_with_the_same_score_leaves_the_profile_version(client, store_dir):
+        # §4 A6: bump meta.version only when something changed.
+        before = _baseline(client, ROBERT)
+        body = _ok(client, ROBERT, "quiz_result", "Retook the quiz.", {"score": 0.8, "quiz_id": "kq_v1"})
+&gt;       assert body["profile_diff"] == []
+               ^^^^^^^^^^^^^^^^^^^^
+E       KeyError: 'profile_diff'
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:235: KeyError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_invalid_quiz_result_is_rejected_before_anything_is_written[None]" time="0.010"><failure message="AssertionError: {&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-05:00&quot;,&quot;type&quot;:&quot;quiz_result&quot;,&quot;text&quot;:&quot;Knowledge quiz.&quot;,&quot;payload&quot;:null,&quot;source&quot;:&quot;ui_chat&quot;}&#10;assert 200 == 422&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a733ef10&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_invalid_quiz_result_is_re0/store')
+payload = None
+
+    @pytest.mark.parametrize("payload", [
+        None, {}, {"quiz_id": "kq_v1"}, {"score": 1.2, "quiz_id": "kq_v1"}, {"score": -0.1, "quiz_id": "kq_v1"},
+        {"score": "0.8", "quiz_id": "kq_v1"}, {"score": True, "quiz_id": "kq_v1"}, {"score": None, "quiz_id": "kq_v1"},
+    ])
+    def test_invalid_quiz_result_is_rejected_before_anything_is_written(client, store_dir, payload):
+        # §3.4 payload {score, quiz_id}; §3.1 quiz_score is a 0-1 fraction. A bad score never reaches the profile.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        r = _post(client, ROBERT, "quiz_result", "Knowledge quiz.", payload)
+&gt;       assert r.status_code == 422, r.text
+E       AssertionError: {"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-05:00","type":"quiz_result","text":"Knowledge quiz.","payload":null,"source":"ui_chat"}
+E       assert 200 == 422
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:249: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_invalid_quiz_result_is_rejected_before_anything_is_written[payload1]" time="0.009"><failure message="AssertionError: {&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-05:00&quot;,&quot;type&quot;:&quot;quiz_result&quot;,&quot;text&quot;:&quot;Knowledge quiz.&quot;,&quot;payload&quot;:{},&quot;source&quot;:&quot;ui_chat&quot;}&#10;assert 200 == 422&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a733f130&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_invalid_quiz_result_is_re1/store')
+payload = {}
+
+    @pytest.mark.parametrize("payload", [
+        None, {}, {"quiz_id": "kq_v1"}, {"score": 1.2, "quiz_id": "kq_v1"}, {"score": -0.1, "quiz_id": "kq_v1"},
+        {"score": "0.8", "quiz_id": "kq_v1"}, {"score": True, "quiz_id": "kq_v1"}, {"score": None, "quiz_id": "kq_v1"},
+    ])
+    def test_invalid_quiz_result_is_rejected_before_anything_is_written(client, store_dir, payload):
+        # §3.4 payload {score, quiz_id}; §3.1 quiz_score is a 0-1 fraction. A bad score never reaches the profile.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        r = _post(client, ROBERT, "quiz_result", "Knowledge quiz.", payload)
+&gt;       assert r.status_code == 422, r.text
+E       AssertionError: {"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-05:00","type":"quiz_result","text":"Knowledge quiz.","payload":{},"source":"ui_chat"}
+E       assert 200 == 422
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:249: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_invalid_quiz_result_is_rejected_before_anything_is_written[payload2]" time="0.009"><failure message="AssertionError: {&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-05:00&quot;,&quot;type&quot;:&quot;quiz_result&quot;,&quot;text&quot;:&quot;Knowledge quiz.&quot;,&quot;payload&quot;:{&quot;quiz_id&quot;:&quot;kq_v1&quot;},&quot;source&quot;:&quot;ui_chat&quot;}&#10;assert 200 == 422&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a733f350&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_invalid_quiz_result_is_re2/store')
+payload = {'quiz_id': 'kq_v1'}
+
+    @pytest.mark.parametrize("payload", [
+        None, {}, {"quiz_id": "kq_v1"}, {"score": 1.2, "quiz_id": "kq_v1"}, {"score": -0.1, "quiz_id": "kq_v1"},
+        {"score": "0.8", "quiz_id": "kq_v1"}, {"score": True, "quiz_id": "kq_v1"}, {"score": None, "quiz_id": "kq_v1"},
+    ])
+    def test_invalid_quiz_result_is_rejected_before_anything_is_written(client, store_dir, payload):
+        # §3.4 payload {score, quiz_id}; §3.1 quiz_score is a 0-1 fraction. A bad score never reaches the profile.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        r = _post(client, ROBERT, "quiz_result", "Knowledge quiz.", payload)
+&gt;       assert r.status_code == 422, r.text
+E       AssertionError: {"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-05:00","type":"quiz_result","text":"Knowledge quiz.","payload":{"quiz_id":"kq_v1"},"source":"ui_chat"}
+E       assert 200 == 422
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:249: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_invalid_quiz_result_is_rejected_before_anything_is_written[payload3]" time="0.011"><failure message="AssertionError: {&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-05:00&quot;,&quot;type&quot;:&quot;quiz_result&quot;,&quot;text&quot;:&quot;Knowledge quiz.&quot;,&quot;payload&quot;:{&quot;score&quot;:1.2,&quot;quiz_id&quot;:&quot;kq_v1&quot;},&quot;source&quot;:&quot;ui_chat&quot;}&#10;assert 200 == 422&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a733f570&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_invalid_quiz_result_is_re3/store')
+payload = {'score': 1.2, 'quiz_id': 'kq_v1'}
+
+    @pytest.mark.parametrize("payload", [
+        None, {}, {"quiz_id": "kq_v1"}, {"score": 1.2, "quiz_id": "kq_v1"}, {"score": -0.1, "quiz_id": "kq_v1"},
+        {"score": "0.8", "quiz_id": "kq_v1"}, {"score": True, "quiz_id": "kq_v1"}, {"score": None, "quiz_id": "kq_v1"},
+    ])
+    def test_invalid_quiz_result_is_rejected_before_anything_is_written(client, store_dir, payload):
+        # §3.4 payload {score, quiz_id}; §3.1 quiz_score is a 0-1 fraction. A bad score never reaches the profile.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        r = _post(client, ROBERT, "quiz_result", "Knowledge quiz.", payload)
+&gt;       assert r.status_code == 422, r.text
+E       AssertionError: {"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-05:00","type":"quiz_result","text":"Knowledge quiz.","payload":{"score":1.2,"quiz_id":"kq_v1"},"source":"ui_chat"}
+E       assert 200 == 422
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:249: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_invalid_quiz_result_is_rejected_before_anything_is_written[payload4]" time="0.010"><failure message="AssertionError: {&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-05:00&quot;,&quot;type&quot;:&quot;quiz_result&quot;,&quot;text&quot;:&quot;Knowledge quiz.&quot;,&quot;payload&quot;:{&quot;score&quot;:-0.1,&quot;quiz_id&quot;:&quot;kq_v1&quot;},&quot;source&quot;:&quot;ui_chat&quot;}&#10;assert 200 == 422&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a733f680&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_invalid_quiz_result_is_re4/store')
+payload = {'score': -0.1, 'quiz_id': 'kq_v1'}
+
+    @pytest.mark.parametrize("payload", [
+        None, {}, {"quiz_id": "kq_v1"}, {"score": 1.2, "quiz_id": "kq_v1"}, {"score": -0.1, "quiz_id": "kq_v1"},
+        {"score": "0.8", "quiz_id": "kq_v1"}, {"score": True, "quiz_id": "kq_v1"}, {"score": None, "quiz_id": "kq_v1"},
+    ])
+    def test_invalid_quiz_result_is_rejected_before_anything_is_written(client, store_dir, payload):
+        # §3.4 payload {score, quiz_id}; §3.1 quiz_score is a 0-1 fraction. A bad score never reaches the profile.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        r = _post(client, ROBERT, "quiz_result", "Knowledge quiz.", payload)
+&gt;       assert r.status_code == 422, r.text
+E       AssertionError: {"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-05:00","type":"quiz_result","text":"Knowledge quiz.","payload":{"score":-0.1,"quiz_id":"kq_v1"},"source":"ui_chat"}
+E       assert 200 == 422
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:249: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_invalid_quiz_result_is_rejected_before_anything_is_written[payload5]" time="0.008"><failure message="AssertionError: {&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-05:00&quot;,&quot;type&quot;:&quot;quiz_result&quot;,&quot;text&quot;:&quot;Knowledge quiz.&quot;,&quot;payload&quot;:{&quot;score&quot;:&quot;0.8&quot;,&quot;quiz_id&quot;:&quot;kq_v1&quot;},&quot;source&quot;:&quot;ui_chat&quot;}&#10;assert 200 == 422&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a733f9b0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_invalid_quiz_result_is_re5/store')
+payload = {'score': '0.8', 'quiz_id': 'kq_v1'}
+
+    @pytest.mark.parametrize("payload", [
+        None, {}, {"quiz_id": "kq_v1"}, {"score": 1.2, "quiz_id": "kq_v1"}, {"score": -0.1, "quiz_id": "kq_v1"},
+        {"score": "0.8", "quiz_id": "kq_v1"}, {"score": True, "quiz_id": "kq_v1"}, {"score": None, "quiz_id": "kq_v1"},
+    ])
+    def test_invalid_quiz_result_is_rejected_before_anything_is_written(client, store_dir, payload):
+        # §3.4 payload {score, quiz_id}; §3.1 quiz_score is a 0-1 fraction. A bad score never reaches the profile.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        r = _post(client, ROBERT, "quiz_result", "Knowledge quiz.", payload)
+&gt;       assert r.status_code == 422, r.text
+E       AssertionError: {"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-05:00","type":"quiz_result","text":"Knowledge quiz.","payload":{"score":"0.8","quiz_id":"kq_v1"},"source":"ui_chat"}
+E       assert 200 == 422
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:249: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_invalid_quiz_result_is_rejected_before_anything_is_written[payload6]" time="0.008"><failure message="AssertionError: {&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-05:00&quot;,&quot;type&quot;:&quot;quiz_result&quot;,&quot;text&quot;:&quot;Knowledge quiz.&quot;,&quot;payload&quot;:{&quot;score&quot;:true,&quot;quiz_id&quot;:&quot;kq_v1&quot;},&quot;source&quot;:&quot;ui_chat&quot;}&#10;assert 200 == 422&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a733fce0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_invalid_quiz_result_is_re6/store')
+payload = {'score': True, 'quiz_id': 'kq_v1'}
+
+    @pytest.mark.parametrize("payload", [
+        None, {}, {"quiz_id": "kq_v1"}, {"score": 1.2, "quiz_id": "kq_v1"}, {"score": -0.1, "quiz_id": "kq_v1"},
+        {"score": "0.8", "quiz_id": "kq_v1"}, {"score": True, "quiz_id": "kq_v1"}, {"score": None, "quiz_id": "kq_v1"},
+    ])
+    def test_invalid_quiz_result_is_rejected_before_anything_is_written(client, store_dir, payload):
+        # §3.4 payload {score, quiz_id}; §3.1 quiz_score is a 0-1 fraction. A bad score never reaches the profile.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        r = _post(client, ROBERT, "quiz_result", "Knowledge quiz.", payload)
+&gt;       assert r.status_code == 422, r.text
+E       AssertionError: {"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-05:00","type":"quiz_result","text":"Knowledge quiz.","payload":{"score":true,"quiz_id":"kq_v1"},"source":"ui_chat"}
+E       assert 200 == 422
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:249: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_invalid_quiz_result_is_rejected_before_anything_is_written[payload7]" time="0.008"><failure message="AssertionError: {&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-05:00&quot;,&quot;type&quot;:&quot;quiz_result&quot;,&quot;text&quot;:&quot;Knowledge quiz.&quot;,&quot;payload&quot;:{&quot;score&quot;:null,&quot;quiz_id&quot;:&quot;kq_v1&quot;},&quot;source&quot;:&quot;ui_chat&quot;}&#10;assert 200 == 422&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a733f020&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_invalid_quiz_result_is_re7/store')
+payload = {'score': None, 'quiz_id': 'kq_v1'}
+
+    @pytest.mark.parametrize("payload", [
+        None, {}, {"quiz_id": "kq_v1"}, {"score": 1.2, "quiz_id": "kq_v1"}, {"score": -0.1, "quiz_id": "kq_v1"},
+        {"score": "0.8", "quiz_id": "kq_v1"}, {"score": True, "quiz_id": "kq_v1"}, {"score": None, "quiz_id": "kq_v1"},
+    ])
+    def test_invalid_quiz_result_is_rejected_before_anything_is_written(client, store_dir, payload):
+        # §3.4 payload {score, quiz_id}; §3.1 quiz_score is a 0-1 fraction. A bad score never reaches the profile.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        r = _post(client, ROBERT, "quiz_result", "Knowledge quiz.", payload)
+&gt;       assert r.status_code == 422, r.text
+E       AssertionError: {"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-05:00","type":"quiz_result","text":"Knowledge quiz.","payload":{"score":null,"quiz_id":"kq_v1"},"source":"ui_chat"}
+E       assert 200 == 422
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:249: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_applies_new_at_path_and_rebuilds_limits" time="0.012"><failure message="assert 0.5 == 0.3 ± 1.0e-09&#10;  &#10;  comparison failed&#10;  Obtained: 0.5&#10;  Expected: 0.3 ± 1.0e-09">client = &lt;starlette.testclient.TestClient object at 0x76e2a6014160&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_applies_new_0/store')
+
+    def test_profile_edit_applies_new_at_path_and_rebuilds_limits(client, store_dir):
+        # §3.4 {path, old, new} + §4 A5: a declared field changes and limits are rebuilt from it, trace included.
+        # preferences.max_fee_mer_pct feeds limits.max_fee_mer_pct directly (rules/limits.py trace).
+        before = _baseline(client, ROBERT)
+        assert before["limits"]["max_fee_mer_pct"] == pytest.approx(0.5, abs=1e-9)
+        body = _ok(client, ROBERT, "profile_edit", "Lowering my fee ceiling.",
+                   _edit("preferences.max_fee_mer_pct", 0.5, 0.3))
+        after = _profile(client, ROBERT)
+&gt;       assert after["preferences"]["max_fee_mer_pct"] == pytest.approx(0.3, abs=1e-9)
+E       assert 0.5 == 0.3 ± 1.0e-09
+E         
+E         comparison failed
+E         Obtained: 0.5
+E         Expected: 0.3 ± 1.0e-09
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:263: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_of_risk_declared_rederives_effective_risk_and_limits" time="0.012"><failure message="AssertionError: assert 'low_moderate' == 'low'&#10;  &#10;  - low&#10;  + low_moderate">client = &lt;starlette.testclient.TestClient object at 0x76e2a60148d0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_of_risk_decl0/store')
+
+    def test_profile_edit_of_risk_declared_rederives_effective_risk_and_limits(client, store_dir):
+        # §7.1 effective = min(declared, capacity) and §7.2 limits come from risk.effective: lowering the declared level
+        # below the capacity (low_moderate) lowers risk.effective and the limits are rebuilt from it.
+        before = _baseline(client, ROBERT)
+        assert before["risk"]["declared"] == "low_moderate"
+        body = _ok(client, ROBERT, "profile_edit", "I am more cautious than I said.",
+                   _edit("risk.declared", "low_moderate", "low"))
+        after = _profile(client, ROBERT)
+&gt;       assert after["risk"]["declared"] == "low"
+E       AssertionError: assert 'low_moderate' == 'low'
+E         
+E         - low
+E         + low_moderate
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:287: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_with_a_stale_old_value_is_a_conflict_and_changes_nothing" time="0.009"><failure message="AssertionError: {&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-05:00&quot;,&quot;type&quot;:&quot;profile_edit&quot;,&quot;text&quot;:&quot;Edit on stale data.&quot;,&quot;payload&quot;:{&quot;path&quot;:&quot;preferences.max_fee_mer_pct&quot;,&quot;old&quot;:0.9,&quot;new&quot;:0.3},&quot;source&quot;:&quot;ui_chat&quot;}&#10;assert 200 in (409, 422)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a6014490&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_with_a_stale0/store')
+
+    def test_profile_edit_with_a_stale_old_value_is_a_conflict_and_changes_nothing(client, store_dir):
+        # §3.4: payload.old is the value the user saw. A mismatch means the edit was made on stale data.
+        # SPEC-AMBIGUITY: the task allows 409 or 422; the stricter reading is that either way nothing is appended and the
+        # profile is untouched.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        r = _post(client, ROBERT, "profile_edit", "Edit on stale data.", _edit("preferences.max_fee_mer_pct", 0.9, 0.3))
+&gt;       assert r.status_code in (409, 422), r.text
+E       AssertionError: {"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-05:00","type":"profile_edit","text":"Edit on stale data.","payload":{"path":"preferences.max_fee_mer_pct","old":0.9,"new":0.3},"source":"ui_chat"}
+E       assert 200 in (409, 422)
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:311: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_needs_path_and_new[None]" time="0.009"><failure message="AssertionError: {&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-05:00&quot;,&quot;type&quot;:&quot;profile_edit&quot;,&quot;text&quot;:&quot;Incomplete edit.&quot;,&quot;payload&quot;:null,&quot;source&quot;:&quot;ui_chat&quot;}&#10;assert 200 == 422&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a6014c00&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_needs_path_a0/store')
+payload = None
+
+    @pytest.mark.parametrize("payload", [
+        None, {}, {"path": "preferences.max_fee_mer_pct", "old": 0.5}, {"old": 0.5, "new": 0.3},
+        {"path": "", "old": 0.5, "new": 0.3},
+    ])
+    def test_profile_edit_needs_path_and_new(client, store_dir, payload):
+        # §3.4: profile_edit.payload = {path, old, new}.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        r = _post(client, ROBERT, "profile_edit", "Incomplete edit.", payload)
+&gt;       assert r.status_code == 422, r.text
+E       AssertionError: {"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-05:00","type":"profile_edit","text":"Incomplete edit.","payload":null,"source":"ui_chat"}
+E       assert 200 == 422
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:324: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_needs_path_and_new[payload1]" time="0.009"><failure message="AssertionError: {&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-05:00&quot;,&quot;type&quot;:&quot;profile_edit&quot;,&quot;text&quot;:&quot;Incomplete edit.&quot;,&quot;payload&quot;:{},&quot;source&quot;:&quot;ui_chat&quot;}&#10;assert 200 == 422&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a6015150&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_needs_path_a1/store')
+payload = {}
+
+    @pytest.mark.parametrize("payload", [
+        None, {}, {"path": "preferences.max_fee_mer_pct", "old": 0.5}, {"old": 0.5, "new": 0.3},
+        {"path": "", "old": 0.5, "new": 0.3},
+    ])
+    def test_profile_edit_needs_path_and_new(client, store_dir, payload):
+        # §3.4: profile_edit.payload = {path, old, new}.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        r = _post(client, ROBERT, "profile_edit", "Incomplete edit.", payload)
+&gt;       assert r.status_code == 422, r.text
+E       AssertionError: {"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-05:00","type":"profile_edit","text":"Incomplete edit.","payload":{},"source":"ui_chat"}
+E       assert 200 == 422
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:324: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_needs_path_and_new[payload2]" time="0.009"><failure message="AssertionError: {&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-05:00&quot;,&quot;type&quot;:&quot;profile_edit&quot;,&quot;text&quot;:&quot;Incomplete edit.&quot;,&quot;payload&quot;:{&quot;path&quot;:&quot;preferences.max_fee_mer_pct&quot;,&quot;old&quot;:0.5},&quot;source&quot;:&quot;ui_chat&quot;}&#10;assert 200 == 422&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a6015370&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_needs_path_a2/store')
+payload = {'path': 'preferences.max_fee_mer_pct', 'old': 0.5}
+
+    @pytest.mark.parametrize("payload", [
+        None, {}, {"path": "preferences.max_fee_mer_pct", "old": 0.5}, {"old": 0.5, "new": 0.3},
+        {"path": "", "old": 0.5, "new": 0.3},
+    ])
+    def test_profile_edit_needs_path_and_new(client, store_dir, payload):
+        # §3.4: profile_edit.payload = {path, old, new}.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        r = _post(client, ROBERT, "profile_edit", "Incomplete edit.", payload)
+&gt;       assert r.status_code == 422, r.text
+E       AssertionError: {"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-05:00","type":"profile_edit","text":"Incomplete edit.","payload":{"path":"preferences.max_fee_mer_pct","old":0.5},"source":"ui_chat"}
+E       assert 200 == 422
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:324: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_needs_path_and_new[payload3]" time="0.010"><failure message="AssertionError: {&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-05:00&quot;,&quot;type&quot;:&quot;profile_edit&quot;,&quot;text&quot;:&quot;Incomplete edit.&quot;,&quot;payload&quot;:{&quot;old&quot;:0.5,&quot;new&quot;:0.3},&quot;source&quot;:&quot;ui_chat&quot;}&#10;assert 200 == 422&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a6015480&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_needs_path_a3/store')
+payload = {'old': 0.5, 'new': 0.3}
+
+    @pytest.mark.parametrize("payload", [
+        None, {}, {"path": "preferences.max_fee_mer_pct", "old": 0.5}, {"old": 0.5, "new": 0.3},
+        {"path": "", "old": 0.5, "new": 0.3},
+    ])
+    def test_profile_edit_needs_path_and_new(client, store_dir, payload):
+        # §3.4: profile_edit.payload = {path, old, new}.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        r = _post(client, ROBERT, "profile_edit", "Incomplete edit.", payload)
+&gt;       assert r.status_code == 422, r.text
+E       AssertionError: {"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-05:00","type":"profile_edit","text":"Incomplete edit.","payload":{"old":0.5,"new":0.3},"source":"ui_chat"}
+E       assert 200 == 422
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:324: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_needs_path_and_new[payload4]" time="0.009"><failure message="AssertionError: {&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-05:00&quot;,&quot;type&quot;:&quot;profile_edit&quot;,&quot;text&quot;:&quot;Incomplete edit.&quot;,&quot;payload&quot;:{&quot;path&quot;:&quot;&quot;,&quot;old&quot;:0.5,&quot;new&quot;:0.3},&quot;source&quot;:&quot;ui_chat&quot;}&#10;assert 200 == 422&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a60158c0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_needs_path_a4/store')
+payload = {'path': '', 'old': 0.5, 'new': 0.3}
+
+    @pytest.mark.parametrize("payload", [
+        None, {}, {"path": "preferences.max_fee_mer_pct", "old": 0.5}, {"old": 0.5, "new": 0.3},
+        {"path": "", "old": 0.5, "new": 0.3},
+    ])
+    def test_profile_edit_needs_path_and_new(client, store_dir, payload):
+        # §3.4: profile_edit.payload = {path, old, new}.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        r = _post(client, ROBERT, "profile_edit", "Incomplete edit.", payload)
+&gt;       assert r.status_code == 422, r.text
+E       AssertionError: {"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-05:00","type":"profile_edit","text":"Incomplete edit.","payload":{"path":"","old":0.5,"new":0.3},"source":"ui_chat"}
+E       assert 200 == 422
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:324: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_that_breaks_the_schema_or_names_no_field_is_refused[risk.declared-low_moderate-extreme]" time="0.010"><failure message="AssertionError: {&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-05:00&quot;,&quot;type&quot;:&quot;profile_edit&quot;,&quot;text&quot;:&quot;Bad edit.&quot;,&quot;payload&quot;:{&quot;path&quot;:&quot;risk.declared&quot;,&quot;old&quot;:&quot;low_moderate&quot;,&quot;new&quot;:&quot;extreme&quot;},&quot;source&quot;:&quot;ui_chat&quot;}&#10;assert 200 in (400, 409, 422)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a60159d0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_that_breaks_0/store')
+path = 'risk.declared', old = 'low_moderate', new = 'extreme'
+
+    @pytest.mark.parametrize("path,old,new", [
+        ("risk.declared", "low_moderate", "extreme"),                       # not in the risk-level enum
+        ("preferences.max_fee_mer_pct", 0.5, "cheap"),                      # wrong type
+        ("preferences.does_not_exist", None, True),                         # not a declared profile field
+        ("nowhere.at.all", None, 1),
+    ])
+    def test_profile_edit_that_breaks_the_schema_or_names_no_field_is_refused(client, store_dir, path, old, new):
+        # §3.3: the profile is validated against profile.v2.json on every save; an invalid edit never lands.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        r = _post(client, ROBERT, "profile_edit", "Bad edit.", _edit(path, old, new))
+&gt;       assert r.status_code in (400, 409, 422), r.text
+E       AssertionError: {"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-05:00","type":"profile_edit","text":"Bad edit.","payload":{"path":"risk.declared","old":"low_moderate","new":"extreme"},"source":"ui_chat"}
+E       assert 200 in (400, 409, 422)
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:339: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_that_breaks_the_schema_or_names_no_field_is_refused[preferences.max_fee_mer_pct-0.5-cheap]" time="0.009"><failure message="AssertionError: {&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-05:00&quot;,&quot;type&quot;:&quot;profile_edit&quot;,&quot;text&quot;:&quot;Bad edit.&quot;,&quot;payload&quot;:{&quot;path&quot;:&quot;preferences.max_fee_mer_pct&quot;,&quot;old&quot;:0.5,&quot;new&quot;:&quot;cheap&quot;},&quot;source&quot;:&quot;ui_chat&quot;}&#10;assert 200 in (400, 409, 422)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a6015d00&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_that_breaks_1/store')
+path = 'preferences.max_fee_mer_pct', old = 0.5, new = 'cheap'
+
+    @pytest.mark.parametrize("path,old,new", [
+        ("risk.declared", "low_moderate", "extreme"),                       # not in the risk-level enum
+        ("preferences.max_fee_mer_pct", 0.5, "cheap"),                      # wrong type
+        ("preferences.does_not_exist", None, True),                         # not a declared profile field
+        ("nowhere.at.all", None, 1),
+    ])
+    def test_profile_edit_that_breaks_the_schema_or_names_no_field_is_refused(client, store_dir, path, old, new):
+        # §3.3: the profile is validated against profile.v2.json on every save; an invalid edit never lands.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        r = _post(client, ROBERT, "profile_edit", "Bad edit.", _edit(path, old, new))
+&gt;       assert r.status_code in (400, 409, 422), r.text
+E       AssertionError: {"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-05:00","type":"profile_edit","text":"Bad edit.","payload":{"path":"preferences.max_fee_mer_pct","old":0.5,"new":"cheap"},"source":"ui_chat"}
+E       assert 200 in (400, 409, 422)
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:339: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_that_breaks_the_schema_or_names_no_field_is_refused[preferences.does_not_exist-None-True]" time="0.009"><failure message="AssertionError: {&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-05:00&quot;,&quot;type&quot;:&quot;profile_edit&quot;,&quot;text&quot;:&quot;Bad edit.&quot;,&quot;payload&quot;:{&quot;path&quot;:&quot;preferences.does_not_exist&quot;,&quot;old&quot;:null,&quot;new&quot;:true},&quot;source&quot;:&quot;ui_chat&quot;}&#10;assert 200 in (400, 409, 422)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a6016140&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_that_breaks_2/store')
+path = 'preferences.does_not_exist', old = None, new = True
+
+    @pytest.mark.parametrize("path,old,new", [
+        ("risk.declared", "low_moderate", "extreme"),                       # not in the risk-level enum
+        ("preferences.max_fee_mer_pct", 0.5, "cheap"),                      # wrong type
+        ("preferences.does_not_exist", None, True),                         # not a declared profile field
+        ("nowhere.at.all", None, 1),
+    ])
+    def test_profile_edit_that_breaks_the_schema_or_names_no_field_is_refused(client, store_dir, path, old, new):
+        # §3.3: the profile is validated against profile.v2.json on every save; an invalid edit never lands.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        r = _post(client, ROBERT, "profile_edit", "Bad edit.", _edit(path, old, new))
+&gt;       assert r.status_code in (400, 409, 422), r.text
+E       AssertionError: {"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-05:00","type":"profile_edit","text":"Bad edit.","payload":{"path":"preferences.does_not_exist","old":null,"new":true},"source":"ui_chat"}
+E       assert 200 in (400, 409, 422)
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:339: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_that_breaks_the_schema_or_names_no_field_is_refused[nowhere.at.all-None-1]" time="0.009"><failure message="AssertionError: {&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-05:00&quot;,&quot;type&quot;:&quot;profile_edit&quot;,&quot;text&quot;:&quot;Bad edit.&quot;,&quot;payload&quot;:{&quot;path&quot;:&quot;nowhere.at.all&quot;,&quot;old&quot;:null,&quot;new&quot;:1},&quot;source&quot;:&quot;ui_chat&quot;}&#10;assert 200 in (400, 409, 422)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a6016580&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_that_breaks_3/store')
+path = 'nowhere.at.all', old = None, new = 1
+
+    @pytest.mark.parametrize("path,old,new", [
+        ("risk.declared", "low_moderate", "extreme"),                       # not in the risk-level enum
+        ("preferences.max_fee_mer_pct", 0.5, "cheap"),                      # wrong type
+        ("preferences.does_not_exist", None, True),                         # not a declared profile field
+        ("nowhere.at.all", None, 1),
+    ])
+    def test_profile_edit_that_breaks_the_schema_or_names_no_field_is_refused(client, store_dir, path, old, new):
+        # §3.3: the profile is validated against profile.v2.json on every save; an invalid edit never lands.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        r = _post(client, ROBERT, "profile_edit", "Bad edit.", _edit(path, old, new))
+&gt;       assert r.status_code in (400, 409, 422), r.text
+E       AssertionError: {"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-05:00","type":"profile_edit","text":"Bad edit.","payload":{"path":"nowhere.at.all","old":null,"new":1},"source":"ui_chat"}
+E       assert 200 in (400, 409, 422)
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:339: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_never_writes_limits_trace_llm_or_rule_fields[limits.max_crypto_weight-0.5]" time="0.008"><failure message="AssertionError: ('limits.max_crypto_weight', 200, '{&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:0...rying to set a computed field.&quot;,&quot;payload&quot;:{&quot;path&quot;:&quot;limits.max_crypto_weight&quot;,&quot;old&quot;:0.0,&quot;new&quot;:0.5},&quot;source&quot;:&quot;ui_chat&quot;}')&#10;assert 200 in (400, 403, 422)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a60168b0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_never_writes0/store')
+path = 'limits.max_crypto_weight', new = 0.5
+
+    @pytest.mark.parametrize("path,new", [
+        ("limits.max_crypto_weight", 0.5),                                  # limits: only rules build them (inv. 2)
+        ("limits.excluded_activities", []),
+        ("limits.max_fee_mer_pct", 5.0),
+        ("limits", {"max_crypto_weight": 1.0}),
+        ("limits_trace.max_fee_mer_pct", []),
+        ("limits_trace", {}),
+        ("risk.behavioural", "low"),                                        # llm: fields (inv. 1, 2, 3)
+        ("risk.behavioural.value", "low"),
+        ("risk.behavioural.confidence", 0.99),
+        ("knowledge.question_quality", 1.0),
+        ("knowledge.question_quality.value", 1.0),
+        ("values.parsed_notes", []),
+        ("values.parsed_notes.value", []),
+        ("values.parsed_notes.by", "user:declared"),
+        ("risk.effective", "high"),                                         # rule: fields (inv. 1: computed, not declared)
+        ("risk.capacity", "high"),
+        ("knowledge.score", 100),
+        ("identity.life_stage", "retired"),
+        ("objectives.effective_horizon_years", 30),
+        ("meta.version", 99),
+        ("meta.profile_id", "persona-someone-else"),
+    ])
+    def test_profile_edit_never_writes_limits_trace_llm_or_rule_fields(client, store_dir, path, new):
+        # §1 inv. 1: only the user changes a plain value; an object {value, by, ...} is computed. Inv. 2: no request sets
+        # limits or limits_trace. Inv. 3/4: llm: fields change only through the gate.
+        # SPEC-AMBIGUITY: rule: fields are computed, not declared; stricter reading = they are refused too.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        old = copy.deepcopy(_node(before, path))
+        r = _post(client, ROBERT, "profile_edit", "Trying to set a computed field.", _edit(path, old, new))
+&gt;       assert r.status_code in REFUSED_PATH_STATUS, (path, r.status_code, r.text)
+E       AssertionError: ('limits.max_crypto_weight', 200, '{"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:0...rying to set a computed field.","payload":{"path":"limits.max_crypto_weight","old":0.0,"new":0.5},"source":"ui_chat"}')
+E       assert 200 in (400, 403, 422)
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:383: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_never_writes_limits_trace_llm_or_rule_fields[limits.excluded_activities-new1]" time="0.009"><failure message="AssertionError: ('limits.excluded_activities', 200, '{&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30...load&quot;:{&quot;path&quot;:&quot;limits.excluded_activities&quot;,&quot;old&quot;:[&quot;tobacco&quot;,&quot;accounting_fraud_last_5y&quot;],&quot;new&quot;:[]},&quot;source&quot;:&quot;ui_chat&quot;}')&#10;assert 200 in (400, 403, 422)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a6016cf0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_never_writes1/store')
+path = 'limits.excluded_activities', new = []
+
+    @pytest.mark.parametrize("path,new", [
+        ("limits.max_crypto_weight", 0.5),                                  # limits: only rules build them (inv. 2)
+        ("limits.excluded_activities", []),
+        ("limits.max_fee_mer_pct", 5.0),
+        ("limits", {"max_crypto_weight": 1.0}),
+        ("limits_trace.max_fee_mer_pct", []),
+        ("limits_trace", {}),
+        ("risk.behavioural", "low"),                                        # llm: fields (inv. 1, 2, 3)
+        ("risk.behavioural.value", "low"),
+        ("risk.behavioural.confidence", 0.99),
+        ("knowledge.question_quality", 1.0),
+        ("knowledge.question_quality.value", 1.0),
+        ("values.parsed_notes", []),
+        ("values.parsed_notes.value", []),
+        ("values.parsed_notes.by", "user:declared"),
+        ("risk.effective", "high"),                                         # rule: fields (inv. 1: computed, not declared)
+        ("risk.capacity", "high"),
+        ("knowledge.score", 100),
+        ("identity.life_stage", "retired"),
+        ("objectives.effective_horizon_years", 30),
+        ("meta.version", 99),
+        ("meta.profile_id", "persona-someone-else"),
+    ])
+    def test_profile_edit_never_writes_limits_trace_llm_or_rule_fields(client, store_dir, path, new):
+        # §1 inv. 1: only the user changes a plain value; an object {value, by, ...} is computed. Inv. 2: no request sets
+        # limits or limits_trace. Inv. 3/4: llm: fields change only through the gate.
+        # SPEC-AMBIGUITY: rule: fields are computed, not declared; stricter reading = they are refused too.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        old = copy.deepcopy(_node(before, path))
+        r = _post(client, ROBERT, "profile_edit", "Trying to set a computed field.", _edit(path, old, new))
+&gt;       assert r.status_code in REFUSED_PATH_STATUS, (path, r.status_code, r.text)
+E       AssertionError: ('limits.excluded_activities', 200, '{"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30...load":{"path":"limits.excluded_activities","old":["tobacco","accounting_fraud_last_5y"],"new":[]},"source":"ui_chat"}')
+E       assert 200 in (400, 403, 422)
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:383: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_never_writes_limits_trace_llm_or_rule_fields[limits.max_fee_mer_pct-5.0]" time="0.010"><failure message="AssertionError: ('limits.max_fee_mer_pct', 200, '{&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-...&quot;Trying to set a computed field.&quot;,&quot;payload&quot;:{&quot;path&quot;:&quot;limits.max_fee_mer_pct&quot;,&quot;old&quot;:0.5,&quot;new&quot;:5.0},&quot;source&quot;:&quot;ui_chat&quot;}')&#10;assert 200 in (400, 403, 422)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a6016f10&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_never_writes2/store')
+path = 'limits.max_fee_mer_pct', new = 5.0
+
+    @pytest.mark.parametrize("path,new", [
+        ("limits.max_crypto_weight", 0.5),                                  # limits: only rules build them (inv. 2)
+        ("limits.excluded_activities", []),
+        ("limits.max_fee_mer_pct", 5.0),
+        ("limits", {"max_crypto_weight": 1.0}),
+        ("limits_trace.max_fee_mer_pct", []),
+        ("limits_trace", {}),
+        ("risk.behavioural", "low"),                                        # llm: fields (inv. 1, 2, 3)
+        ("risk.behavioural.value", "low"),
+        ("risk.behavioural.confidence", 0.99),
+        ("knowledge.question_quality", 1.0),
+        ("knowledge.question_quality.value", 1.0),
+        ("values.parsed_notes", []),
+        ("values.parsed_notes.value", []),
+        ("values.parsed_notes.by", "user:declared"),
+        ("risk.effective", "high"),                                         # rule: fields (inv. 1: computed, not declared)
+        ("risk.capacity", "high"),
+        ("knowledge.score", 100),
+        ("identity.life_stage", "retired"),
+        ("objectives.effective_horizon_years", 30),
+        ("meta.version", 99),
+        ("meta.profile_id", "persona-someone-else"),
+    ])
+    def test_profile_edit_never_writes_limits_trace_llm_or_rule_fields(client, store_dir, path, new):
+        # §1 inv. 1: only the user changes a plain value; an object {value, by, ...} is computed. Inv. 2: no request sets
+        # limits or limits_trace. Inv. 3/4: llm: fields change only through the gate.
+        # SPEC-AMBIGUITY: rule: fields are computed, not declared; stricter reading = they are refused too.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        old = copy.deepcopy(_node(before, path))
+        r = _post(client, ROBERT, "profile_edit", "Trying to set a computed field.", _edit(path, old, new))
+&gt;       assert r.status_code in REFUSED_PATH_STATUS, (path, r.status_code, r.text)
+E       AssertionError: ('limits.max_fee_mer_pct', 200, '{"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-..."Trying to set a computed field.","payload":{"path":"limits.max_fee_mer_pct","old":0.5,"new":5.0},"source":"ui_chat"}')
+E       assert 200 in (400, 403, 422)
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:383: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_never_writes_limits_trace_llm_or_rule_fields[limits-new3]" time="0.009"><failure message="AssertionError: ('limits', 200, '{&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-05:00&quot;,&quot;type&quot;:&quot;p...s&quot;:[&quot;tobacco&quot;,&quot;accounting_fraud_last_5y&quot;],&quot;max_fee_mer_pct&quot;:0.5},&quot;new&quot;:{&quot;max_crypto_weight&quot;:1.0}},&quot;source&quot;:&quot;ui_chat&quot;}')&#10;assert 200 in (400, 403, 422)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a6017130&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_never_writes3/store')
+path = 'limits', new = {'max_crypto_weight': 1.0}
+
+    @pytest.mark.parametrize("path,new", [
+        ("limits.max_crypto_weight", 0.5),                                  # limits: only rules build them (inv. 2)
+        ("limits.excluded_activities", []),
+        ("limits.max_fee_mer_pct", 5.0),
+        ("limits", {"max_crypto_weight": 1.0}),
+        ("limits_trace.max_fee_mer_pct", []),
+        ("limits_trace", {}),
+        ("risk.behavioural", "low"),                                        # llm: fields (inv. 1, 2, 3)
+        ("risk.behavioural.value", "low"),
+        ("risk.behavioural.confidence", 0.99),
+        ("knowledge.question_quality", 1.0),
+        ("knowledge.question_quality.value", 1.0),
+        ("values.parsed_notes", []),
+        ("values.parsed_notes.value", []),
+        ("values.parsed_notes.by", "user:declared"),
+        ("risk.effective", "high"),                                         # rule: fields (inv. 1: computed, not declared)
+        ("risk.capacity", "high"),
+        ("knowledge.score", 100),
+        ("identity.life_stage", "retired"),
+        ("objectives.effective_horizon_years", 30),
+        ("meta.version", 99),
+        ("meta.profile_id", "persona-someone-else"),
+    ])
+    def test_profile_edit_never_writes_limits_trace_llm_or_rule_fields(client, store_dir, path, new):
+        # §1 inv. 1: only the user changes a plain value; an object {value, by, ...} is computed. Inv. 2: no request sets
+        # limits or limits_trace. Inv. 3/4: llm: fields change only through the gate.
+        # SPEC-AMBIGUITY: rule: fields are computed, not declared; stricter reading = they are refused too.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        old = copy.deepcopy(_node(before, path))
+        r = _post(client, ROBERT, "profile_edit", "Trying to set a computed field.", _edit(path, old, new))
+&gt;       assert r.status_code in REFUSED_PATH_STATUS, (path, r.status_code, r.text)
+E       AssertionError: ('limits', 200, '{"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-05:00","type":"p...s":["tobacco","accounting_fraud_last_5y"],"max_fee_mer_pct":0.5},"new":{"max_crypto_weight":1.0}},"source":"ui_chat"}')
+E       assert 200 in (400, 403, 422)
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:383: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_never_writes_limits_trace_llm_or_rule_fields[limits_trace.max_fee_mer_pct-new4]" time="0.009"><failure message="AssertionError: ('limits_trace.max_fee_mer_pct', 200, '{&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:...,&quot;payload&quot;:{&quot;path&quot;:&quot;limits_trace.max_fee_mer_pct&quot;,&quot;old&quot;:[&quot;preferences.max_fee_mer_pct&quot;],&quot;new&quot;:[]},&quot;source&quot;:&quot;ui_chat&quot;}')&#10;assert 200 in (400, 403, 422)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a6017460&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_never_writes4/store')
+path = 'limits_trace.max_fee_mer_pct', new = []
+
+    @pytest.mark.parametrize("path,new", [
+        ("limits.max_crypto_weight", 0.5),                                  # limits: only rules build them (inv. 2)
+        ("limits.excluded_activities", []),
+        ("limits.max_fee_mer_pct", 5.0),
+        ("limits", {"max_crypto_weight": 1.0}),
+        ("limits_trace.max_fee_mer_pct", []),
+        ("limits_trace", {}),
+        ("risk.behavioural", "low"),                                        # llm: fields (inv. 1, 2, 3)
+        ("risk.behavioural.value", "low"),
+        ("risk.behavioural.confidence", 0.99),
+        ("knowledge.question_quality", 1.0),
+        ("knowledge.question_quality.value", 1.0),
+        ("values.parsed_notes", []),
+        ("values.parsed_notes.value", []),
+        ("values.parsed_notes.by", "user:declared"),
+        ("risk.effective", "high"),                                         # rule: fields (inv. 1: computed, not declared)
+        ("risk.capacity", "high"),
+        ("knowledge.score", 100),
+        ("identity.life_stage", "retired"),
+        ("objectives.effective_horizon_years", 30),
+        ("meta.version", 99),
+        ("meta.profile_id", "persona-someone-else"),
+    ])
+    def test_profile_edit_never_writes_limits_trace_llm_or_rule_fields(client, store_dir, path, new):
+        # §1 inv. 1: only the user changes a plain value; an object {value, by, ...} is computed. Inv. 2: no request sets
+        # limits or limits_trace. Inv. 3/4: llm: fields change only through the gate.
+        # SPEC-AMBIGUITY: rule: fields are computed, not declared; stricter reading = they are refused too.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        old = copy.deepcopy(_node(before, path))
+        r = _post(client, ROBERT, "profile_edit", "Trying to set a computed field.", _edit(path, old, new))
+&gt;       assert r.status_code in REFUSED_PATH_STATUS, (path, r.status_code, r.text)
+E       AssertionError: ('limits_trace.max_fee_mer_pct', 200, '{"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:...,"payload":{"path":"limits_trace.max_fee_mer_pct","old":["preferences.max_fee_mer_pct"],"new":[]},"source":"ui_chat"}')
+E       assert 200 in (400, 403, 422)
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:383: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_never_writes_limits_trace_llm_or_rule_fields[limits_trace-new5]" time="0.010"><failure message="AssertionError: ('limits_trace', 200, '{&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-05:00&quot;,&quot;ty...erences.max_fee_mer_pct&quot;],&quot;max_theme_weight&quot;:[&quot;values.parsed_notes[approved_by_user]&quot;]},&quot;new&quot;:{}},&quot;source&quot;:&quot;ui_chat&quot;}')&#10;assert 200 in (400, 403, 422)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a733fac0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_never_writes5/store')
+path = 'limits_trace', new = {}
+
+    @pytest.mark.parametrize("path,new", [
+        ("limits.max_crypto_weight", 0.5),                                  # limits: only rules build them (inv. 2)
+        ("limits.excluded_activities", []),
+        ("limits.max_fee_mer_pct", 5.0),
+        ("limits", {"max_crypto_weight": 1.0}),
+        ("limits_trace.max_fee_mer_pct", []),
+        ("limits_trace", {}),
+        ("risk.behavioural", "low"),                                        # llm: fields (inv. 1, 2, 3)
+        ("risk.behavioural.value", "low"),
+        ("risk.behavioural.confidence", 0.99),
+        ("knowledge.question_quality", 1.0),
+        ("knowledge.question_quality.value", 1.0),
+        ("values.parsed_notes", []),
+        ("values.parsed_notes.value", []),
+        ("values.parsed_notes.by", "user:declared"),
+        ("risk.effective", "high"),                                         # rule: fields (inv. 1: computed, not declared)
+        ("risk.capacity", "high"),
+        ("knowledge.score", 100),
+        ("identity.life_stage", "retired"),
+        ("objectives.effective_horizon_years", 30),
+        ("meta.version", 99),
+        ("meta.profile_id", "persona-someone-else"),
+    ])
+    def test_profile_edit_never_writes_limits_trace_llm_or_rule_fields(client, store_dir, path, new):
+        # §1 inv. 1: only the user changes a plain value; an object {value, by, ...} is computed. Inv. 2: no request sets
+        # limits or limits_trace. Inv. 3/4: llm: fields change only through the gate.
+        # SPEC-AMBIGUITY: rule: fields are computed, not declared; stricter reading = they are refused too.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        old = copy.deepcopy(_node(before, path))
+        r = _post(client, ROBERT, "profile_edit", "Trying to set a computed field.", _edit(path, old, new))
+&gt;       assert r.status_code in REFUSED_PATH_STATUS, (path, r.status_code, r.text)
+E       AssertionError: ('limits_trace', 200, '{"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-05:00","ty...erences.max_fee_mer_pct"],"max_theme_weight":["values.parsed_notes[approved_by_user]"]},"new":{}},"source":"ui_chat"}')
+E       assert 200 in (400, 403, 422)
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:383: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_never_writes_limits_trace_llm_or_rule_fields[risk.behavioural-low]" time="0.010"><failure message="AssertionError: ('risk.behavioural', 200, '{&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-05:00&quot;...rt_0004&quot;,&quot;signal&quot;:&quot;hype_chasing&quot;,&quot;note&quot;:&quot;asks which AI stock is the next big one&quot;}]},&quot;new&quot;:&quot;low&quot;},&quot;source&quot;:&quot;ui_chat&quot;}')&#10;assert 200 in (400, 403, 422)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a733e140&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_never_writes6/store')
+path = 'risk.behavioural', new = 'low'
+
+    @pytest.mark.parametrize("path,new", [
+        ("limits.max_crypto_weight", 0.5),                                  # limits: only rules build them (inv. 2)
+        ("limits.excluded_activities", []),
+        ("limits.max_fee_mer_pct", 5.0),
+        ("limits", {"max_crypto_weight": 1.0}),
+        ("limits_trace.max_fee_mer_pct", []),
+        ("limits_trace", {}),
+        ("risk.behavioural", "low"),                                        # llm: fields (inv. 1, 2, 3)
+        ("risk.behavioural.value", "low"),
+        ("risk.behavioural.confidence", 0.99),
+        ("knowledge.question_quality", 1.0),
+        ("knowledge.question_quality.value", 1.0),
+        ("values.parsed_notes", []),
+        ("values.parsed_notes.value", []),
+        ("values.parsed_notes.by", "user:declared"),
+        ("risk.effective", "high"),                                         # rule: fields (inv. 1: computed, not declared)
+        ("risk.capacity", "high"),
+        ("knowledge.score", 100),
+        ("identity.life_stage", "retired"),
+        ("objectives.effective_horizon_years", 30),
+        ("meta.version", 99),
+        ("meta.profile_id", "persona-someone-else"),
+    ])
+    def test_profile_edit_never_writes_limits_trace_llm_or_rule_fields(client, store_dir, path, new):
+        # §1 inv. 1: only the user changes a plain value; an object {value, by, ...} is computed. Inv. 2: no request sets
+        # limits or limits_trace. Inv. 3/4: llm: fields change only through the gate.
+        # SPEC-AMBIGUITY: rule: fields are computed, not declared; stricter reading = they are refused too.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        old = copy.deepcopy(_node(before, path))
+        r = _post(client, ROBERT, "profile_edit", "Trying to set a computed field.", _edit(path, old, new))
+&gt;       assert r.status_code in REFUSED_PATH_STATUS, (path, r.status_code, r.text)
+E       AssertionError: ('risk.behavioural', 200, '{"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-05:00"...rt_0004","signal":"hype_chasing","note":"asks which AI stock is the next big one"}]},"new":"low"},"source":"ui_chat"}')
+E       assert 200 in (400, 403, 422)
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:383: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_never_writes_limits_trace_llm_or_rule_fields[risk.behavioural.value-low]" time="0.010"><failure message="AssertionError: ('risk.behavioural.value', 200, '{&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-... a computed field.&quot;,&quot;payload&quot;:{&quot;path&quot;:&quot;risk.behavioural.value&quot;,&quot;old&quot;:&quot;moderate_high&quot;,&quot;new&quot;:&quot;low&quot;},&quot;source&quot;:&quot;ui_chat&quot;}')&#10;assert 200 in (400, 403, 422)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a733c270&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_never_writes7/store')
+path = 'risk.behavioural.value', new = 'low'
+
+    @pytest.mark.parametrize("path,new", [
+        ("limits.max_crypto_weight", 0.5),                                  # limits: only rules build them (inv. 2)
+        ("limits.excluded_activities", []),
+        ("limits.max_fee_mer_pct", 5.0),
+        ("limits", {"max_crypto_weight": 1.0}),
+        ("limits_trace.max_fee_mer_pct", []),
+        ("limits_trace", {}),
+        ("risk.behavioural", "low"),                                        # llm: fields (inv. 1, 2, 3)
+        ("risk.behavioural.value", "low"),
+        ("risk.behavioural.confidence", 0.99),
+        ("knowledge.question_quality", 1.0),
+        ("knowledge.question_quality.value", 1.0),
+        ("values.parsed_notes", []),
+        ("values.parsed_notes.value", []),
+        ("values.parsed_notes.by", "user:declared"),
+        ("risk.effective", "high"),                                         # rule: fields (inv. 1: computed, not declared)
+        ("risk.capacity", "high"),
+        ("knowledge.score", 100),
+        ("identity.life_stage", "retired"),
+        ("objectives.effective_horizon_years", 30),
+        ("meta.version", 99),
+        ("meta.profile_id", "persona-someone-else"),
+    ])
+    def test_profile_edit_never_writes_limits_trace_llm_or_rule_fields(client, store_dir, path, new):
+        # §1 inv. 1: only the user changes a plain value; an object {value, by, ...} is computed. Inv. 2: no request sets
+        # limits or limits_trace. Inv. 3/4: llm: fields change only through the gate.
+        # SPEC-AMBIGUITY: rule: fields are computed, not declared; stricter reading = they are refused too.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        old = copy.deepcopy(_node(before, path))
+        r = _post(client, ROBERT, "profile_edit", "Trying to set a computed field.", _edit(path, old, new))
+&gt;       assert r.status_code in REFUSED_PATH_STATUS, (path, r.status_code, r.text)
+E       AssertionError: ('risk.behavioural.value', 200, '{"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-... a computed field.","payload":{"path":"risk.behavioural.value","old":"moderate_high","new":"low"},"source":"ui_chat"}')
+E       assert 200 in (400, 403, 422)
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:383: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_never_writes_limits_trace_llm_or_rule_fields[risk.behavioural.confidence-0.99]" time="0.009"><failure message="AssertionError: ('risk.behavioural.confidence', 200, '{&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:3... to set a computed field.&quot;,&quot;payload&quot;:{&quot;path&quot;:&quot;risk.behavioural.confidence&quot;,&quot;old&quot;:0.55,&quot;new&quot;:0.99},&quot;source&quot;:&quot;ui_chat&quot;}')&#10;assert 200 in (400, 403, 422)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a733e8b0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_never_writes8/store')
+path = 'risk.behavioural.confidence', new = 0.99
+
+    @pytest.mark.parametrize("path,new", [
+        ("limits.max_crypto_weight", 0.5),                                  # limits: only rules build them (inv. 2)
+        ("limits.excluded_activities", []),
+        ("limits.max_fee_mer_pct", 5.0),
+        ("limits", {"max_crypto_weight": 1.0}),
+        ("limits_trace.max_fee_mer_pct", []),
+        ("limits_trace", {}),
+        ("risk.behavioural", "low"),                                        # llm: fields (inv. 1, 2, 3)
+        ("risk.behavioural.value", "low"),
+        ("risk.behavioural.confidence", 0.99),
+        ("knowledge.question_quality", 1.0),
+        ("knowledge.question_quality.value", 1.0),
+        ("values.parsed_notes", []),
+        ("values.parsed_notes.value", []),
+        ("values.parsed_notes.by", "user:declared"),
+        ("risk.effective", "high"),                                         # rule: fields (inv. 1: computed, not declared)
+        ("risk.capacity", "high"),
+        ("knowledge.score", 100),
+        ("identity.life_stage", "retired"),
+        ("objectives.effective_horizon_years", 30),
+        ("meta.version", 99),
+        ("meta.profile_id", "persona-someone-else"),
+    ])
+    def test_profile_edit_never_writes_limits_trace_llm_or_rule_fields(client, store_dir, path, new):
+        # §1 inv. 1: only the user changes a plain value; an object {value, by, ...} is computed. Inv. 2: no request sets
+        # limits or limits_trace. Inv. 3/4: llm: fields change only through the gate.
+        # SPEC-AMBIGUITY: rule: fields are computed, not declared; stricter reading = they are refused too.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        old = copy.deepcopy(_node(before, path))
+        r = _post(client, ROBERT, "profile_edit", "Trying to set a computed field.", _edit(path, old, new))
+&gt;       assert r.status_code in REFUSED_PATH_STATUS, (path, r.status_code, r.text)
+E       AssertionError: ('risk.behavioural.confidence', 200, '{"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:3... to set a computed field.","payload":{"path":"risk.behavioural.confidence","old":0.55,"new":0.99},"source":"ui_chat"}')
+E       assert 200 in (400, 403, 422)
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:383: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_never_writes_limits_trace_llm_or_rule_fields[knowledge.question_quality-1.0]" time="0.010"><failure message="AssertionError: ('knowledge.question_quality', 200, '{&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30...[{&quot;event_id&quot;:&quot;ev_robert_0005&quot;,&quot;score&quot;:0.9},{&quot;event_id&quot;:&quot;ev_robert_0004&quot;,&quot;score&quot;:0.3}]},&quot;new&quot;:1.0},&quot;source&quot;:&quot;ui_chat&quot;}')&#10;assert 200 in (400, 403, 422)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a733f790&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_never_writes9/store')
+path = 'knowledge.question_quality', new = 1.0
+
+    @pytest.mark.parametrize("path,new", [
+        ("limits.max_crypto_weight", 0.5),                                  # limits: only rules build them (inv. 2)
+        ("limits.excluded_activities", []),
+        ("limits.max_fee_mer_pct", 5.0),
+        ("limits", {"max_crypto_weight": 1.0}),
+        ("limits_trace.max_fee_mer_pct", []),
+        ("limits_trace", {}),
+        ("risk.behavioural", "low"),                                        # llm: fields (inv. 1, 2, 3)
+        ("risk.behavioural.value", "low"),
+        ("risk.behavioural.confidence", 0.99),
+        ("knowledge.question_quality", 1.0),
+        ("knowledge.question_quality.value", 1.0),
+        ("values.parsed_notes", []),
+        ("values.parsed_notes.value", []),
+        ("values.parsed_notes.by", "user:declared"),
+        ("risk.effective", "high"),                                         # rule: fields (inv. 1: computed, not declared)
+        ("risk.capacity", "high"),
+        ("knowledge.score", 100),
+        ("identity.life_stage", "retired"),
+        ("objectives.effective_horizon_years", 30),
+        ("meta.version", 99),
+        ("meta.profile_id", "persona-someone-else"),
+    ])
+    def test_profile_edit_never_writes_limits_trace_llm_or_rule_fields(client, store_dir, path, new):
+        # §1 inv. 1: only the user changes a plain value; an object {value, by, ...} is computed. Inv. 2: no request sets
+        # limits or limits_trace. Inv. 3/4: llm: fields change only through the gate.
+        # SPEC-AMBIGUITY: rule: fields are computed, not declared; stricter reading = they are refused too.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        old = copy.deepcopy(_node(before, path))
+        r = _post(client, ROBERT, "profile_edit", "Trying to set a computed field.", _edit(path, old, new))
+&gt;       assert r.status_code in REFUSED_PATH_STATUS, (path, r.status_code, r.text)
+E       AssertionError: ('knowledge.question_quality', 200, '{"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30...[{"event_id":"ev_robert_0005","score":0.9},{"event_id":"ev_robert_0004","score":0.3}]},"new":1.0},"source":"ui_chat"}')
+E       assert 200 in (400, 403, 422)
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:383: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_never_writes_limits_trace_llm_or_rule_fields[knowledge.question_quality.value-1.0]" time="0.009"><failure message="AssertionError: ('knowledge.question_quality.value', 200, '{&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15...set a computed field.&quot;,&quot;payload&quot;:{&quot;path&quot;:&quot;knowledge.question_quality.value&quot;,&quot;old&quot;:0.62,&quot;new&quot;:1.0},&quot;source&quot;:&quot;ui_chat&quot;}')&#10;assert 200 in (400, 403, 422)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a733ecf0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_never_writes10/store')
+path = 'knowledge.question_quality.value', new = 1.0
+
+    @pytest.mark.parametrize("path,new", [
+        ("limits.max_crypto_weight", 0.5),                                  # limits: only rules build them (inv. 2)
+        ("limits.excluded_activities", []),
+        ("limits.max_fee_mer_pct", 5.0),
+        ("limits", {"max_crypto_weight": 1.0}),
+        ("limits_trace.max_fee_mer_pct", []),
+        ("limits_trace", {}),
+        ("risk.behavioural", "low"),                                        # llm: fields (inv. 1, 2, 3)
+        ("risk.behavioural.value", "low"),
+        ("risk.behavioural.confidence", 0.99),
+        ("knowledge.question_quality", 1.0),
+        ("knowledge.question_quality.value", 1.0),
+        ("values.parsed_notes", []),
+        ("values.parsed_notes.value", []),
+        ("values.parsed_notes.by", "user:declared"),
+        ("risk.effective", "high"),                                         # rule: fields (inv. 1: computed, not declared)
+        ("risk.capacity", "high"),
+        ("knowledge.score", 100),
+        ("identity.life_stage", "retired"),
+        ("objectives.effective_horizon_years", 30),
+        ("meta.version", 99),
+        ("meta.profile_id", "persona-someone-else"),
+    ])
+    def test_profile_edit_never_writes_limits_trace_llm_or_rule_fields(client, store_dir, path, new):
+        # §1 inv. 1: only the user changes a plain value; an object {value, by, ...} is computed. Inv. 2: no request sets
+        # limits or limits_trace. Inv. 3/4: llm: fields change only through the gate.
+        # SPEC-AMBIGUITY: rule: fields are computed, not declared; stricter reading = they are refused too.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        old = copy.deepcopy(_node(before, path))
+        r = _post(client, ROBERT, "profile_edit", "Trying to set a computed field.", _edit(path, old, new))
+&gt;       assert r.status_code in REFUSED_PATH_STATUS, (path, r.status_code, r.text)
+E       AssertionError: ('knowledge.question_quality.value', 200, '{"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15...set a computed field.","payload":{"path":"knowledge.question_quality.value","old":0.62,"new":1.0},"source":"ui_chat"}')
+E       assert 200 in (400, 403, 422)
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:383: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_never_writes_limits_trace_llm_or_rule_fields[values.parsed_notes-new11]" time="0.008"><failure message="AssertionError: ('values.parsed_notes', 200, '{&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-05:...&quot;input_hash&quot;:&quot;sha256:836c82c57f4ea7712016d8e3ebfa13d1626477c669c4d954235bdfb760319216&quot;},&quot;new&quot;:[]},&quot;source&quot;:&quot;ui_chat&quot;}')&#10;assert 200 in (400, 403, 422)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a733d150&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_never_writes11/store')
+path = 'values.parsed_notes', new = []
+
+    @pytest.mark.parametrize("path,new", [
+        ("limits.max_crypto_weight", 0.5),                                  # limits: only rules build them (inv. 2)
+        ("limits.excluded_activities", []),
+        ("limits.max_fee_mer_pct", 5.0),
+        ("limits", {"max_crypto_weight": 1.0}),
+        ("limits_trace.max_fee_mer_pct", []),
+        ("limits_trace", {}),
+        ("risk.behavioural", "low"),                                        # llm: fields (inv. 1, 2, 3)
+        ("risk.behavioural.value", "low"),
+        ("risk.behavioural.confidence", 0.99),
+        ("knowledge.question_quality", 1.0),
+        ("knowledge.question_quality.value", 1.0),
+        ("values.parsed_notes", []),
+        ("values.parsed_notes.value", []),
+        ("values.parsed_notes.by", "user:declared"),
+        ("risk.effective", "high"),                                         # rule: fields (inv. 1: computed, not declared)
+        ("risk.capacity", "high"),
+        ("knowledge.score", 100),
+        ("identity.life_stage", "retired"),
+        ("objectives.effective_horizon_years", 30),
+        ("meta.version", 99),
+        ("meta.profile_id", "persona-someone-else"),
+    ])
+    def test_profile_edit_never_writes_limits_trace_llm_or_rule_fields(client, store_dir, path, new):
+        # §1 inv. 1: only the user changes a plain value; an object {value, by, ...} is computed. Inv. 2: no request sets
+        # limits or limits_trace. Inv. 3/4: llm: fields change only through the gate.
+        # SPEC-AMBIGUITY: rule: fields are computed, not declared; stricter reading = they are refused too.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        old = copy.deepcopy(_node(before, path))
+        r = _post(client, ROBERT, "profile_edit", "Trying to set a computed field.", _edit(path, old, new))
+&gt;       assert r.status_code in REFUSED_PATH_STATUS, (path, r.status_code, r.text)
+E       AssertionError: ('values.parsed_notes', 200, '{"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-05:..."input_hash":"sha256:836c82c57f4ea7712016d8e3ebfa13d1626477c669c4d954235bdfb760319216"},"new":[]},"source":"ui_chat"}')
+E       assert 200 in (400, 403, 422)
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:383: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_never_writes_limits_trace_llm_or_rule_fields[values.parsed_notes.value-new12]" time="0.010"><failure message="AssertionError: ('values.parsed_notes.value', 200, '{&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:...&quot;,&quot;quote&quot;:&quot;No hype stocks unless I can explain the business.&quot;,&quot;approved_by_user&quot;:true}],&quot;new&quot;:[]},&quot;source&quot;:&quot;ui_chat&quot;}')&#10;assert 200 in (400, 403, 422)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a6016be0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_never_writes12/store')
+path = 'values.parsed_notes.value', new = []
+
+    @pytest.mark.parametrize("path,new", [
+        ("limits.max_crypto_weight", 0.5),                                  # limits: only rules build them (inv. 2)
+        ("limits.excluded_activities", []),
+        ("limits.max_fee_mer_pct", 5.0),
+        ("limits", {"max_crypto_weight": 1.0}),
+        ("limits_trace.max_fee_mer_pct", []),
+        ("limits_trace", {}),
+        ("risk.behavioural", "low"),                                        # llm: fields (inv. 1, 2, 3)
+        ("risk.behavioural.value", "low"),
+        ("risk.behavioural.confidence", 0.99),
+        ("knowledge.question_quality", 1.0),
+        ("knowledge.question_quality.value", 1.0),
+        ("values.parsed_notes", []),
+        ("values.parsed_notes.value", []),
+        ("values.parsed_notes.by", "user:declared"),
+        ("risk.effective", "high"),                                         # rule: fields (inv. 1: computed, not declared)
+        ("risk.capacity", "high"),
+        ("knowledge.score", 100),
+        ("identity.life_stage", "retired"),
+        ("objectives.effective_horizon_years", 30),
+        ("meta.version", 99),
+        ("meta.profile_id", "persona-someone-else"),
+    ])
+    def test_profile_edit_never_writes_limits_trace_llm_or_rule_fields(client, store_dir, path, new):
+        # §1 inv. 1: only the user changes a plain value; an object {value, by, ...} is computed. Inv. 2: no request sets
+        # limits or limits_trace. Inv. 3/4: llm: fields change only through the gate.
+        # SPEC-AMBIGUITY: rule: fields are computed, not declared; stricter reading = they are refused too.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        old = copy.deepcopy(_node(before, path))
+        r = _post(client, ROBERT, "profile_edit", "Trying to set a computed field.", _edit(path, old, new))
+&gt;       assert r.status_code in REFUSED_PATH_STATUS, (path, r.status_code, r.text)
+E       AssertionError: ('values.parsed_notes.value', 200, '{"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:...","quote":"No hype stocks unless I can explain the business.","approved_by_user":true}],"new":[]},"source":"ui_chat"}')
+E       assert 200 in (400, 403, 422)
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:383: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_never_writes_limits_trace_llm_or_rule_fields[values.parsed_notes.by-user:declared]" time="0.011"><failure message="AssertionError: ('values.parsed_notes.by', 200, '{&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-...eld.&quot;,&quot;payload&quot;:{&quot;path&quot;:&quot;values.parsed_notes.by&quot;,&quot;old&quot;:&quot;llm:values_parser&quot;,&quot;new&quot;:&quot;user:declared&quot;},&quot;source&quot;:&quot;ui_chat&quot;}')&#10;assert 200 in (400, 403, 422)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a6016690&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_never_writes13/store')
+path = 'values.parsed_notes.by', new = 'user:declared'
+
+    @pytest.mark.parametrize("path,new", [
+        ("limits.max_crypto_weight", 0.5),                                  # limits: only rules build them (inv. 2)
+        ("limits.excluded_activities", []),
+        ("limits.max_fee_mer_pct", 5.0),
+        ("limits", {"max_crypto_weight": 1.0}),
+        ("limits_trace.max_fee_mer_pct", []),
+        ("limits_trace", {}),
+        ("risk.behavioural", "low"),                                        # llm: fields (inv. 1, 2, 3)
+        ("risk.behavioural.value", "low"),
+        ("risk.behavioural.confidence", 0.99),
+        ("knowledge.question_quality", 1.0),
+        ("knowledge.question_quality.value", 1.0),
+        ("values.parsed_notes", []),
+        ("values.parsed_notes.value", []),
+        ("values.parsed_notes.by", "user:declared"),
+        ("risk.effective", "high"),                                         # rule: fields (inv. 1: computed, not declared)
+        ("risk.capacity", "high"),
+        ("knowledge.score", 100),
+        ("identity.life_stage", "retired"),
+        ("objectives.effective_horizon_years", 30),
+        ("meta.version", 99),
+        ("meta.profile_id", "persona-someone-else"),
+    ])
+    def test_profile_edit_never_writes_limits_trace_llm_or_rule_fields(client, store_dir, path, new):
+        # §1 inv. 1: only the user changes a plain value; an object {value, by, ...} is computed. Inv. 2: no request sets
+        # limits or limits_trace. Inv. 3/4: llm: fields change only through the gate.
+        # SPEC-AMBIGUITY: rule: fields are computed, not declared; stricter reading = they are refused too.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        old = copy.deepcopy(_node(before, path))
+        r = _post(client, ROBERT, "profile_edit", "Trying to set a computed field.", _edit(path, old, new))
+&gt;       assert r.status_code in REFUSED_PATH_STATUS, (path, r.status_code, r.text)
+E       AssertionError: ('values.parsed_notes.by', 200, '{"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-...eld.","payload":{"path":"values.parsed_notes.by","old":"llm:values_parser","new":"user:declared"},"source":"ui_chat"}')
+E       assert 200 in (400, 403, 422)
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:383: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_never_writes_limits_trace_llm_or_rule_fields[risk.effective-high]" time="0.010"><failure message="AssertionError: ('risk.effective', 200, '{&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-05:00&quot;,&quot;...&quot;old&quot;:{&quot;value&quot;:&quot;low_moderate&quot;,&quot;by&quot;:&quot;rule:min(declared, capacity)&quot;,&quot;confidence&quot;:1.0},&quot;new&quot;:&quot;high&quot;},&quot;source&quot;:&quot;ui_chat&quot;}')&#10;assert 200 in (400, 403, 422)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2d56f6690&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_never_writes14/store')
+path = 'risk.effective', new = 'high'
+
+    @pytest.mark.parametrize("path,new", [
+        ("limits.max_crypto_weight", 0.5),                                  # limits: only rules build them (inv. 2)
+        ("limits.excluded_activities", []),
+        ("limits.max_fee_mer_pct", 5.0),
+        ("limits", {"max_crypto_weight": 1.0}),
+        ("limits_trace.max_fee_mer_pct", []),
+        ("limits_trace", {}),
+        ("risk.behavioural", "low"),                                        # llm: fields (inv. 1, 2, 3)
+        ("risk.behavioural.value", "low"),
+        ("risk.behavioural.confidence", 0.99),
+        ("knowledge.question_quality", 1.0),
+        ("knowledge.question_quality.value", 1.0),
+        ("values.parsed_notes", []),
+        ("values.parsed_notes.value", []),
+        ("values.parsed_notes.by", "user:declared"),
+        ("risk.effective", "high"),                                         # rule: fields (inv. 1: computed, not declared)
+        ("risk.capacity", "high"),
+        ("knowledge.score", 100),
+        ("identity.life_stage", "retired"),
+        ("objectives.effective_horizon_years", 30),
+        ("meta.version", 99),
+        ("meta.profile_id", "persona-someone-else"),
+    ])
+    def test_profile_edit_never_writes_limits_trace_llm_or_rule_fields(client, store_dir, path, new):
+        # §1 inv. 1: only the user changes a plain value; an object {value, by, ...} is computed. Inv. 2: no request sets
+        # limits or limits_trace. Inv. 3/4: llm: fields change only through the gate.
+        # SPEC-AMBIGUITY: rule: fields are computed, not declared; stricter reading = they are refused too.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        old = copy.deepcopy(_node(before, path))
+        r = _post(client, ROBERT, "profile_edit", "Trying to set a computed field.", _edit(path, old, new))
+&gt;       assert r.status_code in REFUSED_PATH_STATUS, (path, r.status_code, r.text)
+E       AssertionError: ('risk.effective', 200, '{"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-05:00","..."old":{"value":"low_moderate","by":"rule:min(declared, capacity)","confidence":1.0},"new":"high"},"source":"ui_chat"}')
+E       assert 200 in (400, 403, 422)
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:383: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_never_writes_limits_trace_llm_or_rule_fields[risk.capacity-high]" time="0.009"><failure message="AssertionError: ('risk.capacity', 200, '{&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-05:00&quot;,&quot;t...y(horizon, income_stability, emergency_fund_months, withdrawals)&quot;,&quot;confidence&quot;:1.0},&quot;new&quot;:&quot;high&quot;},&quot;source&quot;:&quot;ui_chat&quot;}')&#10;assert 200 in (400, 403, 422)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a77fcd10&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_never_writes15/store')
+path = 'risk.capacity', new = 'high'
+
+    @pytest.mark.parametrize("path,new", [
+        ("limits.max_crypto_weight", 0.5),                                  # limits: only rules build them (inv. 2)
+        ("limits.excluded_activities", []),
+        ("limits.max_fee_mer_pct", 5.0),
+        ("limits", {"max_crypto_weight": 1.0}),
+        ("limits_trace.max_fee_mer_pct", []),
+        ("limits_trace", {}),
+        ("risk.behavioural", "low"),                                        # llm: fields (inv. 1, 2, 3)
+        ("risk.behavioural.value", "low"),
+        ("risk.behavioural.confidence", 0.99),
+        ("knowledge.question_quality", 1.0),
+        ("knowledge.question_quality.value", 1.0),
+        ("values.parsed_notes", []),
+        ("values.parsed_notes.value", []),
+        ("values.parsed_notes.by", "user:declared"),
+        ("risk.effective", "high"),                                         # rule: fields (inv. 1: computed, not declared)
+        ("risk.capacity", "high"),
+        ("knowledge.score", 100),
+        ("identity.life_stage", "retired"),
+        ("objectives.effective_horizon_years", 30),
+        ("meta.version", 99),
+        ("meta.profile_id", "persona-someone-else"),
+    ])
+    def test_profile_edit_never_writes_limits_trace_llm_or_rule_fields(client, store_dir, path, new):
+        # §1 inv. 1: only the user changes a plain value; an object {value, by, ...} is computed. Inv. 2: no request sets
+        # limits or limits_trace. Inv. 3/4: llm: fields change only through the gate.
+        # SPEC-AMBIGUITY: rule: fields are computed, not declared; stricter reading = they are refused too.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        old = copy.deepcopy(_node(before, path))
+        r = _post(client, ROBERT, "profile_edit", "Trying to set a computed field.", _edit(path, old, new))
+&gt;       assert r.status_code in REFUSED_PATH_STATUS, (path, r.status_code, r.text)
+E       AssertionError: ('risk.capacity', 200, '{"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-05:00","t...y(horizon, income_stability, emergency_fund_months, withdrawals)","confidence":1.0},"new":"high"},"source":"ui_chat"}')
+E       assert 200 in (400, 403, 422)
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:383: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_never_writes_limits_trace_llm_or_rule_fields[knowledge.score-100]" time="0.008"><failure message="AssertionError: ('knowledge.score', 200, '{&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-05:00&quot;,...e&quot;:0.85,&quot;history&quot;:[{&quot;date&quot;:&quot;2026-11-01&quot;,&quot;value&quot;:76},{&quot;date&quot;:&quot;2026-11-14&quot;,&quot;value&quot;:74}]},&quot;new&quot;:100},&quot;source&quot;:&quot;ui_chat&quot;}')&#10;assert 200 in (400, 403, 422)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a733c5a0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_never_writes16/store')
+path = 'knowledge.score', new = 100
+
+    @pytest.mark.parametrize("path,new", [
+        ("limits.max_crypto_weight", 0.5),                                  # limits: only rules build them (inv. 2)
+        ("limits.excluded_activities", []),
+        ("limits.max_fee_mer_pct", 5.0),
+        ("limits", {"max_crypto_weight": 1.0}),
+        ("limits_trace.max_fee_mer_pct", []),
+        ("limits_trace", {}),
+        ("risk.behavioural", "low"),                                        # llm: fields (inv. 1, 2, 3)
+        ("risk.behavioural.value", "low"),
+        ("risk.behavioural.confidence", 0.99),
+        ("knowledge.question_quality", 1.0),
+        ("knowledge.question_quality.value", 1.0),
+        ("values.parsed_notes", []),
+        ("values.parsed_notes.value", []),
+        ("values.parsed_notes.by", "user:declared"),
+        ("risk.effective", "high"),                                         # rule: fields (inv. 1: computed, not declared)
+        ("risk.capacity", "high"),
+        ("knowledge.score", 100),
+        ("identity.life_stage", "retired"),
+        ("objectives.effective_horizon_years", 30),
+        ("meta.version", 99),
+        ("meta.profile_id", "persona-someone-else"),
+    ])
+    def test_profile_edit_never_writes_limits_trace_llm_or_rule_fields(client, store_dir, path, new):
+        # §1 inv. 1: only the user changes a plain value; an object {value, by, ...} is computed. Inv. 2: no request sets
+        # limits or limits_trace. Inv. 3/4: llm: fields change only through the gate.
+        # SPEC-AMBIGUITY: rule: fields are computed, not declared; stricter reading = they are refused too.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        old = copy.deepcopy(_node(before, path))
+        r = _post(client, ROBERT, "profile_edit", "Trying to set a computed field.", _edit(path, old, new))
+&gt;       assert r.status_code in REFUSED_PATH_STATUS, (path, r.status_code, r.text)
+E       AssertionError: ('knowledge.score', 200, '{"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-05:00",...e":0.85,"history":[{"date":"2026-11-01","value":76},{"date":"2026-11-14","value":74}]},"new":100},"source":"ui_chat"}')
+E       assert 200 in (400, 403, 422)
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:383: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_never_writes_limits_trace_llm_or_rule_fields[identity.life_stage-retired]" time="0.009"><failure message="AssertionError: ('identity.life_stage', 200, '{&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-05:..._stage&quot;,&quot;old&quot;:{&quot;value&quot;:&quot;pre_retirement&quot;,&quot;by&quot;:&quot;rule:life_stage&quot;,&quot;confidence&quot;:1.0},&quot;new&quot;:&quot;retired&quot;},&quot;source&quot;:&quot;ui_chat&quot;}')&#10;assert 200 in (400, 403, 422)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a733c380&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_never_writes17/store')
+path = 'identity.life_stage', new = 'retired'
+
+    @pytest.mark.parametrize("path,new", [
+        ("limits.max_crypto_weight", 0.5),                                  # limits: only rules build them (inv. 2)
+        ("limits.excluded_activities", []),
+        ("limits.max_fee_mer_pct", 5.0),
+        ("limits", {"max_crypto_weight": 1.0}),
+        ("limits_trace.max_fee_mer_pct", []),
+        ("limits_trace", {}),
+        ("risk.behavioural", "low"),                                        # llm: fields (inv. 1, 2, 3)
+        ("risk.behavioural.value", "low"),
+        ("risk.behavioural.confidence", 0.99),
+        ("knowledge.question_quality", 1.0),
+        ("knowledge.question_quality.value", 1.0),
+        ("values.parsed_notes", []),
+        ("values.parsed_notes.value", []),
+        ("values.parsed_notes.by", "user:declared"),
+        ("risk.effective", "high"),                                         # rule: fields (inv. 1: computed, not declared)
+        ("risk.capacity", "high"),
+        ("knowledge.score", 100),
+        ("identity.life_stage", "retired"),
+        ("objectives.effective_horizon_years", 30),
+        ("meta.version", 99),
+        ("meta.profile_id", "persona-someone-else"),
+    ])
+    def test_profile_edit_never_writes_limits_trace_llm_or_rule_fields(client, store_dir, path, new):
+        # §1 inv. 1: only the user changes a plain value; an object {value, by, ...} is computed. Inv. 2: no request sets
+        # limits or limits_trace. Inv. 3/4: llm: fields change only through the gate.
+        # SPEC-AMBIGUITY: rule: fields are computed, not declared; stricter reading = they are refused too.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        old = copy.deepcopy(_node(before, path))
+        r = _post(client, ROBERT, "profile_edit", "Trying to set a computed field.", _edit(path, old, new))
+&gt;       assert r.status_code in REFUSED_PATH_STATUS, (path, r.status_code, r.text)
+E       AssertionError: ('identity.life_stage', 200, '{"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-05:..._stage","old":{"value":"pre_retirement","by":"rule:life_stage","confidence":1.0},"new":"retired"},"source":"ui_chat"}')
+E       assert 200 in (400, 403, 422)
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:383: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_never_writes_limits_trace_llm_or_rule_fields[objectives.effective_horizon_years-30]" time="0.010"><failure message="AssertionError: ('objectives.effective_horizon_years', 200, '{&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-..._years&quot;,&quot;old&quot;:{&quot;value&quot;:3.6,&quot;by&quot;:&quot;rule:min(horizon, first_withdrawal)&quot;,&quot;confidence&quot;:1.0},&quot;new&quot;:30},&quot;source&quot;:&quot;ui_chat&quot;}')&#10;assert 200 in (400, 403, 422)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a6016470&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_never_writes18/store')
+path = 'objectives.effective_horizon_years', new = 30
+
+    @pytest.mark.parametrize("path,new", [
+        ("limits.max_crypto_weight", 0.5),                                  # limits: only rules build them (inv. 2)
+        ("limits.excluded_activities", []),
+        ("limits.max_fee_mer_pct", 5.0),
+        ("limits", {"max_crypto_weight": 1.0}),
+        ("limits_trace.max_fee_mer_pct", []),
+        ("limits_trace", {}),
+        ("risk.behavioural", "low"),                                        # llm: fields (inv. 1, 2, 3)
+        ("risk.behavioural.value", "low"),
+        ("risk.behavioural.confidence", 0.99),
+        ("knowledge.question_quality", 1.0),
+        ("knowledge.question_quality.value", 1.0),
+        ("values.parsed_notes", []),
+        ("values.parsed_notes.value", []),
+        ("values.parsed_notes.by", "user:declared"),
+        ("risk.effective", "high"),                                         # rule: fields (inv. 1: computed, not declared)
+        ("risk.capacity", "high"),
+        ("knowledge.score", 100),
+        ("identity.life_stage", "retired"),
+        ("objectives.effective_horizon_years", 30),
+        ("meta.version", 99),
+        ("meta.profile_id", "persona-someone-else"),
+    ])
+    def test_profile_edit_never_writes_limits_trace_llm_or_rule_fields(client, store_dir, path, new):
+        # §1 inv. 1: only the user changes a plain value; an object {value, by, ...} is computed. Inv. 2: no request sets
+        # limits or limits_trace. Inv. 3/4: llm: fields change only through the gate.
+        # SPEC-AMBIGUITY: rule: fields are computed, not declared; stricter reading = they are refused too.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        old = copy.deepcopy(_node(before, path))
+        r = _post(client, ROBERT, "profile_edit", "Trying to set a computed field.", _edit(path, old, new))
+&gt;       assert r.status_code in REFUSED_PATH_STATUS, (path, r.status_code, r.text)
+E       AssertionError: ('objectives.effective_horizon_years', 200, '{"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-..._years","old":{"value":3.6,"by":"rule:min(horizon, first_withdrawal)","confidence":1.0},"new":30},"source":"ui_chat"}')
+E       assert 200 in (400, 403, 422)
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:383: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_never_writes_limits_trace_llm_or_rule_fields[meta.version-99]" time="0.009"><failure message="AssertionError: ('meta.version', 200, '{&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-05:00&quot;,&quot;ty...edit&quot;,&quot;text&quot;:&quot;Trying to set a computed field.&quot;,&quot;payload&quot;:{&quot;path&quot;:&quot;meta.version&quot;,&quot;old&quot;:1,&quot;new&quot;:99},&quot;source&quot;:&quot;ui_chat&quot;}')&#10;assert 200 in (400, 403, 422)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a6016250&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_never_writes19/store')
+path = 'meta.version', new = 99
+
+    @pytest.mark.parametrize("path,new", [
+        ("limits.max_crypto_weight", 0.5),                                  # limits: only rules build them (inv. 2)
+        ("limits.excluded_activities", []),
+        ("limits.max_fee_mer_pct", 5.0),
+        ("limits", {"max_crypto_weight": 1.0}),
+        ("limits_trace.max_fee_mer_pct", []),
+        ("limits_trace", {}),
+        ("risk.behavioural", "low"),                                        # llm: fields (inv. 1, 2, 3)
+        ("risk.behavioural.value", "low"),
+        ("risk.behavioural.confidence", 0.99),
+        ("knowledge.question_quality", 1.0),
+        ("knowledge.question_quality.value", 1.0),
+        ("values.parsed_notes", []),
+        ("values.parsed_notes.value", []),
+        ("values.parsed_notes.by", "user:declared"),
+        ("risk.effective", "high"),                                         # rule: fields (inv. 1: computed, not declared)
+        ("risk.capacity", "high"),
+        ("knowledge.score", 100),
+        ("identity.life_stage", "retired"),
+        ("objectives.effective_horizon_years", 30),
+        ("meta.version", 99),
+        ("meta.profile_id", "persona-someone-else"),
+    ])
+    def test_profile_edit_never_writes_limits_trace_llm_or_rule_fields(client, store_dir, path, new):
+        # §1 inv. 1: only the user changes a plain value; an object {value, by, ...} is computed. Inv. 2: no request sets
+        # limits or limits_trace. Inv. 3/4: llm: fields change only through the gate.
+        # SPEC-AMBIGUITY: rule: fields are computed, not declared; stricter reading = they are refused too.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        old = copy.deepcopy(_node(before, path))
+        r = _post(client, ROBERT, "profile_edit", "Trying to set a computed field.", _edit(path, old, new))
+&gt;       assert r.status_code in REFUSED_PATH_STATUS, (path, r.status_code, r.text)
+E       AssertionError: ('meta.version', 200, '{"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-05:00","ty...edit","text":"Trying to set a computed field.","payload":{"path":"meta.version","old":1,"new":99},"source":"ui_chat"}')
+E       assert 200 in (400, 403, 422)
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:383: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_never_writes_limits_trace_llm_or_rule_fields[meta.profile_id-persona-someone-else]" time="0.009"><failure message="AssertionError: ('meta.profile_id', 200, '{&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-05:00&quot;,... field.&quot;,&quot;payload&quot;:{&quot;path&quot;:&quot;meta.profile_id&quot;,&quot;old&quot;:&quot;persona-robert&quot;,&quot;new&quot;:&quot;persona-someone-else&quot;},&quot;source&quot;:&quot;ui_chat&quot;}')&#10;assert 200 in (400, 403, 422)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a6015ae0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_never_writes20/store')
+path = 'meta.profile_id', new = 'persona-someone-else'
+
+    @pytest.mark.parametrize("path,new", [
+        ("limits.max_crypto_weight", 0.5),                                  # limits: only rules build them (inv. 2)
+        ("limits.excluded_activities", []),
+        ("limits.max_fee_mer_pct", 5.0),
+        ("limits", {"max_crypto_weight": 1.0}),
+        ("limits_trace.max_fee_mer_pct", []),
+        ("limits_trace", {}),
+        ("risk.behavioural", "low"),                                        # llm: fields (inv. 1, 2, 3)
+        ("risk.behavioural.value", "low"),
+        ("risk.behavioural.confidence", 0.99),
+        ("knowledge.question_quality", 1.0),
+        ("knowledge.question_quality.value", 1.0),
+        ("values.parsed_notes", []),
+        ("values.parsed_notes.value", []),
+        ("values.parsed_notes.by", "user:declared"),
+        ("risk.effective", "high"),                                         # rule: fields (inv. 1: computed, not declared)
+        ("risk.capacity", "high"),
+        ("knowledge.score", 100),
+        ("identity.life_stage", "retired"),
+        ("objectives.effective_horizon_years", 30),
+        ("meta.version", 99),
+        ("meta.profile_id", "persona-someone-else"),
+    ])
+    def test_profile_edit_never_writes_limits_trace_llm_or_rule_fields(client, store_dir, path, new):
+        # §1 inv. 1: only the user changes a plain value; an object {value, by, ...} is computed. Inv. 2: no request sets
+        # limits or limits_trace. Inv. 3/4: llm: fields change only through the gate.
+        # SPEC-AMBIGUITY: rule: fields are computed, not declared; stricter reading = they are refused too.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        old = copy.deepcopy(_node(before, path))
+        r = _post(client, ROBERT, "profile_edit", "Trying to set a computed field.", _edit(path, old, new))
+&gt;       assert r.status_code in REFUSED_PATH_STATUS, (path, r.status_code, r.text)
+E       AssertionError: ('meta.profile_id', 200, '{"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-05:00",... field.","payload":{"path":"meta.profile_id","old":"persona-robert","new":"persona-someone-else"},"source":"ui_chat"}')
+E       assert 200 in (400, 403, 422)
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:383: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_profile_edit_of_values_notes_runs_n3_through_the_gate_with_the_mock_cache" time="0.012"><failure message="AssertionError: assert 'I prefer com...the business.' == 'I love AI an...hing in tech.'&#10;  &#10;  - I love AI and new tech but I don't want everything in tech.&#10;  + I prefer companies I understand. No hype stocks unless I can explain the business.">client = &lt;starlette.testclient.TestClient object at 0x76e2a60146b0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_profile_edit_of_values_no0/store')
+
+    def test_profile_edit_of_values_notes_runs_n3_through_the_gate_with_the_mock_cache(client, store_dir):
+        # D7 point 1 + §4 A2/A3: changed values.notes -&gt; N3 (values_parser, recorded answer) -&gt; gate: the quotes are exact
+        # substrings of the new notes, every rule starts approved_by_user: false, the field is stamped llm:values_parser.
+        before = _baseline(client, ROBERT)
+        assert before["values"]["notes"] == ROBERT_NOTES
+        body = _ok(client, ROBERT, "profile_edit", "Rewrote my notes.", _edit("values.notes", ROBERT_NOTES, AMIRA_NOTES))
+        after = _profile(client, ROBERT)
+&gt;       assert after["values"]["notes"] == AMIRA_NOTES
+E       AssertionError: assert 'I prefer com...the business.' == 'I love AI an...hing in tech.'
+E         
+E         - I love AI and new tech but I don't want everything in tech.
+E         + I prefer companies I understand. No hype stocks unless I can explain the business.
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:401: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_unapproved_parsed_rules_are_not_promoted_into_limits_after_a_notes_edit" time="0.011" /><testcase classname="tests.flows.test_flow_a_events" name="test_notes_edit_replaces_approved_rules_so_their_promoted_limit_is_rebuilt_away" time="0.010"><failure message="AssertionError: assert 'I love AI an...hing in tech.' == 'I prefer com...the business.'&#10;  &#10;  - I prefer companies I understand. No hype stocks unless I can explain the business.&#10;  + I love AI and new tech but I don't want everything in tech.">client = &lt;starlette.testclient.TestClient object at 0x76e2a6014e20&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_notes_edit_replaces_appro0/store')
+
+    def test_notes_edit_replaces_approved_rules_so_their_promoted_limit_is_rebuilt_away(client, store_dir):
+        # §4 A5 on Amira: her approved "tech_heavy" rule (max_pct 50) gives limits.max_theme_weight. Re-parsing different
+        # notes (Robert's, recorded) yields unapproved rules only, so the promoted limit is gone after the refresh.
+        # SPEC-AMBIGUITY: approval is per parsed rule/quote; a rule that is no longer parsed keeps no approval (stricter:
+        # no limit survives that no approved rule supports).
+        before = _baseline(client, AMIRA)
+        assert before["limits"]["max_theme_weight"] == {"tech_heavy": pytest.approx(0.5, abs=1e-9)}
+        body = _ok(client, AMIRA, "profile_edit", "New notes.", _edit("values.notes", AMIRA_NOTES, ROBERT_NOTES))
+        after = _profile(client, AMIRA)
+&gt;       assert after["values"]["notes"] == ROBERT_NOTES
+E       AssertionError: assert 'I love AI an...hing in tech.' == 'I prefer com...the business.'
+E         
+E         - I prefer companies I understand. No hype stocks unless I can explain the business.
+E         + I love AI and new tech but I don't want everything in tech.
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:441: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_notes_edit_with_an_unrecorded_text_keeps_the_previous_parse_and_logs_the_failure" time="0.011"><failure message="AssertionError: Flow A response must carry its run_id (§4)&#10;assert (False)&#10; +  where False = isinstance(None, str)&#10; +    where None = &lt;built-in method get of dict object at 0x76e2a71e8d00&gt;('run_id')&#10; +      where &lt;built-in method get of dict object at 0x76e2a71e8d00&gt; = {'event_id': 'ev_robert_0009', 'profile_id': 'persona-robert', 'ts': '2026-11-15T09:30:00-05:00', 'type': 'profile_edit', ...}.get">client = &lt;starlette.testclient.TestClient object at 0x76e2a60145a0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_notes_edit_with_an_unreco0/store')
+
+    def test_notes_edit_with_an_unrecorded_text_keeps_the_previous_parse_and_logs_the_failure(client, store_dir):
+        # §1 inv. 4 / §4 A3: if N3 cannot produce a gated output (mock cache miss), the previous parsed value stays and
+        # the failure goes in the audit log. The request itself still succeeds; nothing is invented.
+        before = _baseline(client, ROBERT)
+        body = _ok(client, ROBERT, "profile_edit", "Rewrote my notes.", _edit("values.notes", ROBERT_NOTES, UNRECORDED_NOTES))
+        after = _profile(client, ROBERT)
+        assert after["values"]["parsed_notes"] == before["values"]["parsed_notes"]
+        assert after["limits"] == before["limits"]
+&gt;       audit = _audit(client, body)
+                ^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:460: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x76e2a60145a0&gt;
+body = {'event_id': 'ev_robert_0009', 'profile_id': 'persona-robert', 'ts': '2026-11-15T09:30:00-05:00', 'type': 'profile_edit', ...}
+
+    def _audit(client: TestClient, body: dict) -&gt; dict:
+&gt;       assert isinstance(body.get("run_id"), str) and body["run_id"], "Flow A response must carry its run_id (§4)"
+E       AssertionError: Flow A response must carry its run_id (§4)
+E       assert (False)
+E        +  where False = isinstance(None, str)
+E        +    where None = &lt;built-in method get of dict object at 0x76e2a71e8d00&gt;('run_id')
+E        +      where &lt;built-in method get of dict object at 0x76e2a71e8d00&gt; = {'event_id': 'ev_robert_0009', 'profile_id': 'persona-robert', 'ts': '2026-11-15T09:30:00-05:00', 'type': 'profile_edit', ...}.get
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:105: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_notes_edit_with_a_stale_old_is_refused_and_n3_does_not_run" time="0.010"><failure message="AssertionError: {&quot;event_id&quot;:&quot;ev_robert_0009&quot;,&quot;profile_id&quot;:&quot;persona-robert&quot;,&quot;ts&quot;:&quot;2026-11-15T09:30:00-05:00&quot;,&quot;type&quot;:&quot;profile_edit&quot;,&quot;text&quot;:&quot;Rewrote my notes.&quot;,&quot;payload&quot;:{&quot;path&quot;:&quot;values.notes&quot;,&quot;old&quot;:&quot;something else&quot;,&quot;new&quot;:&quot;I love AI and new tech but I don't want everything in tech.&quot;},&quot;source&quot;:&quot;ui_chat&quot;}&#10;assert 200 in (409, 422)&#10; +  where 200 = &lt;Response [200 OK]&gt;.status_code">client = &lt;starlette.testclient.TestClient object at 0x76e2a6014380&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_notes_edit_with_a_stale_o0/store')
+
+    def test_notes_edit_with_a_stale_old_is_refused_and_n3_does_not_run(client, store_dir):
+        # §3.4 old/new + §4 A2: a refused edit changes nothing, so there is no changed input for N3.
+        before = _baseline(client, ROBERT)
+        events = _events_file(store_dir, ROBERT).read_bytes()
+        r = _post(client, ROBERT, "profile_edit", "Rewrote my notes.", _edit("values.notes", "something else", AMIRA_NOTES))
+&gt;       assert r.status_code in (409, 422), r.text
+E       AssertionError: {"event_id":"ev_robert_0009","profile_id":"persona-robert","ts":"2026-11-15T09:30:00-05:00","type":"profile_edit","text":"Rewrote my notes.","payload":{"path":"values.notes","old":"something else","new":"I love AI and new tech but I don't want everything in tech."},"source":"ui_chat"}
+E       assert 200 in (409, 422)
+E        +  where 200 = &lt;Response [200 OK]&gt;.status_code
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:470: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_flow_a_audit_lists_the_whole_event_log_in_order_and_is_deterministic" time="0.004"><failure message="AssertionError: Flow A response must carry its run_id (§4)&#10;assert (False)&#10; +  where False = isinstance(None, str)&#10; +    where None = &lt;built-in method get of dict object at 0x76e2a71f8340&gt;('run_id')&#10; +      where &lt;built-in method get of dict object at 0x76e2a71f8340&gt; = {'event_id': 'ev_robert_0008', 'profile_id': 'persona-robert', 'ts': '2026-11-15T09:30:00-05:00', 'type': 'quiz_result', ...}.get">client = &lt;starlette.testclient.TestClient object at 0x76e2a6017680&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_flow_a_audit_lists_the_wh0/store')
+tmp_path = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_flow_a_audit_lists_the_wh0')
+monkeypatch = &lt;_pytest.monkeypatch.MonkeyPatch object at 0x76e2a60788a0&gt;
+
+    def test_flow_a_audit_lists_the_whole_event_log_in_order_and_is_deterministic(client, store_dir, tmp_path, monkeypatch):
+        # §10: events_considered = the event ids the run looked at; §1 inv. 8: same inputs -&gt; same refreshed profile.
+        body = _ok(client, ROBERT, "quiz_result", "Quiz.", {"score": 0.5, "quiz_id": "kq_v1"})
+&gt;       audit = _audit(client, body)
+                ^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:479: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x76e2a6017680&gt;
+body = {'event_id': 'ev_robert_0008', 'profile_id': 'persona-robert', 'ts': '2026-11-15T09:30:00-05:00', 'type': 'quiz_result', ...}
+
+    def _audit(client: TestClient, body: dict) -&gt; dict:
+&gt;       assert isinstance(body.get("run_id"), str) and body["run_id"], "Flow A response must carry its run_id (§4)"
+E       AssertionError: Flow A response must carry its run_id (§4)
+E       assert (False)
+E        +  where False = isinstance(None, str)
+E        +    where None = &lt;built-in method get of dict object at 0x76e2a71f8340&gt;('run_id')
+E        +      where &lt;built-in method get of dict object at 0x76e2a71f8340&gt; = {'event_id': 'ev_robert_0008', 'profile_id': 'persona-robert', 'ts': '2026-11-15T09:30:00-05:00', 'type': 'quiz_result', ...}.get
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:105: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_d10_flow_a_response_and_audit_describe_never_prescribe" time="0.004"><failure message="AssertionError: Flow A response must carry its run_id (§4)&#10;assert (False)&#10; +  where False = isinstance(None, str)&#10; +    where None = &lt;built-in method get of dict object at 0x76e2a6055200&gt;('run_id')&#10; +      where &lt;built-in method get of dict object at 0x76e2a6055200&gt; = {'event_id': 'ev_robert_0008', 'profile_id': 'persona-robert', 'ts': '2026-11-15T09:30:00-05:00', 'type': 'profile_edit', ...}.get">client = &lt;starlette.testclient.TestClient object at 0x76e2a60157b0&gt;
+store_dir = PosixPath('/tmp/pytest-of-safraa/pytest-397/test_d10_flow_a_response_and_a0/store')
+
+    def test_d10_flow_a_response_and_audit_describe_never_prescribe(client, store_dir):
+        # D10 / §1 inv. 7: every user-facing string in the response and the audit describes; none recommends a trade.
+        body = _ok(client, ROBERT, "profile_edit", "Fee ceiling.", _edit("preferences.max_fee_mer_pct", 0.5, 0.4))
+&gt;       text = (json.dumps(body) + json.dumps(_audit(client, body))).lower()
+                                              ^^^^^^^^^^^^^^^^^^^^
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:501: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+client = &lt;starlette.testclient.TestClient object at 0x76e2a60157b0&gt;
+body = {'event_id': 'ev_robert_0008', 'profile_id': 'persona-robert', 'ts': '2026-11-15T09:30:00-05:00', 'type': 'profile_edit', ...}
+
+    def _audit(client: TestClient, body: dict) -&gt; dict:
+&gt;       assert isinstance(body.get("run_id"), str) and body["run_id"], "Flow A response must carry its run_id (§4)"
+E       AssertionError: Flow A response must carry its run_id (§4)
+E       assert (False)
+E        +  where False = isinstance(None, str)
+E        +    where None = &lt;built-in method get of dict object at 0x76e2a6055200&gt;('run_id')
+E        +      where &lt;built-in method get of dict object at 0x76e2a6055200&gt; = {'event_id': 'ev_robert_0008', 'profile_id': 'persona-robert', 'ts': '2026-11-15T09:30:00-05:00', 'type': 'profile_edit', ...}.get
+
+/home/safraa/Downloads/Datathon2026/Coherence_analyzer/.claude/worktrees/p3-flowa/tests/flows/test_flow_a_events.py:105: AssertionError</failure></testcase><testcase classname="tests.flows.test_flow_a_events" name="test_events_endpoint_for_flow_a_never_writes_the_fixtures_dir" time="0.020" /></testsuite></testsuites>

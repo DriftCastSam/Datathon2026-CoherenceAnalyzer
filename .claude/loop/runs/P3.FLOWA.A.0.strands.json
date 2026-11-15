@@ -1,0 +1,43 @@
+{
+  "duration_s": 230.8,
+  "guard_cancellations": [
+    {
+      "reason": "'^[A-Z_]*' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'^[A-Z_]*' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'def' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'for' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'drawdown\"' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'A4' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    },
+    {
+      "reason": "'NameError\\' is not on the shell allowlist ['python -m pytest', 'pytest', 'python -m coherence_analyzer', 'python -c', 'python scripts/', 'git status', 'git diff', 'git log', 'git show', 'ls', 'cat', 'head', 'tail', 'grep', 'rg', 'find', 'wc', 'sed -n', 'diff', 'sort', 'uniq', 'echo', 'jq', 'mkdir']",
+      "tool": "shell"
+    }
+  ],
+  "is_error": false,
+  "model_id": "us.anthropic.claude-sonnet-5-5",
+  "num_turns": 25,
+  "result": "he plain `knowledge.quiz_score`. `knowledge.score` is re-derived by a rule: field and moves in the direction of the quiz change. Limits and `limits_trace` are unchanged and have no knowledge dependency (\u00a73.1, \u00a73.4, inv. 2).\n- **test_quiz_result_with_the_same_score_leaves_the_profile_version**: an identical score gives an empty diff and no version bump (\u00a74 A6).\n- **test_invalid_quiz_result_is_rejected_before_anything_is_written** (8 payloads): a missing, out-of-range, string, bool or null score gets 422. Nothing is appended and the profile is unchanged (\u00a73.4, \u00a73.1).\n- **test_profile_edit_applies_new_at_path_and_rebuilds_limits**: editing `preferences.max_fee_mer_pct` changes the profile, `limits.max_fee_mer_pct` and the trace. The diff entries are correct, the limits entry's `by` starts with `rule:`, and N3 doesn't run (\u00a73.4, \u00a74 A5).\n- **test_profile_edit_of_risk_declared_rederives_effective_risk_and_limits**: editing `risk.declared` re-derives `risk.effective` as min(declared, capacity) and rebuilds limits from it (\u00a77.1, \u00a77.2, \u00a74 A4/A5).\n- **test_profile_edit_with_a_stale_old_value_is_a_conflict_and_changes_nothing**: a mismatched `old` gets 409 or 422, with no append and no profile change (\u00a73.4).\n- **test_profile_edit_needs_path_and_new** (5 payloads): missing payload, path or new gets 422 and nothing is written (\u00a73.4).\n- **test_profile_edit_that_breaks_the_schema_or_names_no_field_is_refused** (4 cases): an enum or type violation, or a path that isn't a profile field, is refused and nothing lands (\u00a73.3, profile.v2.json).\n- **test_profile_edit_never_writes_limits_trace_llm_or_rule_fields** (21 paths): `limits.*`, `limits_trace.*`, `risk.behavioural.*`, `knowledge.question_quality.*` and `values.parsed_notes.*` are refused with 400, 403 or 422. So are the rule: fields (`risk.effective`, `risk.capacity`, `knowledge.score`, `identity.life_stage`, `objectives.effective_horizon_years`) and `meta.*`. Nothing is appended and the profile is unchanged (inv. 1, 2, 3, 4). Refusing rule: and `meta.*` fields is my stricter reading of \"user-editable declared fields\".\n- **test_profile_edit_of_values_notes_runs_n3_through_the_gate_with_the_mock_cache**: Robert's notes are replaced with Amira's recorded notes. Exactly one `values_parser` call is accepted by the gate with `cache_hit`. The recorded rules come back with exact-substring quotes, `approved_by_user` false and `by` `llm:values_parser` (D7, \u00a74 A2/A3, \u00a76.2 N3, \u00a711).\n- **test_unapproved_parsed_rules_are_not_promoted_into_limits_after_a_notes_edit**: after the notes edit, limits and `limits_trace` equal the baseline, with no `max_theme_weight` (inv. 2, \u00a76.2).\n- **test_notes_edit_replaces_approved_rules_so_their_promoted_limit_is_rebuilt_away**: on Amira, replacing her notes with Robert's recorded notes drops her approved tech_heavy 50% limit. The new rules are unapproved and the diff shows the limits change (\u00a74 A5, D7). This assumes an approval doesn't carry over to rules that are no longer parsed.\n- **test_notes_edit_with_an_unrecorded_text_keeps_the_previous_parse_and_logs_the_failure**: on a mock cache miss the request still succeeds and `parsed_notes` is unchanged. The audit has no accepted N3 call and logs a `values_parser` entry in `llm_errors` (inv. 4, \u00a74 A3).\n- **test_notes_edit_with_a_stale_old_is_refused_and_n3_does_not_run**: a stale `old` on `values.notes` gets 409 or 422 and nothing changes (\u00a73.4, \u00a74 A2).\n- **test_flow_a_audit_lists_the_whole_event_log_in_order_and_is_deterministic**: `events_considered` is the full ordered log. Replaying the same event in a second store gives the same limits, trace, quiz score, knowledge score and version (\u00a710, inv. 8).\n- **test_d10_flow_a_response_and_audit_describe_never_prescribe**: the response and audit contain no prescriptive phrases (D10, inv. 7).\n- **test_events_endpoint_for_flow_a_never_writes_the_fixtures_dir**: after all Flow A event types for Robert and Amira, the hashes under `fixtures/` are identical to the start (CLAUDE.md).\n",
+  "stop_reason": "end_turn",
+  "usage": {
+    "inputTokens": 1432088,
+    "outputTokens": 35329,
+    "totalTokens": 1467417
+  }
+}
