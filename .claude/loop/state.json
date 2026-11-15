@@ -37,6 +37,7 @@
     "P3.RESIZE": "impl",
     "P3.S4": "impl",
     "P3.SKIP": "impl",
-    "P3.UIINTAKE": "impl"
+    "P3.UIINTAKE": "impl",
+    "P4.N4GATE": "tests"
   }
 }
