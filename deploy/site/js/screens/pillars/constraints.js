@@ -178,7 +178,7 @@
       + '<div class="detail__col">'
       + '<div class="detail__header">'
       + '<h2 class="t-h3">Declared constraints</h2>'
-      + '<button class="btn btn--outline-dark" type="button" data-edit-constraints aria-label="Edit declared constraints">Edit</button>'
+      + App.editButtonHtml("Edit", FIRST_INTAKE_PATH)
       + '</div>'
       + App.factsHtml(section.facts && section.facts.declared, FIELD_LABEL, VALUE_LABEL,
         "No constraint field is declared for this profile.") + "</div>"
@@ -188,7 +188,20 @@
 
   /* ---------- renderer ---------- */
 
+  function bindOnce(section) {
+    if (section.dataset.constraintsBound === "1") return;
+    section.dataset.constraintsBound = "1";
+    section.addEventListener("click", event => {
+      const editBtn = event.target.closest("[data-edit-path]");
+      if (editBtn) {
+        const path = editBtn.dataset.editPath;
+        App.go("#/conversation?path=" + encodeURIComponent(path));
+      }
+    });
+  }
+
   App.renderers[ROUTE] = function (section) {
+    bindOnce(section);
     const report = App.data && App.data.report;
     const live = ruleModel(report);
     /* The sample meter reads its scale from the same helper as the live one. */
@@ -207,16 +220,6 @@
     if (list) list.innerHTML = rules.map(rule => App.ruleCardHtml(rule, iconFor)).join("");
 
     const detail = section.querySelector("[data-detail]");
-    if (detail) {
-      detail.innerHTML = live ? detailHtml(sectionData) : "";
-      /* Wire the Edit button after rendering. */
-      const editBtn = detail.querySelector("[data-edit-constraints]");
-      if (editBtn && !editBtn.dataset.wired) {
-        editBtn.dataset.wired = "true";
-        editBtn.addEventListener("click", () => {
-          App.go("#/conversation?path=" + encodeURIComponent(FIRST_INTAKE_PATH));
-        });
-      }
-    }
+    if (detail) detail.innerHTML = live ? detailHtml(sectionData) : "";
   };
 })();

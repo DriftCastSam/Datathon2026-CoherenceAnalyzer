@@ -210,6 +210,12 @@
       + "</div>").join("") + "</dl>";
   }
 
+  function editButtonHtml(label, path) {
+    if (App.source.mode !== "live") return "";
+    return '<button class="btn btn--outline-dark" type="button" data-edit-path="' + esc(path) + '" '
+      + 'aria-label="' + esc(label) + '">' + esc(label.replace(/^Edit /, "Edit")) + "</button>";
+  }
+
   function segmentsHtml(section) {
     const segments = (section.narrative && section.narrative.segments) || [];
     if (!segments.length) return '<p class="t-small muted">No written explanation is attached to this section.</p>';
@@ -443,6 +449,7 @@
     ruleCardHtml,
     humanizeValue,
     factsHtml,
+    editButtonHtml,
     segmentsHtml,
     go,
     routeParams,

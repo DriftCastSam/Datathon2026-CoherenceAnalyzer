@@ -262,12 +262,7 @@
     <div class="sq-panes">
       <section class="card sq-chat" aria-label="Conversation">
         <h2 class="t-h3">Conversation</h2>
-        <div class="sq-thread" data-thread aria-live="polite">
-          <div class="sq-msg sq-msg--you"><p class="sq-msg__who">You</p><p class="sq-msg__text">Show me US technology stocks and technology ETFs.</p></div>
-          <div class="sq-msg sq-msg--agent"><p class="sq-msg__who">Agent</p><p class="sq-msg__text">I applied 3 filters to the 31-asset universe. 6 assets match. The list is sorted A to Z and is not a recommendation.</p></div>
-          <div class="sq-msg sq-msg--you"><p class="sq-msg__who">You</p><p class="sq-msg__text">Which one of these is best for me?</p></div>
-          <div class="sq-msg sq-msg--agent"><p class="sq-msg__who">Agent · outside what I can do</p><p class="sq-msg__text">I can't rank or recommend assets. I can add filters to narrow the list, or run a coherence analysis on the assets you select yourself.</p></div>
-        </div>
+        <div class="sq-thread" data-thread aria-live="polite"></div>
         <div class="sq-composer">
           <div class="sq-suggests">
             <button class="sq-suggest" type="button" data-say="Only ETFs">Only ETFs</button>
@@ -292,17 +287,13 @@
           <button class="sq-link" type="button" data-clear>Clear all</button>
         </div>
         <div class="sq-chips">
-          <span class="sq-chips__list" data-chips>
-            <span class="sq-chip"><span class="sq-chip__label">Asset class: Equity, ETF</span><button class="sq-chip__x" type="button" data-drop="cls" aria-label="Remove filter Asset class: Equity, ETF"><img src="assets/icon-x-blue.svg" alt="" width="12" height="12"></button></span>
-            <span class="sq-chip"><span class="sq-chip__label">Market: United States</span><button class="sq-chip__x" type="button" data-drop="mkt" aria-label="Remove filter Market: United States"><img src="assets/icon-x-blue.svg" alt="" width="12" height="12"></button></span>
-            <span class="sq-chip"><span class="sq-chip__label">Sector: Technology</span><button class="sq-chip__x" type="button" data-drop="sec" aria-label="Remove filter Sector: Technology"><img src="assets/icon-x-blue.svg" alt="" width="12" height="12"></button></span>
-          </span>
+          <span class="sq-chips__list" data-chips></span>
           <select class="sq-add" data-add aria-label="Add a filter">
             <option value="">+ Add filter</option>
           </select>
         </div>
         <div class="sq-countrow">
-          <p class="t-body-strong" data-count>6 of 31 assets match</p>
+          <p class="t-body-strong" data-count></p>
           <p class="t-small label">Sorted A to Z. Order carries no ranking.</p>
         </div>
         <div class="tbl sq-results__table-wrapper">
@@ -313,14 +304,7 @@
             <thead>
               <tr><th scope="col">Select</th><th scope="col">Name</th><th scope="col">Ticker</th><th scope="col">Asset class</th><th scope="col">Sector</th><th scope="col">Currency</th></tr>
             </thead>
-            <tbody data-rows>
-              <tr class="sq-row sq-row--on"><td><input class="sq-check" type="checkbox" data-key="sample-1" checked aria-label="Select Technology sector ETF"></td><td class="sq-name">Technology sector ETF</td><td>[TICKER]</td><td>ETF</td><td>Technology</td><td>USD</td></tr>
-              <tr class="sq-row"><td><input class="sq-check" type="checkbox" data-key="sample-2" aria-label="Select US cloud software company"></td><td class="sq-name">US cloud software company</td><td>[TICKER]</td><td>Equity</td><td>Technology</td><td>USD</td></tr>
-              <tr class="sq-row"><td><input class="sq-check" type="checkbox" data-key="sample-3" aria-label="Select US consumer electronics company"></td><td class="sq-name">US consumer electronics company</td><td>[TICKER]</td><td>Equity</td><td>Technology</td><td>USD</td></tr>
-              <tr class="sq-row sq-row--on"><td><input class="sq-check" type="checkbox" data-key="sample-4" checked aria-label="Select US semiconductor company A"></td><td class="sq-name">US semiconductor company A</td><td>[TICKER]</td><td>Equity</td><td>Technology</td><td>USD</td></tr>
-              <tr class="sq-row"><td><input class="sq-check" type="checkbox" data-key="sample-5" aria-label="Select US semiconductor company B"></td><td class="sq-name">US semiconductor company B</td><td>[TICKER]</td><td>Equity</td><td>Technology</td><td>USD</td></tr>
-              <tr class="sq-row"><td><input class="sq-check" type="checkbox" data-key="sample-6" aria-label="Select US social media company"></td><td class="sq-name">US social media company</td><td>[TICKER]</td><td>Equity</td><td>Technology</td><td>USD</td></tr>
-            </tbody>
+            <tbody data-rows></tbody>
           </table>
         </div>
         <div class="sq-selection">

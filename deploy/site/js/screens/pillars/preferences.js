@@ -191,7 +191,7 @@
       + '<div class="detail__col">'
       + '<div class="detail__header">'
       + '<h2 class="t-h3">Declared preferences</h2>'
-      + '<button class="btn btn--outline-dark" type="button" data-edit-preferences aria-label="Edit declared preferences">Edit</button>'
+      + App.editButtonHtml("Edit", FIRST_INTAKE_PATH)
       + '</div>'
       + factsHtml(section.facts && section.facts.declared) + "</div>"
       + '<div class="detail__col"><h2 class="t-h3">Explanation</h2>' + segmentsHtml(section) + "</div>"
@@ -201,7 +201,20 @@
 
   /* ---------- renderer ---------- */
 
+  function bindOnce(section) {
+    if (section.dataset.preferencesBound === "1") return;
+    section.dataset.preferencesBound = "1";
+    section.addEventListener("click", event => {
+      const editBtn = event.target.closest("[data-edit-path]");
+      if (editBtn) {
+        const path = editBtn.dataset.editPath;
+        App.go("#/conversation?path=" + encodeURIComponent(path));
+      }
+    });
+  }
+
   App.renderers[ROUTE] = function (section) {
+    bindOnce(section);
     const report = App.data && App.data.report;
     const sectionData = sectionOf(report);
     const live = ruleModel(report, sectionData);
@@ -217,16 +230,6 @@
     if (list) list.innerHTML = rules.map(rule => App.ruleCardHtml(rule, iconFor)).join("");
 
     const detail = section.querySelector("[data-detail]");
-    if (detail) {
-      detail.innerHTML = live ? detailHtml(sectionData, report) : "";
-      /* Wire the Edit button after rendering. */
-      const editBtn = detail.querySelector("[data-edit-preferences]");
-      if (editBtn && !editBtn.dataset.wired) {
-        editBtn.dataset.wired = "true";
-        editBtn.addEventListener("click", () => {
-          App.go("#/conversation?path=" + encodeURIComponent(FIRST_INTAKE_PATH));
-        });
-      }
-    }
+    if (detail) detail.innerHTML = live ? detailHtml(sectionData, report) : "";
   };
 })();

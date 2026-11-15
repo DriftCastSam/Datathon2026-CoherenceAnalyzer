@@ -29,7 +29,7 @@
   /* Only the most recent question load for the current persona may fill the screen. */
   let loadSeq = 0;
   let activeSection = null;
-  let pathSelectionApplied = false;
+  let lastAppliedHash = "";
 
   App.navSpec.conversation = {tabs: [], chrome: "bare"};
 
@@ -365,21 +365,25 @@
       submitInput(section);
     });
     window.addEventListener("hashchange", () => {
-      pathSelectionApplied = false;
       if (App.route !== CONVERSATION_ROUTE) screen.persona = null;
     });
   }
 
   function applyPathSelection() {
-    if (pathSelectionApplied) return;
+    const currentHash = location.hash;
+    if (lastAppliedHash === currentHash) return;
+    if (!screen.questions.length) return;
     const pathParam = App.routeParams().get("path");
-    if (!pathParam || !screen.questions.length) return;
+    if (!pathParam) {
+      lastAppliedHash = currentHash;
+      return;
+    }
     const matchIndex = screen.questions.findIndex(question => question.path === pathParam);
     if (matchIndex >= 0) {
       screen.index = matchIndex;
       screen.fieldError = "";
-      pathSelectionApplied = true;
     }
+    lastAppliedHash = currentHash;
   }
 
   App.renderers.conversation = function (section) {
@@ -387,13 +391,14 @@
     activeSection = section;
     const needsLoad = Boolean(App.state.persona) && screen.persona !== App.state.persona;
     if (needsLoad) {
-      pathSelectionApplied = false;
+      lastAppliedHash = "";
+      render();
       loadQuestions().then(() => {
         applyPathSelection();
         render();
       });
     } else {
-      if (!pathSelectionApplied) applyPathSelection();
+      applyPathSelection();
       render();
     }
   };
