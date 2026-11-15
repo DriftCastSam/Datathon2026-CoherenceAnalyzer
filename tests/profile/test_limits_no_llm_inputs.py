@@ -1,5 +1,8 @@
-"""Invariant 2 (SPEC §1, §7.1, §7.2, §15): no `llm:` field feeds `limits`, directly or transitively.
-Unapproved parsed rules never reach `limits`.
+"""Invariant 2 (SPEC §1, §7.1, §7.2, §15) as amended by docs/spec-decisions.md D11 (owner, 2026-11-15): no `llm:` field
+feeds `limits`, directly or transitively, with ONE exception: a gated, unapproved N3 `max_theme_weight` rule with a
+number is promoted as a PROVISIONAL limit (flagged `provisional: true`, traced as `values.parsed_notes[provisional]`,
+checks against it capped at warning). Everything else (firm limits, unapproved rules without a number, every other llm:
+field) is exactly as before.
 """
 import copy
 import json
@@ -34,6 +37,29 @@ def _build(profile: dict) -> tuple[dict, dict]:
 
 def _strip(block: dict) -> dict:
     return {k: v for k, v in block.items() if k not in META_KEYS}
+
+
+PROVISIONAL_PATH = "values.parsed_notes[provisional]"   # D11
+
+
+def _is_provisional(entry) -> bool:
+    return isinstance(entry, dict) and entry.get("provisional") is True
+
+
+def _firm(block: dict) -> dict:
+    """The limits without D11 provisional entries (an emptied max_theme_weight counts as absent)."""
+    out = _strip(block)
+    themes = out.get("max_theme_weight")
+    if isinstance(themes, dict):
+        kept = {t: v for t, v in themes.items() if not _is_provisional(v)}
+        out["max_theme_weight"] = kept or None
+    elif not themes:
+        out["max_theme_weight"] = None
+    return out
+
+
+def _firm_trace(trace: dict) -> dict:
+    return {k: [p for p in v if p != PROVISIONAL_PATH] for k, v in trace.items()}
 
 
 def _resolve(profile: dict, path: str):
@@ -121,10 +147,11 @@ def _perturb_llm_fields(robert: dict) -> dict:
 
 
 def test_llm_fields_do_not_change_limits(robert):
+    """D11: the perturbed llm: fields change no FIRM limit and no firm trace; only the provisional entry may appear."""
     base, base_trace = _build(robert)
     lim, trace = _build(_perturb_llm_fields(robert))
-    assert _strip(lim) == _strip(base)
-    assert trace == base_trace
+    assert _firm(lim) == _firm(base)
+    assert _firm_trace(trace) == _firm_trace(base_trace)
 
 
 def test_llm_fields_do_not_change_limits_without_rederive(robert):
@@ -132,14 +159,17 @@ def test_llm_fields_do_not_change_limits_without_rederive(robert):
     p = _derive(robert)
     perturbed = _perturb_llm_fields(p)
     lim, _ = limits_mod.build_limits(perturbed, ROBERT_VALUE)
-    assert _strip(lim) == _strip(base)
+    assert _firm(lim) == _firm(base)
 
 
-def test_unapproved_parsed_rules_do_not_appear_in_limits(robert):
+def test_unapproved_parsed_rules_do_not_appear_in_limits_except_as_provisional(robert):
+    """D11: an unapproved rule without a number (exclude_activity) never reaches limits; an unapproved numeric theme
+    rule appears only as a provisional entry, traced as values.parsed_notes[provisional]."""
     p = _perturb_llm_fields(robert)
-    lim, _ = _build(p)
-    dumped = json.dumps(lim, default=str)
-    assert "fossil_fuel_producer" not in dumped
-    assert "tech_heavy" not in dumped
-    assert not lim.get("max_theme_weight")
+    lim, trace = _build(p)
+    assert "fossil_fuel_producer" not in json.dumps(lim, default=str)
     assert sorted(lim["excluded_activities"]) == ["accounting_fraud_last_5y", "tobacco"]
+    themes = lim.get("max_theme_weight") or {}
+    assert set(themes) == {"tech_heavy"}                      # D11.1: promoted at once ...
+    assert _is_provisional(themes["tech_heavy"])              # ... and only as provisional
+    assert PROVISIONAL_PATH in trace["max_theme_weight"]
