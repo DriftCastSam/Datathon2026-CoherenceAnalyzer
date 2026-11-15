@@ -219,7 +219,7 @@ details.abadge ul{margin:8px 0 0;padding-left:18px;font-size:13px;color:var(--mu
 /* Flow B (SPEC §4 B2): intent confirmation form, status line, error banner */
 .ifm{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px 18px;margin-top:14px;align-items:end}
 .ifm label{display:block;font-size:11.5px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--soft);margin-bottom:4px}
-.ifm input,.ifm select{width:100%;border:1px solid var(--muted);border-radius:4px;padding:9px 12px;font:inherit;font-size:14px;background:var(--surface);color:var(--ink);min-height:40px}
+.ifm input,.ifm select,.ifm textarea{width:100%;border:1px solid var(--muted);border-radius:4px;padding:9px 12px;font:inherit;font-size:14px;background:var(--surface);color:var(--ink);min-height:40px}
 .ifm .full{grid-column:1/-1}
 .errbar{border-left:4px solid var(--red);background:var(--red-bg);color:var(--red-ink);padding:10px 14px;border-radius:4px;font-weight:600}
 .primary[disabled]{opacity:.45;cursor:not-allowed}
@@ -280,6 +280,7 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
     "situation.income_stability": "Stabilité du revenu", "identity.employer_sector": "Secteur de l'employeur",
     "preferences.asset_types_refused": "Types d'actifs refusés", "preferences.max_fee_mer_pct": "RFG maximal", "values.notes": "Vos notes",
     "preferences.interests": "Intérêts", "values.parsed_notes": "Règles tirées de vos notes",
+    "values.parsed_notes.value.params.max_pct": "Part maximale d'un thème de vos notes",
   };
   const fieldName = p => FIELD[p] || FIELD[p.replace(/\[\d+\]/g, "").replace(/\.date$/, "")] || p;
   const UNIT = {weight: pct, risk_share: pct, annual_vol: pct, drawdown: pct, cad, score: x => String(Math.round(x))};
@@ -288,7 +289,7 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
     : typeof v === "object" ? Object.entries(v).map(([k, x]) => `${k}: ${show(x)}`).join(", ") : (LVL[v] || STAGE[v] || OBJ[v] || String(v));
   const KIND = {fact: "fait", assumption: "hypothèse", inference: "inférence", unknown: "inconnu"};
   const PAGES = [["synthese", "Synthèse"], ["facteurs", "Facteurs"], ["profil", "Profil"], ["portefeuille", "Portefeuille"], ["recherche", "Recherche"], ["simulation", "Simulation"], ["sources", "Sources"]];
-  const state = {rep: null, page: "synthese", factor: null, error: ""};
+  const state = {rep: null, page: "synthese", factor: null, error: "", draft: null, intake: null};
 
   /* Flow B reports carry the checks of the trade (`checks_proposed`) next to today's: the sections and the verdict follow the trade. */
   const shownChecks = rep => rep.checks_proposed || rep.checks_current;
@@ -418,12 +419,87 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
   async function decideRule(action, index) {
     if (!apiBase() || (action !== "approve" && action !== "reject")) return;
     const approved = action === "approve";
+    let rule = null, max_pct = null;
+    state.rep.sections.forEach(s => { const d = (s.facts.derived || {})["values.parsed_notes"]; if (!rule && d && d.value && d.value[index]) rule = d.value[index]; });
+    /* §16 Amira: a theme rule written without a number is not approved blindly; the page asks for the number and sends it. A rejection records no limit. */
+    if (approved && rule && rule.rule_kind === "max_theme_weight" && typeof (rule.params || {}).max_pct !== "number") {
+      const typed = prompt(`Vous avez écrit « ${rule.quote} ». Quelle part maximale du portefeuille (en %) voulez-vous pour ce thème?`);
+      if (typed === null) return;
+      max_pct = Number(String(typed).trim().replace(",", "."));
+      if (!Number.isFinite(max_pct) || !(max_pct > 0 && max_pct <= 100)) {
+        state.error = "La décision n'a pas été enregistrée : la part maximale doit être un nombre supérieur à 0 et au plus 100.";
+        render();
+        return;
+      }
+    }
+    const decision = {approved};
+    if (max_pct !== null) decision.max_pct = max_pct;
     try {
-      await apiPost(`/profiles/${state.rep.profile_id}/parsed-rules/${index}/decision`, {approved});
-      state.rep.sections.forEach(s => { const d = (s.facts.derived || {})["values.parsed_notes"], r = d && d.value ? d.value[index] : null; if (r) r.approved_by_user = approved; });
+      await apiPost(`/profiles/${state.rep.profile_id}/parsed-rules/${index}/decision`, decision);
+      state.rep.sections.forEach(s => { const d = (s.facts.derived || {})["values.parsed_notes"], r = d && d.value ? d.value[index] : null;
+        if (r) { r.approved_by_user = approved; if (max_pct !== null) r.params = Object.assign({}, r.params, {max_pct}); } });
       state.error = "";
     } catch (e) { state.error = "La décision n'a pas été enregistrée (" + e.message + ")."; }
     render();
+    if (!state.error) loadIntake();
+  }
+  /* ---------- Intake (SPEC §12, §20.6): fixed questions from GET /profiles/{id}/intake; the static demo lists what is missing, read-only ---------- */
+  async function loadIntake() {
+    if (!apiBase() || !state.rep) return;
+    try {
+      const r = await fetch(apiBase() + "/profiles/" + state.rep.profile_id + "/intake");
+      if (!r.ok) throw new Error("API : HTTP " + r.status);
+      state.intake = await r.json();
+    } catch (e) { state.error = "La liste des points à préciser n'a pas été chargée (" + e.message + ")."; }
+    render();
+  }
+  async function answerIntake(path, value) {
+    if (!apiBase()) return;
+    let given = String(value == null ? "" : value).trim();
+    if (!given) return;
+    if (path.endsWith(".max_pct")) {
+      /* a theme share is a JSON number in (0, 100] */
+      given = Number(given.replace(",", "."));
+      if (!Number.isFinite(given) || !(given > 0 && given <= 100)) { state.error = "La réponse n'a pas été enregistrée : la part maximale doit être un nombre supérieur à 0 et au plus 100."; render(); return; }
+    } else if (given === "true" || given === "false" || "[{-0123456789".includes(given[0])) {
+      try { given = JSON.parse(given); } catch (e) { /* stays the text the user typed */ }
+    } else if ((path.includes("prefers_") || path.endsWith("home_bias_ok")) && ["oui", "yes", "non", "no"].includes(given.toLowerCase())) {
+      given = ["oui", "yes"].includes(given.toLowerCase());
+    }
+    try {
+      await apiPost(`/profiles/${state.rep.profile_id}/intake/answer`, {path, value: given});
+      state.error = "";
+    } catch (e) { state.error = "La réponse n'a pas été enregistrée (" + e.message + ")."; }
+    await loadIntake();
+    render();
+  }
+  async function skipIntake(path) {
+    if (!apiBase()) return;
+    try {
+      await apiPost(`/profiles/${state.rep.profile_id}/intake/skip`, {path});
+      state.error = "";
+    } catch (e) { state.error = "La question n'a pas été passée (" + e.message + ")."; }
+    await loadIntake();
+    render();
+  }
+  function renderIntake(rep) {
+    if (apiBase()) {
+      if (!state.intake) return `<p class="small" style="margin-top:12px">Chargement des points à préciser…</p>`;
+      const all = Object.values(state.intake), left = all.reduce((n, x) => n + (x.missing || []).length, 0), q = all.map(x => x.next_question).find(Boolean);
+      if (!q) return `<p class="small" style="margin-top:12px">Rien à préciser : chaque question du profil a une réponse ou a été passée.</p>`;
+      return `<form id="intake-form" class="ifm" data-path="${esc(q.path)}">
+        <p class="small full">Il reste ${left} point${left > 1 ? "s" : ""} à préciser. Une question à la fois; une question passée reste « non vérifiable ».</p>
+        <p class="full"><b>${esc(q.text)}</b></p>
+        <div><label for="ik-answer">Votre réponse</label><input id="ik-answer" name="answer" type="text" required autocomplete="off"></div>
+        <div class="actions" style="margin-top:0"><button class="primary" type="submit">Enregistrer la réponse</button><button class="link" type="button" data-intake="skip" data-path="${esc(q.path)}">Passer cette question</button></div></form>`;
+    }
+    const block = rep.intake || (rep.site && rep.site.intake);
+    if (!block) return "";
+    const rows = Object.entries(block).map(([f, e]) => [f, Array.isArray(e) ? e : (e && e.missing) || []]).filter(([, m]) => m.length);
+    const title = f => (rep.sections.find(s => s.factor === f) || {}).title || f;
+    return rows.length
+      ? `<div style="margin-top:16px"><p class="small">Ce qui manque encore au profil (lecture seule : les réponses passent par l'API).</p><ul class="unklist">${rows.map(([f, m]) => `<li><b>${esc(title(f))}</b> : ${m.map(p => esc(fieldName(p))).join(" · ")}</li>`).join("")}</ul></div>`
+      : `<p class="small" style="margin-top:12px">Rien ne manque au profil.</p>`;
   }
   function explanationCard(rep) {
     const e = rep.explanation, title = f => (rep.sections.find(s => s.factor === f) || {}).title || f;
@@ -441,6 +517,7 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
   /* ---------- Flow B (SPEC §4 B2, §12): intent confirmation form, trade report loader ---------- */
   function renderIntentForm(intent) {
     const live = Boolean(apiBase()), f = intent.funding || {}, kind = f.kind || "";
+    const editable = live && intent.status === "draft";
     const v = x => x == null ? "" : esc(x);
     const pick = k => kind === k ? "selected" : "";
     const kinds = [["specific", "Un titre que vous indiquez"], ["pro_rata_all", "Au prorata de tout le portefeuille"], ["pro_rata_class", "Au prorata d'une classe d'actifs"], ["cash_contribution", "Un apport en argent"]];
@@ -452,9 +529,10 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
       <div><label for="if-fticker">Financé par le titre</label><input id="if-fticker" name="funding_ticker" type="text" autocomplete="off" value="${v(f.ticker)}"></div>
       <div><label for="if-fclass">Classe d'actifs</label><input id="if-fclass" name="funding_asset_class" type="text" autocomplete="off" value="${v(f.asset_class)}"></div>
       <div><label for="if-famount">Apport (CAD)</label><input id="if-famount" name="funding_amount_cad" type="number" step="any" min="0" value="${v(f.amount_cad)}"></div>
-      <div class="full actions" style="margin-top:0"><button class="primary" type="submit" ${live ? "" : "disabled"}>Confirmer l'intention</button>
-        <span id="intent-msg" class="small" role="status">${live ? "La confirmation envoie ces valeurs à l'API, qui renvoie le rapport de la transaction." : "Aucune API configurée : le formulaire montre le brouillon et n'envoie rien."}</span></div></form>`;
+      <div class="full actions" style="margin-top:0"><button class="primary" type="submit" ${editable ? "" : "disabled"}>Confirmer l'intention</button>
+        <span id="intent-msg" class="small" role="status">${!live ? "Aucune API configurée : le formulaire montre le brouillon et n'envoie rien." : intent.status === "draft" ? "La confirmation envoie ces valeurs à l'API, qui renvoie le rapport de la transaction." : "Cette intention est déjà confirmée : elle s'affiche sans pouvoir être renvoyée."}</span></div></form>`;
   }
+  /* B2: the body is exactly what api.ConfirmIn accepts (ticker, target_weight_pct, funding); nothing is copied from the draft or the report. */
   async function confirmIntent(form) {
     if (!apiBase()) return;
     const val = name => form.elements[name] ? form.elements[name].value.trim() : "";
@@ -462,16 +540,38 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
     if (funding.kind === "specific") funding.ticker = val("funding_ticker");
     if (funding.kind === "pro_rata_class") funding.asset_class = val("funding_asset_class");
     if (funding.kind === "cash_contribution") funding.amount_cad = Number(val("funding_amount_cad"));
-    const edited = Object.assign({}, state.rep.intent, {ticker: val("ticker"), target_weight_pct: Number(val("target_weight_pct")), funding});
+    const edited = {ticker: val("ticker"), target_weight_pct: Number(val("target_weight_pct")), funding};
     try {
       const rep = await apiPost(`/intents/${form.dataset.intentId}/confirm`, edited);
       state.rep = Object.assign({}, rep, {site: rep.site || state.rep.site});
-      state.factor = null; state.error = "";
+      state.draft = null; state.factor = null; state.error = "";
     } catch (e) { state.error = "L'intention n'a pas été confirmée (" + e.message + ")."; }
     render();
   }
-  const intentCard = rep => rep.intent ? `<section class="card" id="intent"><h3>Transaction demandée</h3>
-    <p class="small" style="margin-top:6px">Brouillon lu dans vos propres mots. La page décrit l'effet de cette transaction sur vos limites, sans rien exécuter.</p>${renderIntentForm(rep.intent)}</section>` : "";
+  /* B1/B2: the draft comes from POST /profiles/{id}/events (an order_intent event); the user's own words are the only input. */
+  async function requestDraft(text) {
+    if (!apiBase()) return;
+    const said = String(text || "").trim();
+    if (!said) return;
+    try {
+      const res = await apiPost(`/profiles/${state.rep.profile_id}/events`, {type: "order_intent", text: said, ts: new Date().toISOString()});
+      state.draft = res.intent; state.error = "";
+    } catch (e) { state.error = "La demande n'a pas été enregistrée (" + e.message + ")."; }
+    render();
+  }
+  function renderDraftRequest() {
+    if (!apiBase()) return "";
+    return `<form id="draft-form" class="ifm"><div class="full"><label for="df-text">Votre demande, dans vos mots</label><textarea id="df-text" name="text" rows="3" required></textarea></div>
+      <div class="full actions" style="margin-top:0"><button class="primary" type="submit">Lire ma demande</button><span class="small" role="status">L'API lit votre texte et remplit seulement ce que vous avez écrit.</span></div></form>`;
+  }
+  function intentCard(rep) {
+    const note = `<p class="small" style="margin-top:6px">Brouillon lu dans vos propres mots. La page décrit l'effet de cette transaction sur vos limites, sans rien exécuter.</p>`;
+    if (apiBase()) {
+      const shown = state.draft || rep.intent;
+      return `<section class="card" id="intent"><h3>Transaction demandée</h3>${note}${renderDraftRequest()}${shown ? renderIntentForm(state.draft ? state.draft : rep.intent) : ""}</section>`;
+    }
+    return rep.intent ? `<section class="card" id="intent"><h3>Transaction demandée</h3>${note}${renderIntentForm(rep.intent)}</section>` : "";
+  }
   /* The trade report is a separate file (deploy/preview_report.py output), never listed in the reports index: the display block
      `site` and the section facts the renderers read are built here from its own profile_card and limits. */
   async function loadFlowB() {
@@ -486,12 +586,12 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
         return Object.assign({}, s, {facts: Array.isArray(s.facts) ? {declared, derived} : s.facts});
       });
       rep.site = {as_of: c.as_of, value_cad: c.value_cad, portfolio_file: rep.portfolio_id, whatif: false, weights_pct: rep.weights_current,
-        limits: rep.limits, limits_trace: rep.limits_trace, label: `${c.name} · transaction demandée : ${rep.intent.ticker} à ${rep.intent.target_weight_pct} %`,
+        limits: rep.limits, limits_trace: rep.limits_trace, intake: rep.intake, label: `${c.name} · transaction demandée : ${rep.intent.ticker} à ${rep.intent.target_weight_pct} %`,
         profile_card: {name: c.name, age: c.age, occupation: c.occupation, life_stage: c.life_stage, risk_declared: c.declared, risk_capacity: c.capacity,
           risk_effective: c.effective, horizon_years: c.horizon_years, effective_horizon_years: c.effective_horizon_years, first_withdrawal: c.first_withdrawal,
           emergency_fund_months: c.ef_months, goals: c.goals || [], notes: c.notes || ""}};
-      state.rep = rep; state.factor = null; state.error = "";
-      route();
+      state.rep = rep; state.factor = null; state.error = ""; state.draft = null; state.intake = null;
+      route(); loadIntake();
     } catch (e) { $("#app").innerHTML = `<p class="card">Impossible de charger le rapport de la transaction (${esc(e.message)}). Rechargez la page.</p>`; }
   }
 
@@ -646,7 +746,7 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
       <section class="card"><div style="display:flex;justify-content:space-between;gap:12px;align-items:center;flex-wrap:wrap"><h2>Points à clarifier</h2>${pc.findings.length ? st(pc.status, `${pc.findings.length} point${pc.findings.length > 1 ? "s" : ""}`) : st("pass", "Aucune contradiction")}</div>
         <div class="pcs" style="margin-top:16px">${pc.findings.map(x => { const v = x.values || x.quotes || []; return `<div class="pcc ${x.status}"><span class="t tx-${x.status}">${tag[x.status]} · ${x.source.startsWith("llm") ? "IA, vérifiée par le code" : "règle " + esc(x.id)}</span>
           <div class="vs"><span class="small">${esc(fieldName(x.fields[0]))}</span><br><b>« ${esc(show(v[0]))} »</b></div><div class="vs"><span class="small">${esc(fieldName(x.fields[1]))}</span><br><b>« ${esc(show(v[1]))} »</b></div>
-          ${x.reason ? `<p class="small">${esc(x.reason)}</p>` : ""}<p class="ask"><b>Question :</b> ${esc((x.question && (x.question["fr-CA"] || x.question)) || "")}</p></div>`; }).join("") || `<p class="sub">Les réponses du profil vont dans le même sens.</p>`}</div></section>
+          ${x.reason ? `<p class="small">${esc(x.reason)}</p>` : ""}<p class="ask"><b>Question :</b> ${esc((x.question && (x.question["fr-CA"] || x.question)) || "")}</p></div>`; }).join("") || `<p class="sub">Les réponses du profil vont dans le même sens.</p>`}</div>${renderIntake(rep)}</section>
       ${renderValuesRules(rep)}
       <div class="half">
         <section class="card"><h3>Profil de ${esc(p.name)}</h3><dl class="facts" style="margin-top:10px">
@@ -899,6 +999,11 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
     if (state.page === "recherche" && rep.site.whatif) bindRecherche();
     if (state.page === "simulation" && rep.site.whatif) bindSimulation();
     document.querySelectorAll("[data-action]").forEach(b => b.addEventListener("click", () => { if (apiBase()) decideRule(b.dataset.action, Number(b.dataset.index)); }));
+    const draftForm = $("#draft-form");
+    if (draftForm) draftForm.addEventListener("submit", e => { e.preventDefault(); requestDraft(e.target.elements.text.value); });
+    const intakeForm = $("#intake-form");
+    if (intakeForm) intakeForm.addEventListener("submit", e => { e.preventDefault(); answerIntake(e.target.dataset.path, e.target.elements.answer.value); });
+    document.querySelectorAll("[data-intake]").forEach(b => b.addEventListener("click", () => { if (b.dataset.intake === "skip") skipIntake(b.dataset.path); }));
     const intentForm = $("#intent-form");
     if (intentForm) intentForm.addEventListener("submit", e => { e.preventDefault(); confirmIntent(e.target); });
     bindChecks(rep);
@@ -919,7 +1024,7 @@ footer{border-top:1px solid var(--line);padding-block:22px 40px;font-size:13px;c
     try {
       const r = await fetch("reports/" + file);
       if (!r.ok) throw new Error("HTTP " + r.status);
-      state.rep = await r.json(); state.factor = null; state.error = ""; route();
+      state.rep = await r.json(); state.factor = null; state.error = ""; state.draft = null; state.intake = null; route(); loadIntake();
     } catch (e) { $("#app").innerHTML = `<p class="card">Impossible de charger le rapport ${esc(file)} (${esc(e.message)}). Rechargez la page.</p>`; }
   }
   try { const t = localStorage.getItem("ca-theme"); if (t) document.documentElement.dataset.theme = t; } catch (e) {}

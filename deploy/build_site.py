@@ -74,6 +74,14 @@ def _label(template: str, extras: dict) -> str:
     return template.format(**{t.replace(".", "_"): f"{w:g}" for t, w in extras["weights_pct"].items()})
 
 
+def missing_by_factor(persona: str) -> dict:
+    """{factor: [missing intake path, ...]} = `intake.missing` on the persona's profile (paths only: no AI output, no limit).
+    The static demo has no server, so the « Points à clarifier » card reads this list, read-only."""
+    from coherence_analyzer import intake
+    profile = json.loads((FIXTURES / persona / "profile.json").read_text(encoding="utf-8"))
+    return {f: intake.missing(profile, f) for f in intake.FACTORS}
+
+
 def build_reports(out: Path) -> list[dict]:
     from coherence_analyzer import pipeline
     out.mkdir(parents=True, exist_ok=True)
@@ -82,7 +90,7 @@ def build_reports(out: Path) -> list[dict]:
         rep = pipeline.review(FIXTURES / persona, pf_file)
         extras = site_extras(persona, pf_file)
         label = _label(template, extras)
-        rep["site"] = {**extras, "label": label}
+        rep["site"] = {**extras, "label": label, "intake": missing_by_factor(persona)}
         (out / f"{name}.json").write_text(json.dumps(rep, ensure_ascii=False, separators=(",", ":")))
         index.append({"file": f"{name}.json", "label": label, "verdict": rep["verdict"],
                       "profile": rep.get("profile_coherence", {}).get("status")})
@@ -103,7 +111,9 @@ def build_flow_b(out: Path) -> Path:
         paths = mod.build(Path(tmp))
         src = next(p for p in paths if p.stem == "robert-nvda")
         dest = out / "robert-nvda.json"
-        dest.write_text(src.read_text(encoding="utf-8"), encoding="utf-8")
+        doc = json.loads(src.read_text(encoding="utf-8"))
+        doc["intake"] = missing_by_factor("robert")        # static demo: the missing list, read-only (same persona as the report)
+        dest.write_text(json.dumps(doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     return dest
 
 
