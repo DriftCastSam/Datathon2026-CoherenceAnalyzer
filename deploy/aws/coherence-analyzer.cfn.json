@@ -1181,29 +1181,9 @@
       },
       "Metadata": {
         "com.aws.cloudformation.Context": {
-          "why": "AuthType NONE on AWS::Lambda::Url does not itself allow unauthenticated invocation; an explicit resource-based policy statement with FunctionUrlAuthType NONE is required for public invoke, per the Lambda Function URL public-access shape.",
+          "why": "AuthType NONE on AWS::Lambda::Url does not itself allow unauthenticated invocation; an explicit resource-based policy statement with Action lambda:InvokeFunctionUrl and FunctionUrlAuthType NONE is required for public invoke. A second statement granting lambda:InvokeFunction with FunctionUrlAuthType was tried and rejected by the Lambda API at deploy time (FunctionUrlAuthType is only a valid condition on the InvokeFunctionUrl action, confirmed by a real CREATE_FAILED event, not just cfn-lint, which only checks schema shape): this one statement is the complete, correct grant.",
           "must": [
-            "Paired with ApiFunctionUrlInvokePermission: InvokeFunctionUrl alone returns HTTP 403"
-          ]
-        }
-      },
-      "Condition": "DeployFlowB"
-    },
-    "ApiFunctionUrlInvokePermission": {
-      "Type": "AWS::Lambda::Permission",
-      "Properties": {
-        "FunctionName": {
-          "Ref": "ApiFunction"
-        },
-        "Action": "lambda:InvokeFunction",
-        "Principal": "*",
-        "FunctionUrlAuthType": "NONE"
-      },
-      "Metadata": {
-        "com.aws.cloudformation.Context": {
-          "why": "A Function URL invocation always requires both lambda:InvokeFunctionUrl and lambda:InvokeFunction; granting only InvokeFunctionUrl returns HTTP 403 even with AuthType NONE. FunctionUrlAuthType NONE here scopes this public InvokeFunction grant to calls routed through the Function URL, not a direct lambda:Invoke API call.",
-          "must": [
-            "Scoped by FunctionUrlAuthType to Function URL calls only, does not open direct lambda:Invoke"
+            "Action lambda:InvokeFunctionUrl only; do not add a second statement for lambda:InvokeFunction"
           ]
         }
       },
