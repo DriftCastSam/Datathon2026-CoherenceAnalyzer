@@ -29,6 +29,9 @@
   };
   const MISSING_SCENARIO = "No precomputed scenario exists for this amount and funding source.";
   const CHART_UNAVAILABLE = "Chart unavailable";
+  const MODE_LIVE = "live";
+  const BASE_PROFILE_NOTE = "What-if scenarios are precomputed from the persona's original profile; "
+    + "edits made in this session are not reflected here.";
 
   /* Choices persist while the screen re-renders; a persona change starts them over. */
   const choice = {persona: null, ticker: null, target: null, funding: null};
@@ -50,6 +53,28 @@
       && requested.indexOf(ticker) === at);
     if (!tickers.length) return {empty: EMPTY_UNAVAILABLE};
     return {context: {base: universe.base, whatif, tickers}};
+  }
+
+  /* Scenarios come from the persona's prebuilt profile; live mode shows that profile's report
+     once it has loaded (personaId -> report | null while loading or failed). */
+  const baseReports = new Map();
+
+  function loadBaseReport(personaId, section) {
+    if (baseReports.has(personaId)) return;
+    baseReports.set(personaId, null);
+    App.source.prebuiltReport(personaId).then(report => {
+      baseReports.set(personaId, report);
+      if (App.state.persona === personaId) App.renderers.whatif(section);
+    }).catch(error => console.error("[whatif] base profile unavailable for " + personaId, error));
+  }
+
+  function profileDisplay(section) {
+    const live = view.profileLine(App.state.report);
+    if (App.source.mode !== MODE_LIVE) return {line: live, note: false};
+    loadBaseReport(App.state.persona, section);
+    const baseReport = baseReports.get(App.state.persona);
+    const baseLine = baseReport ? view.profileLine(baseReport) : "";
+    return baseLine && baseLine !== live ? {line: baseLine, note: true} : {line: live, note: false};
   }
 
   function syncChoice(context) {
@@ -146,7 +171,7 @@
     show(mount, "content", false);
   }
 
-  function paintContext(mount, context) {
+  function paintContext(mount, context, section) {
     const {targets, fundings} = syncChoice(context);
     const {base, whatif, tickers} = context;
     show(mount, "empty", false);
@@ -159,7 +184,10 @@
       fundings.map(item => ({value: item.id, label: item.label})), choice.funding);
     text(mount, "meta", (tickers.indexOf(choice.ticker) + 1) + " of " + tickers.length
       + (tickers.length === 1 ? " selected asset" : " selected assets"));
-    text(mount, "profile", view.profileLine(App.state.report));
+    const profile = profileDisplay(section);
+    text(mount, "profile", profile.line);
+    text(mount, "profile-note", profile.note ? BASE_PROFILE_NOTE : "");
+    show(mount, "profile-note", profile.note);
     text(mount, "as-of", view.asOfLine(base));
 
     const scenario = whatif[choice.ticker].scenarios[view.keyOf(choice.target, choice.funding)];
@@ -191,7 +219,7 @@
     if (resolved.empty) {
       paintEmpty(mount, resolved.empty);
     } else {
-      paintContext(mount, resolved.context);
+      paintContext(mount, resolved.context, section);
     }
     bindSelect(section, "#whatif-asset", value => { choice.ticker = value; });
     bindSelect(section, "#whatif-amount", value => { choice.target = Number(value); });

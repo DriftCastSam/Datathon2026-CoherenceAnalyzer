@@ -8,11 +8,13 @@
      Series start at today's value; arrays may differ in length (each spans the
      full x range). Returns false and leaves el untouched without a usable cone. */
 
-  const VIEW = {width: 1200, height: 300, left: 52, right: 1050, top: 20, bottom: 255};
-  const LABEL_X = 1064;
-  const MIN_LABEL_GAP = 18;
-  const FLOOR_LABEL_CLEARANCE = 18;
+  const VIEW = {width: 1200, height: 300, left: 84, right: 940, top: 20, bottom: 255};
+  const LABEL_X = 954;
+  const MIN_LABEL_GAP = 26;
+  const FLOOR_LABEL_POSITION = 0.4;
+  const FLOOR_LABEL_RISE = 5;
   const TICK_TARGET = 5;
+  const MAX_YEAR_TICKS = 5;
   const STEP_CANDIDATES = [1, 2, 2.5, 5, 10];
   const COLOR = {ink: "#172b3f", muted: "#5c6b7a", red: "#e41c23", compare: "#55637a"};
   const DEFAULT_LABELS = {
@@ -70,7 +72,7 @@
       const y = yOf(value).toFixed(1);
       parts.push('<line class="fan__grid" x1="' + VIEW.left + '" y1="' + y
         + '" x2="' + VIEW.right + '" y2="' + y + '"/>');
-      parts.push('<text class="fan__tick" x="42" y="' + y
+      parts.push('<text class="fan__tick" x="74" y="' + y
         + '" text-anchor="end" dominant-baseline="middle">'
         + App.esc(compact(value)) + "</text>");
     }
@@ -80,10 +82,13 @@
   function yearLabelsSvg(years, xOf) {
     const parts = ['<text class="fan__x" x="' + VIEW.left
       + '" y="277" text-anchor="start">Today</text>'];
-    for (let year = 1; year <= years; year += 1) {
-      parts.push('<text class="fan__x" x="' + xOf(year / years).toFixed(1)
-        + '" y="277" text-anchor="middle">Year ' + year + "</text>");
-    }
+    const step = Math.ceil(years / MAX_YEAR_TICKS);
+    const shown = [];
+    for (let year = step; year < years; year += step) shown.push(year);
+    if (shown.length && years - shown[shown.length - 1] < step / 2) shown.pop();
+    shown.push(years);
+    shown.forEach(year => parts.push('<text class="fan__x" x="' + xOf(year / years).toFixed(1)
+      + '" y="277" text-anchor="middle">Year ' + year + "</text>"));
     return parts.join("");
   }
 
@@ -107,17 +112,20 @@
       + App.esc(end.text) + "</text>").join("");
   }
 
-  function floorSvg(floor, yOf, lowEndY) {
+  function floorLabelX() {
+    return VIEW.left + (VIEW.right - VIEW.left) * FLOOR_LABEL_POSITION;
+  }
+
+  function floorSvg(floor, yOf) {
     if (floor === null) return "";
     const y = yOf(floor);
-    const nearLow = Math.abs(y + 13 - lowEndY) < FLOOR_LABEL_CLEARANCE;
-    const labelY = nearLow ? y - 7 : y + 13;
+    const labelY = y - FLOOR_LABEL_RISE;
     return '<line x1="' + VIEW.left + '" y1="' + y.toFixed(1) + '" x2="' + VIEW.right
       + '" y2="' + y.toFixed(1) + '" stroke="' + COLOR.red
       + '" stroke-width="1.5" stroke-dasharray="3 5"/>'
-      + '<text class="fan__series" x="1042" y="' + labelY.toFixed(1)
-      + '" text-anchor="end" fill="' + COLOR.red + '" font-size="12">Floor '
-      + App.esc(compact(floor)) + "</text>";
+      + '<text class="fan__floor" x="' + floorLabelX() + '" y="'
+      + labelY.toFixed(1) + '" text-anchor="middle" fill="' + COLOR.red
+      + '">Floor ' + App.esc(compact(floor)) + "</text>";
   }
 
   function endMarkers(bands, labels, yOf) {
@@ -166,13 +174,12 @@
     const stroke = (series, color, width, extra) => '<path d="' + linePath(points(series))
       + '" fill="none" stroke="' + color + '" stroke-width="' + width
       + '" stroke-linejoin="round"' + (extra || "") + "/>";
-    const lowEndY = bands.p5 ? yOf(bands.p5[bands.p5.length - 1]) : -Infinity;
     el.innerHTML = '<div class="fan"><svg viewBox="0 0 ' + VIEW.width + " "
       + VIEW.height + '" role="img" aria-label="'
       + App.esc(describe(bands, years, opts.asOf)) + '">'
       + gridSvg(axis, yOf)
       + band(bands.p95, bands.p5, ".08") + band(bands.p75, bands.p25, ".16")
-      + floorSvg(floor, yOf, lowEndY)
+      + floorSvg(floor, yOf)
       + (bands.p5 ? stroke(bands.p5, COLOR.red, 1.8) : "")
       + (compare ? stroke(compare, COLOR.compare, 2.2,
         ' stroke-dasharray="1 5" stroke-linecap="round"') : "")

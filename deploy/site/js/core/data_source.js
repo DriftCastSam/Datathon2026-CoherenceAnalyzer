@@ -14,6 +14,7 @@
   const MODE_LIVE = "live";
   const MODE_STATIC = "static";
   const SKIPPED_BY = "user:skipped";
+  const DEFAULT_PERSONA_ID = "persona-robert";
   const STATIC_CARD_KEYS = {
     "risk.declared": "risk_declared",
     "objectives.horizon_years": "horizon_years"
@@ -223,11 +224,17 @@
 
   /* ---------- boot ---------- */
 
+  /* The first persona is the default one; move the preferred persona there. */
+  function defaultFirst(list) {
+    const preferred = list.find(item => item.id === DEFAULT_PERSONA_ID);
+    return preferred ? [preferred, ...list.filter(item => item !== preferred)] : list;
+  }
+
   async function init() {
     try {
       await request(API_DIR + "health", undefined, HEALTH_TIMEOUT_MS);
       const profiles = await request(API_DIR + "profiles");
-      livePersonas = profiles.map(item => ({id: item.profile_id, name: item.name, entries: []}));
+      livePersonas = defaultFirst(profiles.map(item => ({id: item.profile_id, name: item.name, entries: []})));
       mode = livePersonas.length ? MODE_LIVE : MODE_STATIC;
     } catch (error) {
       console.info("[data] live API unavailable, using prebuilt reports", error);
@@ -244,6 +251,8 @@
     personas,
     report,
     rerun,
+    /* The prebuilt report for a persona, whatever the mode (the what-if base profile). */
+    prebuiltReport: staticReport,
     intake,
     answer,
     skip,

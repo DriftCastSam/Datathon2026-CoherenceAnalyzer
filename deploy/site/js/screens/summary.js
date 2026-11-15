@@ -4,6 +4,7 @@
   const OPTION_SEPARATOR = "|";
   const CAD_SIGN = "$";
   const MONTHS_PER_YEAR = 12;
+  const DEFAULT_HORIZON_YEARS = 5;
   const MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
   const PALETTE = ["var(--navy)", "var(--alloc-steel)", "var(--brand)", "var(--alloc-sky)", "var(--blue)", "var(--alloc-grey)"];
   const LIVE_PALETTE = ["var(--navy)", "var(--alloc-steel)", "var(--alloc-sky)", "var(--blue)", "var(--alloc-grey)"];
@@ -149,23 +150,24 @@
 
   /* ---------- totals ---------- */
 
+  function horizonYears(ctx) {
+    const cone = ctx.metrics && ctx.metrics.cone;
+    const length = cone && Array.isArray(cone.p50) ? cone.p50.length - 1 : 0;
+    return length > 0 ? Math.max(1, Math.round(length / MONTHS_PER_YEAR)) : DEFAULT_HORIZON_YEARS;
+  }
+
   /* Fields fall back to the sample one at a time: a report without `site` shows the sample
      portfolio value beside the live median. That is acceptable for swapped reports dirs. */
   function totalsHtml(ctx) {
     const value = num(ctx.site && ctx.site.value_cad, SAMPLE.value);
     const p50 = num(ctx.metrics && ctx.metrics.p50_T, SAMPLE.p50);
-    const goal = goalAmount(ctx.report);
-    let delta = "";
-    if (isNum(goal) && goal > 0) {
-      const change = p50 / goal - 1;
-      delta = " (" + (change >= 0 ? "+" : "−") + App.fmtPct(Math.abs(change), 1) + ")";
-    } else if (!ctx.report) {
-      delta = " (+19.2%)";
-    }
+    const years = horizonYears(ctx);
+    const relative = relativeTo(p50, value);
+    const delta = relative ? " (" + relative + ")" : (!ctx.report ? " (+19.2%)" : "");
     return '<div class="sum__figures">'
       + '<div class="sum__figure"><p class="sum__figure-label">Portfolio value (CAD)</p>'
       + '<p class="sum__figure-value num">' + App.esc(App.fmtCad(value, 2)) + '</p></div>'
-      + '<div class="sum__figure"><p class="sum__figure-label sum__figure-label--blue">Median projection, year 5</p>'
+      + '<div class="sum__figure"><p class="sum__figure-label sum__figure-label--blue">Median projection, year ' + years + '</p>'
       + '<p class="sum__figure-value sum__figure-value--l num">' + App.esc(App.fmtCad(p50, 2) + delta) + '</p></div>'
       + '</div>'
       + '<div class="sum__verdicts">'
@@ -391,9 +393,7 @@
 
   function chartNoteHtml(ctx) {
     const asOf = ctx.site && typeof ctx.site.as_of === "string" && ctx.site.as_of ? ctx.site.as_of : "2026-11-12";
-    const cone = ctx.metrics && ctx.metrics.cone;
-    const length = cone && Array.isArray(cone.p50) ? cone.p50.length - 1 : 0;
-    const years = length > 0 ? Math.max(1, Math.round(length / MONTHS_PER_YEAR)) : 5;
+    const years = horizonYears(ctx);
     return years + (years === 1 ? " year" : " years") + ", CAD, as of " + asOf;
   }
 
