@@ -976,6 +976,238 @@
         }
       },
       "Condition": "DeployFlowB"
+    },
+    "ApiLogGroup": {
+      "Type": "AWS::Logs::LogGroup",
+      "DeletionPolicy": "Delete",
+      "UpdateReplacePolicy": "Delete",
+      "Properties": {
+        "LogGroupName": {
+          "Fn::Sub": "/aws/lambda/${AWS::StackName}-api"
+        },
+        "RetentionInDays": 30
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Logs of the API Lambda (serves the full FastAPI app over HTTP via a Function URL), the only log group its role may write."
+        }
+      },
+      "Condition": "DeployFlowB"
+    },
+    "ApiLambdaRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "Description": "Execution role of the API Lambda: the app least-privilege policy plus its own log group.",
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": "lambda.amazonaws.com"
+              },
+              "Action": "sts:AssumeRole",
+              "Condition": {
+                "StringEquals": {
+                  "aws:SourceAccount": {
+                    "Ref": "AWS::AccountId"
+                  }
+                }
+              }
+            }
+          ]
+        },
+        "ManagedPolicyArns": [
+          {
+            "Ref": "AppAccessPolicy"
+          }
+        ],
+        "Policies": [
+          {
+            "PolicyName": "ApiLogs",
+            "PolicyDocument": {
+              "Version": "2012-10-17",
+              "Statement": [
+                {
+                  "Sid": "WriteOwnLogGroup",
+                  "Effect": "Allow",
+                  "Action": [
+                    "logs:CreateLogGroup",
+                    "logs:CreateLogStream",
+                    "logs:PutLogEvents"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::GetAtt": [
+                        "ApiLogGroup",
+                        "Arn"
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Reuses AppAccessPolicy (one model, one guardrail, one S3 prefix).",
+          "must": [
+            "No other managed policy",
+            "Logs limited to ApiLogGroup"
+          ]
+        }
+      },
+      "Condition": "DeployFlowB"
+    },
+    "ApiFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "FunctionName": {
+          "Fn::Sub": "${AWS::StackName}-api"
+        },
+        "Description": "CoherenceAnalyzer full FastAPI app (profiles, reviews, corrections, intake) served over HTTP via a Lambda Function URL for the CloudFront-hosted static site to call cross-origin. Educational simulation, no execution.",
+        "Runtime": "python3.11",
+        "Handler": "coherence_analyzer.api_lambda_handler.handler",
+        "Architectures": [
+          "x86_64"
+        ],
+        "Code": {
+          "S3Bucket": {
+            "Ref": "LambdaCodeS3Bucket"
+          },
+          "S3Key": {
+            "Ref": "LambdaCodeS3Key"
+          }
+        },
+        "Role": {
+          "Fn::GetAtt": [
+            "ApiLambdaRole",
+            "Arn"
+          ]
+        },
+        "Timeout": 29,
+        "MemorySize": 1024,
+        "LoggingConfig": {
+          "LogGroup": {
+            "Ref": "ApiLogGroup"
+          },
+          "LogFormat": "Text"
+        },
+        "Environment": {
+          "Variables": {
+            "COHERENCE_ANALYZER_LLM": "live",
+            "COHERENCE_ANALYZER_STORE": "s3",
+            "COHERENCE_ANALYZER_S3_BUCKET": {
+              "Ref": "DataBucket"
+            },
+            "COHERENCE_ANALYZER_S3_PREFIX": {
+              "Ref": "S3Prefix"
+            },
+            "BEDROCK_MODEL_ID": {
+              "Ref": "BedrockModelId"
+            },
+            "BEDROCK_GUARDRAIL_ID": {
+              "Fn::GetAtt": [
+                "ExplainerGuardrail",
+                "GuardrailId"
+              ]
+            },
+            "BEDROCK_GUARDRAIL_VERSION": {
+              "Fn::GetAtt": [
+                "ExplainerGuardrailVersion",
+                "Version"
+              ]
+            },
+            "COHERENCE_ANALYZER_RUNTIME_CACHE_DIR": "/tmp/llm-cache"
+          }
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Serves coherence_analyzer/api.py over HTTP via a Function URL (fewest moving parts, no API Gateway) for a request/response FastAPI app, not the Flow B batch resizer. A Function URL invokes synchronously, so its effective hard ceiling is the Lambda function's own synchronous max of 900s; 29s instead mirrors a typical API-Gateway-style REST integration timeout, well inside that ceiling, so one hung request fails fast instead of holding a warm environment for up to 15 minutes. 1024MB (vs Flow B's 2048MB) is sized for FastAPI request handling, not the B7 resize step.",
+          "must": [
+            "Reuses FlowBFunction's exact Code block (same LambdaCodeS3Bucket/LambdaCodeS3Key params, one deployable artifact)",
+            "Timeout/MemorySize are independent of FlowBFunction's 900s/2048MB"
+          ]
+        }
+      },
+      "Condition": "DeployFlowB"
+    },
+    "ApiFunctionUrl": {
+      "Type": "AWS::Lambda::Url",
+      "Properties": {
+        "TargetFunctionArn": {
+          "Fn::GetAtt": [
+            "ApiFunction",
+            "Arn"
+          ]
+        },
+        "AuthType": "NONE",
+        "Cors": {
+          "AllowOrigins": [
+            "*"
+          ],
+          "AllowMethods": [
+            "GET",
+            "POST",
+            "PUT"
+          ],
+          "AllowHeaders": [
+            "*"
+          ]
+        }
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "Public demo API with no auth, invoked cross-origin by the CloudFront-hosted static site. Cors mirrors api.py's own CORSMiddleware(allow_origins=[\"*\"], allow_methods=[\"GET\",\"POST\",\"PUT\"], allow_headers=[\"*\"]) exactly so the browser-enforced preflight matches what the app itself already allows.",
+          "must": [
+            "AuthType NONE paired with ApiFunctionUrlPermission (NONE alone on the URL does not grant public invoke)"
+          ]
+        }
+      },
+      "Condition": "DeployFlowB"
+    },
+    "ApiFunctionUrlPermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "ApiFunction"
+        },
+        "Action": "lambda:InvokeFunctionUrl",
+        "Principal": "*",
+        "FunctionUrlAuthType": "NONE"
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "AuthType NONE on AWS::Lambda::Url does not itself allow unauthenticated invocation; an explicit resource-based policy statement with FunctionUrlAuthType NONE is required for public invoke, per the Lambda Function URL public-access shape.",
+          "must": [
+            "Paired with ApiFunctionUrlInvokePermission: InvokeFunctionUrl alone returns HTTP 403"
+          ]
+        }
+      },
+      "Condition": "DeployFlowB"
+    },
+    "ApiFunctionUrlInvokePermission": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "ApiFunction"
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "*",
+        "FunctionUrlAuthType": "NONE"
+      },
+      "Metadata": {
+        "com.aws.cloudformation.Context": {
+          "why": "A Function URL invocation always requires both lambda:InvokeFunctionUrl and lambda:InvokeFunction; granting only InvokeFunctionUrl returns HTTP 403 even with AuthType NONE. FunctionUrlAuthType NONE here scopes this public InvokeFunction grant to calls routed through the Function URL, not a direct lambda:Invoke API call.",
+          "must": [
+            "Scoped by FunctionUrlAuthType to Function URL calls only, does not open direct lambda:Invoke"
+          ]
+        }
+      },
+      "Condition": "DeployFlowB"
     }
   },
   "Outputs": {
@@ -1013,6 +1245,16 @@
       "Description": "ARN of the Flow B state machine (start-execution with fixture_dir, intent_id, auto_confirm)",
       "Value": {
         "Ref": "FlowBStateMachine"
+      },
+      "Condition": "DeployFlowB"
+    },
+    "ApiFunctionUrl": {
+      "Description": "Public HTTPS endpoint for the full FastAPI app (profiles, reviews, corrections, intake); the static site calls this cross-origin.",
+      "Value": {
+        "Fn::GetAtt": [
+          "ApiFunctionUrl",
+          "FunctionUrl"
+        ]
       },
       "Condition": "DeployFlowB"
     }

@@ -5,6 +5,23 @@
      "static" (prebuilt JSON under reports/). All URLs are relative so one origin serves both. */
   const API_DIR = "api/";
   const SITE_API_DIR = "site-api/";
+
+  /* Reads <meta name="coherence-api-base"> (empty in the shipped static page, so every
+     path below stays relative to the page's own origin unless configured otherwise).
+     window.COHERENCE_API_BASE can override it at runtime, for the CloudFront build
+     calling a separately hosted API. */
+  function apiBase() {
+    const meta = document.querySelector('meta[name="coherence-api-base"]');
+    return (typeof window !== "undefined" && window.COHERENCE_API_BASE) || (meta ? meta.content : "") || "";
+  }
+
+  function apiDir() {
+    return apiBase() + API_DIR;
+  }
+
+  function siteApiDir() {
+    return apiBase() + SITE_API_DIR;
+  }
   const REPORT_DIR = "reports/en-CA/";
   const HEALTH_TIMEOUT_MS = 1500;
   const REQUEST_TIMEOUT_MS = 120000;
@@ -118,7 +135,7 @@
   }
 
   async function runLiveReview(personaId) {
-    const report = await post(SITE_API_DIR + "profiles/" + encodeURIComponent(personaId) + "/review");
+    const report = await post(siteApiDir() + "profiles/" + encodeURIComponent(personaId) + "/review");
     reportCache.set(personaId, stamp(report, SOURCE_LIVE));
     return report;
   }
@@ -163,7 +180,7 @@
 
   function whatifLive(personaId, tickers) {
     return requireLive("compute live what-if scenarios")
-      || post(SITE_API_DIR + "profiles/" + encodeURIComponent(personaId) + "/whatif", {tickers});
+      || post(siteApiDir() + "profiles/" + encodeURIComponent(personaId) + "/whatif", {tickers});
   }
 
   /* ---------- personas ---------- */
@@ -209,7 +226,7 @@
     const manifest = await loadIntakeManifest();
     let read;
     if (mode === MODE_LIVE) {
-      const profile = await request(API_DIR + "profiles/" + encodeURIComponent(personaId));
+      const profile = await request(apiDir() + "profiles/" + encodeURIComponent(personaId));
       read = path => lookup(profile, path, manifest.skipped_by);
     } else {
       const card = currentReport && currentReport.site ? currentReport.site.profile_card : null;
@@ -230,12 +247,63 @@
 
   function answer(personaId, path, value) {
     return requireLive("save an answer")
-      || post(API_DIR + "profiles/" + encodeURIComponent(personaId) + "/intake/answer", {path, value});
+      || post(apiDir() + "profiles/" + encodeURIComponent(personaId) + "/intake/answer", {path, value});
   }
 
   function skip(personaId, path) {
     return requireLive("skip a question")
-      || post(API_DIR + "profiles/" + encodeURIComponent(personaId) + "/intake/skip", {path});
+      || post(apiDir() + "profiles/" + encodeURIComponent(personaId) + "/intake/skip", {path});
+  }
+
+  /* ---------- the raw profile (parsed rules, evidence) ---------- */
+
+  function profile(personaId) {
+    return requireLive("read the full profile")
+      || request(apiDir() + "profiles/" + encodeURIComponent(personaId));
+  }
+
+  /* ---------- parsed-rule decisions and corrections (P8.UNIFY) ---------- */
+
+  function decideRule(personaId, index, approved, maxPct) {
+    const body = maxPct === undefined || maxPct === null ? {approved} : {approved, max_pct: maxPct};
+    return requireLive("decide a parsed rule")
+      || post(apiDir() + "profiles/" + encodeURIComponent(personaId) + "/parsed-rules/" + index + "/decision", body);
+  }
+
+  function correction(personaId, kind, ref, text) {
+    return requireLive("send a correction")
+      || post(apiDir() + "profiles/" + encodeURIComponent(personaId) + "/corrections", {target: {kind, ref}, text});
+  }
+
+  /* ---------- Flow B: trade draft and confirmation ---------- */
+
+  function requestDraft(personaId, text) {
+    return requireLive("draft a trade from text")
+      || post(apiDir() + "profiles/" + encodeURIComponent(personaId) + "/events",
+              {type: "order_intent", text, ts: new Date().toISOString()});
+  }
+
+  function confirmIntent(intentId, body) {
+    return requireLive("confirm a trade")
+      || post(apiDir() + "intents/" + encodeURIComponent(intentId) + "/confirm", body);
+  }
+
+  /* ---------- any user: profile list, creation, portfolio ---------- */
+
+  function listProfiles() {
+    return requireLive("list profiles")
+      || request(apiDir() + "profiles");
+  }
+
+  function createProfile(body) {
+    return requireLive("create a profile")
+      || post(apiDir() + "profiles", body);
+  }
+
+  function savePortfolio(personaId, body) {
+    return requireLive("save a portfolio")
+      || request(apiDir() + "profiles/" + encodeURIComponent(personaId) + "/portfolio",
+                  {method: "PUT", headers: {"Content-Type": "application/json"}, body: JSON.stringify(body)});
   }
 
   /* ---------- boot ---------- */
@@ -250,8 +318,8 @@
   async function init() {
     await loadStaticIndex();
     try {
-      await request(API_DIR + "health", undefined, HEALTH_TIMEOUT_MS);
-      const profiles = await request(API_DIR + "profiles");
+      await request(apiDir() + "health", undefined, HEALTH_TIMEOUT_MS);
+      const profiles = await request(apiDir() + "profiles");
       livePersonas = defaultFirst(profiles.map(item => ({id: item.profile_id, name: item.name, entries: []})));
       mode = livePersonas.length ? MODE_LIVE : MODE_STATIC;
     } catch (error) {
@@ -274,6 +342,14 @@
     universe,
     whatif,
     whatifLive,
+    profile,
+    decideRule,
+    correction,
+    requestDraft,
+    confirmIntent,
+    listProfiles,
+    createProfile,
+    savePortfolio,
     /* True when this report is the prebuilt stand-in for a failed live analysis. */
     isFallback,
     staticIndex: () => staticIndex

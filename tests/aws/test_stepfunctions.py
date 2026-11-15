@@ -994,6 +994,21 @@ def _only(doc: dict, rtype: str) -> tuple[str, dict]:
     return name, res
 
 
+FLOW_B_HANDLER = "coherence_analyzer.lambda_handler.handler"
+
+
+def _flow_b_lambda(doc: dict) -> tuple[str, dict]:
+    """The Step-Functions Flow B Lambda specifically, by its handler: a later, unrelated task added a second
+    AWS::Lambda::Function (`ApiFunction`, handler `coherence_analyzer.api_lambda_handler.handler`) serving the whole
+    FastAPI app over a Function URL, so "the only Lambda in the template" is no longer a true premise. This file is
+    about the Flow B steps Lambda only."""
+    found = {k: v for k, v in _of_type(doc, "AWS::Lambda::Function").items()
+             if v["Properties"].get("Handler") == FLOW_B_HANDLER}
+    assert len(found) == 1, f"expected exactly one Lambda with handler {FLOW_B_HANDLER}, got {sorted(found)}"
+    ((name, res),) = found.items()
+    return name, res
+
+
 def _stmts(policy: dict) -> list[dict]:
     st = policy["Statement"]
     return st if isinstance(st, list) else [st]
@@ -1044,12 +1059,16 @@ def test_cfn_adds_only_the_expected_resource_types_and_keeps_one_managed_policy(
     types_ = {v["Type"] for v in doc["Resources"].values()}
     old = {"AWS::S3::Bucket", "AWS::S3::BucketPolicy", "AWS::Bedrock::Guardrail", "AWS::Bedrock::GuardrailVersion",
            "AWS::IAM::ManagedPolicy"}
-    new = {"AWS::Lambda::Function", "AWS::StepFunctions::StateMachine", "AWS::IAM::Role", "AWS::Logs::LogGroup"}
+    new = {"AWS::Lambda::Function", "AWS::StepFunctions::StateMachine", "AWS::IAM::Role", "AWS::Logs::LogGroup",
+           "AWS::Lambda::Url", "AWS::Lambda::Permission"}   # the unrelated API Lambda's Function URL (P9)
     assert old <= types_ and types_ <= old | new, sorted(types_ - old - new)
-    _only(doc, "AWS::Lambda::Function")
+    _flow_b_lambda(doc)
     _only(doc, "AWS::StepFunctions::StateMachine")
     _only(doc, "AWS::IAM::ManagedPolicy")
-    assert len(_of_type(doc, "AWS::IAM::Role")) == 2, "one role for the Lambda, one for the state machine"
+    assert len(_of_type(doc, "AWS::Lambda::Function")) == 2, \
+        "the Flow B Lambda plus the unrelated API Lambda (P9), not a third"
+    assert len(_of_type(doc, "AWS::IAM::Role")) == 3, \
+        "one role for the Flow B Lambda, one for the state machine, one for the unrelated API Lambda (P9)"
     for name, res in doc["Resources"].items():
         assert EM_DASH not in name and EM_DASH not in str(res.get("Properties", {}).get("Description", ""))
 
@@ -1058,7 +1077,7 @@ def test_cfn_lambda_function_runs_the_handler_with_the_live_s3_store_env():
     """SPEC §14 (Lambda hosts the steps): python3.11, the handler, the code location from parameters, and the environment
     of the live deployment: LLM live, store s3 on the stack's bucket and prefix, the guardrail id and version, the model."""
     doc = _cfn()
-    fn_id, fn = _only(doc, "AWS::Lambda::Function")
+    fn_id, fn = _flow_b_lambda(doc)
     p = fn["Properties"]
     assert p["Runtime"] == "python3.11"
     assert p["Handler"] == "coherence_analyzer.lambda_handler.handler"
@@ -1089,7 +1108,7 @@ def test_cfn_lambda_role_reuses_the_least_privilege_policy_plus_cloudwatch_logs_
     guardrail, S3 prefix) and gets CloudWatch Logs (basic execution managed policy or an inline logs-only policy); no
     other managed policy, no wildcard action, no `*` resource."""
     doc = _cfn()
-    _, fn = _only(doc, "AWS::Lambda::Function")
+    _, fn = _flow_b_lambda(doc)
     _, role = _role_of(doc, fn["Properties"])
     assert _assume_principals(role) == {"lambda.amazonaws.com"}
     arns = role.get("ManagedPolicyArns", [])
@@ -1111,7 +1130,7 @@ def test_cfn_state_machine_points_at_the_lambda_and_matches_the_asl_file():
     """The state machine's definition reaches the Lambda ARN (DefinitionSubstitutions or an inlined DefinitionString) and
     every `${Placeholder}` of flow_b.asl.json is substituted; an inlined definition names every state of the ASL file."""
     doc = _cfn()
-    fn_id, _ = _only(doc, "AWS::Lambda::Function")
+    fn_id, _ = _flow_b_lambda(doc)
     _, sm = _only(doc, "AWS::StepFunctions::StateMachine")
     p = sm["Properties"]
     raw = ASL_PATH.read_text(encoding="utf-8")
@@ -1134,9 +1153,9 @@ def test_cfn_state_machine_role_may_only_invoke_the_one_lambda():
     """The state machine role trusts states.amazonaws.com and is allowed exactly lambda:InvokeFunction, on that function
     (its ARN, optionally with a version suffix) and nothing else; no managed policy attached."""
     doc = _cfn()
-    fn_id, _ = _only(doc, "AWS::Lambda::Function")
+    fn_id, _ = _flow_b_lambda(doc)
     _, sm = _only(doc, "AWS::StepFunctions::StateMachine")
-    _, lambda_fn = _only(doc, "AWS::Lambda::Function")
+    _, lambda_fn = _flow_b_lambda(doc)
     name, role = _role_of(doc, sm["Properties"])
     assert _role_of(doc, lambda_fn["Properties"])[0] != name, "the two roles must be different"
     assert _assume_principals(role) == {"states.amazonaws.com"}

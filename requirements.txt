@@ -5,6 +5,7 @@ jsonschema
 pydantic
 fastapi
 uvicorn
+mangum
 pytest
 python-dotenv
 strands-agents
