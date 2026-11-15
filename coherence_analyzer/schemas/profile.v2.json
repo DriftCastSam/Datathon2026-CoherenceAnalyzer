@@ -23,11 +23,11 @@
       "type": "object",
       "required": ["age", "retirement_target_age", "employment_type"],
       "properties": {
-        "age": {"type": "integer", "minimum": 0},
+        "age": {"anyOf": [{"type": "integer", "minimum": 0}, {"$ref": "#/$defs/unanswered"}]},
         "dependants": {"type": "integer", "minimum": 0},
-        "retirement_target_age": {"anyOf": [{"type": "integer", "minimum": 0}, {"$ref": "#/$defs/skipped"}]},
-        "employment_type": {"type": "string"},
-        "employer_sector": {"anyOf": [{"type": "string"}, {"$ref": "#/$defs/skipped"}]},
+        "retirement_target_age": {"anyOf": [{"type": "integer", "minimum": 0}, {"$ref": "#/$defs/skipped"}, {"$ref": "#/$defs/unanswered"}]},
+        "employment_type": {"anyOf": [{"type": "string"}, {"$ref": "#/$defs/unanswered"}]},
+        "employer_sector": {"anyOf": [{"type": "string"}, {"$ref": "#/$defs/skipped"}, {"$ref": "#/$defs/unanswered"}]},
         "life_stage": {"$ref": "#/$defs/ruleField"}
       }
     },
@@ -35,8 +35,8 @@
       "type": "object",
       "required": ["monthly_expenses", "emergency_fund", "planned_withdrawals"],
       "properties": {
-        "monthly_expenses": {"anyOf": [{"type": "number", "exclusiveMinimum": 0}, {"$ref": "#/$defs/skipped"}]},
-        "emergency_fund": {"anyOf": [{"type": "number", "minimum": 0}, {"$ref": "#/$defs/skipped"}]},
+        "monthly_expenses": {"anyOf": [{"type": "number", "exclusiveMinimum": 0}, {"$ref": "#/$defs/skipped"}, {"$ref": "#/$defs/unanswered"}]},
+        "emergency_fund": {"anyOf": [{"type": "number", "minimum": 0}, {"$ref": "#/$defs/skipped"}, {"$ref": "#/$defs/unanswered"}]},
         "income_stability": {"$ref": "#/$defs/ruleField"},
         "emergency_fund_months": {"$ref": "#/$defs/ruleField"},
         "planned_withdrawals": {"anyOf": [
@@ -52,7 +52,8 @@
               }
             }
           },
-          {"$ref": "#/$defs/skipped"}
+          {"$ref": "#/$defs/skipped"},
+          {"$ref": "#/$defs/unanswered"}
         ]},
         "monthly_contribution": {"type": "number", "minimum": 0}
       }
@@ -61,17 +62,17 @@
       "type": "object",
       "required": ["horizon_years"],
       "properties": {
-        "horizon_years": {"anyOf": [{"type": "number", "minimum": 0}, {"$ref": "#/$defs/skipped"}]},
+        "horizon_years": {"anyOf": [{"type": "number", "minimum": 0}, {"$ref": "#/$defs/skipped"}, {"$ref": "#/$defs/unanswered"}]},
         "effective_horizon_years": {"$ref": "#/$defs/ruleField"},
-        "goals": {"anyOf": [{"type": "array", "items": {"type": "object"}}, {"$ref": "#/$defs/skipped"}]}
+        "goals": {"anyOf": [{"type": "array", "items": {"type": "object"}}, {"$ref": "#/$defs/skipped"}, {"$ref": "#/$defs/unanswered"}]}
       }
     },
     "risk": {
       "type": "object",
       "required": ["declared"],
       "properties": {
-        "declared": {"anyOf": [{"$ref": "#/$defs/level"}, {"$ref": "#/$defs/skipped"}]},
-        "max_acceptable_drawdown_pct": {"anyOf": [{"type": "number", "maximum": 0}, {"$ref": "#/$defs/skipped"}]},
+        "declared": {"anyOf": [{"$ref": "#/$defs/level"}, {"$ref": "#/$defs/skipped"}, {"$ref": "#/$defs/unanswered"}]},
+        "max_acceptable_drawdown_pct": {"anyOf": [{"type": "number", "maximum": 0}, {"$ref": "#/$defs/skipped"}, {"$ref": "#/$defs/unanswered"}]},
         "capacity": {"$ref": "#/$defs/ruleLevelField"},
         "effective": {"$ref": "#/$defs/ruleLevelField"},
         "behavioural": {
@@ -157,7 +158,7 @@
       "type": "object",
       "properties": {
         "asset_types_allowed": {"type": "array", "items": {"type": "string"}},
-        "asset_types_refused": {"anyOf": [{"type": "array", "items": {"type": "string"}}, {"$ref": "#/$defs/skipped"}]},
+        "asset_types_refused": {"anyOf": [{"type": "array", "items": {"type": "string"}}, {"$ref": "#/$defs/skipped"}, {"$ref": "#/$defs/unanswered"}]},
         "max_fee_mer_pct": {"type": "number", "minimum": 0}
       }
     },
@@ -186,6 +187,10 @@
     "ruleLevelField": {
       "allOf": [{"$ref": "#/$defs/ruleField"}],
       "properties": {"value": {"anyOf": [{"$ref": "#/$defs/level"}, {"type": "null"}]}}
+    },
+    "unanswered": {
+      "description": "A required intake answer the user has not given yet (a new profile, POST /profiles): null, never a default. Counts as missing for intake and as unknown for every check that needs it.",
+      "type": "null"
     },
     "skipped": {
       "description": "A required intake answer the user skipped (docs/spec-factors.md §20.6): checks that need it report unknown.",

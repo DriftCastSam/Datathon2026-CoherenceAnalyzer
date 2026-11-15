@@ -22,16 +22,18 @@ from __future__ import annotations
 
 import copy
 import json
+import math
 import os
 import re
 import threading
-from datetime import datetime
+from datetime import date, datetime
 from pathlib import Path
 from typing import Annotated, Any, Literal
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, field_validator, model_validator
+from pydantic import (BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr, field_validator,
+                      model_validator)
 
 from . import config, data, intake, pipeline, store
 from . import intent as intent_mod
@@ -43,6 +45,12 @@ DEFAULT_SOURCE = "ui_chat"
 INTAKE_SOURCE = "intake"
 
 _INTENT_ID = re.compile(r"^in_(\d{4,})$")
+_PROFILE_ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9_-]{2,63}$")     # safe as a URL segment and as a directory name
+_PROFILE_FILES = ("profile.json", "events.jsonl", "portfolio.json")
+_USER_ID = re.compile(r"^user-(\d{4,})$")
+_ISO_DATE = re.compile(r"^\d{4}-\d{2}-\d{2}$")
+PORTFOLIO_SUM_TOLERANCE = 0.01          # §3.5: weights_pct sum to 100 +- 0.01
+PORTFOLIO_EDIT_SOURCE = "ui"
 _RUN_ID = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 _EVENT_ID = re.compile(r"^ev_(.+)_(\d+)$")
 _ISO_DATETIME = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:\d{2})?$")
@@ -52,7 +60,7 @@ _THEME_NUMBER_PATH = re.compile(
 _LOCK = threading.RLock()     # one writer at a time: a local demo server, files are small
 
 app = FastAPI(title="CoherenceAnalyzer")
-app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET", "POST"], allow_headers=["*"])
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["GET", "POST", "PUT"], allow_headers=["*"])
 
 
 # ---------------------------------------------------------------- request bodies (unknown keys -> 422)
@@ -102,12 +110,69 @@ class DecisionIn(_Body):
     max_pct: Annotated[float, Field(gt=0, le=100, strict=True)] | None = None
 
 
+class ProfileIn(_Body):
+    """POST /profiles. Nothing else: no id, no limits, no limits_trace, no llm: field (inv. 2); answers go through
+    the intake routes."""
+    locale: Literal["fr-CA", "en-CA"]
+    display_name: StrictStr | None = Field(default=None, max_length=100)
+
+    @field_validator("display_name")
+    @classmethod
+    def _name_not_blank(cls, v: str | None) -> str | None:
+        if v is not None and not v.strip():
+            raise ValueError("display_name must not be blank")
+        return v.strip() if v is not None else None
+
+
+_Num = StrictInt | StrictFloat
+
+
+class PortfolioIn(_Body):
+    """PUT /profiles/{id}/portfolio (§3.5): weights in percent. The id comes from the URL."""
+    as_of: StrictStr
+    value_cad: _Num
+    weights_pct: dict[StrictStr, _Num]
+
+    @field_validator("as_of")
+    @classmethod
+    def _as_of_date(cls, v: str) -> str:
+        if not _ISO_DATE.match(v):
+            raise ValueError("as_of must be a date, YYYY-MM-DD")
+        try:
+            date.fromisoformat(v)
+        except ValueError as exc:
+            raise ValueError(f"as_of is not a valid date: {exc}") from exc
+        return v
+
+    @field_validator("value_cad")
+    @classmethod
+    def _value_positive(cls, v: int | float) -> int | float:
+        if not math.isfinite(v) or v <= 0:
+            raise ValueError("value_cad must be a positive number")
+        return v
+
+    @field_validator("weights_pct")
+    @classmethod
+    def _weights(cls, v: dict[str, int | float]) -> dict[str, int | float]:
+        if not v:
+            raise ValueError("weights_pct must hold at least one holding")
+        if any(not math.isfinite(w) or w <= 0 for w in v.values()):
+            raise ValueError("every weight is a positive percentage (no short positions)")
+        total = sum(v.values())
+        if abs(total - 100) > PORTFOLIO_SUM_TOLERANCE + 1e-9:
+            raise ValueError(f"weights_pct sum to {total}, expected 100 +- {PORTFOLIO_SUM_TOLERANCE}")
+        return v
+
+
 # ---------------------------------------------------------------- fixtures and working copies
 
 def _fixture_dirs() -> dict[str, Path]:
-    """{meta.profile_id: fixture dir} for every fixture dir holding profile.json + events.jsonl + portfolio.json."""
+    """{meta.profile_id: seed dir} for every seed dir (`config.SEED_DIR`, default fixtures/) holding profile.json +
+    events.jsonl + portfolio.json. Seeds are read-only."""
     out: dict[str, Path] = {}
-    root = config.FIXTURES_DIR
+    root = config.SEED_DIR
+    if not root.is_dir():
+        return out
     for d in sorted(p for p in root.iterdir() if p.is_dir()):
         if not all((d / f).is_file() for f in ("profile.json", "events.jsonl", "portfolio.json")):
             continue
@@ -120,21 +185,63 @@ def _fixture_dirs() -> dict[str, Path]:
     return out
 
 
+def _store_profiles_root() -> Path:
+    return store.root() / "profiles"
+
+
+def _store_dirs() -> dict[str, Path]:
+    """{profile_id: dir} for every profile in the store: `<store>/profiles/<profile_id>/` holding a readable
+    profile.json + events.jsonl + portfolio.json whose `meta.profile_id` is the directory name."""
+    out: dict[str, Path] = {}
+    root = _store_profiles_root()
+    if not root.is_dir():
+        return out
+    for d in sorted(p for p in root.iterdir() if p.is_dir()):
+        if not _PROFILE_ID.match(d.name) or not all((d / f).is_file() for f in _PROFILE_FILES):
+            continue
+        try:
+            meta = json.loads((d / "profile.json").read_text(encoding="utf-8"))["meta"]
+        except (OSError, ValueError, KeyError, TypeError):
+            continue
+        if isinstance(meta, dict) and meta.get("profile_id") == d.name:
+            out[d.name] = d
+    return out
+
+
+def _profile_ids() -> list[str]:
+    """Every profile id: the seeds first (sorted by directory), then the store-only users (sorted)."""
+    seeds = _fixture_dirs()
+    return list(seeds) + sorted(set(_store_dirs()) - set(seeds))
+
+
+def _event_namespace(profile_id: str) -> Path:
+    """Pseudo-path whose `.name` is the lower-case alphanumeric namespace of this user's event ids
+    (`ev_<name>_NNNN`, schema pattern `^ev_[a-z0-9]+_\\d{4}$`)."""
+    return Path(re.sub(r"[^a-z0-9]", "", profile_id.lower()) or "user")
+
+
 def _workdir(profile_id: str) -> tuple[Path, Path]:
-    """(working dir, fixture dir); copies the fixture on first access. 404 for an unknown id."""
-    fixture = _fixture_dirs().get(profile_id)
-    if fixture is None:
+    """(working dir, event-id namespace path). The working dir is `<store>/profiles/<profile_id>/`. A seed is copied
+    there on first access (seeds are never written); a user that exists only in the store is served as is. The
+    second element is the seed dir for a seed, else a pseudo path (see `_event_namespace`). 404 for an unknown id,
+    with no side effect."""
+    if not isinstance(profile_id, str) or not _PROFILE_ID.match(profile_id):
         raise HTTPException(status_code=404, detail=f"unknown profile {profile_id!r}")
-    work = store.root() / "profiles" / profile_id
+    work = _store_profiles_root() / profile_id
+    seed = _fixture_dirs().get(profile_id)
+    if seed is None:
+        if not all((work / f).is_file() for f in ("profile.json", "events.jsonl")):
+            raise HTTPException(status_code=404, detail=f"unknown profile {profile_id!r}")
+        return work, _event_namespace(profile_id)
     with _LOCK:
         if not (work / "profile.json").exists():
             work.mkdir(parents=True, exist_ok=True)
             for pattern in COPY_PATTERNS:
-                for src in sorted(fixture.glob(pattern)):
+                for src in sorted(seed.glob(pattern)):
                     dst = work / src.name
                     if src.is_file() and not dst.exists():
                         dst.write_bytes(src.read_bytes())
-    return work, fixture
+    return work, seed
 
 
 def _load(work: Path) -> dict:
@@ -174,12 +281,103 @@ def health() -> dict:
 
 @app.get("/profiles")
 def list_profiles() -> list[dict]:
+    """Seeds first, then the users that exist only in the store (a seed copied to the store is listed once)."""
     out = []
-    for pid, d in _fixture_dirs().items():
-        profile = json.loads((d / "profile.json").read_text(encoding="utf-8"))
-        name = (profile.get("identity") or {}).get("name") or profile["meta"].get("name") or d.name.capitalize()
+    seeds, stored = _fixture_dirs(), _store_dirs()
+    for pid in _profile_ids():
+        d = seeds.get(pid) or stored[pid]
+        try:
+            profile = json.loads((d / "profile.json").read_text(encoding="utf-8"))
+        except (OSError, ValueError):
+            continue
+        name = (profile.get("identity") or {}).get("name") or profile["meta"].get("name") or (
+            d.name.capitalize() if pid in seeds else pid)
         out.append({"profile_id": pid, "name": str(name)})
     return out
+
+
+def _new_user_profile(profile_id: str, body: ProfileIn) -> dict:
+    """A profile v2 with every intake.REQUIRED path unanswered (absent: never a default, P3.SKIP) and no computed
+    field: no limits (they are built from declared values on the first refresh), no parsed notes, nothing from an LLM."""
+    identity: dict[str, Any] = {"age": None, "retirement_target_age": None, "employment_type": None,
+                                "employer_sector": None}
+    if body.display_name is not None:
+        identity["name"] = body.display_name
+    return {"meta": {"profile_id": profile_id, "schema_version": 2, "version": 1, "locale": body.locale,
+                     "updated_at": pipeline._now()[:10]},
+            "identity": identity,
+            "situation": {"monthly_expenses": None, "emergency_fund": None, "planned_withdrawals": None},
+            "objectives": {"primary": None, "goals": None, "horizon_years": None},
+            "risk": {"declared": None, "max_acceptable_drawdown_pct": None, "reaction_to_20pct_drop": None},
+            "knowledge": {}, "values": {},
+            "preferences": {"asset_types_refused": None, "prefers_dividends": None, "prefers_large_caps": None,
+                            "home_bias_ok": None}}
+
+
+def _next_user_id() -> str:
+    """user-NNNN: highest number among the store directories and the seeds + 1 (assigned by the server, under _LOCK)."""
+    taken = set(_fixture_dirs())
+    root = _store_profiles_root()
+    if root.is_dir():
+        taken.update(p.name for p in root.iterdir() if p.is_dir())
+    highest = max((int(m.group(1)) for m in map(_USER_ID.match, taken) if m), default=0)
+    return f"user-{highest + 1:04d}"
+
+
+@app.post("/profiles", status_code=201)
+def create_profile(body: ProfileIn) -> dict:
+    """§12: create a user in the store. The files are written events.jsonl first, profile.json last, so a directory
+    without profile.json is never served."""
+    with _LOCK:
+        profile_id = _next_user_id()
+        profile = _new_user_profile(profile_id, body)
+        try:
+            pipeline.validate_profile(profile, "new profile")
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+        work = _store_profiles_root() / profile_id
+        work.mkdir(parents=True, exist_ok=False)
+        (work / "events.jsonl").write_text("", encoding="utf-8")
+        _save(work, profile)
+    return profile
+
+
+@app.put("/profiles/{profile_id}/portfolio")
+def put_portfolio(profile_id: str, body: PortfolioIn) -> dict:
+    """§3.5: set the holdings (weights in percent). Validated (tickers in the universe, weights sum to 100 +- 0.01)
+    before anything is written. portfolio.json is replaced atomically and one `profile_edit` event
+    `{path: "portfolio", old, new}` (old/new = {as_of, value_cad, weights_pct}, old null on the first set) is
+    appended; a failure after the write restores both files. The id in the file is the one in the URL."""
+    work, fixture = _workdir(profile_id)
+    unknown = sorted(set(body.weights_pct) - set(data.load_assets().index))
+    if unknown:
+        raise HTTPException(status_code=422, detail=f"tickers not in the asset universe: {unknown}")
+    new = {"as_of": body.as_of, "value_cad": body.value_cad, "weights_pct": dict(body.weights_pct)}
+    pf_path, events_path = work / "portfolio.json", work / "events.jsonl"
+    with _LOCK:
+        pf_before = pf_path.read_bytes() if pf_path.exists() else None
+        events_before = events_path.read_bytes() if events_path.exists() else b""
+        previous = _read_json(pf_path, None) if pf_before is not None else None
+        old = None if not isinstance(previous, dict) else {k: previous.get(k) for k in new}
+        portfolio_id = (previous or {}).get("portfolio_id") if isinstance(previous, dict) else None
+        if not isinstance(portfolio_id, str) or not portfolio_id or (previous or {}).get("profile_id") != profile_id:
+            portfolio_id = f"{profile_id}-main"
+        doc = {"portfolio_id": portfolio_id, "profile_id": profile_id, **new}
+        event = {"event_id": _next_event_id(store.read_events(events_path), fixture), "profile_id": profile_id,
+                 "ts": pipeline._now(), "type": "profile_edit",
+                 "text": f"The portfolio holdings were set ({len(new['weights_pct'])} positions, as of {body.as_of}).",
+                 "payload": {"path": "portfolio", "old": old, "new": new}, "source": PORTFOLIO_EDIT_SOURCE}
+        try:
+            _write_json(pf_path, doc)
+            _append_event(work, event)
+        except BaseException:
+            events_path.write_bytes(events_before)
+            if pf_before is None:
+                pf_path.unlink(missing_ok=True)
+            else:
+                pf_path.write_bytes(pf_before)
+            raise
+    return {**doc, "event_id": event["event_id"]}
 
 
 @app.get("/profiles/{profile_id}")
@@ -484,7 +682,7 @@ def _write_json(path: Path, doc: Any) -> None:
 def _known_intent_ids() -> list[int]:
     """Numbers of every intent id in the fixtures and in every working copy (ids are unique across profiles)."""
     nums: list[int] = []
-    dirs = list(_fixture_dirs().values()) + [store.root() / "profiles" / pid for pid in _fixture_dirs()]
+    dirs = [_store_profiles_root() / pid for pid in _profile_ids()] + list(_fixture_dirs().values())
     for d in dirs:
         try:
             records = _read_json(d / "intents.json", [])
@@ -524,8 +722,8 @@ def _draft_intent(work: Path, event: dict) -> dict:
 def _find_intent(intent_id: str) -> tuple[str, Path, dict]:
     """(profile_id, working copy, record) of a draft made through this API; 404 when no working copy holds it."""
     if _INTENT_ID.match(intent_id):
-        for pid in sorted(_fixture_dirs()):
-            work = store.root() / "profiles" / pid
+        for pid in _profile_ids():
+            work = _store_profiles_root() / pid
             try:
                 records = _read_json(work / "intents.json", [])
             except (OSError, ValueError):
@@ -543,7 +741,7 @@ def confirm_intent(intent_id: str, body: ConfirmIn) -> dict:
     Everything is validated before anything is written. Confirming an intent twice is a 409 (no second event, no
     second run)."""
     profile_id, work, record = _find_intent(intent_id)
-    fixture = _fixture_dirs()[profile_id]
+    fixture = _workdir(profile_id)[1]
     with _LOCK:
         records = _read_json(work / "intents.json", [])
         record = next(r for r in records if r.get("intent_id") == intent_id)
@@ -674,6 +872,9 @@ def _adopt_refreshed_profile(work: Path, report: dict) -> None:
 @app.post("/profiles/{profile_id}/review")
 def post_review(profile_id: str) -> dict:
     work, _ = _workdir(profile_id)
+    if not (work / "portfolio.json").is_file():
+        raise HTTPException(status_code=409, detail="this profile holds no portfolio yet: "
+                            f"PUT /profiles/{profile_id}/portfolio first")
     with _LOCK:
         try:
             report = pipeline.review(work)
