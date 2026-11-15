@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="coherence-api-base" content="">
 <title>Compass — Datathon Polyfinance</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -22,7 +23,7 @@
     <div class="util">
       <button class="iconbtn" type="button" aria-label="Help"><img class="i30" src="assets/icon-help.svg" alt="" width="30" height="30"></button>
       <button class="iconbtn" type="button" aria-label="Messages"><img class="i30" src="assets/icon-mail.svg" alt="" width="30" height="30"></button>
-      <button class="user-chip" type="button"><img class="i18" src="assets/icon-user.svg" alt="" width="18" height="18"><span>Robert</span></button>
+      <button class="user-chip" type="button"><img class="i18" src="assets/icon-user.svg" alt="" width="18" height="18"><span>Profile</span></button>
       <button class="signout" type="button"><img class="i16" src="assets/icon-out.svg" alt="" width="16" height="16"><span>Sign out</span></button>
     </div>
   </div>
@@ -48,7 +49,7 @@
   <div class="sum__title-row">
     <h1 class="t-title">Summary</h1>
     <select class="select" data-persona aria-label="Persona">
-      <option value="">Persona: Robert</option>
+      <option value="">Persona</option>
     </select>
     <div class="sum__lastrun">
       <img class="i22" src="assets/icon-refresh.svg" alt="" width="22" height="22">
@@ -93,7 +94,7 @@
   <div class="card sum__exec">
     <h2 class="t-h3">Executive summary</h2>
     <div class="sum__exec-body" data-exec>
-      <p class="sum__summary-text">Robert's profile holds together: a short horizon, a capital-preservation goal and a low-to-moderate risk level point the same way. The portfolio does not fully match it. A 22% position in one high-volatility technology stock breaks the concentration constraint and pushes the bad-scenario loss well past what the profile tolerates.</p>
+      <p class="sum__summary-text">This profile holds together: a short horizon, a capital-preservation goal and a low-to-moderate risk level point the same way. The portfolio does not fully match it. A 22% position in one high-volatility technology stock breaks the concentration constraint and pushes the bad-scenario loss well past what the profile tolerates.</p>
       <div class="tbl">
         <table class="table sum__table">
           <colgroup><col style="width:250px"><col style="width:210px"><col style="width:290px"><col></colgroup>
@@ -177,6 +178,7 @@
     <a class="sum__menu-item" role="menuitem" href="#/constraints">Constraints</a>
     <a class="sum__menu-item" role="menuitem" href="#/preferences">Preferences</a>
     <a class="sum__menu-item" role="menuitem" href="#/coherence">Profile coherence</a>
+    <a class="sum__menu-item" role="menuitem" href="#/trade">Check a trade</a>
   </div>
 </div>
 </section>
@@ -367,7 +369,7 @@
     <div class="wf-verdict__main">
       <p class="wf-verdict__label">Does this asset fit the profile?</p>
       <div data-wf="verdict-chip"><span class="st st--violation"><img class="st__icon" src="assets/icon-x.svg" alt="" width="16" height="16"><span class="st__label">Misaligned</span></span></div>
-      <p class="t-body" data-wf="finding">Adding this stock raises the median projection slightly, but it moves the portfolio further from Robert&rsquo;s low-to-moderate risk level. The estimated bad-scenario loss grows from 60,000 to 72,500, against a tolerance of 25,000. The position itself stays within the 10% single-stock limit. This is an analysis of the asset you chose, not a suggestion to buy or avoid it.</p>
+      <p class="t-body" data-wf="finding">Adding this stock raises the median projection slightly, but it moves the portfolio further from the profile&rsquo;s low-to-moderate risk level. The estimated bad-scenario loss grows from 60,000 to 72,500, against a tolerance of 25,000. The position itself stays within the 10% single-stock limit. This is an analysis of the asset you chose, not a suggestion to buy or avoid it.</p>
     </div>
     <div class="wf-verdict__side">
       <div class="wf-verdict__item">
@@ -480,6 +482,56 @@
   </div>
 </div>
 </section>
+  <section data-route="trade" hidden>
+<div class="wrap scr scr-trade">
+  <a class="back" href="#/summary"><img class="i16" src="assets/icon-back.svg" alt="" width="16" height="16"><span>Accounts summary</span></a>
+  <div class="title-row">
+    <h1 class="t-title">Check a trade</h1>
+  </div>
+
+  <section class="card trade-draft" data-trade="draft" aria-label="Describe the trade">
+    <h2 class="t-h3">Describe the trade</h2>
+    <form class="trade-draft__form" data-trade-draft-form novalidate>
+      <label class="field">
+        <span class="t-small label">What do you want to do</span>
+        <input class="input" type="text" name="text" data-trade-draft-input autocomplete="off"
+          placeholder="e.g. put 10% in NVDA, funded from ZST.TO">
+      </label>
+      <button class="btn btn--primary" type="submit">Draft</button>
+    </form>
+    <p class="field__error" data-trade-draft-error role="alert" hidden></p>
+  </section>
+
+  <section class="card trade-confirm" data-trade="confirm" hidden aria-label="Confirm the trade">
+    <h2 class="t-h3">Confirm</h2>
+    <p class="t-small muted" data-trade-confirm-note>Edit any field before confirming. Nothing is applied until you confirm.</p>
+    <form class="trade-confirm__form" data-trade-confirm-form novalidate>
+      <div class="trade-confirm__grid" data-trade-confirm-fields></div>
+      <button class="btn btn--primary" type="submit">Confirm</button>
+    </form>
+  </section>
+
+  <section class="card trade-report" data-trade="report" hidden aria-label="Trade coherence report">
+    <div class="trade-report__verdicts">
+      <div class="trade-report__verdict">
+        <p class="t-small label">Today</p>
+        <div data-trade="verdict-current"></div>
+      </div>
+      <div class="trade-report__verdict">
+        <p class="t-small label">With this trade</p>
+        <div data-trade="verdict-proposed"></div>
+      </div>
+    </div>
+    <div class="trade-fan">
+      <div data-chart="trade"><p class="t-small muted">Chart unavailable</p></div>
+    </div>
+    <p class="trade-report__headroom" data-trade="headroom" hidden></p>
+    <ul class="chks" data-trade="checks"></ul>
+  </section>
+
+  <p class="t-small muted trade-disclaimer">Simulation only. No transaction is executed. No buy/sell recommendations.</p>
+</div>
+</section>
 </main>
 
 <footer class="foot">
@@ -508,5 +560,6 @@
 <script src="js/screens/whatif/whatif_view.js"></script>
 <script src="js/screens/whatif/whatif.js"></script>
 <script src="js/screens/conversation.js"></script>
+<script src="js/screens/trade.js"></script>
 </body>
 </html>

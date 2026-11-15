@@ -1,12 +1,20 @@
 """P2.D10C oracle: D10 "Describe, never prescribe" on the dashboard code path (docs/spec-decisions.md D10; SPEC inv. 7,
 §8, §9.2, §9.3 item 3, §12 UI, §13, §18; docs/spec-factors.md §20.7).
 
-Scope: `deploy/site/index.html` (reads `headroom`, never `alternatives`), `deploy/preview_report.py` (no `option`
-segments, no "within your own limits ... would fit up to" text, headroom line = §8 template, flow B only) and
+`deploy/site/index.html` (French, single-page) is being retired; the page-level tests below now pin the
+equivalent behaviour on the English multi-screen app: `deploy/site/app.html` + `deploy/site/js/screens/trade.js`
+(the only screen that reads `headroom`) + `deploy/site/js/core/shell.js` (the shared segment-kind renderer; read
+only, not owned by this task). `deploy/preview_report.py` and `deploy/build_site.py` are unaffected by that port
+(their own tests below are unchanged, since neither file's D10 behaviour needed to change) except for the new,
+additive `preview_report.build_en_ca()` (the app's static Flow B demo; covered in `test_ui_flow_b.py`).
+
+Scope: `deploy/site/app.html` + `deploy/site/js/screens/trade.js` (reads `headroom`, never `alternatives`),
+`deploy/site/js/core/shell.js` (no `option` segment kind), `deploy/preview_report.py` (no `option` segments, no
+"within your own limits ... would fit up to" text, headroom line = §8 template, flow B only) and
 `deploy/build_site.py` (built reports carry `headroom`, not `alternatives`).
 
-Offline and deterministic: COHERENCE_ANALYZER_LLM=mock, the HTML is read as text, the builds write to tmp dirs and use
-the repo's fixed seeds. No network, no clock, no browser.
+Offline and deterministic: COHERENCE_ANALYZER_LLM=mock, the HTML/JS is read as text, the builds write to tmp dirs
+and use the repo's fixed seeds. No network, no clock, no browser.
 """
 from __future__ import annotations
 
@@ -25,10 +33,13 @@ os.environ["COHERENCE_ANALYZER_LLM"] = "mock"
 
 ROOT = Path(__file__).resolve().parents[2]
 DEPLOY = ROOT / "deploy"
-INDEX = DEPLOY / "site" / "index.html"
+APP_HTML = DEPLOY / "site" / "app.html"
+TRADE = DEPLOY / "site" / "js" / "screens" / "trade.js"
+SHELL = DEPLOY / "site" / "js" / "core" / "shell.js"
 PREVIEW = DEPLOY / "preview_report.py"
 BUILD_SITE = DEPLOY / "build_site.py"
 SCHEMA = ROOT / "coherence_analyzer" / "schemas" / "report.json"
+INDEX = DEPLOY / "site" / "index.html"  # still built by build_site.py (FR dashboard); not retired yet, not touched
 
 # SPEC §9.3 item 3, verbatim list (matched case- and accent-insensitively).
 BLOCKLIST = (
@@ -106,83 +117,138 @@ def strings(obj, skip_keys: frozenset[str] = frozenset({"disclaimer"})) -> list[
     return out
 
 
-# --------------------------------------------------------------------------------------------- index.html
+def function_source(src: str, name: str) -> str:
+    """Comment/string-aware body of `function <name>(...) {...}` (trade.js/shell.js build markup by string
+    concatenation, not template literals: no `${}` slot-drilling needed)."""
+    found = list(re.finditer(rf"function\s+{re.escape(name)}\s*\(", src))
+    assert len(found) == 1, f"must define `function {name}(` exactly once (found {len(found)})"
+    i = found[0].end() - 1
+    i = _balanced(src, i, "(", ")")
+    brace_open = src.index("{", i)
+    end = _balanced(src, brace_open, "{", "}")
+    return src[brace_open + 1:end - 1]
+
+
+def _balanced(s: str, start: int, open_ch: str, close_ch: str) -> int:
+    depth, i, n = 0, start, len(s)
+    while i < n:
+        c = s[i]
+        if c in "\"'`":
+            j = i + 1
+            while s[j] != c:
+                j += 2 if s[j] == "\\" else 1
+            i = j + 1
+            continue
+        if s.startswith("//", i):
+            nl = s.find("\n", i)
+            i = nl if nl != -1 else n
+            continue
+        if s.startswith("/*", i):
+            i = s.index("*/", i) + 2
+            continue
+        if c == open_ch:
+            depth += 1
+        elif c == close_ch:
+            depth -= 1
+            if depth == 0:
+                return i + 1
+        i += 1
+    raise ValueError(f"unbalanced {open_ch!r}")
+
+
+# --------------------------------------------------------------------------------------------- app.html / trade.js
 
 @pytest.fixture(scope="module")
-def page() -> str:
-    return INDEX.read_text(encoding="utf-8")
+def app_html() -> str:
+    return APP_HTML.read_text(encoding="utf-8")
 
 
-def _visible_source(page: str) -> str:
-    """index.html with the fixed disclaimer and the Recherche refusal sentence removed."""
-    # SPEC-AMBIGUITY: the Recherche chip « Lequel est le meilleur pour moi? » is a sample USER question that triggers
-    # the refusal message (task note exempts that message); it is the user's voice, not product advice, so it is
-    # exempt from the ranking-vocabulary scan too.
-    return page.replace(DISCLAIMER_FR, " ").replace(REFUSAL_FR, " ").replace("Lequel est le meilleur pour moi?", " ")
+@pytest.fixture(scope="module")
+def trade_src() -> str:
+    return TRADE.read_text(encoding="utf-8")
 
 
-def test_page_reads_headroom_not_alternatives(page):
-    """D10 item 2 / SPEC §13: the page reads the report key `headroom` and no longer mentions `alternatives`."""
-    low = page.lower()
-    assert re.search(r"\.headroom\b|\[\s*[\"']headroom[\"']\s*\]|\{[^}]*\bheadroom\b[^}]*\}\s*=\s*", page), \
-        "index.html must read `headroom` from the report"
-    assert "alternatives" not in low
-    assert "alternative" not in low
+@pytest.fixture(scope="module")
+def shell_src() -> str:
+    return SHELL.read_text(encoding="utf-8")
 
 
-def test_page_has_no_option_segment_kind_or_tag(page):
-    """D10 item 2: explanation segment kind `option` is removed: not in the KIND map, no `k-option` style."""
-    m = re.search(r"const KIND\s*=\s*\{(?P<body>[^}]*)\}", page)
-    assert m, "KIND map (segment kind -> label) not found"
+def test_page_reads_headroom_not_alternatives(app_html, trade_src):
+    """D10 item 2 / SPEC §13: trade.js reads the report key `headroom` (`report.headroom`, `headroom.line`)
+    and neither trade.js nor the app shell ever mentions `alternatives`."""
+    assert re.search(r"\breport\.headroom\b", trade_src)
+    assert re.search(r"\bheadroom\.line\b", trade_src)
+    for src, label in ((app_html, "app.html"), (trade_src, "trade.js")):
+        low = src.lower()
+        assert "alternatives" not in low, label
+        assert "alternative" not in low, label
+
+
+def test_page_has_no_option_segment_kind_or_tag(shell_src, app_html):
+    """D10 item 2: explanation segment kind `option` is removed: not in the shared segment-kind map
+    (`shell.js`'s `SEGMENT_KIND_LABEL`, used by every pillar screen's `segmentsHtml`), no `k-option` /
+    `seg__kind--option` style, no `kind === "option"` comparison anywhere. HTML `<option>`/`<optgroup>` tags
+    (the ticker select, the funding-kind picker) are widgets, not wording: stripped before checking the rest
+    of the page says "option" nowhere else."""
+    m = re.search(r"const\s+SEGMENT_KIND_LABEL\s*=\s*\{(?P<body>[^}]*)\}", shell_src)
+    assert m, "SEGMENT_KIND_LABEL map (segment kind -> label) not found in shell.js"
     kinds = set(re.findall(r"(\w+)\s*:", m.group("body")))
     assert kinds == SEGMENT_KINDS
-    assert "k-option" not in page
-    assert not re.search(r"kind\s*[=!]==?\s*[\"']option[\"']", page)
-    # HTML <option>/<optgroup> of the selects are widgets, not wording: strip them, nothing else may say "option".
-    stripped = re.sub(r"</?(option|optgroup)\b", " ", page, flags=re.I)
-    stripped = re.sub(r"\bconst opt\b|\bopt\(", " ", stripped)
+    assert "k-option" not in shell_src and "seg__kind--option" not in shell_src
+    assert not re.search(r"kind\s*[=!]==?\s*[\"']option[\"']", shell_src)
+    stripped = re.sub(r"</?(option|optgroup)\b", " ", app_html, flags=re.I)
     assert not re.search(r"\boptions?\b", stripped, re.I)
 
 
-def test_page_headroom_line_uses_spec_8_fr_template_wording(page):
-    """SPEC §8 FR template: « Avec le financement indiqué (ZST.TO), la transaction franchit votre limite H9 au-delà
-    de X %. » (funding, check id and X come from the headroom object; the fixed wording is in the page)."""
-    low = norm(page)
+def test_page_headroom_line_uses_spec_8_fr_template_wording(trade_src):
+    """Retarget, architecture note: unlike index.html (which typed the SPEC §8 FR sentence into its own JS),
+    trade.js builds no template text at all -- it only displays `headroom.line` verbatim, because the real
+    pipeline now builds that sentence server-side (`coherence_analyzer.resizer.headroom_text`, SPEC §8),
+    which is where the template wording now lives and is verified: `test_build_en_ca_adds_the_spec_8_headroom_line_...`
+    (tests/dashboard/test_ui_flow_b.py) checks the EN template on the app's own demo report; this test
+    checks the FR template directly against the real function (unchanged by this port) and confirms
+    trade.js's `renderHeadroom` carries no copy of the sentence itself, FR or EN."""
+    from coherence_analyzer import resizer
+    text = resizer.headroom_text({"max_weight_pct": 1.5, "binding_check": "H9", "metrics": {}},
+                                  {"kind": "specific", "ticker": "ZST.TO"}, 10, locale="fr-CA")
+    low = norm(text)
     for frag in ("avec le financement indique (", "), la transaction franchit votre limite ", " au-dela de "):
         assert frag in low, frag
-    at = low.index("la transaction franchit votre limite")
-    # SPEC-AMBIGUITY: "the dashboard reads headroom" is not tied to a function name; stricter reading: the template
-    # text sits next to code that reads `headroom` (so it is built from the report, not typed as a constant).
-    assert "headroom" in low[max(0, at - 1500):at + 400]
+    render_body = function_source(trade_src, "renderHeadroom")
+    assert "franchit" not in render_body and "crosses your limit" not in render_body, \
+        "the sentence is read from the report, never typed in trade.js"
 
 
-def test_page_headroom_line_is_conditional_on_the_report(page):
-    """SPEC §9.2 / §20.7: the headroom line is flow B only: the page renders it only when `headroom` is non-null."""
-    assert "la transaction franchit votre limite" in page
-    at = page.index("la transaction franchit votre limite")
-    window = page[max(0, at - 1500):at]
-    assert re.search(r"headroom\s*(\?|&&|\)|!==?\s*null|!=\s*null)|if\s*\(\s*!?\s*[\w.]*headroom|"
-                     r"[\w.]*headroom\s*\?|[\w.]*headroom\s*&&", window), "headroom line must be guarded"
+def test_page_headroom_line_is_conditional_on_the_report(trade_src):
+    """SPEC §9.2 / §20.7: the headroom line is flow B only: `renderHeadroom` shows it only when `headroom` is
+    non-null and carries a `line`, else the element stays hidden with no text."""
+    body = function_source(trade_src, "renderHeadroom")
+    assert re.search(r"if\s*\(\s*headroom\s*&&\s*headroom\.line\s*\)", body)
+    assert re.search(r"\.hidden\s*=\s*true", body), "hidden when there is no line"
+    assert re.search(r"\.hidden\s*=\s*false", body), "shown when there is one"
 
 
-def test_page_headroom_line_has_no_action_framing(page):
-    """D10 items 1-2: the headroom is a fact; the text around the template carries no 'jusqu'à' / 'tient dans' framing."""
-    low = norm(page)
-    at = low.index("la transaction franchit votre limite")
-    around = low[max(0, at - 300):at + 300]
-    for bad in ("jusqu'a", "tient dans vos limites", "dans vos limites", "peut aller", "pourrait"):
-        assert bad not in around, bad
+def test_page_headroom_line_has_no_action_framing(trade_src):
+    """D10 items 1-2: the headroom is a fact; `renderHeadroom` adds no framing text of its own around the
+    server-built sentence -- it is a direct assignment (`el.textContent = headroom.line`), never a
+    concatenation with extra wording ("jusqu'à" / "tient dans vos limites" / "would fit" or similar)."""
+    body = function_source(trade_src, "renderHeadroom")
+    assert re.search(r"el\.textContent\s*=\s*headroom\.line\s*;", body), \
+        "the line is assigned verbatim, not built or wrapped by the UI"
+    assert not re.search(r"headroom\.line\s*\+|\+\s*headroom\.line", body), "no concatenation around the line"
 
 
-def test_page_text_passes_the_advisory_blocklist(page):
-    """SPEC §9.3 item 3 / D10 item 4: no advisory phrase anywhere in the page (text, templates, attributes), apart
-    from the fixed disclaimer and the Recherche refusal message."""
-    assert blocklist_hits(_visible_source(page)) == []
+def test_page_text_passes_the_advisory_blocklist(app_html, trade_src):
+    """SPEC §9.3 item 3 / D10 item 4: no advisory phrase anywhere in the app shell or the trade screen (text,
+    templates, attributes), apart from the fixed disclaimer (which does not itself match the blocklist)."""
+    assert blocklist_hits(app_html) == []
+    assert blocklist_hits(trade_src) == []
 
 
-def test_page_does_not_rank_or_propose_choices(page):
-    """D10 item 1: no 'best / ideal / next step' vocabulary in the page's user-facing strings."""
-    low = norm(_visible_source(page))
+def test_page_does_not_rank_or_propose_choices(app_html, trade_src):
+    """D10 item 1: no 'best / ideal / next step' vocabulary in the app shell's or the trade screen's
+    user-facing strings; `<option>`/`<optgroup>` tags (widgets) are stripped first."""
+    low = norm(re.sub(r"</?(option|optgroup)\b", " ", app_html, flags=re.I)) + " " + norm(trade_src)
     for pat in (r"\ble meilleur\b", r"\bla meilleure\b", r"\bmieux adapte", r"\bplus adapte", r"\bideal\b",
                 r"\bprochaine etape\b", r"\bnext step\b", r"\bbest\b", r"\bmost suitable\b", r"\bfits? within\b",
                 r"\bce qui tient dans vos limites\b", r"\bwould fit\b"):
@@ -425,7 +491,9 @@ def test_built_whatif_and_universe_have_no_option_or_ranking_fields(site):
 
 
 def test_built_dashboard_is_the_headroom_page(site):
-    """The page copied into the site is the one that reads `headroom` and never `alternatives` (SPEC §13)."""
+    """The page copied into the site is the one that reads `headroom` and never `alternatives` (SPEC §13); the
+    FR dashboard (index.html) is unaffected by the app port and is still built as is -- it is retired separately,
+    not by this change."""
     assert site["html"] == INDEX.read_text(encoding="utf-8")
     assert "headroom" in site["html"] and "alternatives" not in site["html"].lower()
 

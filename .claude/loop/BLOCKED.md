@@ -9,9 +9,15 @@ updated for the two new, legitimate resources (`ApiFunction`, its `AWS::Lambda::
 
 ---
 
-# BLOCKED: tests/dashboard/test_any_user_dashboard.py and tests/dashboard/test_ui_intake_confirm.py are frozen
-oracles that pin `deploy/site/index.html`; retargeting them to `deploy/site/app.html` is a deliberate rewrite, not
-a provable-error fix, so I did not use the frozen.json drop/re-add bypass unilaterally.
+# RESOLVED: tests/dashboard/test_any_user_dashboard.py and tests/dashboard/test_ui_intake_confirm.py retargeted to
+app.html
+
+Owner-authorized (this session): removed both paths from `.claude/loop/frozen.json` and asked me to apply the
+prepared rewrite directly. Both files now pin `deploy/site/app.html` + its JS instead of `index.html`; both are
+green (`test_any_user_dashboard.py` 26/26, `test_ui_intake_confirm.py` 27/27). `deploy/build_site.py` was also
+fixed directly (owner-authorized, no other lane touching it): `build()` now calls `preview_report.build_en_ca()`
+so `reports/en-CA/robert-nvda.json` exists for trade.js's offline demo. Original blocker text kept below for
+context.
 
 Task (ad hoc, this session): with index.html's features now fully ported into app.html, retire index.html — but
 first rewrite these two frozen test files to pin app.html's equivalent behaviour (same test function names, same

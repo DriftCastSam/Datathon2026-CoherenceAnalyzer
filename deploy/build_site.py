@@ -295,6 +295,12 @@ def build(out: Path) -> Path:
             personas = [load_persona(dir_name) for dir_name in persona_dirs]
             build_whatif_en(out / "reports" / "en-CA", personas)
             build_reports_en(out / "reports" / "en-CA", personas)
+            # app.html's trade.js reads its own offline/static worked example directly at
+            # reports/en-CA/robert-nvda.json (STATIC_DEMO_PATH), never through either locale's index.json. Built by
+            # deploy/preview_report.py's `build_en_ca` (additive to its FR `build()`/`build_flow_b` above), which
+            # fills in `headroom.line` with the real SPEC §8 EN template (tests/dashboard/test_ui_flow_b.py).
+            import preview_report  # deploy/preview_report.py (deploy/ is on sys.path below, like `import whatif`)
+            preview_report.build_en_ca(out / "reports" / "en-CA")
     finally:
         if saved is None:
             os.environ.pop(STORE_DIR_ENV, None)

@@ -15,6 +15,7 @@ from __future__ import annotations
 import copy
 import json
 import sys
+import tempfile
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -509,6 +510,28 @@ def build(out_dir: Path) -> list[Path]:
         {"file": "robert-review.json", "label": "Robert · review · today", "verdict": reports["robert-review"]["verdict"]},
     ]), encoding="utf-8")
     return paths
+
+
+# ---------- EN-CA Flow B demo for app.html (additive: the FR build() above is untouched) ----------
+
+def build_en_ca(out_dir: Path) -> Path:
+    """English Flow B demo report for app.html's trade screen (deploy/site/js/screens/trade.js):
+    `build()`'s `robert-nvda` report, with `headroom.line` filled in using the SPEC §8 EN template the
+    real pipeline uses (coherence_analyzer.resizer.headroom_text), since this preview module predates
+    that wiring and otherwise leaves `headroom` without a `line`. Written as its own file
+    (`<out_dir>/robert-nvda.json`), never through an index (mirrors `build_flow_b` in deploy/build_site.py)."""
+    from coherence_analyzer import resizer
+    with tempfile.TemporaryDirectory() as tmp:
+        paths = build(Path(tmp))
+        src = next(p for p in paths if p.stem == "robert-nvda")
+        rep = json.loads(src.read_text(encoding="utf-8"))
+    h = rep.get("headroom")
+    if h and not h.get("line"):
+        h["line"] = resizer.headroom_text(h, rep["intent"]["funding"], rep["intent"]["target_weight_pct"], locale="en-CA")
+    out_dir.mkdir(parents=True, exist_ok=True)
+    dest = out_dir / "robert-nvda.json"
+    dest.write_text(json.dumps(_clean(rep), ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    return dest
 
 
 if __name__ == "__main__":

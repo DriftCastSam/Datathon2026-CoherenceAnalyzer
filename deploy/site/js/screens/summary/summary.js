@@ -2,6 +2,10 @@
   "use strict";
 
   const OPTION_SEPARATOR = "|";
+  const NEW_PROFILE_VALUE = "__new__";
+  const NEW_PROFILE_LABEL = "+ New profile";
+  const NEW_PROFILE_LOCALE = "en-CA";
+  const NEW_PROFILE_NAME_PROMPT = "Name this profile (optional). Leave it blank to skip.";
   const CAD_SIGN = "$";
   const MONTHS_PER_YEAR = 12;
   const DEFAULT_HORIZON_YEARS = 5;
@@ -27,7 +31,7 @@
     vol: 0.168,
     mdd: -0.24,
     asOf: "14 Nov 2026, 17:40",
-    summary: "Robert's profile holds together: a short horizon, a capital-preservation goal and a low-to-moderate risk level point the same way. The portfolio does not fully match it. A 22% position in one high-volatility technology stock breaks the concentration constraint and pushes the bad-scenario loss well past what the profile tolerates.",
+    summary: "This profile holds together: a short horizon, a capital-preservation goal and a low-to-moderate risk level point the same way. The portfolio does not fully match it. A 22% position in one high-volatility technology stock breaks the concentration constraint and pushes the bad-scenario loss well past what the profile tolerates.",
     holdings: [
       {name: "Aggregate bond ETF", pct: 35},
       {name: "Canadian equities", pct: 25},
@@ -141,7 +145,7 @@
 
   function findPersona(report) {
     const card = report && report.site ? report.site.profile_card : null;
-    return card && typeof card.name === "string" && card.name ? card.name : "Robert";
+    return card && typeof card.name === "string" && card.name ? card.name : "Profile";
   }
 
   /* ---------- totals ---------- */
@@ -448,6 +452,38 @@
     }
   }
 
+  /* Creates a brand-new, empty profile, then routes straight to the intake flow for it.
+     A new profile has no portfolio yet; conversation.js handles that gap when the analysis
+     is run. On failure the select is restored to the current persona and an inline error shows. */
+  async function createNewProfile(select, screen) {
+    select.disabled = true;
+    try {
+      const typed = window.prompt(NEW_PROFILE_NAME_PROMPT);
+      if (typed === null) { select.value = selectedValue(); return; }
+      const display_name = typed.trim();
+      const body = display_name ? {locale: NEW_PROFILE_LOCALE, display_name} : {locale: NEW_PROFILE_LOCALE};
+      const created = await App.source.createProfile(body);
+      const profileId = created && created.meta && created.meta.profile_id;
+      if (!profileId) throw new Error("the new profile had no id");
+      const list = await App.source.listProfiles();
+      App.state.personas = list.map(item => ({id: item.profile_id, name: item.name, entries: []}));
+      App.state.persona = profileId;
+      App.state.entryFile = null;
+      App.state.report = null;
+      App.state.universe = null;
+      App.state.whatif = null;
+      App.state.selection = [];
+      showError(screen, "");
+      App.go("#/conversation");
+    } catch (error) {
+      console.error("[summary] could not create a new profile", error);
+      showError(screen, "Could not create a new profile: " + error.message);
+      select.value = selectedValue();
+    } finally {
+      select.disabled = false;
+    }
+  }
+
   /* ---------- renderer ---------- */
 
   App.renderers.summary = function (section) {
@@ -465,11 +501,20 @@
 
     const select = screen.querySelector("[data-persona]");
     const options = pickerOptions(App.state.personas);
-    select.innerHTML = options.length
-      ? options.map(option => '<option value="' + App.esc(option.value) + '">Persona: ' + App.esc(option.text) + '</option>').join("")
+    const pickable = App.source.mode === "live" ? options.concat([{value: NEW_PROFILE_VALUE, text: NEW_PROFILE_LABEL}]) : options;
+    select.innerHTML = pickable.length
+      ? pickable.map(option => '<option value="' + App.esc(option.value) + '">'
+        + (option.value === NEW_PROFILE_VALUE ? App.esc(option.text) : "Persona: " + App.esc(option.text)) + '</option>').join("")
       : '<option value="">Persona: ' + App.esc(findPersona(report)) + '</option>';
     if (options.some(option => option.value === selectedValue())) select.value = selectedValue();
-    select.onchange = event => { switchPersona(event.target.value, event.target, screen); };
+    select.onchange = event => {
+      const value = event.target.value;
+      if (value === NEW_PROFILE_VALUE) {
+        createNewProfile(event.target, screen);
+      } else {
+        switchPersona(value, event.target, screen);
+      }
+    };
 
     screen.querySelector("[data-run-at]").textContent = fmtAsOf(
       ctx.site && typeof ctx.site.as_of === "string" && ctx.site.as_of ? ctx.site.as_of : SAMPLE.asOf
