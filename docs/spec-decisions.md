@@ -119,3 +119,50 @@ The product is informative only. This entry wins over SPEC.md until a human fold
 4. Narration prompt rules and the V4 blocklist cover suggestions ("consider", "you could", "vous pourriez",
    "envisage", "rebalance", "next step", ...), not only buy/sell imperatives; matching is case- and
    accent-insensitive. Stating a measured effect of the user's own trade stays allowed.
+
+## D11. Numeric note rules apply at once as provisional limits, capped at warning (SPEC inv. 1-3, §6.2 N3, §7.2, §7.4 S4). Approved 2026-11-15 (owner)
+A clear numeric condition the user wrote ("max 20 % in tech") should not wait for a click to count; err on strictness,
+and let the user correct a misreading.
+1. A gated N3 rule with a number (`max_theme_weight` with `max_pct`) is promoted into `limits` at once as a
+   **provisional** limit: `limits.max_theme_weight[theme]` carries `provisional: true`, and `limits_trace` names
+   `values.parsed_notes[provisional]` (distinct from `[approved_by_user]`).
+2. A check against a provisional limit is capped at `warning` (never `violation`), so invariant 3 holds: an LLM reading
+   alone never makes a portfolio `incoherent`. The UI shows it flagged as read from the user's notes, with the quote.
+3. User approval makes it a full-strength limit (`provisional` gone, breach = `violation`); rejection removes it.
+4. Rules without a number (`exclude_activity`, theme rule with no `max_pct`) are unchanged: approval click, or the
+   intake asks for the number. S4 keeps reminding about unapproved rules.
+5. Invariant 1 is amended accordingly: limits are fed by `rule:` fields, user-declared values, and gated provisional
+   N3 numeric rules (flagged, capped). CLAUDE.md and `tests/profile/test_limits_no_llm_inputs.py` need the owner's update.
+
+## D12. "Today" = the real run date, recorded; fixtures keep a pinned date (replaces D1 for live use). Approved 2026-11-15 (owner)
+1. Every rule that needs the current date (effective horizon, "withdrawals within 24 months", N1's 30-day window, G1
+   goal dates) uses the run date in the user's time zone. The audit record stores `reference_date` and its source.
+2. Reproducibility: a run can be replayed with the recorded `reference_date`. Fixtures, the demo and the tests pin it
+   (`COHERENCE_ANALYZER_TODAY`, default for persona fixtures = `portfolio.as_of`), so goldens do not drift.
+3. The market data window (D4) is unchanged; `portfolio.as_of` stays the valuation date of the holdings.
+
+## D13. The trade flow asks nothing: a breach is a plain statement with facts and the user's own words (SPEC §4 B2-B9, §8, §9, §18, D10). Approved 2026-11-15 (owner)
+To avoid an "AI chat" feel, nothing after a trade asks the user anything: no follow-up prompt, no action buttons, no
+Q&A (§18 "no chatbot" stands; questions the user types stay events scored by N2, never answered).
+1. Status is unchanged: a hard limit the trade crosses is still a `violation` (verdict `incoherent`).
+2. Wording only: each crossed limit is one templated statement, FR and EN, of the form
+   EN "Making this trade takes you outside your profile: <limit> (<limit value>). Facts: <value after the trade>
+   [, <value before>]. From what you told us: '<quote>' (<source>)."
+   The quote part appears only when the limit traces to the user's own words (a parsed note rule or an event); every
+   number comes from the facts (numcheck). The §8 headroom sentence stays as the one figure about the trade's size.
+3. The intake (missing profile fields) still asks its fixed questions; this decision covers the trade flow only.
+4. AI failure fallback is confirmed as is: N5 retries once, then the deterministic template (math only).
+
+## D14. A trade that worsens an existing breach counts as crossing it (SPEC §8 ambiguity). Approved 2026-11-15 (owner)
+Confirms the P3.RESIZE reading: in the headroom, a limit already breached on the current portfolio binds when the trade
+makes it worse; an unchanged or improved breach does not.
+
+## D15. Deferred investment start (`objectives.start_date`). Approved 2026-11-15 (owner)
+1. New optional user-declared field `objectives.start_date` (YYYY-MM). Absent or in the past = starts now.
+2. Horizon end = start date + `horizon_years` ("from January 2027 for 4 years" ends January 2031; "4 years from now"
+   ends 4 years after the reference date of D12). The effective horizon still runs from the reference date to
+   min(horizon end, first planned withdrawal).
+3. The intake asks for it as an optional question (empty answer = starts now). Not an input of any `llm:` field.
+
+## UI note (2026-11-15)
+Dark-cockpit presentation and the display of `unknown` are deferred: a colleague is revamping the UI.
