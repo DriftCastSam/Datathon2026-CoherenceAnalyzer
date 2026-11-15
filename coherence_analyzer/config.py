@@ -19,6 +19,8 @@ RUNTIME_CACHE_DIR = Path(os.getenv("COHERENCE_ANALYZER_RUNTIME_CACHE_DIR", ROOT 
 PROMPTS_DIR = Path(__file__).parent / "llm" / "prompts"
 LLM_SCHEMAS_DIR = Path(__file__).parent / "llm" / "schemas"
 SCHEMAS_DIR = Path(__file__).parent / "schemas"
+# Seed personas (read-only; copied to the store on first access, never written). Default: fixtures/.
+SEED_DIR = Path(os.getenv("COHERENCE_ANALYZER_SEED_DIR") or FIXTURES_DIR)
 
 # LLM / AWS
 COHERENCE_ANALYZER_LLM = os.getenv("COHERENCE_ANALYZER_LLM", "mock")        # mock | record | live
