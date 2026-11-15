@@ -1069,6 +1069,26 @@
     "README.md"
    ],
    "notes": "Integration bug found end to end (P5.USERS + P3.FREETEXT): POST /profiles creates a user with no portfolio.json; every intake answer runs pipeline.refresh, which calls _load_portfolio and raises FileNotFoundError -> HTTP 500 on the first answer, so the natural order create -> answer intake -> PUT portfolio is impossible. derive.derive_all(portfolio_value_cad=None) and limits.build_limits(.., None) raise TypeError. Required: (1) Flow A (refresh) runs when the profile has no portfolio yet: every derived field and limit that needs the portfolio value or the reference date (D1: as_of = portfolio.as_of) is null with a limits_trace / derived `by` entry naming the missing input (P3.SKIP convention: never a default, never today's clock); everything else is derived as usual; the audit record has as_of null. (2) PUT /profiles/{id}/portfolio, after writing portfolio.json and its event, runs the same refresh so GET /profiles/{id} shows limits computed from the new value. (3) Test the full order through the API TestClient: create -> answer every intake.REQUIRED path -> PUT portfolio -> review gives a schema-valid report with a verdict, in mock mode, in a tmp store; also review before any portfolio is a clear 4xx, not a 500. Every persona behaviour, report and frozen test stays identical (personas always have a portfolio). Touch only the functions listed. No network, no pip install. P5.DASH edits deploy/ in parallel. Do not change frozen tests; if one contradicts the spec write .claude/loop/BLOCKED.md. D10 applies to every user-facing string."
+  },
+  {
+   "id": "P5.INTAKEFULL",
+   "title": "The intake asks every user-declared input the rules and limits read, so a profile built only from intake answers gets real limits",
+   "spec": [
+    "docs/spec-factors.md §20.3 REQUIRED §20.6",
+    "§3.1",
+    "§7.1",
+    "§7.2",
+    "§1 inv. 1, 2",
+    "docs/spec-decisions.md D3 D7"
+   ],
+   "tests": [
+    "tests/profile/test_intake_covers_rule_inputs.py"
+   ],
+   "code": [
+    "coherence_analyzer/intake.py",
+    "README.md"
+   ],
+   "notes": "End-to-end finding (P5.USERS): a user created with POST /profiles who answers every intake question and sets a portfolio still gets risk.capacity, risk.effective and identity.life_stage null, so every risk-table limit is null and horizon / risque / contraintes are all `unknown`. Cause: rules/registry.REGISTRY and rules/limits.LIMIT_INPUTS read user-declared paths that intake.REQUIRED never asks: identity.age, identity.employment_type (both needed for life_stage / income_stability / capacity), knowledge.declared_level, and the optional preferences.max_fee_mer_pct and values.environment|social|governance.exclusions. knowledge.quiz_score (quiz events) and knowledge.question_quality (N2) are not intake questions. Required: (1) intake.REQUIRED (each path under the factor that owns it per §20.2) includes every declared input whose absence makes a derived field or a limit null; optional inputs either get a question whose 'none' answer is an empty list / null meaning 'no constraint' (state which in README) or stay optional with a one-line reason; fixed fr-CA and en-CA question texts for each new path, no LLM, D10 wording; (2) a test computes the declared inputs from REGISTRY and LIMIT_INPUTS (minus rule outputs, llm: fields and event-fed fields) and asserts each is in REQUIRED or in an explicit OPTIONAL list; (3) a test builds a profile from an empty v2 profile by answering every REQUIRED path (plausible values, plus a portfolio) and asserts derive_all + build_limits give no null limit except those whose input was skipped; (4) the three personas' intake.missing stays empty (their fixtures already hold these fields) and every persona report is unchanged. Touch only intake.py (plus README and the new test). No network, no pip install. P5.DASH edits deploy/ in parallel. Do not change frozen tests; if one pins the old REQUIRED tuple exactly, write .claude/loop/BLOCKED.md naming it (owner request 2026-11-14: the app must work for any user, which makes a pinned persona-only checklist stale)."
   }
  ]
 }
