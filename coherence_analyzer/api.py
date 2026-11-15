@@ -861,6 +861,16 @@ def post_decision(profile_id: str, index: int, body: DecisionIn) -> dict:
             rule["params"] = {**params, intake.THEME_NUMBER_KEY: body.max_pct}
         old = rule.get("approved_by_user") is True
         rule["approved_by_user"] = body.approved
+        # D11.3: a rejection removes a provisional limit and keeps it removed. The rule flag alone cannot say
+        # "rejected" (an unapproved rule is provisional), so the quote is listed on the parsed_notes node.
+        node = profile["values"]["parsed_notes"]
+        rejected = [q for q in node.get("rejected_quotes", []) if q != rule.get("quote")]
+        if not body.approved:
+            rejected.append(rule.get("quote"))
+        if rejected:
+            node["rejected_quotes"] = rejected
+        else:
+            node.pop("rejected_quotes", None)
         return _record_decision(work, profile_id, fixture, index, profile, old, body.approved)
 
 

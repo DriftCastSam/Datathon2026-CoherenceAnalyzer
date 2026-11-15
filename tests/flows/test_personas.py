@@ -354,7 +354,9 @@ def test_amira_theme_limit_exists_only_through_the_users_approval(raw):
     p = copy.deepcopy(raw["amira"])
     for r in _parsed(p):
         r["approved_by_user"] = False
-    assert not _ruled(p, PORTFOLIO_VALUES["amira"])["limits"].get("max_theme_weight")
+    # D11 (owner, 2026-11-15): unapproved + numeric -> provisional only, never a firm limit.
+    themes = _ruled(p, PORTFOLIO_VALUES["amira"])["limits"].get("max_theme_weight") or {}
+    assert all(isinstance(v, dict) and v.get("provisional") is True for v in themes.values())
     q = copy.deepcopy(raw["amira"])
     for r in _parsed(q):
         r["params"].pop("max_pct", None)

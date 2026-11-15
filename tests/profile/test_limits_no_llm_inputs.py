@@ -59,7 +59,11 @@ def _firm(block: dict) -> dict:
 
 
 def _firm_trace(trace: dict) -> dict:
-    return {k: [p for p in v if p != PROVISIONAL_PATH] for k, v in trace.items()}
+    """Every trace entry except max_theme_weight, whose inputs D11 lets switch between [approved_by_user] and
+    [provisional] (the provisional oracle requires [approved_by_user] absent when only a provisional rule exists)."""
+    theme = trace.get("max_theme_weight") or []
+    assert set(theme) <= {"values.parsed_notes[approved_by_user]", PROVISIONAL_PATH}, theme
+    return {k: v for k, v in trace.items() if k != "max_theme_weight"}
 
 
 def _resolve(profile: dict, path: str):

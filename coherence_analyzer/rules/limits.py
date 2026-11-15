@@ -32,6 +32,9 @@ LIMITS_NOTE = "Derived from the profile only. This is what the portfolio struct 
 # Trace path for user-approved parsed rules. The llm: field `values.parsed_notes` itself is never a
 # limits input: only items the user explicitly approved (a user declaration) are promoted (§6.2 N3, §7.2).
 APPROVED_PARSED_RULES = "values.parsed_notes[approved_by_user]"
+# D11: a gated, unapproved numeric max_theme_weight rule is promoted as a PROVISIONAL limit (flagged, capped at
+# warning by H13). It is the one llm: input of `limits`, and it is traced under this distinct path.
+PROVISIONAL_PARSED_RULES = "values.parsed_notes[provisional]"
 PILLARS = ("environment", "social", "governance")
 _TABLE = ("risk.effective",)
 
@@ -84,6 +87,26 @@ def _approved_parsed_rules(profile: dict, kind: str) -> list[dict]:
             if isinstance(r, dict) and r.get("approved_by_user") is True and r.get("rule_kind") == kind]
 
 
+def _is_number(x: Any) -> bool:
+    return isinstance(x, (int, float)) and not isinstance(x, bool)
+
+
+def _provisional_theme_rules(profile: dict) -> list[dict]:
+    """D11.1: unapproved, not rejected max_theme_weight rules that name a theme and carry a real number."""
+    node = profile.get("values", {}).get("parsed_notes")
+    rejected = set(node.get("rejected_quotes") or []) if isinstance(node, dict) else set()
+    out = []
+    for r in (_val(node) if node is not None else None) or []:
+        if not isinstance(r, dict) or r.get("rule_kind") != "max_theme_weight":
+            continue
+        if r.get("approved_by_user") is True or r.get("quote") in rejected:
+            continue
+        params = r.get("params") if isinstance(r.get("params"), dict) else {}
+        if isinstance(params.get("theme"), str) and params["theme"] and _is_number(params.get("max_pct")):
+            out.append(r)
+    return out
+
+
 def _dedupe(items: list[str]) -> list[str]:
     out: list[str] = []
     for x in items:
@@ -105,7 +128,8 @@ def _skip_trace(profile: dict, trace: dict[str, list[str]]) -> tuple[dict[str, l
 
 
 def build_limits(profile: dict, portfolio_value_cad: float | None) -> tuple[dict, dict[str, list[str]]]:
-    """Return (limits, limits_trace). Only approved parsed rules are promoted.
+    """Return (limits, limits_trace). Approved parsed rules are promoted; so are unapproved `max_theme_weight` rules
+    with a number, as provisional limits (D11: `{value, provisional: true, quote}`, traced `[provisional]`).
 
     Reads `risk.effective` (rule:) and user-declared values only (invariant 2). Weights are fractions;
     drawdown and MER stay in percent, like the profile fields they come from.
@@ -150,7 +174,8 @@ def build_limits(profile: dict, portfolio_value_cad: float | None) -> tuple[dict
 
     themes: dict[str, float] = {}
     themeless = 0
-    for r in _approved_parsed_rules(profile, "max_theme_weight"):
+    approved_theme_rules = _approved_parsed_rules(profile, "max_theme_weight")
+    for r in approved_theme_rules:
         params = r.get("params")
         params = params if isinstance(params, dict) else {}
         theme = params.get("theme")
@@ -158,10 +183,18 @@ def build_limits(profile: dict, portfolio_value_cad: float | None) -> tuple[dict
             themeless += 1   # approved but names no theme: nothing to limit, skipped and traced (never a KeyError)
             continue
         pct = params.get("max_pct")
-        if isinstance(pct, bool) or not isinstance(pct, (int, float)):
+        if not _is_number(pct):
             continue   # approved but the number is still unanswered (or skipped): nothing to promote yet
         frac = pct / 100   # percent -> fraction, once
         themes[theme] = min(frac, themes.get(theme, frac))                # stricter wins
+
+    # D11.1: unapproved numeric rules apply at once as provisional limits (stricter wins per theme). A theme that
+    # already has an approved (firm) limit keeps it: the user's own approval outranks a reading of their notes.
+    provisional: dict[str, dict] = {}
+    for r in _provisional_theme_rules(profile):
+        theme, frac = r["params"]["theme"], r["params"]["max_pct"] / 100
+        if theme not in themes and (theme not in provisional or frac < provisional[theme]["value"]):
+            provisional[theme] = {"value": frac, "provisional": True, "quote": r.get("quote")}
 
     limits: dict[str, Any] = {
         "_note": LIMITS_NOTE,
@@ -181,9 +214,16 @@ def build_limits(profile: dict, portfolio_value_cad: float | None) -> tuple[dict
     }
     if "max_fee_mer_pct" in prefs:
         limits["max_fee_mer_pct"] = prefs["max_fee_mer_pct"]
-    if themes:
-        limits["max_theme_weight"] = {k: themes[k] for k in sorted(themes)}
+    if themes or provisional:
+        limits["max_theme_weight"] = {k: (themes[k] if k in themes else provisional[k])
+                                      for k in sorted({*themes, *provisional})}
     trace, _ = _skip_trace(profile, build_trace())
+    # max_theme_weight keeps its static dependency on approved rules ([approved_by_user]); a limit built only from
+    # provisional readings (D11) is traced under the distinct [provisional] path instead.
+    if provisional and not approved_theme_rules:
+        trace["max_theme_weight"] = [PROVISIONAL_PARSED_RULES]
+    elif provisional:
+        trace["max_theme_weight"] = [*trace["max_theme_weight"], PROVISIONAL_PARSED_RULES]
     if portfolio_value_cad is None:
         trace["floor_at_horizon"] = [*trace["floor_at_horizon"], NO_PORTFOLIO_VALUE]
         if row is None:       # risk.effective needs the portfolio value and date: the table limits wait for them

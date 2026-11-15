@@ -380,8 +380,8 @@ def test_approved_parsed_rules_are_promoted(robert):
 def test_unapproved_parsed_rules_are_not_promoted(robert):
     lim, _ = _limits(_with_parsed(robert, approved=False))
     assert sorted(lim["excluded_activities"]) == ["accounting_fraud_last_5y", "tobacco"]
-    assert not lim.get("max_theme_weight")
-    assert "tech_heavy" not in json.dumps(lim, default=str)
+    # D11 (owner, 2026-11-15): the unapproved numeric theme rule is provisional only, never a firm limit.
+    assert all(isinstance(v, dict) and v.get("provisional") is True for v in (lim.get("max_theme_weight") or {}).values())
     assert "fossil_fuel_producer" not in json.dumps(lim, default=str)
 
 

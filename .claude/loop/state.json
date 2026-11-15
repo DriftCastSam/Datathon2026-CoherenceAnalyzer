@@ -48,6 +48,6 @@
     "P5.INTAKEFULL": "impl",
     "P5.NOPF": "impl",
     "P5.USERS": "impl",
-    "P6.PROVISIONAL": "tests"
+    "P6.PROVISIONAL": "impl"
   }
 }
