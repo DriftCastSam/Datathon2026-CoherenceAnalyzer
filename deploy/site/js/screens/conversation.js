@@ -15,6 +15,7 @@
   const RUN_LABEL = "Run analysis";
   const RUN_BUSY_LABEL = "Running analysis…";
   const STATIC_RUN_LABEL = "Go to the analysis";
+  const SKIP_NOT_ALLOWED_HINT = "Needed for the analysis";
   const STATE_ANSWERED = "answered";
   const STATE_SKIPPED = "skipped";
   const STATE_OPEN = "open";
@@ -139,7 +140,11 @@
     try {
       const result = await App.source.intake(personaId, App.state.report);
       if (token !== loadSeq) return;
-      screen.questions = result.questions.map(question => ({...question, skipped: Boolean(question.skipped)}));
+      screen.questions = result.questions.map(question => ({
+        ...question,
+        skipped: Boolean(question.skipped),
+        skippable: question.skippable !== false
+      }));
       screen.index = firstOpenAfter(-1);
     } catch (error) {
       if (token !== loadSeq) return;
@@ -237,6 +242,8 @@
     const chips = spec.chips.filter(chip => chip.value !== KEEP_VALUE || hasAnswer);
     const readOnly = spec.readOnlyList && Array.isArray(question.current)
       ? '<p class="t-body current__readonly">Current: ' + esc(listText(question.current)) + "</p>" : "";
+    const canSkip = question.skippable !== false;
+    const skipHint = canSkip ? "" : ' <span class="t-small muted">(' + esc(SKIP_NOT_ALLOWED_HINT) + ')</span>';
     return '<p class="t-small label">Question ' + (screen.index + 1) + " of " + screen.questions.length + " · required</p>"
       + '<p class="current__q">' + esc(question.text) + "</p>" + readOnly
       + '<div class="sugs" role="group" aria-label="Suggested answers">'
@@ -244,7 +251,7 @@
       + inputHtml(spec)
       + '<p class="field__error" role="alert"' + (screen.fieldError ? "" : " hidden") + ">" + esc(screen.fieldError) + "</p>"
       + '<div class="current__actions"><button class="btn btn--outline-dark" type="button" data-skip-question'
-      + (screen.saving ? " disabled" : "") + ">Skip this question</button></div>";
+      + (screen.saving || !canSkip ? " disabled" : "") + ">Skip this question</button>" + skipHint + "</div>";
   }
 
   function doneHtml() {
