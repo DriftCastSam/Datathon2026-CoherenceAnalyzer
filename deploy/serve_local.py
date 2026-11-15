@@ -24,12 +24,13 @@ sys.path.insert(0, str(ROOT))
 os.environ.setdefault("COHERENCE_ANALYZER_LLM", "mock")
 
 import uvicorn  # noqa: E402
-from fastapi import FastAPI  # noqa: E402
+from fastapi import FastAPI, HTTPException  # noqa: E402
 from fastapi.staticfiles import StaticFiles  # noqa: E402
+from pydantic import BaseModel, Field, field_validator  # noqa: E402
 
 from coherence_analyzer import api  # noqa: E402
 from coherence_analyzer.api import app as api_app  # noqa: E402
-from deploy import build_site  # noqa: E402
+from deploy import build_site, whatif  # noqa: E402
 
 DEFAULT_HOST = "127.0.0.1"
 DEFAULT_PORT = 8000
@@ -40,6 +41,18 @@ PORTFOLIO_FILE = "portfolio.json"
 LIVE_LABEL_SUFFIX = " · live analysis"
 STORE_DIR_ENV = build_site.STORE_DIR_ENV
 STORE_DIR_PREFIX = "coherence-serve-"
+MAX_WHATIF_TICKERS = 10
+
+
+class WhatifRequest(BaseModel):
+    tickers: list[str] = Field(..., min_length=1, max_length=MAX_WHATIF_TICKERS)
+
+    @field_validator("tickers")
+    @classmethod
+    def check_tickers(cls, v: list[str]) -> list[str]:
+        if not v:
+            raise ValueError("at least one ticker is required")
+        return v
 
 
 def live_review(profile_id: str) -> dict[str, Any]:
@@ -51,7 +64,7 @@ def live_review(profile_id: str) -> dict[str, Any]:
     Raises:
         HTTPException: 404 for an unknown profile, 422 when the review rejects it.
     """
-    report = api.post_review(profile_id)
+    report = api.post_review(profile_id, locale=build_site.SITE_LOCALE)
     work, fixture = api.workdir(profile_id)
     name = build_site.load_persona(fixture.name).name
     report["site"] = {
@@ -59,6 +72,35 @@ def live_review(profile_id: str) -> dict[str, Any]:
         "label": f"{name}{LIVE_LABEL_SUFFIX}",
     }
     return report
+
+
+def live_whatif(profile_id: str, body: WhatifRequest) -> dict[str, Any]:
+    """Compute what-if scenarios from the working copy profile.
+
+    Computes scenarios with the user's edited intake answers (working copy) rather
+    than the original fixture, so changes to risk level, goals, or constraints
+    affect the checks and verdict in each scenario.
+
+    Args:
+        profile_id: persona id (e.g. "persona-robert")
+        body: tickers to compute scenarios for (1 to MAX_WHATIF_TICKERS)
+
+    Returns:
+        dict with "universe" ({assets, base}) and "whatif" ({ticker: {asset, scenarios}})
+
+    Raises:
+        HTTPException: 404 for unknown profile, 422 for invalid tickers or count
+    """
+    work, _ = api.workdir(profile_id)
+    ctx = whatif.context(work, build_site.SITE_LOCALE)
+    univ = whatif.universe(ctx)
+
+    valid_tickers = {a["ticker"] for a in univ["assets"]}
+    for ticker in body.tickers:
+        if ticker not in valid_tickers:
+            raise HTTPException(status_code=422, detail=f"ticker {ticker!r} is not in the universe")
+
+    return {"universe": univ, "whatif": whatif.scenarios(ctx, body.tickers)}
 
 
 def create_app(site_dir: Path) -> FastAPI:
@@ -74,6 +116,9 @@ def create_app(site_dir: Path) -> FastAPI:
     root_app = FastAPI(title="CoherenceAnalyzer local")
     root_app.add_api_route(
         f"{SITE_API_PREFIX}/profiles/{{profile_id}}/review", live_review, methods=["POST"]
+    )
+    root_app.add_api_route(
+        f"{SITE_API_PREFIX}/profiles/{{profile_id}}/whatif", live_whatif, methods=["POST"]
     )
     root_app.mount(API_MOUNT_PATH, api_app)
     root_app.mount("/", StaticFiles(directory=site_dir, html=True), name="site")

@@ -878,14 +878,14 @@ def _adopt_refreshed_profile(work: Path, report: dict) -> None:
 
 
 @app.post("/profiles/{profile_id}/review")
-def post_review(profile_id: str) -> dict:
+def post_review(profile_id: str, locale: str | None = Query(None)) -> dict:
     work, _ = _workdir(profile_id)
     if not (work / "portfolio.json").is_file():
         raise HTTPException(status_code=409, detail="this profile holds no portfolio yet: "
                             f"PUT /profiles/{profile_id}/portfolio first")
     with _LOCK:
         try:
-            report = pipeline.review(work)
+            report = pipeline.review(work, locale=locale)
         except ValueError as exc:
             raise HTTPException(status_code=422, detail=str(exc)) from exc
         _adopt_refreshed_profile(work, report)

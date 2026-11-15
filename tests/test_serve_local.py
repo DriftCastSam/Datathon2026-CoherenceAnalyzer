@@ -110,3 +110,100 @@ def test_intake_answer_rejects_non_intake_path(client: TestClient) -> None:
     )
 
     assert response.status_code == 422
+
+
+def test_api_review_with_locale_query_param_returns_english(client: TestClient) -> None:
+    response = client.post("/api/profiles/persona-robert/review?locale=en-CA")
+
+    assert response.status_code == 200
+    headline = response.json()["explanation"]["headline"]
+    assert "portfolio" in headline.lower()
+    assert "portefeuille" not in headline.lower()
+
+
+def test_site_review_produces_english_headline(client: TestClient) -> None:
+    response = client.post(f"{SITE_REVIEW_URL}/persona-robert/review")
+
+    assert response.status_code == 200
+    headline = response.json()["explanation"]["headline"]
+    assert "portfolio" in headline.lower()
+    assert "portefeuille" not in headline.lower()
+
+
+def test_whatif_route_returns_universe_and_scenarios(client: TestClient) -> None:
+    response = client.post(
+        f"{SITE_REVIEW_URL}/persona-robert/whatif", json={"tickers": ["AAPL"]}
+    )
+
+    assert response.status_code == 200
+    data = response.json()
+    assert "universe" in data
+    assert "whatif" in data
+    assert "assets" in data["universe"]
+    assert "base" in data["universe"]
+    assert "AAPL" in data["whatif"]
+
+
+def test_whatif_route_rejects_empty_ticker_list(client: TestClient) -> None:
+    response = client.post(
+        f"{SITE_REVIEW_URL}/persona-robert/whatif", json={"tickers": []}
+    )
+
+    assert response.status_code == 422
+
+
+def test_whatif_route_rejects_too_many_tickers(client: TestClient) -> None:
+    from deploy.serve_local import MAX_WHATIF_TICKERS
+
+    tickers = [f"TICK{i}" for i in range(MAX_WHATIF_TICKERS + 1)]
+    response = client.post(
+        f"{SITE_REVIEW_URL}/persona-robert/whatif", json={"tickers": tickers}
+    )
+
+    assert response.status_code == 422
+
+
+def test_whatif_route_rejects_unknown_ticker(client: TestClient) -> None:
+    response = client.post(
+        f"{SITE_REVIEW_URL}/persona-robert/whatif", json={"tickers": ["ZZZZZ"]}
+    )
+
+    assert response.status_code == 422
+    assert "not in the universe" in response.text.lower()
+
+
+def test_whatif_route_unknown_profile_returns_404(client: TestClient) -> None:
+    response = client.post(
+        f"{SITE_REVIEW_URL}/persona-nobody/whatif", json={"tickers": ["AAPL"]}
+    )
+
+    assert response.status_code == 404
+
+
+def test_whatif_route_reflects_edited_risk_answer(client: TestClient) -> None:
+    # Get the original what-if with Robert's fixture profile
+    response_original = client.post(
+        f"{SITE_REVIEW_URL}/persona-robert/whatif", json={"tickers": ["AAPL"]}
+    )
+    assert response_original.status_code == 200
+    original_whatif = response_original.json()
+    original_base = original_whatif["universe"]["base"]
+
+    # Change risk level in the working copy to "low" (Robert's fixture is "moderate_high")
+    answer = client.post(
+        "/api/profiles/persona-robert/intake/answer",
+        json={"path": "risk.declared", "value": "low"},
+    )
+    assert answer.status_code == 200
+
+    # Get the edited what-if
+    response_edited = client.post(
+        f"{SITE_REVIEW_URL}/persona-robert/whatif", json={"tickers": ["AAPL"]}
+    )
+    assert response_edited.status_code == 200
+    edited_whatif = response_edited.json()
+    edited_base = edited_whatif["universe"]["base"]
+
+    # The checks dictionary should differ (risk.declared affects limits and checks)
+    # At minimum, the risk-related checks should be different
+    assert edited_base["checks"] != original_base["checks"]

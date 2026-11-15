@@ -66,6 +66,18 @@ def test_intake_payload_covers_required_paths_in_order():
     assert all(q["text"] for q in payload["questions"])
 
 
+def test_intake_payload_marks_horizon_not_skippable():
+    from coherence_analyzer import intake
+
+    payload = build_site.intake_payload()
+    questions_by_path = {q["path"]: q for q in payload["questions"]}
+
+    assert not questions_by_path["objectives.horizon_years"]["skippable"]
+    for path in questions_by_path:
+        if path != "objectives.horizon_years":
+            assert questions_by_path[path]["skippable"]
+
+
 def test_store_dir_env_restores_previous_value(monkeypatch):
     monkeypatch.setenv(build_site.STORE_DIR_ENV, "before")
     with build_site.store_dir_env("temp"):
@@ -98,3 +110,21 @@ def test_site_extras_unwraps_skipped_profile_fields(tmp_path):
 
     assert card["first_withdrawal"] is None
     assert card["goals"] == []
+
+
+def test_build_reports_produces_english_headlines(tmp_path, monkeypatch):
+    import tempfile
+    from coherence_analyzer import pipeline
+
+    out = tmp_path / "reports"
+    personas = build_site.discover_personas()
+    with tempfile.TemporaryDirectory() as store:
+        monkeypatch.setenv(build_site.STORE_DIR_ENV, store)
+        index = build_site.build_reports(out, personas[:1])
+
+    rep_file = out / f"{index[0]['file']}"
+    rep = json.loads(rep_file.read_text(encoding="utf-8"))
+    headline = rep["explanation"]["headline"]
+    assert "portfolio" in headline.lower()
+    assert "portefeuille" not in headline.lower()
+    assert rep["explanation"]["disclaimer"] == "Educational simulation with fictional profiles. This is not personalised financial advice. No transaction is executed."
