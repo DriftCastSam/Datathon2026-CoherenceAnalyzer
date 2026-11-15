@@ -356,9 +356,10 @@ def test_metrics_are_the_spec_engine_keys(fid, m_base):
 
 
 def test_not_covered_lists_what_the_spec_says():
-    """§20.2: contraintes `fiscalite` and objectif `objective_vs_portfolio` are listed, never a check."""
+    """§20.2: contraintes `fiscalite` is listed, never a check; objectif `objective_vs_portfolio` was listed only
+    "until O1 lands" (P3.O1), so it is gone now."""
     assert "fiscalite" in contraintes.NOT_COVERED
-    assert "objective_vs_portfolio" in objectif.NOT_COVERED
+    assert "objective_vs_portfolio" not in objectif.NOT_COVERED
     assert not set(contraintes.NOT_COVERED) & set(factors.CHECK_FACTOR)
     assert not set(objectif.NOT_COVERED) & set(factors.CHECK_FACTOR)
 

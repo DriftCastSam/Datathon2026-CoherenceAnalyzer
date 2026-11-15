@@ -31,7 +31,7 @@
     "P2.UI": "impl",
     "P3.FLOWA": "impl",
     "P3.FLOWBG1": "impl",
-    "P3.O1": "tests",
+    "P3.O1": "impl",
     "P3.RESIZE": "impl",
     "P3.SKIP": "impl"
   }

@@ -341,7 +341,7 @@ def test_flow_c_reports_o1_as_info_in_checks_current(review_info):
     """Flow C: O1 is in `checks_current`, `info`, tagged `objectif`, value = the report's own mdd."""
     res = _o1(review_info["checks_current"])
     assert len(res) == 1 and res[0]["status"] == "info" and res[0]["factor"] == "objectif"
-    assert res[0]["value"] == pytest.approx(review_info["metrics"]["mdd"], abs=1e-9)
+    assert res[0]["value"] == pytest.approx(review_info["metrics_current"]["mdd"], abs=1e-9)
 
 
 def test_flow_c_verdict_ignores_o1(review_info):

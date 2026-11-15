@@ -371,6 +371,33 @@ def _h14(m, profile) -> list[Check]:
     return [c]
 
 
+O1_OBJECTIVE = "capital_preservation"
+_O1_FROM = ["objectives.primary", "risk.max_acceptable_drawdown_pct"]
+
+
+def _o1(m, profile) -> list[Check]:
+    """O1 (docs/spec-factors.md §20.2): primary objective = capital_preservation and engine mdd worse than the declared
+    risk.max_acceptable_drawdown_pct -> info (never warning/violation, never moves the verdict). Compares with the
+    declared figure (percent, converted to a fraction once), not with the derived limit. A skipped or missing input
+    -> unknown. Another declared objective -> no row (the check does not apply)."""
+    prim_node = (profile.get("objectives") or {}).get("primary")
+    dd_node = (profile.get("risk") or {}).get("max_acceptable_drawdown_pct")
+    src = "rule:objective_vs_drawdown"
+    dd = _val(dd_node)
+    dd_ok = not is_skipped(dd_node) and isinstance(dd, (int, float)) and not isinstance(dd, bool)
+    lim = _r(dd / 100) if dd_ok else None
+    mdd = m.get("mdd")
+    if is_skipped(prim_node) or _val(prim_node) is None:
+        return [_check("O1", "unknown", None, mdd, lim, "drawdown", list(_O1_FROM), src, "objective_skipped")]
+    if _val(prim_node) != O1_OBJECTIVE:
+        return []
+    if not dd_ok or mdd is None:
+        return [_check("O1", "unknown", None, mdd, lim, "drawdown", list(_O1_FROM), src, "accepted_drawdown_skipped")]
+    triggered = _lt(mdd, lim)
+    return [_check("O1", "info" if triggered else "pass", None, mdd, lim, "drawdown", list(_O1_FROM), src,
+                   "objective_vs_drawdown" if triggered else "objective_drawdown_consistent")]
+
+
 def run_engine(metrics: dict, profile: dict) -> list[Check]:
     """H7-H10, H14 on engine.analyse output (G1: P2, needs goal_probs)."""
     return (_h7(metrics, profile) + _h8(metrics, profile) + _h9(metrics, profile)
@@ -378,7 +405,7 @@ def run_engine(metrics: dict, profile: dict) -> list[Check]:
 
 
 def run_all(weights: dict[str, float], metrics: dict, profile: dict, assets, meta: dict) -> list[Check]:
-    return run_cheap(weights, profile, assets, meta) + run_engine(metrics, profile)
+    return run_cheap(weights, profile, assets, meta) + run_engine(metrics, profile) + _o1(metrics, profile)
 
 
 # ---------------------------------------------------------------- G1 (SPEC §7.3): goal probabilities
