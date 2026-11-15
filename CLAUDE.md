@@ -4,7 +4,7 @@ Read `SPEC.md` before any change. It is the source of truth. If code and spec di
 Then read `docs/spec-decisions.md`: team-approved resolutions of SPEC ambiguities. Where it is more specific than SPEC.md, it wins.
 
 ## Invariants (never break)
-- `limits` is computed from `rule:` fields and user-declared values only. No `llm:` field may feed it (test: `tests/profile/test_limits_no_llm_inputs.py`).
+- `limits` is computed from `rule:` fields, user-declared values, and (D11) gated numeric N3 note rules promoted as **provisional** limits: flagged `provisional: true`, traced as `values.parsed_notes[provisional]`, and any check against them capped at `warning` until the user approves. No other `llm:` field may feed it (test: `tests/profile/test_limits_no_llm_inputs.py`).
 - LLM-derived checks produce `warning | info | unknown` only. Only hard checks produce `violation`.
 - Every LLM output goes through `coherence_analyzer/gate.py`. Evidence must reference real `event_id`s or exact substrings of the user's notes.
 - Every number in an explanation must exist in the facts payload (`explain.numcheck`). Otherwise retry once, then use the template.

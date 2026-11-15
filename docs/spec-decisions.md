@@ -166,3 +166,18 @@ makes it worse; an unchanged or improved breach does not.
 
 ## UI note (2026-11-15)
 Dark-cockpit presentation and the display of `unknown` are deferred: a colleague is revamping the UI.
+
+## D16. Two fixed disclaimers: seed personas vs user-made profiles (SPEC §9.4). Approved 2026-11-15 (owner)
+Seed persona profiles keep the §9.4 text ("... avec des profils fictifs" / "... with fictional profiles"). A profile
+created by a user (`meta.origin = "user"`, set by POST /profiles; seeds are `"seed"`) gets the same text without the
+fictional-profiles clause: FR « Simulation éducative. Ceci n'est pas un conseil financier personnalisé. Aucune
+transaction n'est exécutée. » / EN "Educational simulation. This is not personalised financial advice. No transaction
+is executed." Both live in `config.py`, never LLM-written; every report carries the one that matches its profile.
+
+## D17. Holdings are typed in by the user (SPEC §18 stands). Approved 2026-11-15 (owner)
+Real users enter their own weights and value (`PUT /profiles/{id}/portfolio`). No bank connection, no account or CSV
+import; nothing is executed.
+
+## D18. Live LLM model = Claude Haiku 5.5 on Bedrock. Approved 2026-11-15 (owner)
+Live and record runs use `us.anthropic.claude-haiku-5-5`. Template fallbacks (D13 point 4) are accepted as the cost of
+the smaller model. The mock tests keep reading the hand-written cache entries (`fixture:hand-written`).
