@@ -35,11 +35,27 @@ def test_site_extras_unwraps_skipped_profile_fields(tmp_path):
     assert card["goals"] == []
 
 
-def test_build_reports_produces_english_headlines(tmp_path, monkeypatch):
-    out = tmp_path / "reports"
+def test_build_reports_en_produces_full_index_shape(tmp_path, monkeypatch):
+    """English reports have persona_id, name, file, label, portfolio, verdict, profile in index entries."""
+    personas = [build_site.load_persona("robert"), build_site.load_persona("amira")]
+    out = tmp_path / "reports" / "en-CA"
     with tempfile.TemporaryDirectory() as store:
         monkeypatch.setenv(build_site.STORE_DIR_ENV, store)
-        index = build_site.build_reports(out)
+        index = build_site.build_reports_en(out, personas)
+
+    assert len(index) > 0
+    entry = index[0]
+    assert "persona_id" in entry
+    assert "name" in entry
+    assert "file" in entry
+    assert "label" in entry
+    assert "portfolio" in entry
+    assert "verdict" in entry
+    assert "profile" in entry
+    assert entry["persona_id"] == "persona-robert"
+    assert entry["name"] == "Robert"
+    assert build_site.LABEL_SEPARATOR in entry["label"]
+    assert "current portfolio" in entry["label"]
 
     rep_file = out / "robert-review.json"
     rep = json.loads(rep_file.read_text(encoding="utf-8"))
@@ -47,6 +63,27 @@ def test_build_reports_produces_english_headlines(tmp_path, monkeypatch):
     assert "portfolio" in headline.lower()
     assert "portefeuille" not in headline.lower()
     assert rep["explanation"]["disclaimer"] == "Educational simulation with fictional profiles. This is not personalised financial advice. No transaction is executed."
+
+
+def test_build_reports_fr_produces_simple_index_shape(tmp_path, monkeypatch):
+    """French reports have file, label, verdict, profile (no persona_id/name/portfolio) to match origin/loop/p0."""
+    out = tmp_path / "reports"
+    with tempfile.TemporaryDirectory() as store:
+        monkeypatch.setenv(build_site.STORE_DIR_ENV, store)
+        fr_files = build_site.build_whatif_fr(out)
+        index = build_site.build_reports_fr(out, fr_files)
+
+    assert len(index) > 0
+    entry = index[0]
+    assert "file" in entry
+    assert "label" in entry
+    assert "verdict" in entry
+    assert "profile" in entry
+    # These should NOT be present in French index
+    assert "persona_id" not in entry
+    assert "name" not in entry
+    assert "portfolio" not in entry
+    assert "portefeuille" in entry["label"]
 
 
 def test_build_emits_app_html_and_index_html(tmp_path, monkeypatch):
@@ -57,6 +94,50 @@ def test_build_emits_app_html_and_index_html(tmp_path, monkeypatch):
     assert (tmp_path / "app.html").is_file(), "app.html (English app) should exist"
     assert (tmp_path / "index.html").is_file(), "index.html (French dashboard) should exist"
     assert not (tmp_path / "legacy.html").is_file(), "legacy.html should not exist"
+
+    # Check report directories
+    assert (tmp_path / "reports" / "index.json").is_file(), "French reports index"
+    assert (tmp_path / "reports" / "en-CA" / "index.json").is_file(), "English reports index"
+
+    # Verify French reports (simple shape)
+    fr_index = json.loads((tmp_path / "reports" / "index.json").read_text(encoding="utf-8"))
+    assert len(fr_index) > 0
+    fr_entry = fr_index[0]
+    assert "file" in fr_entry and "label" in fr_entry and "verdict" in fr_entry
+    assert "persona_id" not in fr_entry, "French index should not have persona_id"
+    assert "portefeuille" in fr_entry["label"]
+
+    fr_rep = json.loads((tmp_path / "reports" / "robert-review.json").read_text(encoding="utf-8"))
+    assert "portefeuille" in fr_rep["explanation"]["headline"].lower()
+    assert fr_rep["explanation"]["disclaimer"].startswith("Simulation éducative")
+
+    # Verify English reports (full shape with persona_id, name, etc.)
+    en_index = json.loads((tmp_path / "reports" / "en-CA" / "index.json").read_text(encoding="utf-8"))
+    assert len(en_index) > 0
+    en_entry = en_index[0]
+    assert "persona_id" in en_entry, "English index must have persona_id"
+    assert "name" in en_entry, "English index must have name"
+    assert "file" in en_entry
+    assert "label" in en_entry
+    assert "portfolio" in en_entry, "English index must have portfolio"
+    assert "verdict" in en_entry
+    assert en_entry["persona_id"] == "persona-robert"
+    assert "current portfolio" in en_entry["label"]
+
+    en_rep = json.loads((tmp_path / "reports" / "en-CA" / "robert-review.json").read_text(encoding="utf-8"))
+    assert "portfolio" in en_rep["explanation"]["headline"].lower()
+    assert en_rep["explanation"]["disclaimer"].startswith("Educational simulation")
+
+    # Verify universe/whatif files exist for English app with persona_id filenames
+    assert (tmp_path / "reports" / "en-CA" / "universe-persona-robert.json").is_file()
+    assert (tmp_path / "reports" / "en-CA" / "whatif-persona-robert.json").is_file()
+    assert (tmp_path / "reports" / "en-CA" / "universe-persona-amira.json").is_file()
+    assert (tmp_path / "reports" / "en-CA" / "whatif-persona-amira.json").is_file()
+    assert (tmp_path / "reports" / "en-CA" / "universe-persona-mateo.json").is_file()
+    assert (tmp_path / "reports" / "en-CA" / "whatif-persona-mateo.json").is_file()
+
+    # Verify intake.json exists for English
+    assert (tmp_path / "reports" / "en-CA" / "intake.json").is_file()
 
     app_html = (tmp_path / "app.html").read_text(encoding="utf-8")
     assert 'lang="en-CA"' in app_html

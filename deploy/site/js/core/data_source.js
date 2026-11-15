@@ -5,7 +5,7 @@
      "static" (prebuilt JSON under reports/). All URLs are relative so one origin serves both. */
   const API_DIR = "api/";
   const SITE_API_DIR = "site-api/";
-  const REPORT_DIR = "reports/";
+  const REPORT_DIR = "reports/en-CA/";
   const HEALTH_TIMEOUT_MS = 1500;
   const REQUEST_TIMEOUT_MS = 120000;
   const INTAKE_LOCALE = "en-CA";

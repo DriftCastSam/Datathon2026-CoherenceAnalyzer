@@ -31,18 +31,31 @@ sys.path.insert(0, str(ROOT))
 os.environ.setdefault("COHERENCE_ANALYZER_LLM", "mock")
 
 FIXTURES = ROOT / "fixtures"
-SITE_LOCALE = "en-CA"
+FR_LOCALE = "fr-CA"
+EN_LOCALE = "en-CA"
+SITE_LOCALE = EN_LOCALE  # backward compatibility for serve_local.py
+INTAKE_FILE = "intake.json"
 STORE_DIR_ENV = "COHERENCE_ANALYZER_STORE_DIR"
-REPORTS = [  # (file name, persona fixture dir, portfolio file, picker label); the index keeps this order
+
+# French labels for dashboard (index.html) - must match origin/loop/p0 for frozen tests
+REPORTS_FR = [  # (file name, persona fixture dir, portfolio file, picker label); the index keeps this order
     ("robert-review-nvda", "robert", "portfolio_review.json", "Robert · portefeuille avec NVDA à {NVDA} %"),
     ("robert-review", "robert", "portfolio.json", "Robert · portefeuille actuel"),
     ("amira-review", "amira", "portfolio.json", "Amira · portefeuille actuel"),
     ("mateo-review", "mateo", "portfolio.json", "Mateo · portefeuille actuel"),
 ]
+
+# English labels for app (app.html)
+LABEL_SEPARATOR = " · "
+CURRENT_LABEL = "current portfolio"
+EXTRA_PORTFOLIOS = {  # dir name -> [(report stem suffix, portfolio file, label)]
+    "robert": [("-nvda", "portfolio_review.json", "portfolio with NVDA at 10%")],
+}
+
 # The Flow B demo report (deploy/preview_report.py output): its own file, and the profile directory it was built from.
 FLOW_B_NAME, FLOW_B_PROFILE = "robert-nvda", "robert"
 
-# The profiles the what-if is precomputed for are the ones REPORTS names (deploy/whatif.py takes the profile directory).
+# The profiles the what-if is precomputed for are the ones REPORTS_FR names (deploy/whatif.py takes the profile directory).
 
 
 def _val(x):
@@ -62,6 +75,15 @@ def load_persona(dir_name: str) -> Persona:
     profile = json.loads((FIXTURES / dir_name / "profile.json").read_text(encoding="utf-8"))
     name = (profile.get("identity") or {}).get("name") or dir_name.capitalize()
     return Persona(dir_name, profile["meta"]["profile_id"], name)
+
+
+def report_specs_en(persona: Persona) -> list[tuple[str, str, str]]:
+    """English report specs for one persona: (stem, portfolio_file, label).
+    Returns current portfolio first, then any extra scenario portfolios."""
+    specs = [(f"{persona.dir_name}-review", "portfolio.json", CURRENT_LABEL)]
+    for suffix, pf_file, label in EXTRA_PORTFOLIOS.get(persona.dir_name, []):
+        specs.append((f"{persona.dir_name}-review{suffix}", pf_file, label))
+    return specs
 
 
 def site_extras(profile_dir: Path, name: str, portfolio_file: str, whatif_files: dict | None = None) -> dict:
@@ -119,14 +141,22 @@ def missing_by_factor(persona: str) -> dict:
     return {f: intake.missing(profile, f) for f in intake.FACTORS}
 
 
-def build_whatif(out: Path) -> dict[str, dict]:
-    """Precompute the what-if (deploy/whatif.py: universe + scenarios, real engine, no LLM) for each profile directory REPORTS
+def intake_payload(locale: str) -> dict:
+    """Intake checklist for the site: required questions with texts in the given locale."""
+    from coherence_analyzer import intake
+    questions = [{"factor": factor, "path": path, "text": intake.QUESTIONS[path][locale]}
+                 for factor, paths in intake.REQUIRED.items() for path in paths]
+    return {"skipped_by": intake.SKIPPED_BY, "questions": questions}
+
+
+def build_whatif_fr(out: Path) -> dict[str, dict]:
+    """Precompute the what-if (deploy/whatif.py: universe + scenarios, real engine, no LLM) for each profile directory REPORTS_FR
     names, once per directory. Files: reports/universe-<dir>.json and reports/whatif-<dir>.json; the legacy reports/universe.json
     and reports/whatif.json are those of the first review. Returns {dir name: {"universe": file, "scenarios": file}}."""
     import whatif  # deploy/whatif.py
     out.mkdir(parents=True, exist_ok=True)
     files: dict[str, dict] = {}
-    for _, persona, _, _ in REPORTS:
+    for _, persona, _, _ in REPORTS_FR:
         if persona in files:
             continue
         uni, scen = f"universe-{persona}.json", f"whatif-{persona}.json"
@@ -135,26 +165,69 @@ def build_whatif(out: Path) -> dict[str, dict]:
             shutil.copyfile(Path(tmp) / "universe.json", out / uni)
             shutil.copyfile(Path(tmp) / "whatif.json", out / scen)
         files[persona] = {"universe": uni, "scenarios": scen}
-    first = files[REPORTS[0][1]]
+    first = files[REPORTS_FR[0][1]]
     shutil.copyfile(out / first["universe"], out / "universe.json")
     shutil.copyfile(out / first["scenarios"], out / "whatif.json")
     return files
 
 
-def build_reports(out: Path, whatif_files: dict[str, dict] | None = None) -> list[dict]:
+def build_whatif_en(out: Path, personas: list[Persona]) -> None:
+    """Precompute the what-if for each persona. Files: reports/en-CA/universe-<profile_id>.json and whatif-<profile_id>.json."""
+    import whatif  # deploy/whatif.py
+    out.mkdir(parents=True, exist_ok=True)
+    for persona in personas:
+        uni, scen = f"universe-{persona.profile_id}.json", f"whatif-{persona.profile_id}.json"
+        with tempfile.TemporaryDirectory() as tmp:
+            whatif.build(Path(tmp), FIXTURES / persona.dir_name)
+            shutil.copyfile(Path(tmp) / "universe.json", out / uni)
+            shutil.copyfile(Path(tmp) / "whatif.json", out / scen)
+    # Also create legacy unsuffixed files for the first persona (Robert)
+    first_id = personas[0].profile_id
+    shutil.copyfile(out / f"universe-{first_id}.json", out / "universe.json")
+    shutil.copyfile(out / f"whatif-{first_id}.json", out / "whatif.json")
+
+
+def build_reports_fr(out: Path, whatif_files: dict[str, dict]) -> list[dict]:
+    """Build French reports for dashboard (index.html). Entry shape: {file, label, verdict, profile} - must match origin/loop/p0."""
     from coherence_analyzer import pipeline
     out.mkdir(parents=True, exist_ok=True)
     index = []
-    for name, persona, pf_file, template in REPORTS:
-        rep = pipeline.review(FIXTURES / persona, pf_file, locale=SITE_LOCALE)
+    for name, persona, pf_file, template in REPORTS_FR:
+        rep = pipeline.review(FIXTURES / persona, pf_file, locale=FR_LOCALE)
         pers = load_persona(persona)
-        extras = site_extras(FIXTURES / persona, pers.name, pf_file, (whatif_files or {}).get(persona))
+        extras = site_extras(FIXTURES / persona, pers.name, pf_file, whatif_files.get(persona))
         label = _label(template, extras)
         rep["site"] = {**extras, "label": label, "intake": missing_by_factor(persona)}
         (out / f"{name}.json").write_text(json.dumps(rep, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
         index.append({"file": f"{name}.json", "label": label, "verdict": rep["verdict"],
                       "profile": rep.get("profile_coherence", {}).get("status")})
     (out / "index.json").write_text(json.dumps(index, ensure_ascii=False), encoding="utf-8")
+    return index
+
+
+def build_reports_en(out: Path, personas: list[Persona]) -> list[dict]:
+    """Build English reports for app (app.html). Entry shape: {persona_id, name, file, label, portfolio, verdict, profile}."""
+    from coherence_analyzer import pipeline
+    out.mkdir(parents=True, exist_ok=True)
+    index = []
+    for persona in personas:
+        for stem, pf_file, label_suffix in report_specs_en(persona):
+            rep = pipeline.review(FIXTURES / persona.dir_name, pf_file, locale=EN_LOCALE)
+            extras = site_extras(FIXTURES / persona.dir_name, persona.name, pf_file, whatif_files=None)
+            label = f"{persona.name}{LABEL_SEPARATOR}{label_suffix}"
+            rep["site"] = {**extras, "label": label, "intake": missing_by_factor(persona.dir_name)}
+            (out / f"{stem}.json").write_text(json.dumps(rep, ensure_ascii=False, separators=(",", ":")), encoding="utf-8")
+            index.append({
+                "persona_id": persona.profile_id,
+                "name": persona.name,
+                "file": f"{stem}.json",
+                "label": label,
+                "portfolio": pf_file,
+                "verdict": rep["verdict"],
+                "profile": rep.get("profile_coherence", {}).get("status")
+            })
+    (out / "index.json").write_text(json.dumps(index, ensure_ascii=False), encoding="utf-8")
+    (out / INTAKE_FILE).write_text(json.dumps(intake_payload(EN_LOCALE), ensure_ascii=False), encoding="utf-8")
     return index
 
 
@@ -192,9 +265,21 @@ def build(out: Path) -> Path:
     try:
         with tempfile.TemporaryDirectory() as store:
             os.environ[STORE_DIR_ENV] = store
-            files = build_whatif(out / "reports")
-            build_reports(out / "reports", files)
+            # French reports for dashboard (index.html) - must match origin/loop/p0 for frozen tests
+            fr_files = build_whatif_fr(out / "reports")
+            build_reports_fr(out / "reports", fr_files)
             build_flow_b(out / "reports")
+            # English reports for app (app.html) - full shape with persona_id, name, etc.
+            # Preserve order and deduplicate persona directories from REPORTS_FR
+            seen = set()
+            persona_dirs = []
+            for _, dir_name, _, _ in REPORTS_FR:
+                if dir_name not in seen:
+                    seen.add(dir_name)
+                    persona_dirs.append(dir_name)
+            personas = [load_persona(dir_name) for dir_name in persona_dirs]
+            build_whatif_en(out / "reports" / "en-CA", personas)
+            build_reports_en(out / "reports" / "en-CA", personas)
     finally:
         if saved is None:
             os.environ.pop(STORE_DIR_ENV, None)
