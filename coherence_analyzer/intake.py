@@ -16,16 +16,6 @@ from typing import Any
 FACTORS = ("objectif", "horizon", "risque", "contraintes", "preferences")
 LOCALES = ("fr-CA", "en-CA")
 SKIPPED_BY = "user:skipped"
-NOT_SKIPPABLE: frozenset[str] = frozenset({
-    "objectives.horizon_years",
-    "identity.retirement_target_age",
-    "situation.planned_withdrawals",
-    "situation.emergency_fund",
-    "situation.monthly_expenses",
-    "risk.declared",
-    "risk.max_acceptable_drawdown_pct",
-    "preferences.asset_types_refused",
-})
 PARSED_RULES_PATH = "values.parsed_notes.value"
 THEME_NUMBER_KEY = "max_pct"
 
@@ -216,7 +206,7 @@ def next_question(profile: dict, factor: str, locale: str = "fr-CA") -> dict | N
         rule = dict(_theme_rules_without_number(profile))[path]
         text = THEME_NUMBER_QUESTION[locale].format(quote=rule.get("quote", ""),
                                                     theme=(rule.get("params") or {}).get("theme", ""))
-    return {"factor": factor, "path": path, "text": text, "locale": locale, "skippable": path not in NOT_SKIPPABLE}
+    return {"factor": factor, "path": path, "text": text, "locale": locale}
 
 
 def _assign(profile: dict, path: str, value: Any) -> dict:
