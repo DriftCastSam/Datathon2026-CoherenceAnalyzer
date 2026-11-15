@@ -10,7 +10,13 @@ Invariants kept here (SPEC §1):
 - inv. 2: no request body carries `limits`, `limits_trace` or any `llm:` field. Bodies forbid unknown keys (422), and
   intake paths are restricted to the intake checklist. Limits are recomputed by `pipeline.review`; the refreshed
   profile (limits included) replaces the working profile.json after each review.
-- inv. 7: no route path names a trade action; `order_intent` events are refused (501, Flow B is P2, D7).
+- inv. 7: no route path names a trade action beyond SPEC §12's `/intents/{id}/confirm`; nothing is executed.
+
+Flow B (P2.APIFB, D7, D10): an `order_intent` event is appended, N4 drafts the intent (B1, through the gate), and the
+response is `{event, intent}` with the draft (`status: draft`, only the fields the user stated, the rest null). The
+draft is stored in the working copy (`intents.json`, `intent_drafts.json`). `POST /intents/{id}/confirm` takes the
+user-edited intent (ticker, target_weight_pct, funding), appends an `intent_confirmed` event and runs B3-B9; the
+response is the Flow B report. A second confirmation of the same intent is a 409.
 """
 from __future__ import annotations
 
@@ -24,17 +30,17 @@ from typing import Annotated, Any, Literal
 
 from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, field_validator
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, field_validator, model_validator
 
-from . import config, intake, pipeline, store
+from . import config, data, intake, pipeline, store
+from . import intent as intent_mod
 
 EVENT_TYPES = ("question", "order_intent", "quiz_result", "profile_edit", "note", "intent_confirmed")
 COPY_PATTERNS = ("profile.json", "events.jsonl", "portfolio*.json", "intents.json")
 DEFAULT_LOCALE = "fr-CA"
 DEFAULT_SOURCE = "ui_chat"
-FLOW_B_MESSAGE = ("order_intent events are not accepted: Flow B (intent parsing, confirmation, trade simulation) "
-                  "is P2 (docs/spec-decisions.md D7). Nothing was appended.")
 
+_INTENT_ID = re.compile(r"^in_(\d{4,})$")
 _RUN_ID = re.compile(r"^[A-Za-z0-9_-]{1,64}$")
 _EVENT_ID = re.compile(r"^ev_(.+)_(\d+)$")
 _ISO_DATETIME = re.compile(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2}(\.\d+)?)?(Z|[+-]\d{2}:\d{2})?$")
@@ -231,11 +237,17 @@ def _next_event_id(events: list[dict], fixture: Path) -> str:
     return f"ev_{name}_{highest + 1:04d}"
 
 
+def _append_event(work: Path, event: dict) -> None:
+    path = work / "events.jsonl"
+    if path.exists() and path.stat().st_size and not path.read_bytes().endswith(b"\n"):
+        with open(path, "ab") as f:
+            f.write(b"\n")
+    store.append_event(path, event)
+
+
 @app.post("/profiles/{profile_id}/events")
 def post_event(profile_id: str, body: EventIn) -> dict:
     work, fixture = _workdir(profile_id)
-    if body.type == "order_intent":
-        raise HTTPException(status_code=501, detail=FLOW_B_MESSAGE)
     if body.type == "intent_confirmed" and not body.payload:
         raise HTTPException(status_code=422, detail="intent_confirmed needs the confirmed intent as payload (§3.4)")
     path = work / "events.jsonl"
@@ -245,11 +257,174 @@ def post_event(profile_id: str, body: EventIn) -> dict:
                  "type": body.type, "text": body.text, "payload": body.payload, "source": body.source}
         if body.parent_event_id:
             event["parent_event_id"] = body.parent_event_id
-        if path.exists() and path.stat().st_size and not path.read_bytes().endswith(b"\n"):
-            with open(path, "ab") as f:
-                f.write(b"\n")
-        store.append_event(path, event)
+        _append_event(work, event)
+        if body.type == "order_intent":
+            return {"event": event, "intent": _draft_intent(work, event)}
     return event
+
+
+# ---------------------------------------------------------------- Flow B: draft intent (B1, B2) and confirm (B3-B9)
+
+class FundingIn(_Body):
+    """The funding the user states (SPEC §3.6): a kind and the one parameter that kind needs."""
+    kind: Literal["specific", "pro_rata_all", "pro_rata_class", "cash_contribution"]
+    ticker: str | None = Field(default=None, min_length=1)
+    asset_class: str | None = Field(default=None, min_length=1)
+    amount_cad: Annotated[float, Field(gt=0, strict=True)] | None = None
+
+    @model_validator(mode="after")
+    def _kind_parameter(self) -> "FundingIn":
+        needs = {"specific": "ticker", "pro_rata_class": "asset_class", "cash_contribution": "amount_cad"}.get(self.kind)
+        given = {k for k in ("ticker", "asset_class", "amount_cad") if getattr(self, k) is not None}
+        if given != ({needs} if needs else set()):
+            raise ValueError(f"funding {self.kind!r} takes " + (f"exactly {needs!r}" if needs else "no other field"))
+        return self
+
+    def as_dict(self) -> dict:
+        out: dict = {"kind": self.kind}
+        for k in ("ticker", "asset_class", "amount_cad"):
+            v = getattr(self, k)
+            if v is not None:
+                out[k] = _plain_number(v) if k == "amount_cad" else v
+        return out
+
+
+class ConfirmIn(_Body):
+    """The user-edited intent. Only these three fields: nothing else (limits, limits_trace, llm: ...) is accepted."""
+    ticker: str = Field(min_length=1)
+    target_weight_pct: Annotated[float, Field(gt=0, le=100, strict=True)]
+    funding: FundingIn
+
+
+def _plain_number(v: float) -> int | float:
+    return int(v) if float(v).is_integer() else v
+
+
+def _read_json(path: Path, default: Any) -> Any:
+    return json.loads(path.read_text(encoding="utf-8")) if path.exists() else default
+
+
+def _write_json(path: Path, doc: Any) -> None:
+    tmp = path.with_name(path.name + ".tmp")
+    tmp.write_text(json.dumps(doc, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
+    os.replace(tmp, path)
+
+
+def _known_intent_ids() -> list[int]:
+    """Numbers of every intent id in the fixtures and in every working copy (ids are unique across profiles)."""
+    nums: list[int] = []
+    dirs = list(_fixture_dirs().values()) + [store.root() / "profiles" / pid for pid in _fixture_dirs()]
+    for d in dirs:
+        try:
+            records = _read_json(d / "intents.json", [])
+        except (OSError, ValueError):
+            continue
+        for rec in records if isinstance(records, list) else []:
+            m = _INTENT_ID.match(str(rec.get("intent_id", "")))
+            if m:
+                nums.append(int(m.group(1)))
+    return nums
+
+
+def _draft_intent(work: Path, event: dict) -> dict:
+    """B1 (N4 through the gate) + B2 without auto-confirm: store the draft in the working copy and return it.
+
+    D10: the draft holds only what the user stated. A field N4 listed as ambiguous (a default or a guess), and every
+    field of a draft that failed the gate or never came back (cache miss), is null. Nothing is pre-filled."""
+    intents_path = work / "intents.json"
+    intents = _read_json(intents_path, [])
+    intent_id = f"in_{max(_known_intent_ids(), default=0) + 1:04d}"
+    blank = {k: None for k in pipeline.INTENT_KEYS}
+    record = {"intent_id": intent_id, "event_id": event["event_id"], **blank, "status": "draft"}
+    _write_json(intents_path, intents + [record])             # B1 reads the intent and its event from the working copy
+    state = pipeline.b1_parse_intent(work, intent_id)
+    parsed = state["draft"] or {}
+    ambiguous = set(parsed.get("ambiguous_fields") or []) if parsed else set(pipeline.INTENT_KEYS)
+    stated = {k: (None if k in ambiguous else parsed.get(k)) for k in pipeline.INTENT_KEYS}
+    record = {**record, **stated}
+    _write_json(intents_path, intents + [record])
+    sidecar = work / "intent_drafts.json"
+    _write_json(sidecar, {**_read_json(sidecar, {}), intent_id: {
+        "draft_gate": state["draft_gate"], "llm_calls": state["llm_calls"], "llm_errors": state["llm_errors"],
+        "draft": {**record} if state["draft"] else None}})
+    return {**record, "unstated_fields": [k for k in pipeline.INTENT_KEYS if stated[k] is None]}
+
+
+def _find_intent(intent_id: str) -> tuple[str, Path, dict]:
+    """(profile_id, working copy, record) of a draft made through this API; 404 when no working copy holds it."""
+    if _INTENT_ID.match(intent_id):
+        for pid in sorted(_fixture_dirs()):
+            work = store.root() / "profiles" / pid
+            try:
+                records = _read_json(work / "intents.json", [])
+            except (OSError, ValueError):
+                continue
+            for rec in records if isinstance(records, list) else []:
+                if rec.get("intent_id") == intent_id:
+                    return pid, work, rec
+    raise HTTPException(status_code=404, detail=f"unknown intent {intent_id!r}")
+
+
+@app.post("/intents/{intent_id}/confirm")
+def confirm_intent(intent_id: str, body: ConfirmIn) -> dict:
+    """B2 (the user's confirmed values win over the draft) then B3-B9. The trade is only simulated, never executed.
+
+    Everything is validated before anything is written. Confirming an intent twice is a 409 (no second event, no
+    second run)."""
+    profile_id, work, record = _find_intent(intent_id)
+    fixture = _fixture_dirs()[profile_id]
+    with _LOCK:
+        records = _read_json(work / "intents.json", [])
+        record = next(r for r in records if r.get("intent_id") == intent_id)
+        if record.get("status") != "draft":
+            raise HTTPException(status_code=409, detail=f"intent {intent_id!r} is already confirmed; "
+                                "its run is stored and a second confirmation is not recorded")
+        assets = data.load_assets()
+        tickers = set(assets.index)
+        funding = body.funding.as_dict()
+        if body.ticker not in tickers:
+            raise HTTPException(status_code=422, detail=f"ticker {body.ticker!r} is not in the asset universe")
+        if funding.get("ticker") is not None and funding["ticker"] not in tickers:
+            raise HTTPException(status_code=422, detail=f"funding ticker {funding['ticker']!r} is not in the universe")
+        if funding.get("asset_class") is not None and funding["asset_class"] not in set(assets["asset_class"]):
+            raise HTTPException(status_code=422, detail=f"unknown asset class {funding['asset_class']!r}")
+        confirmed_at = pipeline._now()
+        intent = {"intent_id": intent_id, "event_id": record["event_id"], "action": "buy", "ticker": body.ticker,
+                  "target_weight_pct": _plain_number(body.target_weight_pct), "funding": funding,
+                  "status": "confirmed", "confirmed_at": confirmed_at}
+        pf = data.load_portfolio(work / "portfolio.json", assets)
+        try:
+            intent_mod.apply(pf["weights_pct"], intent, pf["value_cad"])
+        except ValueError as exc:
+            raise HTTPException(status_code=422, detail=f"this trade cannot be applied: {exc}") from exc
+
+        events_path, intents_path = work / "events.jsonl", work / "intents.json"
+        events_before, intents_before = events_path.read_bytes(), intents_path.read_bytes()
+        events = store.read_events(events_path)
+        order_event = next((e for e in events if e["event_id"] == record["event_id"]), None)
+        if order_event is None:
+            raise HTTPException(status_code=409, detail=f"the event {record['event_id']!r} of this intent is missing")
+        side = _read_json(work / "intent_drafts.json", {}).get(intent_id) or {}
+        try:
+            _append_event(work, {"event_id": _next_event_id(events, fixture), "profile_id": profile_id,
+                                 "ts": confirmed_at, "type": "intent_confirmed",
+                                 "text": f"Intent {intent_id} confirmed by the user.", "payload": intent,
+                                 "source": DEFAULT_SOURCE, "parent_event_id": record["event_id"]})
+            _write_json(intents_path, [intent if r.get("intent_id") == intent_id else r for r in records])
+            state = {"fixture_dir": str(work), "intent_id": intent_id, "run_id": store.new_run_id(),
+                     "started_at": pipeline._now(),
+                     "event": {"event_id": order_event["event_id"], "text": order_event["text"]},
+                     "fixture_intent": intent, "draft": side.get("draft"),
+                     "draft_gate": side.get("draft_gate", "rejected:schema"),
+                     "llm_calls": list(side.get("llm_calls") or []), "llm_errors": list(side.get("llm_errors") or [])}
+            state = pipeline.b2_confirm(state, auto_confirm=True)
+            for step in pipeline.FLOW_B_STEPS:
+                state = step(state)
+        except BaseException:
+            events_path.write_bytes(events_before)
+            intents_path.write_bytes(intents_before)
+            raise
+    return state["report"]
 
 
 # ---------------------------------------------------------------- parsed-rule decisions (D7 point 1)

@@ -210,6 +210,7 @@ def scen(tmp_path_factory) -> dict:
         out["draft_nodes"] = list(spy.nodes)
         out["events_after_draft"] = events_path.read_bytes()
         out["reports_after_draft"] = sorted((api_store / "reports").glob("*.json")) if (api_store / "reports").exists() else []
+        out["audits_after_draft"] = sorted((api_store / "audit").glob("*.json")) if (api_store / "audit").exists() else []
         out["store_files_after_draft"] = {str(p): p.read_text(encoding="utf-8")
                                           for p in sorted(api_store.rglob("*")) if p.is_file()}
         if r.status_code not in (200, 201):
@@ -304,7 +305,7 @@ def test_order_intent_appends_one_event_and_runs_b1_only(scen):
     assert appended[0]["type"] == "order_intent" and appended[0]["text"] == ORDER_TEXT
     assert scen["draft_nodes"] == ["intent_parser"]
     assert scen["reports_after_draft"] == []
-    assert not (scen["store"] / "audit").exists() or not list((scen["store"] / "audit").glob("*.json"))
+    assert scen["audits_after_draft"] == []
 
 
 def test_draft_is_stored_in_the_working_copy_never_under_fixtures(scen):
