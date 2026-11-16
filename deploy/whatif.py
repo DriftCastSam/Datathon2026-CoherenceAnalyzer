@@ -29,6 +29,7 @@ from coherence_analyzer.coherence import hard, report as report_mod, soft  # noq
 
 FIXTURES = ROOT / "fixtures"
 TARGETS = (5.0, 10.0)
+CASH_FUNDING = "cash"  # live-only funding id: the amount is new money added to the portfolio
 METRIC_KEYS = ("vol", "mdd", "p5_T", "p50_T", "p95_T", "loss_prob", "width")
 
 
@@ -73,8 +74,8 @@ def context(profile_dir: Path, locale: str) -> dict:
     meta = {n: data.load_meta(n) for n in pipeline.META_NAMES}
     w0, value = pf["weights_pct"], pf["value_cad"]
 
-    def run(weights_pct: dict) -> tuple[dict, list]:
-        m = store.plain(engine.analyse(market, weights_pct, horizon_m, value))
+    def run(weights_pct: dict, value_cad: float | None = None) -> tuple[dict, list]:
+        m = store.plain(engine.analyse(market, weights_pct, horizon_m, value if value_cad is None else value_cad))
         fr = {t: v / 100 for t, v in weights_pct.items()}
         checks = report_mod.tag_checks(hard.run_all(fr, m, profile, assets, meta) + soft.run_all(profile, None, fr, assets))
         return m, checks
@@ -96,9 +97,14 @@ def context(profile_dir: Path, locale: str) -> dict:
             fundings.append((f"specific:{bonds[0]}", {"kind": "specific", "ticker": bonds[0]},
                              f"From {assets.loc[bonds[0], 'name']} ({bonds[0]})"))
 
+    # Live-only funding (serve_local computes any amount): new money, nothing is sold.
+    live_fundings = [(CASH_FUNDING, {"kind": "cash_contribution"},
+                      "Nouvel apport en espèces" if locale == "fr-CA" else "New cash contribution")]
+
     return {
         "assets": assets, "profile": profile, "w0": w0, "value": value, "as_of": pf["as_of"],
-        "m0": m0, "c0": c0, "base_secs": base_secs, "fundings": fundings, "run": run, "locale": locale
+        "m0": m0, "c0": c0, "base_secs": base_secs, "fundings": fundings, "live_fundings": live_fundings,
+        "run": run, "locale": locale
     }
 
 
@@ -121,6 +127,7 @@ def universe(ctx: dict) -> dict:
         "verdict": report_mod.verdict(c0), "sections": ctx["base_secs"], "metrics": {k: m0[k] for k in METRIC_KEYS},
         "cone": _cone(m0), "shares": _shares(w0, assets), "value_cad": ctx["value"], "as_of": ctx["as_of"],
         "weights_pct": w0, "fundings": [{"id": i, "label": lab} for i, _, lab in ctx["fundings"]], "targets": list(TARGETS),
+        "live_fundings": [{"id": i, "label": lab} for i, _, lab in ctx["live_fundings"]],
         "checks": {f"{c['id']}|{c.get('subject')}": c["status"] for c in c0}
     }
     return {"assets": universe_assets, "base": base}
@@ -151,29 +158,67 @@ def scenarios(ctx: dict, tickers: list[str]) -> dict:
         for target in TARGETS:
             for fid, funding, _ in ctx["fundings"]:
                 key = f"{int(target)}|{fid}"
+                intent = {"action": "buy", "ticker": t, "target_weight_pct": target, "funding": funding}
                 try:
-                    w1, _ = intent_mod.apply(ctx["w0"], {"action": "buy", "ticker": t, "target_weight_pct": target,
-                                                  "funding": funding}, ctx["value"])
+                    w1, _ = intent_mod.apply(ctx["w0"], intent, ctx["value"])
                 except ValueError as exc:
                     scen[key] = {"error": str(exc)}
                     continue
-                m1, c1 = ctx["run"](w1)
-                secs_ctx = factors.SectionContext(
-                    profile=ctx["profile"], limits=ctx["profile"]["limits"], limits_trace=ctx["profile"]["limits_trace"],
-                    checks_current=ctx["c0"], checks_proposed=c1, metrics_current=ctx["m0"], metrics_proposed=m1,
-                    intent={"action": "buy", "ticker": t, "target_weight_pct": target, "funding": funding}, locale=ctx["locale"])
-                secs = report_mod.build_sections(secs_ctx)
-                scen[key] = {
-                    "verdict": report_mod.verdict(c1), "metrics": {k: m1[k] for k in METRIC_KEYS}, "cone": _cone(m1),
-                    "shares": _shares(w1, assets), "weights_pct": {k: round(v, 3) for k, v in w1.items()},
-                    "checks": [{k: c.get(k) for k in ("id", "subject", "status", "value", "limit", "unit", "factor")}
-                               for c in c1 if c["status"] != "pass"],
-                    "sections": [{"factor": s["factor"], "title": s["title"], "before": ctx["base_secs"][s["factor"]],
-                                  "after": s["status"], "segments": explain.template_section(s["facts"])["segments"]}
-                                 for s in secs],
-                }
+                scen[key] = _scenario(ctx, w1, ctx["value"], intent)
         all_scen[t] = {"asset": a, "scenarios": scen}
     return all_scen
+
+
+def _scenario(ctx: dict, w1: dict, value_cad: float, intent: dict) -> dict:
+    """One scenario's payload (verdict, metrics, cone, shares, weights, non-pass checks, factor sections)."""
+    assets = ctx["assets"]
+    m1, c1 = ctx["run"](w1, value_cad)
+    secs_ctx = factors.SectionContext(
+        profile=ctx["profile"], limits=ctx["profile"]["limits"], limits_trace=ctx["profile"]["limits_trace"],
+        checks_current=ctx["c0"], checks_proposed=c1, metrics_current=ctx["m0"], metrics_proposed=m1,
+        intent=intent, locale=ctx["locale"])
+    secs = report_mod.build_sections(secs_ctx)
+    return {
+        "verdict": report_mod.verdict(c1), "metrics": {k: m1[k] for k in METRIC_KEYS}, "cone": _cone(m1),
+        "shares": _shares(w1, assets), "weights_pct": {k: round(v, 3) for k, v in w1.items()},
+        "value_cad": round(value_cad, 2),
+        "checks": [{k: c.get(k) for k in ("id", "subject", "status", "value", "limit", "unit", "factor")}
+                   for c in c1 if c["status"] != "pass"],
+        "sections": [{"factor": s["factor"], "title": s["title"], "before": ctx["base_secs"][s["factor"]],
+                      "after": s["status"], "segments": explain.template_section(s["facts"])["segments"]}
+                     for s in secs],
+    }
+
+
+def amount_intent(ctx: dict, ticker: str, amount_cad: float, funding_id: str) -> dict:
+    """The buy intent that puts exactly `amount_cad` CAD into `ticker` with the chosen funding.
+
+    Reallocation (pro_rata_all, specific:<T>): the portfolio value is unchanged, so the target weight is the held
+    weight plus amount / value. New cash ("cash"): the portfolio grows by the amount and the asset ends at
+    (held CAD + amount) / (value + amount). Raises ValueError for a non-positive amount or an unknown funding id.
+    """
+    if ticker not in ctx["assets"].index:
+        raise ValueError(f"unknown ticker: {ticker}")
+    amount = float(amount_cad)
+    if not amount > 0:
+        raise ValueError("the amount must be greater than 0")
+    value, held = float(ctx["value"]), float(ctx["w0"].get(ticker, 0.0))
+    if funding_id == CASH_FUNDING:
+        target = (held / 100 * value + amount) / (value + amount) * 100
+        funding = {"kind": "cash_contribution", "amount_cad": amount}
+    else:
+        funding = next((f for fid, f, _ in ctx["fundings"] if fid == funding_id), None)
+        if funding is None:
+            raise ValueError(f"unknown funding: {funding_id}")
+        target = held + amount / value * 100
+    return {"action": "buy", "ticker": ticker, "target_weight_pct": target, "funding": funding}
+
+
+def scenario_for_amount(ctx: dict, ticker: str, amount_cad: float, funding_id: str) -> dict:
+    """The scenario for a user-typed CAD amount (live route). Raises ValueError when it cannot be funded."""
+    intent = amount_intent(ctx, ticker, amount_cad, funding_id)
+    w1, value_after = intent_mod.apply(ctx["w0"], intent, ctx["value"])
+    return _scenario(ctx, w1, value_after, intent)
 
 
 def build(out: Path, profile_dir: Path | None = None, locale: str = "fr-CA") -> dict:

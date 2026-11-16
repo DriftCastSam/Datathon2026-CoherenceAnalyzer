@@ -1144,26 +1144,14 @@
             "Arn"
           ]
         },
-        "AuthType": "NONE",
-        "Cors": {
-          "AllowOrigins": [
-            "*"
-          ],
-          "AllowMethods": [
-            "GET",
-            "POST",
-            "PUT"
-          ],
-          "AllowHeaders": [
-            "*"
-          ]
-        }
+        "AuthType": "NONE"
       },
       "Metadata": {
         "com.aws.cloudformation.Context": {
-          "why": "Public demo API with no auth, invoked cross-origin by the CloudFront-hosted static site. Cors mirrors api.py's own CORSMiddleware(allow_origins=[\"*\"], allow_methods=[\"GET\",\"POST\",\"PUT\"], allow_headers=[\"*\"]) exactly so the browser-enforced preflight matches what the app itself already allows.",
+          "why": "Public demo API with no auth, invoked cross-origin by the CloudFront-hosted static site. No Cors property here: api.py's own CORSMiddleware(allow_origins=[\"*\"], allow_methods=[\"GET\",\"POST\",\"PUT\"], allow_headers=[\"*\"]) already sets Access-Control-Allow-Origin on every response. A Function URL Cors config adds its own copy of that header on top of the app's, and a response with two Access-Control-Allow-Origin values fails the Fetch spec's CORS check in real browsers (curl does not enforce this, so the bug was invisible to curl-based testing). One source of CORS headers only.",
           "must": [
-            "AuthType NONE paired with ApiFunctionUrlPermission (NONE alone on the URL does not grant public invoke)"
+            "AuthType NONE paired with ApiFunctionUrlPermission (NONE alone on the URL does not grant public invoke)",
+            "No Cors property on this resource (api.py's CORSMiddleware is the only source of Access-Control-Allow-Origin)"
           ]
         }
       },

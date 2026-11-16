@@ -60,7 +60,7 @@ XDIST = subprocess.run([PY, "-c", "import xdist"], capture_output=True).returnco
 ALLOWED = ["Read", "Edit", "Write", "Glob", "Grep",
            "Bash(python -m pytest:*)", "Bash(COHERENCE_ANALYZER_LLM=mock python -m pytest:*)", "Bash(pytest:*)",
            "Bash(python -m coherence_analyzer.cli:*)", "Bash(COHERENCE_ANALYZER_LLM=mock python -m coherence_analyzer.cli:*)",
-           "Bash(python -c:*)", "Bash(git status:*)", "Bash(git diff:*)", "Bash(git log:*)", "Bash(ls:*)"]
+           "Bash(python -c:*)", "Bash(python scripts/quick_tests.py:*)", "Bash(git status:*)", "Bash(git diff:*)", "Bash(git log:*)", "Bash(ls:*)"]
 DISALLOWED = ["Bash(git commit:*)", "Bash(git reset:*)", "Bash(git checkout:*)", "Bash(git stash:*)",
               "Bash(git push:*)", "Bash(pip install:*)", "Bash(curl:*)", "Bash(wget:*)", "WebFetch", "WebSearch"]
 
@@ -89,6 +89,18 @@ def changed_paths() -> list[str]:
     return sorted(line[3:].split(" -> ")[-1] for line in out.splitlines() if line.strip())
 
 
+PREEXISTING: set[str] = set()  # untracked files present at preflight (build/, editor junk): not the agent's doing
+
+
+def agent_changes() -> list[str]:
+    return [p for p in changed_paths() if p not in PREEXISTING]
+
+
+def blocked() -> bool:
+    """The agent raised a spec/test contradiction in THIS run (BLOCKED.md new or changed vs HEAD)."""
+    return BLOCKED.exists() and ".claude/loop/BLOCKED.md" in changed_paths()
+
+
 def log(msg: str) -> None:
     print(f"[loop {time.strftime('%H:%M:%S')}] {msg}", flush=True)
 
@@ -114,7 +126,9 @@ def pytest_run(paths: list[str], tag: str) -> dict:
 
 def verify_tests_phase(task: dict) -> list[str]:
     errs = []
-    stray = [p for p in changed_paths() if not p.startswith("tests/") and not p.startswith(".claude/loop/")]
+    if blocked():
+        return ["agent reported a blocker:\n" + BLOCKED.read_text()]
+    stray = [p for p in agent_changes() if not p.startswith("tests/") and not p.startswith(".claude/loop/")]
     if stray:
         errs.append(f"Phase A may only touch tests/. Also changed: {stray}")
     for t in task["tests"]:
@@ -140,10 +154,10 @@ def verify_impl_phase(task: dict) -> list[str]:
     for f, h in sorted(frozen.items()):
         if sha(ROOT / f) != h:
             errs.append(f"frozen test modified: {f}")
-    for p in changed_paths():
+    for p in agent_changes():
         if any(p == x or (x.endswith("/") and p.startswith(x)) for x in PROTECTED):
             errs.append(f"protected path modified: {p}")
-    if BLOCKED.exists():
+    if blocked():
         errs.append("agent reported a spec/test contradiction:\n" + BLOCKED.read_text())
         return errs
     acc = pytest_run(task["tests"], f"{task['id']}.B.acceptance")
@@ -151,12 +165,15 @@ def verify_impl_phase(task: dict) -> list[str]:
         errs.append("acceptance tests failing:\n" + acc["tail"])
     if acc["skipped"] and not task.get("allow_skips"):
         errs.append(f"acceptance tests skipped: {acc['skipped']}")
+    if errs:  # fail fast: the retry prompt only needs the acceptance failure
+        return errs
     if FULL_SUITE:
         full = pytest_run([], f"{task['id']}.B.full")
     else:  # only what the change can reach (scripts/quick_tests.py); `loop_lane.py merge` runs the full suite
         sys.path.insert(0, str(ROOT / "scripts"))
         import quick_tests
         picked, _, _ = quick_tests.select(quick_tests.changed_files("HEAD"), heavy=False, light_all=False)
+        picked = [p for p in picked if p not in task["tests"]]  # acceptance already ran above
         full = pytest_run(picked, f"{task['id']}.B.affected") if picked else {"rc": 0, "tail": ""}
     if full["rc"] != 0:
         errs.append("full suite failing:\n" + full["tail"])
@@ -169,7 +186,7 @@ def render(name: str, task: dict, retry: str = "") -> str:
     tpl = (LOOP / "prompts" / f"{name}.md").read_text()
     skip_rule = " (this task allows a reasoned conditional skip, see notes)" if task.get("allow_skips") else ""
     return tpl.format(id=task["id"], title=task["title"], spec=", ".join(task["spec"]),
-                      tests=", ".join(task["tests"]), code=", ".join(task.get("code", [])),
+                      tests=", ".join(task["tests"]), tests_sp=" ".join(task["tests"]), code=", ".join(task.get("code", [])),
                       notes=task.get("notes", ""), skip_rule=skip_rule, retry=retry)
 
 
@@ -210,7 +227,9 @@ def claude(prompt: str, tag: str, args) -> dict:
 
 
 def commit(msg: str) -> None:
-    sh("git", "add", "-A", check=True)
+    paths = agent_changes()  # never sweep pre-existing untracked junk (build/, ...) into a loop commit
+    if paths:
+        sh("git", "add", "-A", "--", *paths, check=True)
     r = sh("git", "commit", "-q", "-m", msg + "\n\nAuthored by scripts/agent_loop.py (Claude Code, headless).")
     if r.returncode != 0 and "nothing to commit" not in r.stdout:
         raise SystemExit(r.stdout + r.stderr)
@@ -226,7 +245,7 @@ def phase(task: dict, name: str, verify, args) -> bool:
         if not errs:
             return True
         log(f"  verify failed ({len(errs)} issue(s)); see .claude/loop/runs/{tag}.verify.json")
-        if BLOCKED.exists():
+        if blocked():
             return False
         retry = ("\nRETRY: the deterministic verifier rejected your previous attempt. Fix exactly these and "
                  "nothing else:\n" + "\n---\n".join(errs)[:6000] + "\n")
@@ -236,7 +255,8 @@ def phase(task: dict, name: str, verify, args) -> bool:
 # ---------- main ----------
 
 def preflight(args) -> None:
-    if sh("git", "status", "--porcelain").stdout.strip():
+    PREEXISTING.update(changed_paths())  # untracked only, given the check below
+    if sh("git", "status", "--porcelain", "--untracked-files=no").stdout.strip():
         raise SystemExit("working tree not clean: commit or stash first (each phase must start from a commit)")
     branch = sh("git", "branch", "--show-current").stdout.strip()
     if branch in ("main", "master"):

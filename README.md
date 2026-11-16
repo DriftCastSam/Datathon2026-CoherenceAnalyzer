@@ -305,6 +305,7 @@ All persona financial figures beyond the case brief are fictional team assumptio
   - Flow B UI (P2.UI): the API base URL is configuration (empty `<meta name="coherence-api-base">`), never a hard-coded host. D10 wins over the SPEC §3.6 « default pro_rata_all, shown before confirming »: the funding kind select starts on an empty choice and nothing is pre-filled except what the draft intent states. N3 decisions use the rule's index in the profile's `parsed_notes` list (the page keeps it when it de-duplicates rules across sections); after a decision the page patches `approved_by_user` locally and does not recompute the report. For a trade report the sections, checks and verdict describe the portfolio with the trade (`checks_proposed`); the key-data table and holdings stay today's portfolio and the cone shows both (« Avant » / « Après »). The static demo's `site` block for the trade report is built in the page from its `profile_card` and `limits`; a report returned by `/intents/{id}/confirm` reuses the `site` block already loaded.
   - Any user (P5.USERS): SPEC-AMBIGUITY resolved: (1) A new profile holds `null` (never a default) at every `intake.REQUIRED` path plus `identity.age` and `identity.employment_type`; `pipeline.py` reads `objectives.horizon_years` by key, so the keys exist. `schemas/profile.v2.json` gained `$defs/unanswered` (`null`) as an alternative on those fields (the `required` lists are unchanged); the fields stay required keys. A persona's profile is unaffected. (2) No limit exists until answered: `identity.employment_type` and `identity.age` are outside the intake checklist, so `risk.capacity` stays `null` and the table limits stay `unknown` for a user created through the API (a number the user did not give is never invented); the gap is reported to the owner. (3) Ids are `user-NNNN` (highest existing number + 1, assigned under the API lock); event ids are `ev_user<NNNN>_NNNN`. `display_name` is stored as `identity.name` and shown by `GET /profiles` (the id when absent). (4) A listed profile needs all three files; a profile created but with no portfolio yet is served by id (`GET /profiles/{id}`, `/intake`) and not listed. (5) The audit event of a portfolio set is `profile_edit`, source `ui`, path `portfolio`, `old` = the previous `{as_of, value_cad, weights_pct}` (null the first time), `new` = the submitted ones; a zero or negative weight is a 422. An existing `portfolio_id` of the same profile is kept (`robert-main`), else `<profile_id>-main`.
   - Dashboard for any user (P5.DASH): SPEC-AMBIGUITY: no route returns a profile's portfolio, and the intake / review routes do not carry the portfolio date or value, so a live report's `site.as_of` and `site.value_cad` are read from the report's own `stress` block (`stress.as_of`, `stress.value_cad`, written from the portfolio the review used), and `site.weights_pct` from `metrics_current.drivers` (weight x 100). The profile card and the limits come from `GET /profiles/{id}` read after the review (the review adopts a refreshed profile, so the limits are the recomputed ones); the page computes none of them. A live report has no precomputed what-if (`site.whatif = false`: the note is shown); only the static build precomputes it, for the profiles `REPORTS` names, against each profile's `portfolio.json` (so the two Robert reviews share one pair of files). `POST /profiles` is assumed to answer with the profile (`profile_id` or `meta.profile_id`). A `422` from `POST /profiles/{id}/review` (no portfolio or incomplete profile yet) opens the same onboarding as a new profile (intake, then portfolio form). The portfolio form needs weights summing to 100 +- 0.01 before it sends; the sum, date and value are checked in the page only to avoid a round trip, the API validates again. Picker names come from `GET /profiles` (`name`); the static picker's flow B entry has a neutral label.
+  - What-if amount invested: the user types the CAD amount put into the asset, or the same as a % of the current portfolio value; the two fields mirror each other and the last one typed is authoritative (the mirrored one is shown at 2 dp). Reallocation (pro rata, specific holding) keeps the portfolio value: target weight = held % + amount / value x 100. New cash contribution (live only, funding id `cash`) grows the portfolio by the amount: target weight = (held CAD + amount) / (value + amount) x 100, so exactly the amount is bought, and its bad-scenario loss is measured from the grown value. The static build still precomputes the 5 % / 10 % target-weight grid only (its keys are pinned by a frozen oracle); a typed amount equal to a preset's CAD (within $1; only the part above what is already held) uses it, any other amount is computed by `serve_local` (`POST /site-api/profiles/{id}/whatif/amount`), and the static site says so. The amount must be > $0 and at most what the funding holds.
   - Intake and draft UI (P3.UIINTAKE): the draft request is free text typed by the user (nothing pre-filled, D10); its `ts` is the browser's `Date.toISOString()` (audit metadata, not a computed value). A typed intake answer is sent as text, except: the theme share (`...params.max_pct`) becomes a JSON number in (0, 100] (comma accepted), a text starting with a digit, `-`, `[` or `{` (or `true` / `false`) is parsed as JSON when valid, and oui / non (yes / no) become booleans on the `prefers_*` and `home_bias_ok` paths only. One question is shown at a time (the first `next_question` in factor order). Rejecting a rule never asks for a number (a rejection records no limit); approving a `max_theme_weight` rule with no number asks for it with `prompt()`, and cancelling sends nothing. The static demo embeds `intake.missing` per factor for the persona's stored profile, so it does not reflect answers given elsewhere.
   - The narration prompt is `explainer.v2.md` (describe, never prescribe, in any person or mood; no ranking; a measured effect of the user's own trade may be stated). The advisory blocklist is wider (SPEC §9.3 item 3) and matched case- and accent-insensitively, so deterministic templates avoid words such as French `considéré` / `envisagé`.
   - Hand-written mock entries are keyed to `explainer.v2`. Real recordings under `explainer.v1` stay on disk as cache misses until a human re-records them with `COHERENCE_ANALYZER_LLM=record`; the narration then falls back to the template, by design.
@@ -458,13 +459,16 @@ The Flow B steps, including the Parallel engine state, are in the flowchart at [
 ### Live API Lambda (Function URL)
 
 The same template also holds a second Lambda, `ApiFunction` (handler `coherence_analyzer.api_lambda_handler.handler`,
-python3.11), that serves the whole FastAPI app (`coherence_analyzer.api.app`: profiles, reviews, corrections, intake)
-over HTTP through a Lambda Function URL (`ApiFunctionUrl`), so the CloudFront-hosted static site
-(`deploy/site/`) can call it directly instead of going through `deploy/serve_local.py`'s uvicorn process. Mangum
-(`mangum` in `requirements.txt`) adapts the Function-URL event into one ASGI request/response cycle against `app`;
-see `coherence_analyzer/api_lambda_handler.py` for the adapter and why `lifespan="off"`. It runs with
-`COHERENCE_ANALYZER_LLM=live` and `COHERENCE_ANALYZER_STORE=s3` on the stack's bucket and prefix, the guardrail of
-the stack, and `BEDROCK_MODEL_ID` from the `BedrockModelId` parameter, the same environment variables as
+python3.11), that serves the whole FastAPI app (`coherence_analyzer.api.app`: profiles, reviews, corrections, intake,
+mounted at `/api`) plus the `/site-api/*` display-layer routes app.html's live mode actually calls (`deploy/site_api.py`:
+review/whatif wrapped with the `site` block: profile card, limits, "points to clarify"), over one Lambda Function
+URL (`ApiFunctionUrl`), so the CloudFront-hosted static site (`deploy/site/`) can call it directly instead of going
+through `deploy/serve_local.py`'s uvicorn process. This mirrors `deploy/serve_local.py`'s own one-origin layout
+(`/api/*` + `/site-api/*`) exactly, minus the static file mount, which CloudFront owns instead. Mangum
+(`mangum` in `requirements.txt`) adapts the Function-URL event into one ASGI request/response cycle against the
+combined app; see `coherence_analyzer/api_lambda_handler.py` for the adapter, the mounting, and why `lifespan="off"`.
+It runs with `COHERENCE_ANALYZER_LLM=live` and `COHERENCE_ANALYZER_STORE=s3` on the stack's bucket and prefix, the
+guardrail of the stack, and `BEDROCK_MODEL_ID` from the `BedrockModelId` parameter, the same environment variables as
 `FlowBFunction` (`COHERENCE_ANALYZER_LLM`, `COHERENCE_ANALYZER_STORE`, `COHERENCE_ANALYZER_S3_BUCKET`,
 `COHERENCE_ANALYZER_S3_PREFIX`, `BEDROCK_MODEL_ID`, `BEDROCK_GUARDRAIL_ID`, `BEDROCK_GUARDRAIL_VERSION`,
 `COHERENCE_ANALYZER_RUNTIME_CACHE_DIR=/tmp/llm-cache`). Its Function URL has `AuthType: NONE` plus the two
@@ -476,12 +480,15 @@ tests or the build.
 `FlowBFunction`'s exact `Code` block (`LambdaCodeS3Bucket`/`LambdaCodeS3Key`), one zip artifact serves both
 Lambdas. If you already built and uploaded `flow-b-lambda.zip` for Flow B, there is no separate packaging step:
 a stack update that passes the same `LambdaCodeS3Bucket`/`LambdaCodeS3Key` picks up `ApiFunction` automatically.
-Packaging from scratch is the same commands as Flow B (also mechanized by `deploy/aws/deploy.sh`):
+Packaging from scratch is the same commands as Flow B (also mechanized by `deploy/aws/deploy.sh`), plus the extra
+`deploy/` trio alongside `coherence_analyzer/`, needed for the `/site-api/*` routes' `site_extras`/`whatif` calls:
 
 ```
 rm -rf build && mkdir build
 pip install -r requirements.txt --target build --platform manylinux2014_x86_64 --only-binary=:all: --python-version 3.11
-cp -r coherence_analyzer build/ && mkdir -p build/data && cp -r data/starter data/meta build/data/ && cp -r fixtures build/
+cp -r coherence_analyzer build/ && mkdir -p build/data build/deploy
+cp -r data/starter data/meta build/data/ && cp -r fixtures build/
+cp deploy/site_api.py deploy/build_site.py deploy/whatif.py build/deploy/
 (cd build && zip -qr ../flow-b-lambda.zip . -x '*/__pycache__/*')
 aws s3 cp flow-b-lambda.zip s3://<artifact bucket>/coherence-analyzer/flow-b-lambda-<version>.zip
 aws cloudformation deploy \
@@ -497,13 +504,16 @@ aws cloudformation describe-stacks --stack-name coherence-analyzer \
 Smoke-test once deployed:
 
 ```
-curl <ApiFunctionUrl output>/health
+curl <ApiFunctionUrl output>/api/health
 ```
 
-should return the same `{"ok": true}` body as the app's local `/health` route. To wire the CloudFront-hosted
-static site to it, set `deploy/site/app.html`'s `<meta name="coherence-api-base">` (or `window.COHERENCE_API_BASE`
-before the page's scripts run) to this Function URL, see `apiBase()` in `deploy/site/js/core/data_source.js` for
-where every API call reads it from.
+should return the same `{"ok": true}` body as the app's local `/api/health` route (note the `/api` prefix: the
+Function URL mirrors `serve_local.py`'s layout, not a bare `api.app`). To wire the CloudFront-hosted static site to
+it, build with `python deploy/build_site.py --api-base <ApiFunctionUrl output> <out dir>`: this writes the Function
+URL into the *built* `app.html`'s `<meta name="coherence-api-base">` (never the source file under `deploy/site/`,
+which always ships with that tag empty, see `deploy/build_site.py`'s `_set_api_base`), then sync `<out dir>` to the
+site bucket and invalidate CloudFront. See `apiBase()` in `deploy/site/js/core/data_source.js` for where every API
+call reads the base from (`window.COHERENCE_API_BASE` first, then the meta tag).
 
 
 ## Known limitations

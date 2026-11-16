@@ -114,6 +114,30 @@ def test_build_emits_app_html(tmp_path, monkeypatch):
     assert "Compass" in app_html
 
 
+def test_build_default_ships_empty_api_base(tmp_path, monkeypatch):
+    """Without --api-base, the built app.html keeps the empty meta tag (today's behavior, pinned elsewhere
+    by tests/dashboard/test_ui_flow_b.py et al. against the SOURCE file) — and the source file is untouched."""
+    source_before = (build_site.ROOT / "deploy" / "site" / "app.html").read_text(encoding="utf-8")
+    with tempfile.TemporaryDirectory() as store:
+        monkeypatch.setenv(build_site.STORE_DIR_ENV, store)
+        build_site.build(tmp_path)
+    app_html = (tmp_path / "app.html").read_text(encoding="utf-8")
+    assert '<meta name="coherence-api-base" content="">' in app_html
+    assert (build_site.ROOT / "deploy" / "site" / "app.html").read_text(encoding="utf-8") == source_before
+
+
+def test_build_with_api_base_sets_built_meta_tag_only(tmp_path, monkeypatch):
+    """--api-base rewrites the BUILT copy's meta tag content (normalized to end with one slash) and never
+    touches deploy/site/app.html, the source file other tests pin empty."""
+    source_before = (build_site.ROOT / "deploy" / "site" / "app.html").read_text(encoding="utf-8")
+    with tempfile.TemporaryDirectory() as store:
+        monkeypatch.setenv(build_site.STORE_DIR_ENV, store)
+        build_site.build(tmp_path, api_base="https://example.lambda-url.us-east-1.on.aws")
+    app_html = (tmp_path / "app.html").read_text(encoding="utf-8")
+    assert '<meta name="coherence-api-base" content="https://example.lambda-url.us-east-1.on.aws/">' in app_html
+    assert (build_site.ROOT / "deploy" / "site" / "app.html").read_text(encoding="utf-8") == source_before
+
+
 def test_whatif_respects_locale_parameter(tmp_path):
     """Whatif build with en-CA locale produces English labels."""
     # Build English what-if for Robert

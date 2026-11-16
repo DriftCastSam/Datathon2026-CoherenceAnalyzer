@@ -348,10 +348,18 @@
       <span class="wf-scn__value">Add to current portfolio</span>
     </div>
     <div class="wf-scn__fig">
-      <label class="wf-scn__label" for="whatif-amount">Amount</label>
-      <select class="wf-scn__select" id="whatif-amount">
-        <option></option>
-      </select>
+      <label class="wf-scn__label" for="whatif-amount-cad">Amount invested</label>
+      <div class="wf-amount">
+        <span class="wf-amount__unit" aria-hidden="true">$</span>
+        <input class="wf-amount__input" id="whatif-amount-cad" type="number" inputmode="decimal" min="0" step="any"
+          list="whatif-amount-presets" aria-label="Amount invested, CAD">
+        <span class="wf-amount__or">or</span>
+        <input class="wf-amount__input wf-amount__input--pct" id="whatif-amount-pct" type="number" inputmode="decimal"
+          min="0" step="any" aria-label="Amount invested, percent of the current portfolio value">
+        <span class="wf-amount__unit" aria-hidden="true">% of portfolio</span>
+      </div>
+      <datalist id="whatif-amount-presets"></datalist>
+      <span class="wf-amount__note" data-wf="amount-note" aria-live="polite"></span>
     </div>
     <div class="wf-scn__fig">
       <label class="wf-scn__label" for="whatif-funding">Funded from</label>

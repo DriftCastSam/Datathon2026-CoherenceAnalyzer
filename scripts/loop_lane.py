@@ -182,7 +182,8 @@ def merge(task_id: str) -> int:
             return 4
     env = {**os.environ, "COHERENCE_ANALYZER_LLM": "mock", "PYTHONHASHSEED": "0", "TZ": "UTC"}
     py = ROOT / ".venv" / "bin" / "python"
-    t = subprocess.run([str(py if py.exists() else sys.executable), "-m", "pytest", "-q", "-p", "no:cacheprovider"],
+    t = subprocess.run([str(py if py.exists() else sys.executable), "-m", "pytest", "-q", "-p", "no:cacheprovider",
+                        "-n", "auto", "--dist", "loadfile"],
                        cwd=ROOT, env=env, text=True, capture_output=True)
     tail = (t.stdout + t.stderr).strip().splitlines()[-1:] or [""]
     if t.returncode != 0:

@@ -158,7 +158,7 @@ def test_whatif_route_rejects_empty_ticker_list(client: TestClient) -> None:
 
 
 def test_whatif_route_rejects_too_many_tickers(client: TestClient) -> None:
-    from deploy.serve_local import MAX_WHATIF_TICKERS
+    from deploy.site_api import MAX_WHATIF_TICKERS
 
     tickers = [f"TICK{i}" for i in range(MAX_WHATIF_TICKERS + 1)]
     response = client.post(
@@ -265,3 +265,29 @@ def test_whatif_route_survives_skipped_horizon(client: TestClient) -> None:
     data = response.json()
     assert "universe" in data
     assert "whatif" in data
+
+
+AMOUNT_URL = f"{SITE_REVIEW_URL}/persona-robert/whatif/amount"
+
+
+def test_whatif_amount_route_returns_one_scenario(client: TestClient) -> None:
+    response = client.post(AMOUNT_URL, json={"ticker": "AAPL", "amount_cad": 2500, "funding": "cash"})
+    assert response.status_code == 200, response.text
+    scenario = response.json()["scenario"]
+    assert {"verdict", "metrics", "weights_pct", "value_cad", "sections"} <= set(scenario)
+
+
+@pytest.mark.parametrize("body", [
+    {"ticker": "AAPL", "amount_cad": 0, "funding": "cash"},
+    {"ticker": "AAPL", "amount_cad": 100, "funding": "specific:NOPE"},
+    {"ticker": "NOT_A_TICKER", "amount_cad": 100, "funding": "cash"},
+    {"ticker": "AAPL", "amount_cad": 1e8, "funding": "pro_rata_all"},
+])
+def test_whatif_amount_route_rejects_bad_input(client: TestClient, body: dict) -> None:
+    assert client.post(AMOUNT_URL, json=body).status_code == 422
+
+
+def test_whatif_amount_route_unknown_profile_returns_404(client: TestClient) -> None:
+    response = client.post(f"{SITE_REVIEW_URL}/persona-nobody/whatif/amount",
+                           json={"ticker": "AAPL", "amount_cad": 100, "funding": "cash"})
+    assert response.status_code == 404

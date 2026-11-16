@@ -30,8 +30,22 @@
   const LIVE_OK = "ok";
   const LIVE_FAILED = "failed";
 
-  /* Choices persist while the screen re-renders; a persona change starts them over. */
-  const choice = {persona: null, ticker: null, target: null, funding: null};
+  const AMOUNT_COMPUTING = "Computing the scenario for this amount…";
+  const AMOUNT_STATIC = "Custom amounts are computed by the local app (serve_local). Precomputed amounts for this asset: ";
+  const AMOUNT_FAILED = "This amount could not be computed";
+  const AMOUNT_DEBOUNCE_MS = 350;
+  const MAX_CACHED_AMOUNTS = 50;
+  const EDITED_CAD = "cad";
+  const EDITED_PCT = "pct";
+
+  /* Choices persist while the screen re-renders; a persona change starts them over.
+     amountCad and pct mirror each other (both relative to the current portfolio value); lastEdited says which
+     one the user typed last, and that one is authoritative. */
+  const choice = {persona: null, ticker: null, amountCad: null, pct: null, lastEdited: EDITED_CAD, funding: null};
+
+  /* Live scenarios for typed amounts: key -> {status, scenario?, message?}. */
+  const amountLive = new Map();
+  let amountTimer = null;
 
   /* Live what-if loading: screen-local cache keyed by requestKey -> {status, data?}.
      Bound the cache by clearing entries for other personas. */
@@ -105,18 +119,27 @@
   }
 
   function syncChoice(context) {
-    const {base, tickers} = context;
+    const {base, whatif, tickers} = context;
     if (choice.persona !== App.state.persona) {
-      Object.assign(choice, {persona: App.state.persona, ticker: null, target: null, funding: null});
+      Object.assign(choice, {persona: App.state.persona, ticker: null, amountCad: null, pct: null,
+        lastEdited: EDITED_CAD, funding: null});
     }
     const targets = (base.targets || []).map(Number).filter(Number.isFinite);
-    const fundings = base.fundings || [];
+    const liveFundings = App.source.mode === MODE_LIVE ? (base.live_fundings || []) : [];
+    const fundings = (base.fundings || []).concat(liveFundings);
     if (tickers.indexOf(choice.ticker) < 0) choice.ticker = tickers[0];
-    if (targets.indexOf(Number(choice.target)) < 0) choice.target = targets[0];
+    const held = view.heldPct(whatif[choice.ticker].asset);
+    if (choice.amountCad === null && choice.pct === null) {
+      const first = targets.map(target => view.presetAmount(target, base.value_cad, held)).find(amount => amount > 0);
+      choice.amountCad = first === undefined ? null : first;
+      choice.lastEdited = EDITED_CAD;
+    }
+    if (choice.lastEdited === EDITED_PCT) choice.amountCad = view.amountFromPct(choice.pct, base.value_cad);
+    else choice.pct = view.pctFromAmount(choice.amountCad, base.value_cad);
     if (!fundings.some(item => String(item.id) === choice.funding)) {
       choice.funding = fundings.length ? String(fundings[0].id) : null;
     }
-    return {targets, fundings};
+    return {targets, fundings, held};
   }
 
   function text(mount, key, value) {
@@ -169,9 +192,11 @@
   function paintScenario(mount, context, scenario) {
     const {base} = context;
     const years = view.yearsOf(base.cone);
-    const funding = (base.fundings || []).find(item => String(item.id) === choice.funding);
+    const funding = (base.fundings || []).concat(base.live_fundings || [])
+      .find(item => String(item.id) === choice.funding);
     const derived = view.scenarioView({
-      base, scenario, target: choice.target, fundingLabel: funding ? funding.label : choice.funding, years
+      base, scenario, amountCad: choice.amountCad, funding: choice.funding,
+      fundingLabel: funding ? funding.label : choice.funding, years
     });
     text(mount, "finding", derived.finding);
     html(mount, "verdict-chip", App.chip(derived.verdict));
@@ -197,15 +222,70 @@
     show(mount, "content", false);
   }
 
+  /* Write a number into an input unless the user is typing in it (that would move the caret). */
+  function setInput(input, value) {
+    if (!input || input === document.activeElement) return;
+    input.value = value === null || value === undefined ? "" : String(value);
+  }
+
+  function amountKey(ticker) {
+    const reportId = App.state.report ? App.state.report.run_id || "" : "";
+    return [App.state.persona, ticker, choice.amountCad, choice.funding, reportId].join("|");
+  }
+
+  function loadAmount(key, ticker, section) {
+    amountLive.set(key, {status: LIVE_LOADING});
+    if (amountLive.size > MAX_CACHED_AMOUNTS) amountLive.delete(amountLive.keys().next().value);
+    App.source.whatifAmount(App.state.persona, ticker, choice.amountCad, choice.funding).then(data => {
+      amountLive.set(key, {status: LIVE_OK, scenario: data.scenario});
+    }).catch(error => {
+      const detail = String(error && error.message || "").replace(/^HTTP \d+ for \S+: ?/, "");
+      amountLive.set(key, {status: LIVE_FAILED, message: detail ? AMOUNT_FAILED + ": " + detail : AMOUNT_FAILED + "."});
+    }).then(() => {
+      if (App.route === "whatif") App.renderers.whatif(section);
+    });
+  }
+
+  /* {scenario} | {pending: text} | {failure: text}: the precomputed scenario when the amount matches one,
+     else the live one (local app), else why there is none. */
+  function amountScenario(context, held, targets, section) {
+    const {base, whatif} = context;
+    const problem = view.amountProblem(choice.amountCad,
+      view.capacityCad(choice.funding, held, base.value_cad, base.weights_pct));
+    if (problem) return {failure: problem};
+    const preset = view.presetFor(choice.amountCad, held, base.value_cad, targets, choice.funding);
+    const scenarios = whatif[choice.ticker].scenarios || {};
+    if (preset !== null && scenarios[view.keyOf(preset, choice.funding)]) {
+      return {scenario: scenarios[view.keyOf(preset, choice.funding)]};
+    }
+    if (App.source.mode !== MODE_LIVE) {
+      const presets = targets.map(target => view.presetAmount(target, base.value_cad, held)).filter(amount => amount > 0);
+      return {failure: AMOUNT_STATIC + (presets.map(amount => "$" + App.fmtCad(amount, 2)).join(", ") || "none") + "."};
+    }
+    const key = amountKey(choice.ticker);
+    const entry = amountLive.get(key);
+    if (!entry) loadAmount(key, choice.ticker, section);
+    if (!entry || entry.status === LIVE_LOADING) return {pending: AMOUNT_COMPUTING};
+    if (entry.status === LIVE_FAILED) return {failure: entry.message};
+    return {scenario: entry.scenario};
+  }
+
   function paintContext(mount, context, section, liveDataPresent) {
-    const {targets, fundings} = syncChoice(context);
+    const {targets, fundings, held} = syncChoice(context);
     const {base, whatif, tickers} = context;
     show(mount, "empty", false);
     show(mount, "content", true);
     fillSelect(mount.querySelector("#whatif-asset"),
       tickers.map(ticker => ({value: ticker, label: view.assetLabel(whatif[ticker].asset)})), choice.ticker);
-    fillSelect(mount.querySelector("#whatif-amount"),
-      targets.map(target => ({value: target, label: view.amountLabel(target, base.value_cad)})), choice.target);
+    setInput(mount.querySelector("#whatif-amount-cad"), choice.amountCad);
+    setInput(mount.querySelector("#whatif-amount-pct"), choice.pct);
+    const presets = mount.querySelector("#whatif-amount-presets");
+    if (presets) {
+      presets.innerHTML = targets.map(target => ({amount: view.presetAmount(target, base.value_cad, held), target}))
+        .filter(item => item.amount > 0)
+        .map(item => '<option value="' + App.esc(String(item.amount)) + '">'
+          + App.esc(view.amountLabel(item.target, base.value_cad, held)) + "</option>").join("");
+    }
     fillSelect(mount.querySelector("#whatif-funding"),
       fundings.map(item => ({value: item.id, label: item.label})), choice.funding);
     text(mount, "meta", (tickers.indexOf(choice.ticker) + 1) + " of " + tickers.length
@@ -216,12 +296,14 @@
     show(mount, "profile-note", profile.note);
     text(mount, "as-of", view.asOfLine(base));
 
-    const scenario = whatif[choice.ticker].scenarios[view.keyOf(choice.target, choice.funding)];
-    const failure = !scenario ? MISSING_SCENARIO : scenario.error;
+    const resolved = amountScenario(context, held, targets, section);
+    const scenario = resolved.scenario;
+    text(mount, "amount-note", resolved.pending || "");
+    const failure = resolved.pending ? "" : resolved.failure || (!scenario ? MISSING_SCENARIO : scenario.error);
     text(mount, "error", failure ? String(failure) : "");
     show(mount, "error", Boolean(failure));
-    show(mount, "results", !failure);
-    if (!failure) paintScenario(mount, context, scenario);
+    show(mount, "results", Boolean(scenario) && !failure);
+    if (scenario && !failure) paintScenario(mount, context, scenario);
   }
 
   /* The selects live in the screen's static markup and survive re-renders, so each is bound
@@ -238,10 +320,36 @@
     });
   }
 
+  /* Typing in either amount field updates the other at once, then re-renders after a short pause. */
+  function bindAmount(section, selector, edited) {
+    const input = section.querySelector(selector);
+    if (!input || input.dataset.wiBound === "1") return;
+    input.dataset.wiBound = "1";
+    input.addEventListener("input", () => {
+      const value = input.value === "" ? null : Number(input.value);
+      const base = (resolve().context || {}).base || {};
+      const liveEntry = live.get(cacheKey(App.state.persona, requestedTickers(), App.state.report));
+      const portfolioValue = liveEntry && liveEntry.data ? liveEntry.data.universe.base.value_cad : base.value_cad;
+      choice.lastEdited = edited;
+      if (edited === EDITED_CAD) {
+        choice.amountCad = value;
+        choice.pct = view.pctFromAmount(value, portfolioValue);
+        setInput(section.querySelector("#whatif-amount-pct"), choice.pct);
+      } else {
+        choice.pct = value;
+        choice.amountCad = view.amountFromPct(value, portfolioValue);
+        setInput(section.querySelector("#whatif-amount-cad"), choice.amountCad);
+      }
+      clearTimeout(amountTimer);
+      amountTimer = setTimeout(() => App.renderers.whatif(section), AMOUNT_DEBOUNCE_MS);
+    });
+  }
+
   function bindSelects(section) {
     bindSelect(section, "#whatif-asset", value => { choice.ticker = value; });
-    bindSelect(section, "#whatif-amount", value => { choice.target = Number(value); });
     bindSelect(section, "#whatif-funding", value => { choice.funding = value; });
+    bindAmount(section, "#whatif-amount-cad", EDITED_CAD);
+    bindAmount(section, "#whatif-amount-pct", EDITED_PCT);
   }
 
   function paint(mount, resolved, section, noteHidden) {

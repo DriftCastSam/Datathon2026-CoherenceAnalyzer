@@ -1,0 +1,561 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Compass · Architecture AWS</title>
+<link rel="stylesheet" href="print.css">
+<style>
+  .n{display:inline-block;width:15px;height:15px;border-radius:50%;background:var(--navy);color:#fff;text-align:center;
+     font:600 9px/15px var(--f);margin-right:5px}
+  .sec{margin-top:10px}
+  .intro{color:var(--muted);font-size:11px;margin:0 0 8px;max-width:170mm}
+  .table td.aws{white-space:nowrap;color:var(--blue);font-weight:600}
+  .never li{list-style:none;position:relative;padding-left:2px}
+  .never li::before{content:"✕";position:absolute;left:-13px;color:var(--red);font-weight:600}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+  .grid4 .card p{font-size:9.5px;color:var(--muted)}
+</style>
+</head>
+<body>
+
+<!-- 1 · AWS map -->
+<section class="page">
+  <div class="hdr"><div class="wm"><svg viewBox="0 0 24 24" width="26" height="26"><circle cx="12" cy="12" r="10.5" fill="none" stroke="#0b2a4a" stroke-width="1.8"/><path d="M12 4.5l2.6 7.5h-5.2z" fill="#de171e"/><path d="M12 19.5l-2.6-7.5h5.2z" fill="#0b2a4a"/><circle cx="12" cy="12" r="1.4" fill="#fff"/></svg><span>Compass</span></div><span>Compass · Architecture AWS</span></div>
+  <h1>Architecture AWS</h1>
+  <p class="lead" style="margin-bottom:6mm">Serverless, décrite en CloudFormation. Un pipeline scripté, pas un agent libre : le code décide,
+  Amazon Bedrock lit et rédige dans des cases étroites, et chaque réponse de l'IA est contrôlée avant usage.</p>
+  <div class="card" style="padding:8px"><svg viewBox="0 0 760 600" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+<path d="M0,0 L10,5 L0,10 z" fill="#9aabbd"/></marker>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+<path d="M0,0 L10,5 L0,10 z" fill="#0b6bcb"/></marker>
+</defs>
+<rect class="cloud" x="140" y="8" width="612" height="584" rx="10"/>
+<text x="156" y="28" font-size="10.5" font-weight="700" style="fill:#0b2a4a">AWS Cloud · une région</text>
+<rect class="zone" x="152" y="44" width="380" height="104" rx="8"/>
+<text class="lbl" x="162" y="58">Stack site</text>
+<rect class="zone" x="346" y="186" width="186" height="298" rx="8" style="stroke:#de171e"/>
+<text class="lbl" x="354" y="200" style="fill:#de171e;font-weight:600">IAM · moindre privilège</text>
+<rect class="box" x="8" y="236" width="118" height="92" rx="6"/>
+<rect x="8" y="236" width="118" height="3" rx="1" fill="#0b6bcb"/>
+<text class="ttl" x="20" y="258">Utilisateur</text>
+<text class="sub" x="20" y="273">navigateur</text>
+<text class="sub" x="20" y="287">app.html (Compass)</text>
+<text class="sub" x="20" y="306">Démo / CLI</text>
+<text class="sub" x="20" y="319">aws stepfunctions</text>
+<rect class="box" x="166" y="70" width="160" height="66" rx="4"/>
+<rect x="177" y="80" width="28" height="28" rx="5" fill="#0b2a4a"/>
+<text x="191" y="98.5" text-anchor="middle" font-size="10" font-weight="700" style="fill:#fff">CF</text>
+<text class="ttl" x="213" y="91">Amazon CloudFront</text>
+<text class="sub" x="213" y="105">HTTPS · HTTP/2-3 · cache</text>
+<text class="sub" x="177" y="124">OAC (SigV4) · en-têtes sécurité</text>
+<rect class="box" x="360" y="70" width="160" height="66" rx="4"/>
+<rect x="371" y="80" width="28" height="28" rx="5" fill="#4d6a87"/>
+<text x="385" y="98.5" text-anchor="middle" font-size="10" font-weight="700" style="fill:#fff">S3</text>
+<text class="ttl" x="407" y="91">S3 · bucket site</text>
+<text class="sub" x="407" y="105">privé · SSE-AES256</text>
+<text class="sub" x="371" y="124">app.html, js/, css/, données</text>
+<rect class="box" x="166" y="236" width="160" height="66" rx="4"/>
+<rect x="177" y="246" width="28" height="28" rx="5" fill="#0b2a4a"/>
+<text x="191" y="264.5" text-anchor="middle" font-size="10" font-weight="700" style="fill:#fff">URL</text>
+<text class="ttl" x="213" y="257">Lambda Function URL</text>
+<text class="sub" x="213" y="271">HTTPS · CORS</text>
+<text class="sub" x="177" y="290">/api · /site-api</text>
+<rect class="box" x="360" y="214" width="160" height="80" rx="4"/>
+<rect x="371" y="224" width="28" height="28" rx="5" fill="#0b2a4a"/>
+<text x="385" y="242.5" text-anchor="middle" font-size="10" font-weight="700" style="fill:#fff">λ</text>
+<text class="ttl" x="407" y="235">Lambda · API</text>
+<text class="sub" x="407" y="249">FastAPI + Mangum</text>
+<text class="sub" x="371" y="268">Python 3.11 · 1 024 Mo · 29 s</text>
+<text class="sub" x="371" y="284">Flux A (profil), C (revue), what-if</text>
+<rect class="box" x="166" y="392" width="160" height="80" rx="4"/>
+<rect x="177" y="402" width="28" height="28" rx="5" fill="#0b2a4a"/>
+<text x="191" y="420.5" text-anchor="middle" font-size="10" font-weight="700" style="fill:#fff">SF</text>
+<text class="ttl" x="213" y="413">AWS Step Functions</text>
+<text class="sub" x="213" y="427">machine à états Flow B</text>
+<text class="sub" x="177" y="446">B1 → B9 · retry · catch</text>
+<text class="sub" x="177" y="463">branche parallèle B5</text>
+<rect class="box" x="360" y="392" width="160" height="80" rx="4"/>
+<rect x="371" y="402" width="28" height="28" rx="5" fill="#0b2a4a"/>
+<text x="385" y="420.5" text-anchor="middle" font-size="10" font-weight="700" style="fill:#fff">λ</text>
+<text class="ttl" x="407" y="413">Lambda · Flow B</text>
+<text class="sub" x="407" y="427">1 état = 1 invocation</text>
+<text class="sub" x="371" y="446">Python 3.11 · 2 048 Mo · 900 s</text>
+<text class="sub" x="371" y="463">flux transaction (B)</text>
+<rect class="box" x="574" y="70" width="166" height="66" rx="4"/>
+<rect x="585" y="80" width="28" height="28" rx="5" fill="#de171e"/>
+<text x="599" y="98.5" text-anchor="middle" font-size="10" font-weight="700" style="fill:#fff">GR</text>
+<text class="ttl" x="621" y="91">Bedrock Guardrails</text>
+<text class="sub" x="621" y="105">sujet refusé : conseil</text>
+<text class="sub" x="585" y="124">en placement personnalisé</text>
+<rect class="box" x="574" y="186" width="166" height="80" rx="4"/>
+<rect x="585" y="196" width="28" height="28" rx="5" fill="#0b6bcb"/>
+<text x="599" y="214.5" text-anchor="middle" font-size="10" font-weight="700" style="fill:#fff">BR</text>
+<text class="ttl" x="621" y="207">Amazon Bedrock</text>
+<text class="sub" x="621" y="221">API Converse · 1 outil JSON</text>
+<text class="sub" x="585" y="240">Claude Sonnet 5.5 (live)</text>
+<text class="sub" x="585" y="257">nœuds N1 à N6</text>
+<rect class="box" x="574" y="320" width="166" height="80" rx="4"/>
+<rect x="585" y="330" width="28" height="28" rx="5" fill="#4d6a87"/>
+<text x="599" y="348.5" text-anchor="middle" font-size="10" font-weight="700" style="fill:#fff">S3</text>
+<text class="ttl" x="621" y="341">S3 · bucket données</text>
+<text class="sub" x="621" y="355">versionné · SSE · TLS seul</text>
+<text class="sub" x="585" y="374">préfixe ca/ : profiles, events,</text>
+<text class="sub" x="585" y="391">portfolios, reports, audit</text>
+<rect class="box" x="574" y="440" width="166" height="66" rx="4"/>
+<rect x="585" y="450" width="28" height="28" rx="5" fill="#4d6a87"/>
+<text x="599" y="468.5" text-anchor="middle" font-size="10" font-weight="700" style="fill:#fff">CW</text>
+<text class="ttl" x="621" y="461">CloudWatch Logs</text>
+<text class="sub" x="621" y="475">1 groupe par Lambda</text>
+<text class="sub" x="585" y="494">latence, tokens, cache LLM</text>
+<rect class="box" x="166" y="516" width="354" height="62" rx="4"/>
+<rect x="177" y="526" width="28" height="28" rx="5" fill="#4d6a87"/>
+<text x="191" y="544.5" text-anchor="middle" font-size="10" font-weight="700" style="fill:#fff">CFN</text>
+<text class="ttl" x="213" y="537">AWS CloudFormation</text>
+<text class="sub" x="213" y="551">2 stacks · deploy.sh : code → S3 → deploy</text>
+<text class="sub" x="213" y="566">sorties : ApiFunctionUrl, StateMachineArn, BucketName</text>
+<path class="arrow hot" d="M126,256 C146,256 146,103 164,103" marker-end="url(#ah)"/>
+<circle cx="146" cy="180" r="8" fill="#0b2a4a"/><text x="146" y="183.5" text-anchor="middle" font-size="9.5" font-weight="700" style="fill:#fff">1</text>
+<path class="arrow" d="M326,103 L358,103" marker-end="url(#a)"/><text class="lbl" x="342" y="97" text-anchor="middle">OAC</text>
+<path class="arrow hot" d="M126,272 L164,270" marker-end="url(#ah)"/>
+<circle cx="146" cy="262" r="8" fill="#0b2a4a"/><text x="146" y="265.5" text-anchor="middle" font-size="9.5" font-weight="700" style="fill:#fff">2</text>
+<path class="arrow hot" d="M326,262 L358,258" marker-end="url(#ah)"/>
+<path class="arrow hot" d="M126,312 C146,312 146,430 164,430" marker-end="url(#ah)"/>
+<circle cx="146" cy="372" r="8" fill="#0b2a4a"/><text x="146" y="375.5" text-anchor="middle" font-size="9.5" font-weight="700" style="fill:#fff">3</text>
+<path class="arrow" d="M326,430 L358,430" marker-end="url(#a)"/><text class="lbl" x="342" y="424" text-anchor="middle">invoke</text>
+<path class="arrow" d="M520,240 L572,228" marker-end="url(#a)"/>
+<path class="arrow" d="M520,412 C556,412 556,250 572,250" marker-end="url(#a)"/>
+<path class="arrow" d="M520,276 C540,276 540,350 572,350" marker-end="url(#a)"/>
+<path class="arrow" d="M520,440 C548,440 548,372 572,372" marker-end="url(#a)"/>
+<path class="arrow" d="M520,462 L572,470" marker-end="url(#a)"/>
+<path class="arrow" d="M657,184 L657,138" marker-end="url(#a)"/>
+<text class="lbl" x="664" y="164">explainer (N5)</text>
+<text class="lbl" x="664" y="175">seulement</text>
+<path class="arrow" d="M520,546 C560,546 560,546 572,520" marker-end="url(#a)" stroke-dasharray="4 3"/>
+</svg></div>
+  <div class="grid3" style="margin-top:9px">
+    <div class="card"><h3><span class="n">1</span>Interface</h3><p class="muted">CloudFront sert <code>app.html</code>. Le bucket du site est privé, lisible par CloudFront seul (OAC).</p></div>
+    <div class="card"><h3><span class="n">2</span>Profil et revue</h3><p class="muted">Lambda Function URL : questionnaire, boucle de profil, revue de portefeuille, what-if.</p></div>
+    <div class="card"><h3><span class="n">3</span>Transaction</h3><p class="muted">Machine à états Step Functions : chaque étape visible, rejouable, tracée.</p></div>
+  </div>
+  <div class="pn">1 / 5</div>
+</section>
+
+<!-- 2 · profile loop -->
+<section class="page">
+  <div class="hdr-thin"></div>
+  <h2 style="margin-top:4mm">La boucle d'analyse du profil</h2>
+  <p class="intro">Le profil n'est jamais réécrit par l'IA. Chaque événement relance la boucle : les règles recalculent, les lecteurs IA proposent,
+  la gate accepte, borne ou rejette, puis les limites sont reconstruites à partir des règles et des valeurs déclarées.
+  Ce qui reste ambigu revient à l'utilisateur sous forme de questions fixes.</p>
+  <div class="legend"><span class="u">utilisateur / données</span><span class="r">code déterministe</span><span class="l">Amazon Bedrock</span><span class="g">gate</span></div>
+  <div class="card" style="padding:8px"><svg viewBox="0 0 760 322" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+<path d="M0,0 L10,5 L0,10 z" fill="#9aabbd"/></marker>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+<path d="M0,0 L10,5 L0,10 z" fill="#0b6bcb"/></marker>
+</defs>
+<rect class="box" x="8" y="14" width="136" height="86" rx="4"/>
+<rect x="8" y="14" width="136" height="3" rx="1" fill="#0b6bcb"/>
+<text class="ttl" x="18" y="33">Utilisateur</text>
+<text class="sub" x="18" y="47">questionnaire, notes,</text>
+<text class="sub" x="18" y="59">questions, transaction</text>
+<rect x="18" y="81" width="50" height="13" rx="6.5" fill="#e8f1fb"/><text x="23" y="90.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">app.html</text>
+<rect class="box" x="160" y="14" width="136" height="86" rx="4"/>
+<rect x="160" y="14" width="136" height="3" rx="1" fill="#0b6bcb"/>
+<text class="ttl" x="170" y="33">Événements</text>
+<text class="sub" x="170" y="47">question, quiz, note,</text>
+<text class="sub" x="170" y="59">profile_edit, order_intent</text>
+<rect x="170" y="81" width="65" height="13" rx="6.5" fill="#e8f1fb"/><text x="175" y="90.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">S3 · events</text>
+<rect class="box" x="312" y="14" width="136" height="86" rx="4"/>
+<rect x="312" y="14" width="136" height="3" rx="1" fill="#1a7f47"/>
+<text class="ttl" x="322" y="33">A1 · Règles</text>
+<text class="sub" x="322" y="47">champs rule: dérivés</text>
+<text class="sub" x="322" y="59">horizon, capacité, risque</text>
+<rect x="322" y="81" width="40" height="13" rx="6.5" fill="#e8f1fb"/><text x="327" y="90.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">Lambda</text>
+<rect class="box" x="464" y="14" width="136" height="86" rx="4"/>
+<rect x="464" y="14" width="136" height="3" rx="1" fill="#4d6a87"/>
+<text class="ttl" x="474" y="33">A2 · Lecteurs IA</text>
+<text class="sub" x="474" y="47">N1 comportement, N2</text>
+<text class="sub" x="474" y="59">questions, N3 notes</text>
+<rect x="474" y="81" width="45" height="13" rx="6.5" fill="#e8f1fb"/><text x="479" y="90.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">Bedrock</text>
+<rect class="box" x="616" y="14" width="136" height="86" rx="4"/>
+<rect x="616" y="14" width="136" height="3" rx="1" fill="#de171e"/>
+<text class="ttl" x="626" y="33">A3 · Gate</text>
+<text class="sub" x="626" y="47">abstention, preuves,</text>
+<text class="sub" x="626" y="59">bornes, pas limité</text>
+<rect x="626" y="81" width="40" height="13" rx="6.5" fill="#e8f1fb"/><text x="631" y="90.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">Lambda</text>
+<rect class="box" x="616" y="214" width="136" height="86" rx="4"/>
+<rect x="616" y="214" width="136" height="3" rx="1" fill="#1a7f47"/>
+<text class="ttl" x="626" y="233">A4 · Règles (bis)</text>
+<text class="sub" x="626" y="247">score de connaissances</text>
+<text class="sub" x="626" y="259">avec N2 s'il est actif</text>
+<rect x="626" y="281" width="40" height="13" rx="6.5" fill="#e8f1fb"/><text x="631" y="290.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">Lambda</text>
+<rect class="box" x="464" y="214" width="136" height="86" rx="4"/>
+<rect x="464" y="214" width="136" height="3" rx="1" fill="#1a7f47"/>
+<text class="ttl" x="474" y="233">A5 · Limites + trace</text>
+<text class="sub" x="474" y="247">règles et déclaré seuls ;</text>
+<text class="sub" x="474" y="259">N3 chiffré : provisoire</text>
+<rect x="474" y="281" width="40" height="13" rx="6.5" fill="#e8f1fb"/><text x="479" y="290.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">Lambda</text>
+<rect class="box" x="312" y="214" width="136" height="86" rx="4"/>
+<rect x="312" y="214" width="136" height="3" rx="1" fill="#1a7f47"/>
+<text class="ttl" x="322" y="233">A6 · Nouvelle version</text>
+<text class="sub" x="322" y="247">schéma validé, diff,</text>
+<text class="sub" x="322" y="259">audit du run</text>
+<rect x="322" y="281" width="111" height="13" rx="6.5" fill="#e8f1fb"/><text x="327" y="290.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">S3 · profiles, audit</text>
+<rect class="box" x="160" y="214" width="136" height="86" rx="4"/>
+<rect x="160" y="214" width="136" height="3" rx="1" fill="#4d6a87"/>
+<text class="ttl" x="170" y="233">Cohérence interne</text>
+<text class="sub" x="170" y="247">C1–C5 (code) + N6 (IA)</text>
+<text class="sub" x="170" y="259">→ info ou warning</text>
+<rect x="170" y="281" width="91" height="13" rx="6.5" fill="#e8f1fb"/><text x="175" y="290.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">Lambda + Bedrock</text>
+<rect class="box" x="8" y="214" width="136" height="86" rx="4"/>
+<rect x="8" y="214" width="136" height="3" rx="1" fill="#0b6bcb"/>
+<text class="ttl" x="18" y="233">Points à clarifier</text>
+<text class="sub" x="18" y="247">questions fixes,</text>
+<text class="sub" x="18" y="259">jamais générées</text>
+<rect x="18" y="281" width="50" height="13" rx="6.5" fill="#e8f1fb"/><text x="23" y="290.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">app.html</text>
+<path class="arrow hot" d="M144,57.0 L158,57.0" marker-end="url(#ah)"/>
+<path class="arrow" d="M296,57.0 L310,57.0" marker-end="url(#a)"/>
+<path class="arrow" d="M448,57.0 L462,57.0" marker-end="url(#a)"/>
+<path class="arrow" d="M600,57.0 L614,57.0" marker-end="url(#a)"/>
+<path class="arrow" d="M616,257.0 L602,257.0" marker-end="url(#a)"/>
+<path class="arrow" d="M464,257.0 L450,257.0" marker-end="url(#a)"/>
+<path class="arrow" d="M312,257.0 L298,257.0" marker-end="url(#a)"/>
+<path class="arrow" d="M160,257.0 L146,257.0" marker-end="url(#a)"/>
+<path class="arrow" d="M684.0,100 L684.0,212" marker-end="url(#a)"/><text class="lbl" x="678.0" y="140" text-anchor="end">accepté ou borné</text>
+<text class="lbl" x="678.0" y="152" text-anchor="end" style="fill:#de171e">rejet : valeur précédente gardée,</text>
+<text class="lbl" x="678.0" y="163" text-anchor="end" style="fill:#de171e">rejet écrit dans l'audit</text>
+<path class="arrow hot" d="M76.0,214 L76.0,102" marker-end="url(#ah)"/><text class="lbl" x="82.0" y="148" text-anchor="start">chaque réponse</text>
+<text class="lbl" x="82.0" y="159">= un nouvel événement</text>
+<text x="345" y="150" text-anchor="middle" font-size="12.5" font-weight="600" style="fill:#0b2a4a">Boucle de profil (flux A)</text>
+<text class="sub" x="345" y="165" text-anchor="middle">relancée à chaque événement · IA seulement si son entrée a changé</text>
+</svg></div>
+
+  <h2 class="sec">Les lecteurs IA et leur gate</h2>
+  <div class="card" style="padding:4px 8px">
+  <table class="table">
+    <tr><th>Nœud</th><th>Lit</th><th>Propose</th><th>Gate : condition d'acceptation</th></tr>
+    <tr><td>N1 comportement</td><td>Questions et intentions des 30 derniers jours (20 max), aucun champ du profil</td><td>Niveau de risque observé, confiance ≤ 0,8</td><td><code>event_id</code> réellement montrés ; un niveau de variation par run au plus ; avertit seulement si confiance ≥ 0,5</td></tr>
+    <tr><td>N2 questions</td><td>Chaque question posée (option, désactivée par défaut)</td><td>Sous-scores ; le score est calculé par le code</td><td>Cite son propre événement, citation exacte, effet ≤ ±5 points</td></tr>
+    <tr><td>N3 valeurs</td><td>Notes libres de l'utilisateur</td><td>Règles d'exclusion ou de plafond, avec citation</td><td>Citation mot pour mot dans les notes ; règle chiffrée = limite <b>provisoire</b>, plafonnée à warning jusqu'à l'approbation</td></tr>
+    <tr><td>N4 intention</td><td>Le texte de la transaction</td><td>Brouillon du formulaire</td><td>Achat seulement, ticker réel, 0 &lt; poids ≤ 100, financement valide ; sinon formulaire vide. L'utilisateur confirme.</td></tr>
+    <tr><td>N6 cohérence</td><td>Champs déclarés + constats C1–C5</td><td>Jusqu'à 5 tensions entre champs</td><td>2 champs réels ou plus, citations exactes, sans chiffre ni conseil ; ne change jamais le verdict</td></tr>
+  </table>
+  </div>
+  <div class="grid4 sec">
+    <div class="card role g"><span class="tag">Abstention</span><p>« Je ne sais pas » est une réponse valide : l'ancienne valeur reste.</p></div>
+    <div class="card role g"><span class="tag">Preuves</span><p>Preuve inventée = réponse entière rejetée.</p></div>
+    <div class="card role g"><span class="tag">Bornes</span><p>Énumérations, plages et pas de variation revérifiés par le code.</p></div>
+    <div class="card role r"><span class="tag">Estampille</span><p><code>by: llm:&lt;nœud&gt;</code>, version du prompt, modèle, hash d'entrée.</p></div>
+  </div>
+  <div class="pn">2 / 5</div>
+</section>
+
+<!-- 3 · trade flow + explanation loop -->
+<section class="page">
+  <div class="hdr-thin"></div>
+  <h2 style="margin-top:4mm">Le flux transaction (Step Functions)</h2>
+  <div class="legend"><span class="r">code déterministe</span><span class="l">Bedrock, puis contrôle</span><span class="u">attente utilisateur</span><span class="g">échec</span></div>
+  <div class="card" style="padding:8px"><svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+<path d="M0,0 L10,5 L0,10 z" fill="#9aabbd"/></marker>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+<path d="M0,0 L10,5 L0,10 z" fill="#0b6bcb"/></marker>
+</defs>
+<rect class="box" x="10" y="28" width="118" height="48" rx="6"/><rect x="10" y="28" width="118" height="4" rx="2" fill="#4d6a87"/><text class="ttl" x="69.0" y="50" text-anchor="middle" font-size="10.5">B1 parse intent</text><text class="sub" x="69.0" y="64" text-anchor="middle">N4 intent_parser + gate</text>
+<path d="M219.0,22 L278,52.0 L219.0,82 L160,52.0 z" fill="#fff" stroke="#c9d0db"/><text class="ttl" x="219.0" y="51.0" text-anchor="middle" font-size="10.5">B2 confirmé ?</text><text class="sub" x="219.0" y="63.0" text-anchor="middle">Choice</text>
+<rect class="box" x="310" y="28" width="118" height="48" rx="6"/><rect x="310" y="28" width="118" height="4" rx="2" fill="#4d6a87"/><text class="ttl" x="369.0" y="50" text-anchor="middle" font-size="10.5">B3 refresh</text><text class="sub" x="369.0" y="64" text-anchor="middle">Flux A : N1–N3 + gate</text>
+<rect class="box" x="460" y="28" width="118" height="48" rx="6"/><rect x="460" y="28" width="118" height="4" rx="2" fill="#1a7f47"/><text class="ttl" x="519.0" y="50" text-anchor="middle" font-size="10.5">B4 apply</text><text class="sub" x="519.0" y="64" text-anchor="middle">portefeuille proposé</text>
+<rect class="zone" x="614" y="10" width="130" height="118" rx="8" style="stroke:#0b2a4a"/>
+<text class="lbl" x="620" y="22" style="fill:#0b2a4a;font-weight:600">B5 analyse · Parallel</text>
+<rect class="box" x="620" y="28" width="118" height="40" rx="6"/><rect x="620" y="28" width="118" height="4" rx="2" fill="#1a7f47"/><text class="ttl" x="679.0" y="50" text-anchor="middle" font-size="10.5">actuel</text><text class="sub" x="679.0" y="64" text-anchor="middle">engine.analyse</text>
+<rect class="box" x="620" y="76" width="118" height="40" rx="6"/><rect x="620" y="76" width="118" height="4" rx="2" fill="#1a7f47"/><text class="ttl" x="679.0" y="98" text-anchor="middle" font-size="10.5">proposé</text><text class="sub" x="679.0" y="112" text-anchor="middle">même graine</text>
+<rect class="box" x="160" y="120" width="118" height="40" rx="6"/><rect x="160" y="120" width="118" height="4" rx="2" fill="#0b6bcb"/><text class="ttl" x="219.0" y="142" text-anchor="middle" font-size="10.5">Awaiting confirmation</text><text class="sub" x="219.0" y="156" text-anchor="middle">Pass · brouillon</text>
+<rect class="box" x="620" y="170" width="118" height="48" rx="6"/><rect x="620" y="170" width="118" height="4" rx="2" fill="#1a7f47"/><text class="ttl" x="679.0" y="192" text-anchor="middle" font-size="10.5">B6 checks + diff</text><text class="sub" x="679.0" y="206" text-anchor="middle">contrôles durs/souples</text>
+<path d="M519.0,164 L578,194.0 L519.0,224 L460,194.0 z" fill="#fff" stroke="#c9d0db"/><text class="ttl" x="519.0" y="193.0" text-anchor="middle" font-size="10.5">B7 violations ?</text><text class="sub" x="519.0" y="205.0" text-anchor="middle">Choice</text>
+<rect class="box" x="310" y="242" width="118" height="48" rx="6"/><rect x="310" y="242" width="118" height="4" rx="2" fill="#1a7f47"/><text class="ttl" x="369.0" y="264" text-anchor="middle" font-size="10.5">B7 resize</text><text class="sub" x="369.0" y="278" text-anchor="middle">marge de la transaction</text>
+<rect class="box" x="160" y="170" width="118" height="48" rx="6"/><rect x="160" y="170" width="118" height="4" rx="2" fill="#4d6a87"/><text class="ttl" x="219.0" y="192" text-anchor="middle" font-size="10.5">B8 explain</text><text class="sub" x="219.0" y="206" text-anchor="middle">N5 + numcheck</text>
+<rect class="box" x="10" y="170" width="118" height="48" rx="6"/><rect x="10" y="170" width="118" height="4" rx="2" fill="#1a7f47"/><text class="ttl" x="69.0" y="192" text-anchor="middle" font-size="10.5">B9 save</text><text class="sub" x="69.0" y="206" text-anchor="middle">rapport + audit → S3</text>
+<rect class="box" x="10" y="244" width="118" height="40" rx="6" style="stroke:#de171e"/><text class="ttl" x="69.0" y="262" text-anchor="middle" font-size="10.5" style="fill:#de171e">FlowBFailed</text><text class="sub" x="69.0" y="275" text-anchor="middle">Catch de chaque tâche</text>
+<path class="arrow" d="M128,52.0 L158,52.0" marker-end="url(#a)"/>
+<path class="arrow" d="M278,52.0 L308,52.0" marker-end="url(#a)"/><text class="lbl" x="294" y="47.0" text-anchor="middle">oui</text>
+<path class="arrow" d="M219.0,82 L219.0,118" marker-end="url(#a)"/><text class="lbl" x="225.0" y="104" text-anchor="start">non</text>
+<path class="arrow" d="M428,52.0 L458,52.0" marker-end="url(#a)"/>
+<path class="arrow" d="M578,52.0 L612,52.0" marker-end="url(#a)"/>
+<path class="arrow" d="M679.0,136 L679.0,168" marker-end="url(#a)"/>
+<path class="arrow" d="M620,194.0 L580,194.0" marker-end="url(#a)"/>
+<path class="arrow" d="M460,194.0 L280,194.0" marker-end="url(#a)"/><text class="lbl" x="369.0" y="189.0" text-anchor="middle">non</text>
+<path class="arrow" d="M519.0,224 L519.0,266 L430,266" marker-end="url(#a)"/><text class="lbl" x="525.0" y="248" text-anchor="start">oui</text>
+<path class="arrow" d="M369.0,242 L239.0,220" marker-end="url(#a)"/>
+<path class="arrow" d="M160,194.0 L130,194.0" marker-end="url(#a)"/>
+<path class="arrow" d="M69.0,218 L69.0,242" marker-end="url(#a)" stroke-dasharray="4 3"/><text class="lbl" x="75.0" y="234" text-anchor="start">erreur</text>
+</svg></div>
+  <p class="muted" style="margin-top:6px;font-size:9.6px">Chaque tâche invoque la Lambda Flow B avec le nom de l'étape. B3 rejoue la boucle de profil.
+  L'intention n'est utilisée qu'une fois confirmée. La marge (B7) est un fait calculé, jamais une suggestion.</p>
+
+  <h2 class="sec">La boucle d'explication</h2>
+  <p class="intro">Le verdict est fixé avant tout appel à l'IA. Chaque facteur est rédigé à part, à partir de ses seuls faits, vérifié, puis
+  réessayé une fois ; sinon un gabarit prend le relais. Le titre, la marge et l'avertissement ne sont jamais rédigés par l'IA.</p>
+  <div class="card" style="padding:8px"><svg viewBox="0 0 760 200" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+<path d="M0,0 L10,5 L0,10 z" fill="#9aabbd"/></marker>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+<path d="M0,0 L10,5 L0,10 z" fill="#0b6bcb"/></marker>
+</defs>
+<rect class="box" x="8" y="10" width="136" height="70" rx="4"/>
+<rect x="8" y="10" width="136" height="3" rx="1" fill="#1a7f47"/>
+<text class="ttl" x="18" y="29">Verdict + sections</text>
+<text class="sub" x="18" y="43">décidés par le code,</text>
+<text class="sub" x="18" y="55">avant tout appel IA</text>
+<rect x="18" y="61" width="40" height="13" rx="6.5" fill="#e8f1fb"/><text x="23" y="70.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">Lambda</text>
+<path d="M223.0,15 L280,45.0 L223.0,75 L166,45.0 z" fill="#fff" stroke="#c9d0db"/><text class="ttl" x="223.0" y="44.0" text-anchor="middle" font-size="10.5">Section ok ?</text><text class="sub" x="223.0" y="56.0" text-anchor="middle">statut pass</text>
+<rect class="box" x="304" y="10" width="136" height="70" rx="4"/>
+<rect x="304" y="10" width="136" height="3" rx="1" fill="#4d6a87"/>
+<text class="ttl" x="314" y="29">N5 · essai 1</text>
+<text class="sub" x="314" y="43">faits de la section seuls</text>
+<text class="sub" x="314" y="55">Guardrail actif</text>
+<rect x="314" y="61" width="106" height="13" rx="6.5" fill="#e8f1fb"/><text x="319" y="70.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">Bedrock + Guardrail</text>
+<rect class="box" x="464" y="10" width="136" height="70" rx="4"/>
+<rect x="464" y="10" width="136" height="3" rx="1" fill="#de171e"/>
+<text class="ttl" x="474" y="29">Vérificateur V1–V5</text>
+<text class="sub" x="474" y="43">références, chiffres,</text>
+<text class="sub" x="474" y="55">couverture, ton, forme</text>
+<rect x="474" y="61" width="40" height="13" rx="6.5" fill="#e8f1fb"/><text x="479" y="70.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">Lambda</text>
+<rect class="box" x="616" y="10" width="136" height="70" rx="4"/>
+<rect x="616" y="10" width="136" height="3" rx="1" fill="#1a7f47"/>
+<text class="ttl" x="626" y="29">Texte retenu</text>
+<text class="sub" x="626" y="43">mode llm ou llm_retry</text>
+<text class="sub" x="626" y="55">segments fait / inférence</text>
+<rect class="box" x="464" y="112" width="136" height="70" rx="4"/>
+<rect x="464" y="112" width="136" height="3" rx="1" fill="#4d6a87"/>
+<text class="ttl" x="474" y="131">N5 · essai 2</text>
+<text class="sub" x="474" y="145">mêmes faits + liste</text>
+<text class="sub" x="474" y="157">des échecs</text>
+<rect x="474" y="163" width="106" height="13" rx="6.5" fill="#e8f1fb"/><text x="479" y="172.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">Bedrock + Guardrail</text>
+<rect class="box" x="616" y="112" width="136" height="70" rx="4"/>
+<rect x="616" y="112" width="136" height="3" rx="1" fill="#de171e"/>
+<text class="ttl" x="626" y="131">V1–V5 (bis)</text>
+<text class="sub" x="626" y="145">toutes les règles,</text>
+<text class="sub" x="626" y="157">tous les échecs listés</text>
+<rect x="626" y="163" width="40" height="13" rx="6.5" fill="#e8f1fb"/><text x="631" y="172.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">Lambda</text>
+<rect class="box" x="168" y="112" width="112" height="70" rx="4"/>
+<rect x="168" y="112" width="112" height="3" rx="1" fill="#4d6a87"/>
+<text class="ttl" x="178" y="131">Gabarit</text>
+<text class="sub" x="178" y="145">texte déterministe,</text>
+<text class="sub" x="178" y="157">passe toujours</text>
+<path class="arrow" d="M144,45.0 L166,45.0" marker-end="url(#a)"/>
+<path class="arrow" d="M280,45.0 L302,45.0" marker-end="url(#a)"/><text class="lbl" x="291" y="40.0" text-anchor="middle">non</text>
+<path class="arrow" d="M224,75 L224,110" marker-end="url(#a)"/><text class="lbl" x="230" y="96" text-anchor="start">oui</text>
+<path class="arrow" d="M440,45.0 L462,45.0" marker-end="url(#a)"/>
+<path class="arrow" d="M600,45.0 L614,45.0" marker-end="url(#a)"/><text class="lbl" x="607" y="40.0" text-anchor="middle">ok</text>
+<path class="arrow" d="M532,80 L532,110" marker-end="url(#a)" stroke-dasharray="4 3"/><text class="lbl" x="538" y="96" text-anchor="start">échec</text>
+<path class="arrow" d="M600,147.0 L614,147.0" marker-end="url(#a)"/>
+<path class="arrow" d="M684,112 L684,82" marker-end="url(#a)"/><text class="lbl" x="690" y="96" text-anchor="start">ok</text>
+<path class="arrow" d="M684,182 L684,194 L224,194 L224,184" marker-end="url(#a)" stroke-dasharray="4 3"/><text class="lbl" x="450" y="190" text-anchor="middle">échec, ou blocage du Guardrail</text>
+<text class="lbl" x="372" y="104" text-anchor="middle" font-weight="600" style="fill:#0b2a4a">× 5 facteurs en parallèle</text>
+<text class="lbl" x="372" y="117" text-anchor="middle">objectif, horizon, risque,</text>
+<text class="lbl" x="372" y="128" text-anchor="middle">contraintes, préférences</text>
+<text class="lbl" x="372" y="142" text-anchor="middle">2 appels au plus par section</text>
+</svg></div>
+  <div class="grid4 sec" style="grid-template-columns:repeat(5,1fr)">
+    <div class="card role g"><span class="tag">V1 · Références</span><p>Chaque segment cite un contrôle, un fait ou un événement réel.</p></div>
+    <div class="card role g"><span class="tag">V2 · Chiffres</span><p>Chaque nombre existe dans les faits (tolérance d'arrondi).</p></div>
+    <div class="card role g"><span class="tag">V3 · Couverture</span><p>Chaque violation et avertissement est mentionné.</p></div>
+    <div class="card role g"><span class="tag">V4 · Ton</span><p>Aucune formule de conseil, FR ou EN : « vous devriez », « envisagez »…</p></div>
+    <div class="card role g"><span class="tag">V5 · Forme</span><p>Nombre de segments, type, longueur.</p></div>
+  </div>
+  <div class="pn">3 / 5</div>
+</section>
+
+<!-- 4 · AI safety -->
+<section class="page">
+  <div class="hdr-thin"></div>
+  <h2 style="margin-top:4mm">Sécurité de l'IA : défense en profondeur</h2>
+  <p class="intro">Aucune couche ne suffit seule. Chacune suppose que la précédente a échoué ; une réponse rejetée laisse toujours l'état précédent intact.</p>
+  <div class="card" style="padding:8px;margin-bottom:9px"><svg viewBox="0 0 760 184" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+<path d="M0,0 L10,5 L0,10 z" fill="#9aabbd"/></marker>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+<path d="M0,0 L10,5 L0,10 z" fill="#0b6bcb"/></marker>
+</defs>
+<rect class="box" x="8" y="8" width="96" height="72" rx="4"/>
+<rect x="8" y="8" width="96" height="3" rx="1" fill="#4d6a87"/>
+<text class="ttl" x="18" y="27">Réponse IA</text>
+<text class="sub" x="18" y="41">un outil JSON,</text>
+<text class="sub" x="18" y="53">contexte limité</text>
+<rect x="18" y="61" width="45" height="13" rx="6.5" fill="#e8f1fb"/><text x="23" y="70.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">Bedrock</text>
+<path class="arrow hot" d="M104,44.0 L114,44.0" marker-end="url(#ah)"/>
+<rect class="box" x="116" y="8" width="96" height="72" rx="4"/>
+<rect x="116" y="8" width="96" height="3" rx="1" fill="#de171e"/>
+<text class="ttl" x="126" y="27">Contrat</text>
+<text class="sub" x="126" y="41">schéma JSON</text>
+<text class="sub" x="126" y="53">validé</text>
+<rect x="126" y="61" width="40" height="13" rx="6.5" fill="#e8f1fb"/><text x="131" y="70.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">Lambda</text>
+<path class="arrow hot" d="M212,44.0 L222,44.0" marker-end="url(#ah)"/>
+<path class="arrow" d="M164.0,80 L164.0,120" marker-end="url(#a)" stroke-dasharray="4 3"/>
+<rect x="116" y="122" width="96" height="40" rx="4" fill="#fef6f6" stroke="#f3c9ca"/>
+<text x="164.0" y="139" text-anchor="middle" font-size="9" style="fill:#de171e">nouvel essai,</text>
+<text x="164.0" y="151" text-anchor="middle" font-size="9" style="fill:#de171e">puis rejet</text>
+<rect class="box" x="224" y="8" width="96" height="72" rx="4"/>
+<rect x="224" y="8" width="96" height="3" rx="1" fill="#de171e"/>
+<text class="ttl" x="234" y="27">Gate</text>
+<text class="sub" x="234" y="41">preuves réelles,</text>
+<text class="sub" x="234" y="53">bornes, pas limité</text>
+<rect x="234" y="61" width="40" height="13" rx="6.5" fill="#e8f1fb"/><text x="239" y="70.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">Lambda</text>
+<path class="arrow hot" d="M320,44.0 L330,44.0" marker-end="url(#ah)"/>
+<path class="arrow" d="M272.0,80 L272.0,120" marker-end="url(#a)" stroke-dasharray="4 3"/>
+<rect x="224" y="122" width="96" height="40" rx="4" fill="#fef6f6" stroke="#f3c9ca"/>
+<text x="272.0" y="139" text-anchor="middle" font-size="9" style="fill:#de171e">valeur précédente</text>
+<text x="272.0" y="151" text-anchor="middle" font-size="9" style="fill:#de171e">gardée</text>
+<rect class="box" x="332" y="8" width="96" height="72" rx="4"/>
+<rect x="332" y="8" width="96" height="3" rx="1" fill="#1a7f47"/>
+<text class="ttl" x="342" y="27">Autorité</text>
+<text class="sub" x="342" y="41">warning au plus,</text>
+<text class="sub" x="342" y="53">limites hors IA</text>
+<rect x="342" y="61" width="40" height="13" rx="6.5" fill="#e8f1fb"/><text x="347" y="70.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">Lambda</text>
+<path class="arrow hot" d="M428,44.0 L438,44.0" marker-end="url(#ah)"/>
+<path class="arrow" d="M380.0,80 L380.0,120" marker-end="url(#a)" stroke-dasharray="4 3"/>
+<rect x="332" y="122" width="96" height="40" rx="4" fill="#fef6f6" stroke="#f3c9ca"/>
+<text x="380.0" y="139" text-anchor="middle" font-size="9" style="fill:#de171e">plafonné à</text>
+<text x="380.0" y="151" text-anchor="middle" font-size="9" style="fill:#de171e">warning</text>
+<rect class="box" x="440" y="8" width="96" height="72" rx="4"/>
+<rect x="440" y="8" width="96" height="3" rx="1" fill="#de171e"/>
+<text class="ttl" x="450" y="27">Vérificateur</text>
+<text class="sub" x="450" y="41">V1–V5 sur</text>
+<text class="sub" x="450" y="53">le texte</text>
+<rect x="450" y="61" width="40" height="13" rx="6.5" fill="#e8f1fb"/><text x="455" y="70.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">Lambda</text>
+<path class="arrow hot" d="M536,44.0 L546,44.0" marker-end="url(#ah)"/>
+<path class="arrow" d="M488.0,80 L488.0,120" marker-end="url(#a)" stroke-dasharray="4 3"/>
+<rect x="440" y="122" width="96" height="40" rx="4" fill="#fef6f6" stroke="#f3c9ca"/>
+<text x="488.0" y="139" text-anchor="middle" font-size="9" style="fill:#de171e">nouvel essai,</text>
+<text x="488.0" y="151" text-anchor="middle" font-size="9" style="fill:#de171e">puis gabarit</text>
+<rect class="box" x="548" y="8" width="96" height="72" rx="4"/>
+<rect x="548" y="8" width="96" height="3" rx="1" fill="#de171e"/>
+<text class="ttl" x="558" y="27">Guardrail</text>
+<text class="sub" x="558" y="41">refus du conseil</text>
+<text class="sub" x="558" y="53">personnalisé</text>
+<rect x="558" y="61" width="45" height="13" rx="6.5" fill="#e8f1fb"/><text x="563" y="70.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">Bedrock</text>
+<path class="arrow hot" d="M644,44.0 L654,44.0" marker-end="url(#ah)"/>
+<path class="arrow" d="M596.0,80 L596.0,120" marker-end="url(#a)" stroke-dasharray="4 3"/>
+<rect x="548" y="122" width="96" height="40" rx="4" fill="#fef6f6" stroke="#f3c9ca"/>
+<text x="596.0" y="139" text-anchor="middle" font-size="9" style="fill:#de171e">gabarit, sans</text>
+<text x="596.0" y="151" text-anchor="middle" font-size="9" style="fill:#de171e">nouvel essai</text>
+<rect class="box" x="656" y="8" width="96" height="72" rx="4"/>
+<rect x="656" y="8" width="96" height="3" rx="1" fill="#0b6bcb"/>
+<text class="ttl" x="666" y="27">Rapport</text>
+<text class="sub" x="666" y="41">verdict, faits,</text>
+<text class="sub" x="666" y="53">texte vérifié</text>
+<rect x="666" y="61" width="60" height="13" rx="6.5" fill="#e8f1fb"/><text x="671" y="70.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">S3 · audit</text>
+<text class="lbl" x="8" y="180">En rouge : ce qui se passe quand une couche refuse. L'état précédent n'est jamais effacé.</text>
+</svg></div>
+  <div class="card" style="padding:4px 8px">
+  <table class="table">
+    <tr><th>Couche</th><th>Mécanisme</th><th>Où sur AWS</th></tr>
+    <tr><td>1 · Entrée</td><td>Chaque nœud ne voit que son contexte : N1 ne voit aucun champ du profil (pas d'ancrage), N5 ne voit que les faits de sa section.</td><td class="aws">Lambda</td></tr>
+    <tr><td>2 · Contrat</td><td>Un seul outil par nœud, son schéma JSON comme sortie ; validation, un nouvel essai avec l'erreur, puis <code>LLMOutputInvalid</code>.</td><td class="aws">Bedrock Converse</td></tr>
+    <tr><td>3 · Gate</td><td>Abstention, preuves réelles, bornes, pas de variation limité, estampille. Rejet = valeur précédente + entrée d'audit.</td><td class="aws">Lambda</td></tr>
+    <tr><td>4 · Autorité</td><td>L'IA ne produit que <code>warning</code>, <code>info</code> ou <code>unknown</code>. Les limites viennent des règles et du déclaré ; seule exception, une règle chiffrée des notes, provisoire et plafonnée à warning.</td><td class="aws">Lambda · test CI</td></tr>
+    <tr><td>5 · Ordre</td><td>Verdict et marge calculés avant toute rédaction : un texte ne peut pas changer un résultat.</td><td class="aws">Lambda · Step Functions</td></tr>
+    <tr><td>6 · Rédaction</td><td>Vérificateur V1–V5, un nouvel essai, puis gabarit déterministe.</td><td class="aws">Lambda</td></tr>
+    <tr><td>7 · Guardrail</td><td>Sujet refusé « recommandation de placement personnalisée » sur l'explication ; blocage = gabarit, sans nouvel essai.</td><td class="aws">Bedrock Guardrails</td></tr>
+    <tr><td>8 · Texte fixe</td><td>Titre, marge de la transaction et avertissement légal sont des gabarits.</td><td class="aws">Lambda</td></tr>
+    <tr><td>9 · Traçabilité</td><td>Chaque appel journalisé : nœud, modèle, version du prompt, hash d'entrée, cache, latence, tokens. Audit par run.</td><td class="aws">CloudWatch · S3 audit/</td></tr>
+    <tr><td>10 · Reproductibilité</td><td>Réponses en cache par hash d'entrée, graine fixe ; la démo et les tests rejouent les réponses enregistrées.</td><td class="aws">S3 · mode mock</td></tr>
+  </table>
+  </div>
+
+  <div class="grid2 sec">
+    <div class="card">
+      <h2>Ce que l'IA ne peut jamais faire</h2>
+      <ul class="never">
+        <li>Produire une violation ou changer un verdict</li>
+        <li>Fixer une limite à pleine force sans l'accord de l'utilisateur</li>
+        <li>Écrire un chiffre absent des faits</li>
+        <li>Citer une preuve qui n'existe pas</li>
+        <li>Recommander, classer des choix ou proposer une « prochaine étape »</li>
+        <li>Exécuter une transaction</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Faits, hypothèses, inférences</h2>
+      <p class="muted">Chaque élément du rapport porte son origine : déclaré par l'utilisateur, calculé par une règle (<code>rule:</code>),
+      ou inféré par l'IA (<code>llm:</code>, avec sa confiance et ses preuves). Les hypothèses de l'équipe (dérive, calibrations)
+      sont étiquetées comme telles, dans le rapport comme dans l'interface. Ce qui ne peut pas être vérifié est listé, pas supposé.</p>
+    </div>
+  </div>
+  <div class="pn">4 / 5</div>
+</section>
+
+<!-- 5 · services, IAM, deployment -->
+<section class="page">
+  <div class="hdr-thin"></div>
+  <h2 style="margin-top:4mm">Services</h2>
+  <div class="card" style="padding:4px 8px">
+  <table class="table">
+    <tr><th>Service</th><th>Ressources</th><th>Rôle</th></tr>
+    <tr><td>Amazon Bedrock</td><td><code>ModelArn</code></td><td>API Converse, un outil JSON par nœud. Six nœuds : comportement, questions, valeurs, intention, explication, cohérence.</td></tr>
+    <tr><td>Bedrock Guardrails</td><td><code>ExplainerGuardrail</code></td><td>Refus du conseil en placement personnalisé, sur l'explication.</td></tr>
+    <tr><td>AWS Lambda</td><td><code>ApiFunction</code> · <code>FlowBFunction</code></td><td>API HTTP (FastAPI via Mangum, Function URL) et étapes du flux transaction. Python 3.11, même code qu'en local.</td></tr>
+    <tr><td>AWS Step Functions</td><td><code>FlowBStateMachine</code></td><td>Flux transaction B1 à B9, analyse parallèle, <em>retry</em> et <em>catch</em> par tâche.</td></tr>
+    <tr><td>Amazon S3</td><td><code>DataBucket</code> · <code>SiteBucket</code></td><td>Événements, profils versionnés, portefeuilles, rapports, audit sous <code>ca/</code> ; fichiers du site.</td></tr>
+    <tr><td>Amazon CloudFront</td><td><code>SiteDistribution</code></td><td>Interface en HTTPS, HTTP/2 et 3, cache, en-têtes de sécurité.</td></tr>
+    <tr><td>Amazon CloudWatch</td><td><code>ApiLogGroup</code> · <code>FlowBLogGroup</code></td><td>Journal de chaque appel LLM.</td></tr>
+    <tr><td>AWS IAM</td><td><code>AppAccessPolicy</code></td><td>Un rôle par Lambda, un pour la machine à états.</td></tr>
+    <tr><td>CloudFormation</td><td>2 stacks</td><td><code>deploy/cloudfront.yaml</code> · <code>deploy/aws/coherence-analyzer.cfn.json</code></td></tr>
+  </table>
+  </div>
+
+  <div class="grid2 sec">
+    <div class="card">
+      <h2>Sécurité de l'infrastructure</h2>
+      <ul>
+        <li><code>bedrock:InvokeModel</code> sur le modèle configuré seulement ; <code>ApplyGuardrail</code> sur le guardrail du stack.</li>
+        <li>S3 : lecture, écriture et listage limités au préfixe <code>ca/</code>.</li>
+        <li>Chaque Lambda n'écrit que dans son groupe de logs ; la machine à états n'invoque que la Lambda Flow B.</li>
+        <li>Buckets privés, chiffrés, versionnés ; TLS obligatoire ; site lisible par CloudFront seul.</li>
+        <li>Aucun identifiant dans le dépôt.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Déploiement</h2>
+      <p class="muted"><code>deploy/aws/deploy.sh</code> : paquet de code vers S3, puis <code>aws cloudformation deploy</code>.</p>
+      <table class="table" style="margin-top:6px">
+        <tr><th>Mode</th><th>Usage</th></tr>
+        <tr><td><code>mock</code></td><td>Réponses enregistrées : tests et démo hors ligne</td></tr>
+        <tr><td><code>record</code></td><td>Appelle Bedrock et enregistre</td></tr>
+        <tr><td><code>live</code></td><td>Sur AWS : Bedrock et S3</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="grid2 sec">
+    <div class="card">
+      <h2>Coûts</h2>
+      <ul>
+        <li>Paiement à l'usage : aucun serveur toujours allumé.</li>
+        <li>Lecteurs IA appelés seulement si leur entrée a changé ; le cache évite de repayer un appel.</li>
+        <li>CloudFront en classe de prix 100.</li>
+      </ul>
+    </div>
+    <div class="card">
+      <h2>Limites connues</h2>
+      <ul>
+        <li>Historique de 5 ans ; la dérive est une hypothèse, pas une prévision.</li>
+        <li>Biais de survivance dans l'univers de titres.</li>
+        <li>Limites calibrées par l'équipe, pas réglementaires (KYC AMF/OCRI hors périmètre).</li>
+      </ul>
+    </div>
+  </div>
+
+  <p class="disclaimer" style="position:absolute;left:14mm;right:14mm;bottom:14mm">Simulation éducative avec des profils fictifs. Ceci n'est pas un conseil financier personnalisé. Aucune transaction n'est exécutée.</p>
+  <div class="pn">5 / 5</div>
+</section>
+
+</body>
+</html>

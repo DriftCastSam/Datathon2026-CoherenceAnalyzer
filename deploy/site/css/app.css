@@ -515,6 +515,11 @@ h3{font:600 16px/24px var(--f)}
   .scr-whatif .wf-scn__fig{display:flex;flex-direction:column;gap:2px;min-width:0;max-width:100%}
   .scr-whatif .wf-scn__label{font:400 12px/18px var(--f);color:var(--label)}
   .scr-whatif .wf-scn__value{font:600 14px/22px var(--f);color:var(--ink)}
+  .scr-whatif .wf-amount{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+  .scr-whatif .wf-amount__input{width:110px;margin:0;padding:0 4px;border:0;border-bottom:1px solid var(--label);border-radius:0;background:transparent;font:600 14px/22px var(--f);color:var(--ink)}
+  .scr-whatif .wf-amount__input--pct{width:64px}
+  .scr-whatif .wf-amount__unit,.scr-whatif .wf-amount__or{font:400 12px/18px var(--f);color:var(--label)}
+  .scr-whatif .wf-amount__note{font:400 12px/18px var(--f);color:var(--label)}
   .scr-whatif .wf-scn__select{appearance:none;max-width:100%;margin:0;padding:0 20px 0 0;border:0;border-radius:0;background:transparent url("../assets/icon-chev.svg") no-repeat right 0 center;background-size:14px 14px;font:600 14px/22px var(--f);color:var(--ink);cursor:pointer}
 
   .scr-whatif .wf-verdict{display:flex;align-items:flex-start;gap:48px}

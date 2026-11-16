@@ -178,7 +178,12 @@ def main() -> int:
         return 0
     extra = [x for x in a.pytest_args if x != "--"]
     env = {**os.environ, "COHERENCE_ANALYZER_LLM": os.environ.get("COHERENCE_ANALYZER_LLM", "mock")}
-    return subprocess.call([sys.executable, "-m", "pytest", "-q", *picked, *extra], cwd=ROOT, env=env)
+    try:
+        import xdist  # noqa: F401
+        par = ["-n", "auto", "--dist", "loadfile"] if len(picked) > 3 and "-n" not in extra else []
+    except ImportError:
+        par = []
+    return subprocess.call([sys.executable, "-m", "pytest", "-q", *par, *picked, *extra], cwd=ROOT, env=env)
 
 
 if __name__ == "__main__":

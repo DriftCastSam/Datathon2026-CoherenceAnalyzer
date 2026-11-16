@@ -4,8 +4,11 @@
 # "Flow B on Step Functions (P2.15)" and "Live API Lambda (Function URL)"
 # subsections. Those two subsections document the exact manual shell-command
 # sequence this script runs: build a Lambda zip (coherence_analyzer +
-# data/starter + data/meta + fixtures with pinned manylinux2014/py3.11
-# dependencies), upload it to S3, `aws cloudformation deploy` against
+# data/starter + data/meta + fixtures + deploy/{site_api,build_site,whatif}.py
+# with pinned manylinux2014/py3.11 dependencies — the deploy/ trio is the
+# `/site-api/*` display layer `coherence_analyzer/api_lambda_handler.py`
+# mounts alongside the API, same routes `deploy/serve_local.py` serves
+# locally), upload it to S3, `aws cloudformation deploy` against
 # deploy/aws/coherence-analyzer.cfn.json with the documented parameter
 # overrides, then print the stack Outputs.
 #
@@ -136,8 +139,9 @@ echo
 #   rm -rf build && mkdir build
 #   pip install -r requirements.txt --target build --platform manylinux2014_x86_64 \
 #       --only-binary=:all: --python-version 3.11
-#   cp -r coherence_analyzer build/ && mkdir -p build/data \
-#       && cp -r data/starter data/meta build/data/ && cp -r fixtures build/
+#   cp -r coherence_analyzer build/ && mkdir -p build/data build/deploy \
+#       && cp -r data/starter data/meta build/data/ && cp -r fixtures build/ \
+#       && cp deploy/site_api.py deploy/build_site.py deploy/whatif.py build/deploy/
 #   (cd build && zip -qr ../flow-b-lambda.zip . -x '*/__pycache__/*')
 echo "-- step 1: build --"
 cd "${REPO_ROOT}"
@@ -153,9 +157,10 @@ pip install -r requirements.txt \
   --python-version 3.11
 
 cp -r coherence_analyzer "${BUILD_DIR}/"
-mkdir -p "${BUILD_DIR}/data"
+mkdir -p "${BUILD_DIR}/data" "${BUILD_DIR}/deploy"
 cp -r data/starter data/meta "${BUILD_DIR}/data/"
 cp -r fixtures "${BUILD_DIR}/"
+cp deploy/site_api.py deploy/build_site.py deploy/whatif.py "${BUILD_DIR}/deploy/"
 
 # Name the zip with a timestamp + short git sha so repeated runs never
 # silently reuse a stale LambdaCodeS3Key (CloudFormation does not notice a

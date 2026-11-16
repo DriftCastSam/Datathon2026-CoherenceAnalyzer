@@ -53,10 +53,70 @@
     return Math.trunc(Number(target)) + "|" + String(funding);
   }
 
-  function amountLabel(target, portfolioValue) {
-    const share = App.fmtPct(target, 0) + " of portfolio";
-    if (!hasNumber(portfolioValue)) return share;
-    return App.fmtCad(Number(portfolioValue) * Number(target) / 100, 2) + SEPARATOR + share;
+  const CASH_FUNDING = "cash";
+  const PRESET_TOLERANCE_CAD = 1;
+
+  function round2(value) {
+    return Math.round(Number(value) * 100) / 100;
+  }
+
+  /* A percent-unit value (0.5 means 0.5%), unlike App.fmtPct which reads values below 1 as fractions. */
+  function pctText(pct) {
+    return hasNumber(pct) ? App.fmtCad(round2(pct), Number.isInteger(round2(pct)) ? 0 : 2) + "%" : DASH;
+  }
+
+  function heldPct(asset) {
+    return asset && hasNumber(asset.held_pct) ? Number(asset.held_pct) : 0;
+  }
+
+  /* The amount and the % are both relative to the current portfolio value, for every funding source. */
+  function amountFromPct(pct, portfolioValue) {
+    return allNumbers([pct, portfolioValue]) ? round2(Number(portfolioValue) * Number(pct) / 100) : null;
+  }
+
+  function pctFromAmount(amountCad, portfolioValue) {
+    return allNumbers([amountCad, portfolioValue]) && Number(portfolioValue) > 0
+      ? round2(Number(amountCad) / Number(portfolioValue) * 100) : null;
+  }
+
+  /* CAD the asset gets in a precomputed target-weight scenario (only the part above what is already held). */
+  function presetAmount(target, portfolioValue, held) {
+    return amountFromPct(Math.max(Number(target) - Number(held || 0), 0), portfolioValue);
+  }
+
+  /* The precomputed target whose amount equals the typed one (within $1), else null. Never for new cash. */
+  function presetFor(amountCad, held, portfolioValue, targets, funding) {
+    if (funding === CASH_FUNDING || !hasNumber(amountCad)) return null;
+    const hit = (targets || []).find(target => {
+      const amount = presetAmount(target, portfolioValue, held);
+      return amount !== null && amount > 0 && Math.abs(amount - Number(amountCad)) < PRESET_TOLERANCE_CAD;
+    });
+    return hit === undefined ? null : Number(hit);
+  }
+
+  /* Largest CAD the funding can release for this asset, or null when there is no ceiling (new cash). */
+  function capacityCad(funding, held, portfolioValue, weights) {
+    if (funding === CASH_FUNDING || !hasNumber(portfolioValue)) return null;
+    if (String(funding).startsWith("specific:")) {
+      const source = String(funding).slice("specific:".length);
+      return amountFromPct((weights || {})[source] || 0, portfolioValue);
+    }
+    return amountFromPct(100 - Number(held || 0), portfolioValue);
+  }
+
+  /* "" when the amount can be computed, else the reason shown under the inputs. */
+  function amountProblem(amountCad, capacity) {
+    if (!hasNumber(amountCad) || Number(amountCad) <= 0) return "Enter an amount greater than $0.";
+    if (capacity !== null && Number(amountCad) > capacity + PRESET_TOLERANCE_CAD) {
+      return "This funding source holds $" + App.fmtCad(capacity, 2) + "; enter that amount or less.";
+    }
+    return "";
+  }
+
+  function amountLabel(target, portfolioValue, held) {
+    const amount = presetAmount(target, portfolioValue, held);
+    if (amount === null) return pctText(target);
+    return "$" + App.fmtCad(amount, 2) + SEPARATOR + pctText(pctFromAmount(amount, portfolioValue)) + " of portfolio";
   }
 
   function assetLabel(asset) {
@@ -162,8 +222,12 @@
     const pillarSentence = worse === 0
       ? "No pillar is worse with this asset."
       : worse + " of the four pillars " + (worse === 1 ? "is" : "are") + " worse with this asset.";
-    return "At $" + App.fmtCad(ctx.amount, 2) + " (" + App.fmtPct(ctx.target, 0) + " of the portfolio) with the funding option “"
-      + ctx.fundingLabel + "”, the median value at year " + ctx.years + " moves from " + App.fmtCad(before.p50_T)
+    const lead = ctx.funding === CASH_FUNDING
+      ? "With a new cash contribution of $" + App.fmtCad(ctx.amount, 2) + " (" + pctText(ctx.pct)
+        + " of the current portfolio value)"
+      : "At $" + App.fmtCad(ctx.amount, 2) + " (" + pctText(ctx.pct) + " of the portfolio) funded by “"
+        + ctx.fundingLabel + "”";
+    return lead + ", the median value at year " + ctx.years + " moves from " + App.fmtCad(before.p50_T)
       + " to " + App.fmtCad(after.p50_T) + " and the pessimistic value from " + App.fmtCad(before.p5_T) + " to "
       + App.fmtCad(after.p5_T) + ". Annual volatility moves from " + App.fmtPct(before.vol) + " to "
       + App.fmtPct(after.vol) + ". The estimated bad-scenario loss moves from " + App.fmtCad(ctx.baseLoss)
@@ -210,7 +274,7 @@
     return hasNumber(portfolioValue) && hasNumber(metricsRow.p5_T) ? portfolioValue - Number(metricsRow.p5_T) : null;
   }
 
-  /* ctx: {base, scenario, target, fundingLabel, years}. Returns every derived figure. */
+  /* ctx: {base, scenario, amountCad, funding, fundingLabel, years}. Returns every derived figure. */
   function scenarioView(ctx) {
     const base = ctx.base;
     const value = hasNumber(base.value_cad) ? Number(base.value_cad) : null;
@@ -223,8 +287,10 @@
       baseShares: base.shares || {},
       shares: ctx.scenario.shares || {},
       baseLoss: lossOf(value, baseMetrics),
-      scenLoss: lossOf(value, metrics),
-      amount: hasNumber(value) && hasNumber(ctx.target) ? value * Number(ctx.target) / 100 : null
+      // A new cash contribution grows the portfolio: its loss is measured from the grown value.
+      scenLoss: lossOf(hasNumber(ctx.scenario.value_cad) ? Number(ctx.scenario.value_cad) : value, metrics),
+      amount: hasNumber(ctx.amountCad) ? Number(ctx.amountCad) : null,
+      pct: pctFromAmount(ctx.amountCad, value)
     };
     const pillars = buildPillars(full);
     return {
@@ -237,5 +303,8 @@
     };
   }
 
-  App.whatifView = {keyOf, hasNumber, minus, amountLabel, assetLabel, profileLine, asOfLine, yearsOf, scenarioView};
+  App.whatifView = {
+    keyOf, hasNumber, minus, amountLabel, assetLabel, profileLine, asOfLine, yearsOf, scenarioView,
+    CASH_FUNDING, heldPct, amountFromPct, pctFromAmount, presetAmount, presetFor, capacityCad, amountProblem, pctText
+  };
 })();

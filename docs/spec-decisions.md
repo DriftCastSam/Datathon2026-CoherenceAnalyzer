@@ -180,7 +180,16 @@ import; nothing is executed.
 
 ## D18. Live LLM model = Claude Haiku 5.5 on Bedrock. Approved 2026-11-15 (owner)
 Live and record runs use `us.anthropic.claude-haiku-5-5`. Template fallbacks (D13 point 4) are accepted as the cost of
-the smaller model. The mock tests keep reading the hand-written cache entries (`fixture:hand-written`).
+the smaller model. The mock tests keep reading the hand-written cache entries (`fixture:hand-written`). This governs
+the offline recorded demo (`fixtures/llm_cache`, `cli demo`, see README "Real Bedrock recording"), which is
+unaffected by the addendum below.
+
+**Addendum, 2026-11-15:** the deployed `ApiFunction`/`FlowBFunction` Lambdas (live AWS account, not the offline
+demo above) run `us.anthropic.claude-sonnet-5-5` instead. Haiku 5.5 needs an AWS Marketplace model subscription
+(`aws-marketplace:ViewSubscriptions`/`Subscribe`) this sandbox account's role cannot grant without widening IAM
+scope beyond `AppAccessPolicy`'s existing `bedrock:InvokeModel`-only grant; Sonnet 5.5 needed no such subscription
+and was already the CFN template's `BedrockModelId`/`FoundationModelId` default. No code depends on which Claude
+generation is live; `AppAccessPolicy`'s resource list and `BEDROCK_MODEL_ID` just need to agree, which they do.
 
 ## Scope cut for the demo (2026-11-15, owner)
 The demo runs on the three persona fixtures only (the mock data provided). Out of scope, code to be removed:

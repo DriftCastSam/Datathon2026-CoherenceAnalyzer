@@ -183,6 +183,13 @@
       || post(siteApiDir() + "profiles/" + encodeURIComponent(personaId) + "/whatif", {tickers});
   }
 
+  /* One scenario for a typed CAD amount; funding is "pro_rata_all", "specific:<T>" or "cash". */
+  function whatifAmount(personaId, ticker, amountCad, funding) {
+    return requireLive("compute a what-if scenario for this amount")
+      || post(siteApiDir() + "profiles/" + encodeURIComponent(personaId) + "/whatif/amount",
+        {ticker, amount_cad: amountCad, funding});
+  }
+
   /* ---------- personas ---------- */
 
   async function personas() {
@@ -342,6 +349,7 @@
     universe,
     whatif,
     whatifLive,
+    whatifAmount,
     profile,
     decideRule,
     correction,

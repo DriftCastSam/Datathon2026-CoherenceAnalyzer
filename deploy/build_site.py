@@ -24,6 +24,7 @@ from __future__ import annotations
 import copy
 import json
 import os
+import re
 import shutil
 import sys
 import tempfile
@@ -201,9 +202,31 @@ def build_reports_en(out: Path, personas: list[Persona]) -> list[dict]:
     return _build_reports(out, EN_LOCALE, specs, include_intake=True)
 
 
-def build(out: Path) -> Path:
+def _set_api_base(app_html: Path, api_base: str) -> None:
+    """Rewrite the BUILT copy's empty `<meta name="coherence-api-base" content="">` to carry `api_base`
+    (normalized to end with one slash, so `data_source.js`'s `apiDir()`/`siteApiDir()` concatenation stays
+    correct). Only ever touches the copy under `out/`, never `deploy/site/app.html` itself — that source file
+    must keep shipping with an empty content attribute (tests/dashboard/test_ui_flow_b.py and others pin it)."""
+    base = api_base if api_base.endswith("/") else api_base + "/"
+    text = app_html.read_text(encoding="utf-8")
+    new_text, count = re.subn(
+        r'(<meta\s+name="coherence-api-base"\s+content=")"', rf'\g<1>{base}"', text, count=1,
+    )
+    if count != 1:
+        raise ValueError(f"{app_html}: expected exactly one empty coherence-api-base meta tag, found {count}")
+    app_html.write_text(new_text, encoding="utf-8")
+
+
+def build(out: Path, api_base: str = "") -> Path:
     """Write the whole site into `out` (replaced if it exists) and return it. The store is a temp dir that is
-    removed afterwards and the previous COHERENCE_ANALYZER_STORE_DIR is restored."""
+    removed afterwards and the previous COHERENCE_ANALYZER_STORE_DIR is restored.
+
+    Args:
+        api_base: when non-empty, the built `app.html`'s `coherence-api-base` meta tag is set to this URL
+            (e.g. a Lambda Function URL), so the built site calls a separately hosted live API instead of
+            relying on a same-origin one. Default "" preserves today's behavior exactly (empty meta tag,
+            relative same-origin paths).
+    """
     out = Path(out)
     if out.exists():
         for item in out.iterdir():
@@ -212,6 +235,8 @@ def build(out: Path) -> Path:
             else:
                 item.unlink()
     shutil.copytree(ROOT / "deploy" / "site", out, dirs_exist_ok=True)
+    if api_base:
+        _set_api_base(out / "app.html", api_base)
     saved = os.environ.get("COHERENCE_ANALYZER_STORE_DIR")
     try:
         with tempfile.TemporaryDirectory() as store:
@@ -234,21 +259,42 @@ def build(out: Path) -> Path:
     return out
 
 
+def _usage() -> None:
+    print("usage: python -m deploy.build_site [--api-base URL] [OUT_DIR]", file=sys.stderr)
+
+
 if __name__ == "__main__":
     sys.path.insert(0, str(Path(__file__).resolve().parent))   # `import whatif` when run as a script from anywhere
-    if len(sys.argv) > 1:
-        arg = sys.argv[1]
+    argv = sys.argv[1:]
+    cli_api_base = ""
+    positional: list[str] = []
+    i = 0
+    while i < len(argv):
+        arg = argv[i]
+        if arg == "--api-base":
+            if i + 1 >= len(argv):
+                _usage()
+                sys.exit(2)
+            cli_api_base = argv[i + 1]
+            i += 2
+            continue
         if arg.startswith("-"):
-            print("usage: python -m deploy.build_site [OUT_DIR]", file=sys.stderr)
+            _usage()
             sys.exit(2)
-        out_path = Path(arg).resolve()
+        positional.append(arg)
+        i += 1
+    if len(positional) > 1:
+        _usage()
+        sys.exit(2)
+    if positional:
+        out_path = Path(positional[0]).resolve()
         root_path = ROOT.resolve()
         if out_path == root_path or out_path in root_path.parents:
             print(f"error: refusing to build into {out_path} (ROOT or ancestor of repo)", file=sys.stderr)
             sys.exit(2)
-        out = build(out_path)
+        out = build(out_path, api_base=cli_api_base)
     else:
-        out = build(ROOT / ".cache" / "site")
+        out = build(ROOT / ".cache" / "site", api_base=cli_api_base)
     for p in sorted(out.rglob("*")):
         if p.is_file():
             print(p.relative_to(out), p.stat().st_size)
