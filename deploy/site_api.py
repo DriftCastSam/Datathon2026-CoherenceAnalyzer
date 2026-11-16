@@ -22,8 +22,8 @@ sys.path.insert(0, str(ROOT))
 from fastapi import FastAPI, HTTPException  # noqa: E402
 from pydantic import BaseModel, Field  # noqa: E402
 
-from coherence_analyzer import api, data  # noqa: E402
-from deploy import build_site, whatif  # noqa: E402
+from coherence_analyzer import api, data, explain  # noqa: E402
+from deploy import basket_chat, build_site, search_ask, whatif  # noqa: E402
 
 SITE_API_PREFIX = "/site-api"
 PORTFOLIO_FILE = "portfolio.json"
@@ -40,6 +40,62 @@ class WhatifAmountRequest(BaseModel):
     ticker: str
     amount_cad: float = Field(..., gt=0, le=MAX_WHATIF_AMOUNT_CAD)
     funding: str
+
+
+class BasketTrade(BaseModel):
+    ticker: str
+    amount_cad: float = Field(..., gt=0, le=MAX_WHATIF_AMOUNT_CAD)
+    funding: str
+
+
+class BasketRequest(BaseModel):
+    trades: list[BasketTrade] = Field(..., min_length=1, max_length=MAX_WHATIF_TICKERS)
+
+
+class ChatTurn(BaseModel):
+    role: str
+    text: str = Field(..., max_length=4000)
+
+
+class BasketChatRequest(BasketRequest):
+    messages: list[ChatTurn] = Field(..., min_length=1, max_length=40)
+
+
+def _basket(profile_id: str, trades: list[BasketTrade]) -> tuple[dict, dict]:
+    with api._LOCK:
+        work = api.workdir(profile_id)
+        try:
+            ctx = whatif.context(work, build_site.SITE_LOCALE)
+            scen = whatif.basket_scenario(ctx, [t.model_dump() for t in trades])
+        except (ValueError, TypeError, KeyError) as exc:
+            raise HTTPException(status_code=422, detail=str(exc)) from exc
+    return ctx, scen
+
+
+def live_basket(profile_id: str, body: BasketRequest) -> dict[str, Any]:
+    """All the user's trades applied together: one verdict, checks, metrics, cone (plus the base for comparison)."""
+    ctx, scen = _basket(profile_id, body.trades)
+    return {"scenario": scen, "base": whatif.universe(ctx)["base"]}
+
+
+def live_basket_chat(profile_id: str, body: BasketChatRequest) -> dict[str, Any]:
+    """Answer a question about the basket from its facts payload only (gated, numchecked, template fallback)."""
+    ctx, scen = _basket(profile_id, body.trades)
+    f = basket_chat.facts(ctx, scen)
+    out = basket_chat.answer(f, [m.model_dump() for m in body.messages])
+    return {**out, "verdict": scen["verdict"], "disclaimer": explain.disclaimer(build_site.SITE_LOCALE)}
+
+
+class SearchAskRequest(BaseModel):
+    text: str = Field(..., min_length=1, max_length=500)
+
+
+def live_search_ask(body: SearchAskRequest) -> dict[str, Any]:
+    """Free text -> search filters (no profile involved). 503 when the LLM is unavailable (client falls back)."""
+    try:
+        return search_ask.parse(body.text)
+    except Exception as exc:  # noqa: BLE001 - prototype: the client has a keyword fallback
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
 def live_review(profile_id: str) -> dict[str, Any]:
@@ -144,4 +200,11 @@ def mount(root_app: FastAPI) -> None:
     )
     root_app.add_api_route(
         f"{SITE_API_PREFIX}/profiles/{{profile_id}}/whatif/amount", live_whatif_amount, methods=["POST"]
+    )
+    root_app.add_api_route(f"{SITE_API_PREFIX}/search/ask", live_search_ask, methods=["POST"])
+    root_app.add_api_route(
+        f"{SITE_API_PREFIX}/profiles/{{profile_id}}/basket", live_basket, methods=["POST"]
+    )
+    root_app.add_api_route(
+        f"{SITE_API_PREFIX}/profiles/{{profile_id}}/basket/chat", live_basket_chat, methods=["POST"]
     )

@@ -141,7 +141,7 @@ echo
 #       --only-binary=:all: --python-version 3.11
 #   cp -r coherence_analyzer build/ && mkdir -p build/data build/deploy \
 #       && cp -r data/starter data/meta build/data/ && cp -r fixtures build/ \
-#       && cp deploy/site_api.py deploy/build_site.py deploy/whatif.py build/deploy/
+#       && cp deploy/site_api.py deploy/build_site.py deploy/whatif.py deploy/basket_chat.py deploy/search_ask.py build/deploy/
 #   (cd build && zip -qr ../flow-b-lambda.zip . -x '*/__pycache__/*')
 echo "-- step 1: build --"
 cd "${REPO_ROOT}"
@@ -160,7 +160,7 @@ cp -r coherence_analyzer "${BUILD_DIR}/"
 mkdir -p "${BUILD_DIR}/data" "${BUILD_DIR}/deploy"
 cp -r data/starter data/meta "${BUILD_DIR}/data/"
 cp -r fixtures "${BUILD_DIR}/"
-cp deploy/site_api.py deploy/build_site.py deploy/whatif.py "${BUILD_DIR}/deploy/"
+cp deploy/site_api.py deploy/build_site.py deploy/whatif.py deploy/basket_chat.py deploy/search_ask.py "${BUILD_DIR}/deploy/"
 
 # Name the zip with a timestamp + short git sha so repeated runs never
 # silently reuse a stale LambdaCodeS3Key (CloudFormation does not notice a

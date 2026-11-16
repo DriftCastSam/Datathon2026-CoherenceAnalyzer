@@ -338,16 +338,56 @@
     scrollThread(section);
   }
 
+  /* Apply the AI-parsed filters ({cls, mkt, sec, ccy, tickers, mode, clear}); the reply is written here, from
+     what was applied, never by the model. */
+  function applyParsed(parsed) {
+    const source = rowSource();
+    if (parsed.clear) {
+      Object.keys(state.filters).forEach(dim => { state.filters[dim] = []; });
+      return {text: "Cleared all filters. All " + source.total + " assets in the universe are shown."};
+    }
+    const dims = ["cls", "mkt", "sec", "ccy"].filter(dim => (parsed[dim] || []).length);
+    dims.forEach(dim => {
+      if (parsed.mode !== "add") state.filters[dim] = [];
+      parsed[dim].forEach(value => { if (state.filters[dim].indexOf(value) < 0) state.filters[dim].push(value); });
+    });
+    const named = (parsed.tickers || []).filter(t => source.rows.some(row => row.key === t));
+    if (named.length) {
+      const keys = selectedKeys(source);
+      named.forEach(t => { if (keys.indexOf(t) < 0) keys.push(t); });
+      App.setSelection(keys);
+    }
+    if (!dims.length && !named.length) return null;
+    const parts = [];
+    if (named.length) parts.push("I checked " + named.join(", ") + " in the list.");
+    if (dims.length) parts.push(filterSummary(source));
+    parts.push("Tick the assets you want, then select Check and simulate selected to set amounts and check them together.");
+    return {text: parts.join(" ")};
+  }
+
   function send(section, text) {
     const value = String(text || "").trim();
     if (!value) return;
     state.chat.push({who: "user", text: value});
-    const reply = respond(value);
-    reply.who = "agent";
-    state.chat.push(reply);
+    const focus = () => { const field = section.querySelector("[data-message-input]"); if (field) field.focus(); };
+    const finish = reply => {
+      const at = state.chat.indexOf(pending);
+      reply.who = "agent";
+      if (at >= 0) state.chat.splice(at, 1, reply); else state.chat.push(reply);
+      paint(section);
+      focus();
+    };
+    const pending = {who: "agent", text: "Thinking…"};
+    if (App.source.mode !== "live" || REFUSE.test(deacc(value)) || !App.source.searchAsk) {
+      state.chat.push(pending);
+      finish(respond(value));
+      return;
+    }
+    state.chat.push(pending);
     paint(section);
-    const field = section.querySelector("[data-message-input]");
-    if (field) field.focus();
+    App.source.searchAsk(value).then(parsed => applyParsed(parsed) || respond(value))
+      .catch(error => { console.warn("[search] AI parse failed, keyword fallback", error); return respond(value); })
+      .then(finish);
   }
 
   function toggleSelection(section, box) {

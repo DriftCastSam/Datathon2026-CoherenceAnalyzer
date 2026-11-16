@@ -488,7 +488,7 @@ rm -rf build && mkdir build
 pip install -r requirements.txt --target build --platform manylinux2014_x86_64 --only-binary=:all: --python-version 3.11
 cp -r coherence_analyzer build/ && mkdir -p build/data build/deploy
 cp -r data/starter data/meta build/data/ && cp -r fixtures build/
-cp deploy/site_api.py deploy/build_site.py deploy/whatif.py build/deploy/
+cp deploy/site_api.py deploy/build_site.py deploy/whatif.py deploy/basket_chat.py deploy/search_ask.py build/deploy/
 (cd build && zip -qr ../flow-b-lambda.zip . -x '*/__pycache__/*')
 aws s3 cp flow-b-lambda.zip s3://<artifact bucket>/coherence-analyzer/flow-b-lambda-<version>.zip
 aws cloudformation deploy \

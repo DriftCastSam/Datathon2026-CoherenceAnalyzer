@@ -199,9 +199,14 @@ def _store_profiles_root() -> Path:
     return store.root() / "profiles"
 
 
-def _store_dirs() -> dict[str, Path]:
+def _store_dirs(skip_sync: str | None = None) -> dict[str, Path]:
     """{profile_id: dir} for every profile in the store: `<store>/profiles/<profile_id>/` holding a readable
-    profile.json + events.jsonl + portfolio.json whose `meta.profile_id` is the directory name."""
+    profile.json + events.jsonl + portfolio.json whose `meta.profile_id` is the directory name.
+
+    `skip_sync`: a profile_id whose working copy is already fresh because the caller is mid-mutation on it
+    in this same request (e.g. `_draft_intent`, after `_append_event`). `sync_profile_down` overwrites every
+    file under that profile's dir with S3's last-synced snapshot, so re-syncing it here would silently erase
+    whatever this request already wrote locally but has not synced up yet."""
     out: dict[str, Path] = {}
     s3 = store.backend() == "s3"
     root = _store_profiles_root()
@@ -211,7 +216,7 @@ def _store_dirs() -> dict[str, Path]:
         if not _PROFILE_ID.match(name):
             continue
         d = root / name
-        if s3:
+        if s3 and name != skip_sync:
             store.sync_profile_down(d, name)
         if not all((d / f).is_file() for f in _PROFILE_FILES):
             continue
@@ -224,10 +229,10 @@ def _store_dirs() -> dict[str, Path]:
     return out
 
 
-def _profile_ids() -> list[str]:
+def _profile_ids(skip_sync: str | None = None) -> list[str]:
     """Every profile id: the seeds first (sorted by directory), then the store-only users (sorted)."""
     seeds = _fixture_dirs()
-    return list(seeds) + sorted(set(_store_dirs()) - set(seeds))
+    return list(seeds) + sorted(set(_store_dirs(skip_sync=skip_sync)) - set(seeds))
 
 
 def _event_namespace(profile_id: str) -> Path:
@@ -687,7 +692,7 @@ def post_event(profile_id: str, body: EventIn) -> dict:
             event["parent_event_id"] = body.parent_event_id
         _append_event(work, event)
         if body.type == "order_intent":
-            intent = _draft_intent(work, event)
+            intent = _draft_intent(work, event, profile_id)
             if store.backend() == "s3":
                 store.sync_profile_up(work, profile_id)
             return {"event": event, "intent": intent}
@@ -743,10 +748,11 @@ def _write_json(path: Path, doc: Any) -> None:
     os.replace(tmp, path)
 
 
-def _known_intent_ids() -> list[int]:
-    """Numbers of every intent id in the fixtures and in every working copy (ids are unique across profiles)."""
+def _known_intent_ids(skip_sync: str | None = None) -> list[int]:
+    """Numbers of every intent id in the fixtures and in every working copy (ids are unique across profiles).
+    `skip_sync`: forwarded to `_profile_ids`/`_store_dirs`, see there."""
     nums: list[int] = []
-    dirs = [_store_profiles_root() / pid for pid in _profile_ids()] + list(_fixture_dirs().values())
+    dirs = [_store_profiles_root() / pid for pid in _profile_ids(skip_sync=skip_sync)] + list(_fixture_dirs().values())
     for d in dirs:
         try:
             records = _read_json(d / "intents.json", [])
@@ -759,14 +765,18 @@ def _known_intent_ids() -> list[int]:
     return nums
 
 
-def _draft_intent(work: Path, event: dict) -> dict:
+def _draft_intent(work: Path, event: dict, profile_id: str) -> dict:
     """B1 (N4 through the gate) + B2 without auto-confirm: store the draft in the working copy and return it.
 
     D10: the draft holds only what the user stated. A field N4 listed as ambiguous (a default or a guess), and every
-    field of a draft that failed the gate or never came back (cache miss), is null. Nothing is pre-filled."""
+    field of a draft that failed the gate or never came back (cache miss), is null. Nothing is pre-filled.
+
+    `profile_id`: passed to `_known_intent_ids` as `skip_sync` so the global intent-id scan does not re-sync
+    (and overwrite) this profile's own working copy, which the caller already updated earlier in this same
+    request (the event this draft is for, via `_append_event`, not yet synced up to S3)."""
     intents_path = work / "intents.json"
     intents = _read_json(intents_path, [])
-    intent_id = f"in_{max(_known_intent_ids(), default=0) + 1:04d}"
+    intent_id = f"in_{max(_known_intent_ids(skip_sync=profile_id), default=0) + 1:04d}"
     blank = {k: None for k in pipeline.INTENT_KEYS}
     record = {"intent_id": intent_id, "event_id": event["event_id"], **blank, "status": "draft"}
     _write_json(intents_path, intents + [record])             # B1 reads the intent and its event from the working copy

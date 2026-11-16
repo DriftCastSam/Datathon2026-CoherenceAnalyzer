@@ -190,6 +190,23 @@
         {ticker, amount_cad: amountCad, funding});
   }
 
+  /* Basket: several user-stated trades applied together. trades: [{ticker, amount_cad, funding}]. */
+  function basket(personaId, trades) {
+    return requireLive("check these trades together")
+      || post(siteApiDir() + "profiles/" + encodeURIComponent(personaId) + "/basket", {trades});
+  }
+
+  /* Ask about the basket's report. messages: [{role: "user"|"assistant", text}]. */
+  function basketChat(personaId, trades, messages) {
+    return requireLive("ask about these trades")
+      || post(siteApiDir() + "profiles/" + encodeURIComponent(personaId) + "/basket/chat", {trades, messages});
+  }
+
+  /* Free text -> search filters (no profile involved). */
+  function searchAsk(text) {
+    return requireLive("read this search request") || post(siteApiDir() + "search/ask", {text});
+  }
+
   /* ---------- personas ---------- */
 
   async function personas() {
@@ -350,6 +367,9 @@
     whatif,
     whatifLive,
     whatifAmount,
+    basket,
+    basketChat,
+    searchAsk,
     profile,
     decideRule,
     correction,

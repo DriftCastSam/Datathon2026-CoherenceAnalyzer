@@ -221,6 +221,49 @@ def scenario_for_amount(ctx: dict, ticker: str, amount_cad: float, funding_id: s
     return _scenario(ctx, w1, value_after, intent)
 
 
+def basket_apply(ctx: dict, trades: list[dict]) -> tuple[dict, float, list[dict]]:
+    """Apply several user-stated trades in order, each on the portfolio left by the previous one.
+
+    trades: [{ticker, amount_cad, funding}] with funding "pro_rata_all" | "specific:<T>" | "cash".
+    Returns (weights_pct, value_cad, intents). Raises ValueError when one leg cannot be funded."""
+    w, value = dict(ctx["w0"]), float(ctx["value"])
+    intents = []
+    for i, tr in enumerate(trades):
+        ticker, amount, fid = tr["ticker"], float(tr["amount_cad"]), str(tr["funding"])
+        if ticker not in ctx["assets"].index:
+            raise ValueError(f"unknown ticker: {ticker}")
+        if not amount > 0:
+            raise ValueError(f"trade {i + 1} ({ticker}): the amount must be greater than 0")
+        held = float(w.get(ticker, 0.0))
+        if fid == CASH_FUNDING:
+            target = (held / 100 * value + amount) / (value + amount) * 100
+            funding = {"kind": "cash_contribution", "amount_cad": amount}
+        elif fid == "pro_rata_all":
+            target, funding = held + amount / value * 100, {"kind": "pro_rata_all"}
+        elif fid.startswith("specific:"):
+            target, funding = held + amount / value * 100, {"kind": "specific", "ticker": fid.split(":", 1)[1]}
+        else:
+            raise ValueError(f"unknown funding: {fid}")
+        intent = {"action": "buy", "ticker": ticker, "target_weight_pct": target, "funding": funding}
+        try:
+            w, value = intent_mod.apply(w, intent, value)
+        except ValueError as exc:
+            raise ValueError(f"trade {i + 1} ({ticker}): {exc}") from exc
+        intents.append(intent)
+    return w, value, intents
+
+
+def basket_scenario(ctx: dict, trades: list[dict]) -> dict:
+    """The scenario for all trades applied together (same payload shape as `_scenario`) plus `trades`."""
+    w1, value_after, intents = basket_apply(ctx, trades)
+    scen = _scenario(ctx, w1, value_after, intents[0] if len(intents) == 1 else None)
+    scen["trades"] = [{"ticker": t["ticker"], "name": ctx["assets"].loc[t["ticker"], "name"],
+                       "amount_cad": round(float(t["amount_cad"]), 2), "funding": t["funding"],
+                       "weight_before_pct": round(float(ctx["w0"].get(t["ticker"], 0.0)), 2),
+                       "weight_after_pct": round(float(w1.get(t["ticker"], 0.0)), 2)} for t in trades]
+    return scen
+
+
 def build(out: Path, profile_dir: Path | None = None, locale: str = "fr-CA") -> dict:
     """Write universe.json and whatif.json into `out` for the profile directory `profile_dir` (its profile.json,
     events.jsonl and portfolio.json). Nothing is shared between two calls."""
