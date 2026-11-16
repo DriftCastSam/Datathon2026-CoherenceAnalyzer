@@ -283,7 +283,7 @@ def test_mock_cache_holds_no_hand_written_v1_explainer_entry():
 def test_readme_assumptions_record_d10():
     """CLAUDE.md: every assumption goes in README -> "Assumptions". D10: the headroom is a measurement for the user's
     own funding (not advice), `alternatives` became `headroom`, the blocklist is wider."""
-    text = (ROOT / "README.md").read_text(encoding="utf-8")
+    text = (ROOT / "docs" / "assumptions.md").read_text(encoding="utf-8")
     start = text.index("## Assumptions")
     end = text.find("\n## ", start + 1)
     block = text[start:end if end != -1 else len(text)]

@@ -12,7 +12,7 @@ Rules:
 - Do not edit: SPEC.md, data/starter/**, data/meta/activity_tags.csv, scripts/engine_v0.py. Do not change engine math.
 - Determinism: no unseeded randomness, no wall-clock in computed values (timestamps only in audit metadata), sorted dict/set iteration wherever it reaches output.
 - Iterate on the frozen tests only (`COHERENCE_ANALYZER_LLM=mock python -m pytest -q -x {tests_sp}`). Before you finish, run `python scripts/quick_tests.py` once: it runs only the tests your change can break and must be green. Do NOT run the whole suite: the merge step does that.
-- Record any new assumption in README.md → "Assumptions". Update README "Status" with this step.
+- Record any new assumption in docs/assumptions.md → "Assumptions". Do not add a status log to README.md.
 - Do not run git commands that change state (no commit, stash, reset, checkout). The loop commits for you.
 {retry}
 When done, reply with: files changed, one line each, and any SPEC-AMBIGUITY you resolved.

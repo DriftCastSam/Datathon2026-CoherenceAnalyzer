@@ -11,7 +11,7 @@ What is pinned:
   * the state machine is RUN LOCALLY by a small test-only ASL interpreter (below) that calls `lambda_handler.handler` in
     mock mode for every Task; the final report must equal `pipeline.check(robert, in_0001, auto_confirm=True)`.
   * `deploy/aws/coherence-analyzer.cfn.json`: new Lambda, roles, state machine, output; existing ids/properties unchanged.
-  * README "AWS deploy": package/update instructions + a mermaid diagram.
+  * docs/aws-deploy.md "AWS deploy": package/update instructions + a mermaid diagram.
 
 Contract chosen by these tests (the spec does not name it):
   * the execution input is `{"fixture_dir": str, "intent_id": str, "auto_confirm": bool}` (the arguments of
@@ -50,7 +50,7 @@ ROOT = Path(__file__).resolve().parents[2]
 FIX = ROOT / "fixtures" / "robert"
 ASL_PATH = ROOT / "deploy" / "aws" / "flow_b.asl.json"
 CFN_PATH = ROOT / "deploy" / "aws" / "coherence-analyzer.cfn.json"
-README = ROOT / "README.md"
+README = ROOT / "docs" / "aws-deploy.md"            # moved out of README.md (AWS deploy section)
 TAGS = ROOT / "data" / "meta" / "activity_tags.csv"
 TAGS_BYTES = TAGS.read_bytes() if TAGS.exists() else None
 INTENT_ID = "in_0001"

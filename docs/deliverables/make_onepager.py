@@ -203,23 +203,23 @@ PAGE = """<!doctype html>
 <section class="page">
   <div class="hdr"><div class="wm"><svg viewBox="0 0 24 24" width="26" height="26"><circle cx="12" cy="12" r="10.5" fill="none" stroke="#0b2a4a" stroke-width="1.8"/><path d="M12 4.5l2.6 7.5h-5.2z" fill="#de171e"/><path d="M12 19.5l-2.6-7.5h5.2z" fill="#0b2a4a"/><circle cx="12" cy="12" r="1.4" fill="#fff"/></svg><span>Compass</span></div><span>Compass · Datathon PolyFinances 2026</span></div>
 
-  <h1>Votre portefeuille ressemble-t-il à <em>votre</em> profil ?</h1>
-  <p class="lead">Compass, c'est une boucle agentique qui affine le profil de l'investisseur à chaque action, et une couche
-  de sécurité IA entre ce profil et son portefeuille. L'IA propose, une gate ne garde que ce qu'elle peut prouver, et les
-  règles fixent les limites. Tout le reste n'est que du contexte.</p>
+  <h1>Votre portefeuille dit-il ce que <em>vous</em> voulez ?</h1>
+  <p class="lead">Compass montre à l'investisseur, avec ses propres chiffres et ses propres mots, où son portefeuille
+  s'écarte de ce qu'il veut. L'IA écoute, une gate ne garde que ce qu'elle peut prouver, les règles vérifient,
+  et la décision reste la sienne. Jamais de conseil, jamais d'exécution.</p>
 
   <div class="core">
     <div class="card">
-      <h2>1 · La boucle d'affinage du profil</h2>
-      <p class="cap">Une question, une note ou une transaction devient un événement. L'IA propose ce qu'il révèle, la gate
-      filtre, les limites sont recalculées et le portefeuille est confronté au profil. Ce qui reste flou revient à
-      l'investisseur, et sa réponse relance la boucle.</p>
+      <h2>1 · Comprendre ce que l'investisseur veut</h2>
+      <p class="cap">Déclarations, notes, questions, transactions : chaque geste affine le profil. L'IA propose ce qu'il
+      révèle, la gate filtre, les règles recalculent les limites et le portefeuille y est confronté. Ce qui reste flou
+      revient à l'investisseur sous forme de question, jamais de supposition.</p>
       <div class="legend"><span class="u">utilisateur</span><span class="r">code déterministe</span><span class="l">Amazon Bedrock</span><span class="g">gate</span></div>
       {loop}
     </div>
     <div class="card">
-      <h2>2 · La sécurité IA entre profil et portefeuille</h2>
-      <p class="cap">Aucune réponse de l'IA ne touche le profil ni le verdict sans passer la gate.</p>
+      <h2>2 · Un écart qu'on peut croire</h2>
+      <p class="cap">Pour montrer un écart, il doit être vrai : rien de l'IA ne touche le profil ni le verdict sans la gate.</p>
       <div class="guar">
         <div class="g1">{i_quote}<div><b>Preuves réelles</b><p>Un événement ou une citation exacte, sinon rejet</p></div></div>
         <div class="g1">{i_lock}<div><b>Limites hors IA</b><p>Règles et déclarations seulement</p></div></div>
@@ -231,7 +231,7 @@ PAGE = """<!doctype html>
     </div>
   </div>
 
-  <h2 class="sect">Exemple</h2>
+  <h2 class="sect">L'écart, montré à l'investisseur</h2>
   <div class="hero">
     <div class="card" style="padding:10px 12px">
       <span class="tag" style="--c:var(--blue)">Robert · 59 ans · risque déclaré faible à modéré · horizon 4 ans</span>
@@ -247,7 +247,7 @@ PAGE = """<!doctype html>
       </div>
       <div class="card persona">
         <h3>Amira <span class="chip v">Crypto au-dessus du plafond</span></h3>
-        <p>Risque élevé accepté, mais pas tout : sa concentration tech contredit sa propre note « pas seulement de la tech ».</p>
+        <p>Risque élevé accepté, mais pas tout : Compass lui renvoie sa propre note « pas seulement de la tech ».</p>
       </div>
       <div class="card persona">
         <h3>Mateo <span class="chip w">Inconnu, pas supposé</span></h3>
@@ -258,9 +258,9 @@ PAGE = """<!doctype html>
 
   <div class="bottom sect">
     <div>
-      <h2>Le reste : du contexte</h2>
+      <h2>Pour mesurer et montrer l'écart</h2>
       <div class="card ctx">
-        <p>Ces briques donnent à la boucle de quoi travailler et rendent l'outil agréable à utiliser.</p>
+        <p>Ces briques chiffrent l'écart et le rendent lisible pour l'investisseur.</p>
         <ul>
           <li><b>Moteur de risque :</b> 5 000 trajectoires simulées, stress tests, avant / après</li>
           <li><b>Simulateur de transaction :</b> marge avant la première limite franchie</li>

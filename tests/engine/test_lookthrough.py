@@ -548,9 +548,9 @@ def test_metrics_with_lookthrough_carry_a_boolean_flag_and_stay_report_schema_va
 
 
 def test_sources_md_and_readme_document_the_file_and_the_four_etfs(root):
-    """Task P2.13: format + the four ETFs (XIU.TO, SPY, QQQ, ESGV) are documented in SOURCES.md and README."""
+    """Task P2.13: format + the four ETFs (XIU.TO, SPY, QQQ, ESGV) are documented in SOURCES.md and docs/assumptions.md."""
     sources = (root / "data" / "meta" / "SOURCES.md").read_text()
-    readme = (root / "README.md").read_text()
+    readme = (root / "docs" / "assumptions.md").read_text()
     for text in (sources, readme):
         assert "etf_sector_weights" in text
         assert "look-through" in text.lower() or "lookthrough" in text.lower()

@@ -41,7 +41,7 @@ python scripts/loop_lane.py status                            # all lanes: RUNNI
 - Weights: percent in `portfolio.json`, fractions (0–1) everywhere inside the code. Convert once in `data.py`/`intent.py`.
 - Currency: CAD. USD assets are converted with month-end USDCAD (ffill).
 - Prompt changes bump the version in the filename (`prompts/<node>.v<N>.md`) and re-record the mock cache.
-- Every assumption (calibration, drift, fictional persona figure) goes in `README.md` → "Assumptions".
+- Every assumption (calibration, drift, fictional persona figure) goes in `docs/assumptions.md` → "Assumptions". Keep `README.md` short: no per-task status log (git history has it).
 - Build order: SPEC §17. Finish P0 before touching P1.
 
 <!-- BEGIN AWS Agent Toolkit rules -->

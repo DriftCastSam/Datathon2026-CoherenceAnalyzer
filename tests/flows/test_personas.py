@@ -778,9 +778,9 @@ def test_demo_now_reviews_three_complete_personas(tmp_path, monkeypatch, report_
 # ---------------------------------------------------------------- README Assumptions (CLAUDE.md conventions)
 
 def _assumptions() -> str:
-    text = (ROOT / "README.md").read_text(encoding="utf-8")
-    m = re.search(r"^## Assumptions\s*$(.*?)(?=^## )", text, re.S | re.M)
-    assert m, "README has no '## Assumptions' section"
+    text = (ROOT / "docs" / "assumptions.md").read_text(encoding="utf-8")
+    m = re.search(r"^## Assumptions\s*$(.*?)(?=^## |\Z)", text, re.S | re.M)
+    assert m, "docs/assumptions.md has no '## Assumptions' section"
     return m.group(1)
 
 

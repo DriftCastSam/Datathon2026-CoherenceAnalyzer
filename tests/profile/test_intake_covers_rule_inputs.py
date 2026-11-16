@@ -249,7 +249,7 @@ def test_optional_inputs_and_new_questions_are_documented_in_the_readme_intake_a
     # Task (1): README states which optional inputs are asked ('none' = no constraint) and which stay optional.
     # SPEC-AMBIGUITY: the README block is the "Intake and N3 (P0.10)" assumption bullet; the stricter reading
     # requires the new paths and every optional input to be named inside it.
-    text = (ROOT / "README.md").read_text(encoding="utf-8")
+    text = (ROOT / "docs" / "assumptions.md").read_text(encoding="utf-8")
     start = text.index("**Intake and N3 (P0.10):**")
     end = text.find("\n- **", start + 1)
     block = text[start:end if end != -1 else None]

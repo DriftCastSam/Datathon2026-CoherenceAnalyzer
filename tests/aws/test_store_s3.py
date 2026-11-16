@@ -428,7 +428,7 @@ def test_template_outputs_bucket_name_guardrail_id_and_version():
 
 def _section(text: str, title: str) -> str:
     m = re.search(rf"^(#+)\s*{re.escape(title)}\s*$", text, flags=re.M)
-    assert m, f"README has no '{title}' heading"
+    assert m, f"no '{title}' heading"
     level = len(m.group(1))
     rest = text[m.end():]
     nxt = re.search(rf"^#{{1,{level}}}\s", rest, flags=re.M)
@@ -436,7 +436,7 @@ def _section(text: str, title: str) -> str:
 
 
 def test_readme_has_an_aws_deploy_section_with_the_command_and_env_values():
-    section = _section((ROOT / "README.md").read_text(encoding="utf-8"), "AWS deploy")
+    section = _section((ROOT / "docs" / "aws-deploy.md").read_text(encoding="utf-8"), "AWS deploy")
     assert "aws cloudformation deploy" in section
     assert "deploy/aws/" in section and "ModelArn" in section and "CAPABILITY_IAM" in section
     for token in ("COHERENCE_ANALYZER_STORE=s3", "COHERENCE_ANALYZER_S3_BUCKET", "COHERENCE_ANALYZER_S3_PREFIX",
@@ -445,7 +445,7 @@ def test_readme_has_an_aws_deploy_section_with_the_command_and_env_values():
 
 
 def test_readme_assumptions_document_the_non_atomic_event_append():
-    section = _section((ROOT / "README.md").read_text(encoding="utf-8"), "Assumptions").lower()
+    section = _section((ROOT / "docs" / "assumptions.md").read_text(encoding="utf-8"), "Assumptions").lower()
     assert "append_event" in section and "non-atomic" in section and "s3" in section
 
 
