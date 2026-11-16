@@ -1,5 +1,0 @@
-{
-  "errors": [
-    "agent reported a spec/test contradiction:\n# BLOCKED: P6.TRADEMSG (stale oracles, not a SPEC contradiction)\n\nTwo frozen tests pin the OLD behaviour that D16 changes on purpose. The owner approved updating tests that pin the old\nbehaviour; the orchestrator should update these asserts (my work is otherwise complete and the frozen\n`tests/flows/test_trade_statements_and_disclaimers.py` passes, 16/16):\n\n- `tests/flows/test_any_user.py:503-504`: `rep[\"disclaimer\"] == config.DISCLAIMER[locale]` for a profile made by\n  `POST /profiles`. D16: a `meta.origin == \"user\"` profile carries the user text (without the fictional-profiles\n  clause), i.e. `config.DISCLAIMER_USER[locale]`. Fails in `test_review_works_end_to_end_for_a_new_user[fr-CA|en-CA]`.\n- `tests/flows/test_new_user_no_portfolio.py:484`: same assert, fails in\n  `test_full_order_create_answer_put_review_gives_a_valid_report[*]` (4 params).\n\nFix: compare with `config.DISCLAIMER_USER[locale]` (and `rep[\"explanation\"][\"disclaimer\"]` likewise if asserted).\nAll other tests pass (2696 passed, 6 failed = exactly those).\n"
-  ]
-}

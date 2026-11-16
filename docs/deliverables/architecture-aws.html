@@ -22,8 +22,14 @@
 <section class="page">
   <div class="hdr"><div class="wm"><svg viewBox="0 0 24 24" width="26" height="26"><circle cx="12" cy="12" r="10.5" fill="none" stroke="#0b2a4a" stroke-width="1.8"/><path d="M12 4.5l2.6 7.5h-5.2z" fill="#de171e"/><path d="M12 19.5l-2.6-7.5h5.2z" fill="#0b2a4a"/><circle cx="12" cy="12" r="1.4" fill="#fff"/></svg><span>Compass</span></div><span>Compass · Architecture AWS</span></div>
   <h1>Architecture AWS</h1>
-  <p class="lead" style="margin-bottom:6mm">Serverless, décrite en CloudFormation. Un pipeline scripté, pas un agent libre : le code décide,
-  Amazon Bedrock lit et rédige dans des cases étroites, et chaque réponse de l'IA est contrôlée avant usage.</p>
+  <p class="lead" style="margin-bottom:4mm">Le cœur de Compass tient en deux pièces : une <b>boucle agentique</b> qui affine le profil
+  à chaque événement, et une <b>couche de sécurité IA</b> entre ce profil et le portefeuille. Amazon Bedrock propose, une gate
+  ne garde que ce qu'elle peut prouver, et le code fixe les limites et le verdict. Le reste de l'architecture (interface,
+  flux transaction, explication) est du contexte. Serverless, décrite en CloudFormation.</p>
+  <div class="grid2" style="margin-bottom:5mm">
+    <div class="card role l"><span class="tag">Cœur 1 · page 2</span><p class="muted">Boucle d'affinage du profil : l'IA propose, la gate filtre, les règles recalculent, et ce qui reste flou revient à l'utilisateur.</p></div>
+    <div class="card role g"><span class="tag">Cœur 2 · page 3</span><p class="muted">Sécurité IA : dix couches entre l'IA et le profil ; une réponse rejetée laisse toujours l'état précédent intact.</p></div>
+  </div>
   <div class="card" style="padding:8px"><svg viewBox="0 0 760 600" xmlns="http://www.w3.org/2000/svg">
 <defs>
 <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
@@ -145,10 +151,10 @@
 <!-- 2 · profile loop -->
 <section class="page">
   <div class="hdr-thin"></div>
-  <h2 style="margin-top:4mm">La boucle d'analyse du profil</h2>
-  <p class="intro">Le profil n'est jamais réécrit par l'IA. Chaque événement relance la boucle : les règles recalculent, les lecteurs IA proposent,
+  <h2 style="margin-top:4mm">Cœur 1 · La boucle d'affinage du profil</h2>
+  <p class="intro">C'est la boucle agentique de Compass. Le profil n'est jamais réécrit par l'IA. Chaque événement relance la boucle : les règles recalculent, les lecteurs IA proposent,
   la gate accepte, borne ou rejette, puis les limites sont reconstruites à partir des règles et des valeurs déclarées.
-  Ce qui reste ambigu revient à l'utilisateur sous forme de questions fixes.</p>
+  Ce qui reste ambigu revient à l'utilisateur sous forme de questions fixes ; sa réponse est un nouvel événement, et le profil s'affine à chaque tour.</p>
   <div class="legend"><span class="u">utilisateur / données</span><span class="r">code déterministe</span><span class="l">Amazon Bedrock</span><span class="g">gate</span></div>
   <div class="card" style="padding:8px"><svg viewBox="0 0 760 322" xmlns="http://www.w3.org/2000/svg">
 <defs>
@@ -230,7 +236,7 @@
 <text class="lbl" x="678.0" y="163" text-anchor="end" style="fill:#de171e">rejet écrit dans l'audit</text>
 <path class="arrow hot" d="M76.0,214 L76.0,102" marker-end="url(#ah)"/><text class="lbl" x="82.0" y="148" text-anchor="start">chaque réponse</text>
 <text class="lbl" x="82.0" y="159">= un nouvel événement</text>
-<text x="345" y="150" text-anchor="middle" font-size="12.5" font-weight="600" style="fill:#0b2a4a">Boucle de profil (flux A)</text>
+<text x="345" y="150" text-anchor="middle" font-size="12.5" font-weight="600" style="fill:#0b2a4a">Boucle d'affinage du profil (flux A)</text>
 <text class="sub" x="345" y="165" text-anchor="middle">relancée à chaque événement · IA seulement si son entrée a changé</text>
 </svg></div>
 
@@ -254,128 +260,10 @@
   <div class="pn">2 / 5</div>
 </section>
 
-<!-- 3 · trade flow + explanation loop -->
+<!-- 3 · AI safety (core 2) -->
 <section class="page">
   <div class="hdr-thin"></div>
-  <h2 style="margin-top:4mm">Le flux transaction (Step Functions)</h2>
-  <div class="legend"><span class="r">code déterministe</span><span class="l">Bedrock, puis contrôle</span><span class="u">attente utilisateur</span><span class="g">échec</span></div>
-  <div class="card" style="padding:8px"><svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg">
-<defs>
-<marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-<path d="M0,0 L10,5 L0,10 z" fill="#9aabbd"/></marker>
-<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-<path d="M0,0 L10,5 L0,10 z" fill="#0b6bcb"/></marker>
-</defs>
-<rect class="box" x="10" y="28" width="118" height="48" rx="6"/><rect x="10" y="28" width="118" height="4" rx="2" fill="#4d6a87"/><text class="ttl" x="69.0" y="50" text-anchor="middle" font-size="10.5">B1 parse intent</text><text class="sub" x="69.0" y="64" text-anchor="middle">N4 intent_parser + gate</text>
-<path d="M219.0,22 L278,52.0 L219.0,82 L160,52.0 z" fill="#fff" stroke="#c9d0db"/><text class="ttl" x="219.0" y="51.0" text-anchor="middle" font-size="10.5">B2 confirmé ?</text><text class="sub" x="219.0" y="63.0" text-anchor="middle">Choice</text>
-<rect class="box" x="310" y="28" width="118" height="48" rx="6"/><rect x="310" y="28" width="118" height="4" rx="2" fill="#4d6a87"/><text class="ttl" x="369.0" y="50" text-anchor="middle" font-size="10.5">B3 refresh</text><text class="sub" x="369.0" y="64" text-anchor="middle">Flux A : N1–N3 + gate</text>
-<rect class="box" x="460" y="28" width="118" height="48" rx="6"/><rect x="460" y="28" width="118" height="4" rx="2" fill="#1a7f47"/><text class="ttl" x="519.0" y="50" text-anchor="middle" font-size="10.5">B4 apply</text><text class="sub" x="519.0" y="64" text-anchor="middle">portefeuille proposé</text>
-<rect class="zone" x="614" y="10" width="130" height="118" rx="8" style="stroke:#0b2a4a"/>
-<text class="lbl" x="620" y="22" style="fill:#0b2a4a;font-weight:600">B5 analyse · Parallel</text>
-<rect class="box" x="620" y="28" width="118" height="40" rx="6"/><rect x="620" y="28" width="118" height="4" rx="2" fill="#1a7f47"/><text class="ttl" x="679.0" y="50" text-anchor="middle" font-size="10.5">actuel</text><text class="sub" x="679.0" y="64" text-anchor="middle">engine.analyse</text>
-<rect class="box" x="620" y="76" width="118" height="40" rx="6"/><rect x="620" y="76" width="118" height="4" rx="2" fill="#1a7f47"/><text class="ttl" x="679.0" y="98" text-anchor="middle" font-size="10.5">proposé</text><text class="sub" x="679.0" y="112" text-anchor="middle">même graine</text>
-<rect class="box" x="160" y="120" width="118" height="40" rx="6"/><rect x="160" y="120" width="118" height="4" rx="2" fill="#0b6bcb"/><text class="ttl" x="219.0" y="142" text-anchor="middle" font-size="10.5">Awaiting confirmation</text><text class="sub" x="219.0" y="156" text-anchor="middle">Pass · brouillon</text>
-<rect class="box" x="620" y="170" width="118" height="48" rx="6"/><rect x="620" y="170" width="118" height="4" rx="2" fill="#1a7f47"/><text class="ttl" x="679.0" y="192" text-anchor="middle" font-size="10.5">B6 checks + diff</text><text class="sub" x="679.0" y="206" text-anchor="middle">contrôles durs/souples</text>
-<path d="M519.0,164 L578,194.0 L519.0,224 L460,194.0 z" fill="#fff" stroke="#c9d0db"/><text class="ttl" x="519.0" y="193.0" text-anchor="middle" font-size="10.5">B7 violations ?</text><text class="sub" x="519.0" y="205.0" text-anchor="middle">Choice</text>
-<rect class="box" x="310" y="242" width="118" height="48" rx="6"/><rect x="310" y="242" width="118" height="4" rx="2" fill="#1a7f47"/><text class="ttl" x="369.0" y="264" text-anchor="middle" font-size="10.5">B7 resize</text><text class="sub" x="369.0" y="278" text-anchor="middle">marge de la transaction</text>
-<rect class="box" x="160" y="170" width="118" height="48" rx="6"/><rect x="160" y="170" width="118" height="4" rx="2" fill="#4d6a87"/><text class="ttl" x="219.0" y="192" text-anchor="middle" font-size="10.5">B8 explain</text><text class="sub" x="219.0" y="206" text-anchor="middle">N5 + numcheck</text>
-<rect class="box" x="10" y="170" width="118" height="48" rx="6"/><rect x="10" y="170" width="118" height="4" rx="2" fill="#1a7f47"/><text class="ttl" x="69.0" y="192" text-anchor="middle" font-size="10.5">B9 save</text><text class="sub" x="69.0" y="206" text-anchor="middle">rapport + audit → S3</text>
-<rect class="box" x="10" y="244" width="118" height="40" rx="6" style="stroke:#de171e"/><text class="ttl" x="69.0" y="262" text-anchor="middle" font-size="10.5" style="fill:#de171e">FlowBFailed</text><text class="sub" x="69.0" y="275" text-anchor="middle">Catch de chaque tâche</text>
-<path class="arrow" d="M128,52.0 L158,52.0" marker-end="url(#a)"/>
-<path class="arrow" d="M278,52.0 L308,52.0" marker-end="url(#a)"/><text class="lbl" x="294" y="47.0" text-anchor="middle">oui</text>
-<path class="arrow" d="M219.0,82 L219.0,118" marker-end="url(#a)"/><text class="lbl" x="225.0" y="104" text-anchor="start">non</text>
-<path class="arrow" d="M428,52.0 L458,52.0" marker-end="url(#a)"/>
-<path class="arrow" d="M578,52.0 L612,52.0" marker-end="url(#a)"/>
-<path class="arrow" d="M679.0,136 L679.0,168" marker-end="url(#a)"/>
-<path class="arrow" d="M620,194.0 L580,194.0" marker-end="url(#a)"/>
-<path class="arrow" d="M460,194.0 L280,194.0" marker-end="url(#a)"/><text class="lbl" x="369.0" y="189.0" text-anchor="middle">non</text>
-<path class="arrow" d="M519.0,224 L519.0,266 L430,266" marker-end="url(#a)"/><text class="lbl" x="525.0" y="248" text-anchor="start">oui</text>
-<path class="arrow" d="M369.0,242 L239.0,220" marker-end="url(#a)"/>
-<path class="arrow" d="M160,194.0 L130,194.0" marker-end="url(#a)"/>
-<path class="arrow" d="M69.0,218 L69.0,242" marker-end="url(#a)" stroke-dasharray="4 3"/><text class="lbl" x="75.0" y="234" text-anchor="start">erreur</text>
-</svg></div>
-  <p class="muted" style="margin-top:6px;font-size:9.6px">Chaque tâche invoque la Lambda Flow B avec le nom de l'étape. B3 rejoue la boucle de profil.
-  L'intention n'est utilisée qu'une fois confirmée. La marge (B7) est un fait calculé, jamais une suggestion.</p>
-
-  <h2 class="sec">La boucle d'explication</h2>
-  <p class="intro">Le verdict est fixé avant tout appel à l'IA. Chaque facteur est rédigé à part, à partir de ses seuls faits, vérifié, puis
-  réessayé une fois ; sinon un gabarit prend le relais. Le titre, la marge et l'avertissement ne sont jamais rédigés par l'IA.</p>
-  <div class="card" style="padding:8px"><svg viewBox="0 0 760 200" xmlns="http://www.w3.org/2000/svg">
-<defs>
-<marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-<path d="M0,0 L10,5 L0,10 z" fill="#9aabbd"/></marker>
-<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
-<path d="M0,0 L10,5 L0,10 z" fill="#0b6bcb"/></marker>
-</defs>
-<rect class="box" x="8" y="10" width="136" height="70" rx="4"/>
-<rect x="8" y="10" width="136" height="3" rx="1" fill="#1a7f47"/>
-<text class="ttl" x="18" y="29">Verdict + sections</text>
-<text class="sub" x="18" y="43">décidés par le code,</text>
-<text class="sub" x="18" y="55">avant tout appel IA</text>
-<rect x="18" y="61" width="40" height="13" rx="6.5" fill="#e8f1fb"/><text x="23" y="70.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">Lambda</text>
-<path d="M223.0,15 L280,45.0 L223.0,75 L166,45.0 z" fill="#fff" stroke="#c9d0db"/><text class="ttl" x="223.0" y="44.0" text-anchor="middle" font-size="10.5">Section ok ?</text><text class="sub" x="223.0" y="56.0" text-anchor="middle">statut pass</text>
-<rect class="box" x="304" y="10" width="136" height="70" rx="4"/>
-<rect x="304" y="10" width="136" height="3" rx="1" fill="#4d6a87"/>
-<text class="ttl" x="314" y="29">N5 · essai 1</text>
-<text class="sub" x="314" y="43">faits de la section seuls</text>
-<text class="sub" x="314" y="55">Guardrail actif</text>
-<rect x="314" y="61" width="106" height="13" rx="6.5" fill="#e8f1fb"/><text x="319" y="70.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">Bedrock + Guardrail</text>
-<rect class="box" x="464" y="10" width="136" height="70" rx="4"/>
-<rect x="464" y="10" width="136" height="3" rx="1" fill="#de171e"/>
-<text class="ttl" x="474" y="29">Vérificateur V1–V5</text>
-<text class="sub" x="474" y="43">références, chiffres,</text>
-<text class="sub" x="474" y="55">couverture, ton, forme</text>
-<rect x="474" y="61" width="40" height="13" rx="6.5" fill="#e8f1fb"/><text x="479" y="70.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">Lambda</text>
-<rect class="box" x="616" y="10" width="136" height="70" rx="4"/>
-<rect x="616" y="10" width="136" height="3" rx="1" fill="#1a7f47"/>
-<text class="ttl" x="626" y="29">Texte retenu</text>
-<text class="sub" x="626" y="43">mode llm ou llm_retry</text>
-<text class="sub" x="626" y="55">segments fait / inférence</text>
-<rect class="box" x="464" y="112" width="136" height="70" rx="4"/>
-<rect x="464" y="112" width="136" height="3" rx="1" fill="#4d6a87"/>
-<text class="ttl" x="474" y="131">N5 · essai 2</text>
-<text class="sub" x="474" y="145">mêmes faits + liste</text>
-<text class="sub" x="474" y="157">des échecs</text>
-<rect x="474" y="163" width="106" height="13" rx="6.5" fill="#e8f1fb"/><text x="479" y="172.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">Bedrock + Guardrail</text>
-<rect class="box" x="616" y="112" width="136" height="70" rx="4"/>
-<rect x="616" y="112" width="136" height="3" rx="1" fill="#de171e"/>
-<text class="ttl" x="626" y="131">V1–V5 (bis)</text>
-<text class="sub" x="626" y="145">toutes les règles,</text>
-<text class="sub" x="626" y="157">tous les échecs listés</text>
-<rect x="626" y="163" width="40" height="13" rx="6.5" fill="#e8f1fb"/><text x="631" y="172.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">Lambda</text>
-<rect class="box" x="168" y="112" width="112" height="70" rx="4"/>
-<rect x="168" y="112" width="112" height="3" rx="1" fill="#4d6a87"/>
-<text class="ttl" x="178" y="131">Gabarit</text>
-<text class="sub" x="178" y="145">texte déterministe,</text>
-<text class="sub" x="178" y="157">passe toujours</text>
-<path class="arrow" d="M144,45.0 L166,45.0" marker-end="url(#a)"/>
-<path class="arrow" d="M280,45.0 L302,45.0" marker-end="url(#a)"/><text class="lbl" x="291" y="40.0" text-anchor="middle">non</text>
-<path class="arrow" d="M224,75 L224,110" marker-end="url(#a)"/><text class="lbl" x="230" y="96" text-anchor="start">oui</text>
-<path class="arrow" d="M440,45.0 L462,45.0" marker-end="url(#a)"/>
-<path class="arrow" d="M600,45.0 L614,45.0" marker-end="url(#a)"/><text class="lbl" x="607" y="40.0" text-anchor="middle">ok</text>
-<path class="arrow" d="M532,80 L532,110" marker-end="url(#a)" stroke-dasharray="4 3"/><text class="lbl" x="538" y="96" text-anchor="start">échec</text>
-<path class="arrow" d="M600,147.0 L614,147.0" marker-end="url(#a)"/>
-<path class="arrow" d="M684,112 L684,82" marker-end="url(#a)"/><text class="lbl" x="690" y="96" text-anchor="start">ok</text>
-<path class="arrow" d="M684,182 L684,194 L224,194 L224,184" marker-end="url(#a)" stroke-dasharray="4 3"/><text class="lbl" x="450" y="190" text-anchor="middle">échec, ou blocage du Guardrail</text>
-<text class="lbl" x="372" y="104" text-anchor="middle" font-weight="600" style="fill:#0b2a4a">× 5 facteurs en parallèle</text>
-<text class="lbl" x="372" y="117" text-anchor="middle">objectif, horizon, risque,</text>
-<text class="lbl" x="372" y="128" text-anchor="middle">contraintes, préférences</text>
-<text class="lbl" x="372" y="142" text-anchor="middle">2 appels au plus par section</text>
-</svg></div>
-  <div class="grid4 sec" style="grid-template-columns:repeat(5,1fr)">
-    <div class="card role g"><span class="tag">V1 · Références</span><p>Chaque segment cite un contrôle, un fait ou un événement réel.</p></div>
-    <div class="card role g"><span class="tag">V2 · Chiffres</span><p>Chaque nombre existe dans les faits (tolérance d'arrondi).</p></div>
-    <div class="card role g"><span class="tag">V3 · Couverture</span><p>Chaque violation et avertissement est mentionné.</p></div>
-    <div class="card role g"><span class="tag">V4 · Ton</span><p>Aucune formule de conseil, FR ou EN : « vous devriez », « envisagez »…</p></div>
-    <div class="card role g"><span class="tag">V5 · Forme</span><p>Nombre de segments, type, longueur.</p></div>
-  </div>
-  <div class="pn">3 / 5</div>
-</section>
-
-<!-- 4 · AI safety -->
-<section class="page">
-  <div class="hdr-thin"></div>
-  <h2 style="margin-top:4mm">Sécurité de l'IA : défense en profondeur</h2>
+  <h2 style="margin-top:4mm">Cœur 2 · La sécurité IA entre profil et portefeuille</h2>
   <p class="intro">Aucune couche ne suffit seule. Chacune suppose que la précédente a échoué ; une réponse rejetée laisse toujours l'état précédent intact.</p>
   <div class="card" style="padding:8px;margin-bottom:9px"><svg viewBox="0 0 760 184" xmlns="http://www.w3.org/2000/svg">
 <defs>
@@ -489,13 +377,131 @@
       sont étiquetées comme telles, dans le rapport comme dans l'interface. Ce qui ne peut pas être vérifié est listé, pas supposé.</p>
     </div>
   </div>
+  <div class="pn">3 / 5</div>
+</section>
+
+<!-- 4 · context: trade flow + explanation loop -->
+<section class="page">
+  <div class="hdr-thin"></div>
+  <h2 style="margin-top:4mm">Contexte · Le flux transaction (Step Functions)</h2>
+  <div class="legend"><span class="r">code déterministe</span><span class="l">Bedrock, puis contrôle</span><span class="u">attente utilisateur</span><span class="g">échec</span></div>
+  <div class="card" style="padding:8px"><svg viewBox="0 0 760 300" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+<path d="M0,0 L10,5 L0,10 z" fill="#9aabbd"/></marker>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+<path d="M0,0 L10,5 L0,10 z" fill="#0b6bcb"/></marker>
+</defs>
+<rect class="box" x="10" y="28" width="118" height="48" rx="6"/><rect x="10" y="28" width="118" height="4" rx="2" fill="#4d6a87"/><text class="ttl" x="69.0" y="50" text-anchor="middle" font-size="10.5">B1 parse intent</text><text class="sub" x="69.0" y="64" text-anchor="middle">N4 intent_parser + gate</text>
+<path d="M219.0,22 L278,52.0 L219.0,82 L160,52.0 z" fill="#fff" stroke="#c9d0db"/><text class="ttl" x="219.0" y="51.0" text-anchor="middle" font-size="10.5">B2 confirmé ?</text><text class="sub" x="219.0" y="63.0" text-anchor="middle">Choice</text>
+<rect class="box" x="310" y="28" width="118" height="48" rx="6"/><rect x="310" y="28" width="118" height="4" rx="2" fill="#4d6a87"/><text class="ttl" x="369.0" y="50" text-anchor="middle" font-size="10.5">B3 refresh</text><text class="sub" x="369.0" y="64" text-anchor="middle">Flux A : N1–N3 + gate</text>
+<rect class="box" x="460" y="28" width="118" height="48" rx="6"/><rect x="460" y="28" width="118" height="4" rx="2" fill="#1a7f47"/><text class="ttl" x="519.0" y="50" text-anchor="middle" font-size="10.5">B4 apply</text><text class="sub" x="519.0" y="64" text-anchor="middle">portefeuille proposé</text>
+<rect class="zone" x="614" y="10" width="130" height="118" rx="8" style="stroke:#0b2a4a"/>
+<text class="lbl" x="620" y="22" style="fill:#0b2a4a;font-weight:600">B5 analyse · Parallel</text>
+<rect class="box" x="620" y="28" width="118" height="40" rx="6"/><rect x="620" y="28" width="118" height="4" rx="2" fill="#1a7f47"/><text class="ttl" x="679.0" y="50" text-anchor="middle" font-size="10.5">actuel</text><text class="sub" x="679.0" y="64" text-anchor="middle">engine.analyse</text>
+<rect class="box" x="620" y="76" width="118" height="40" rx="6"/><rect x="620" y="76" width="118" height="4" rx="2" fill="#1a7f47"/><text class="ttl" x="679.0" y="98" text-anchor="middle" font-size="10.5">proposé</text><text class="sub" x="679.0" y="112" text-anchor="middle">même graine</text>
+<rect class="box" x="160" y="120" width="118" height="40" rx="6"/><rect x="160" y="120" width="118" height="4" rx="2" fill="#0b6bcb"/><text class="ttl" x="219.0" y="142" text-anchor="middle" font-size="10.5">Awaiting confirmation</text><text class="sub" x="219.0" y="156" text-anchor="middle">Pass · brouillon</text>
+<rect class="box" x="620" y="170" width="118" height="48" rx="6"/><rect x="620" y="170" width="118" height="4" rx="2" fill="#1a7f47"/><text class="ttl" x="679.0" y="192" text-anchor="middle" font-size="10.5">B6 checks + diff</text><text class="sub" x="679.0" y="206" text-anchor="middle">contrôles durs/souples</text>
+<path d="M519.0,164 L578,194.0 L519.0,224 L460,194.0 z" fill="#fff" stroke="#c9d0db"/><text class="ttl" x="519.0" y="193.0" text-anchor="middle" font-size="10.5">B7 violations ?</text><text class="sub" x="519.0" y="205.0" text-anchor="middle">Choice</text>
+<rect class="box" x="310" y="242" width="118" height="48" rx="6"/><rect x="310" y="242" width="118" height="4" rx="2" fill="#1a7f47"/><text class="ttl" x="369.0" y="264" text-anchor="middle" font-size="10.5">B7 resize</text><text class="sub" x="369.0" y="278" text-anchor="middle">marge de la transaction</text>
+<rect class="box" x="160" y="170" width="118" height="48" rx="6"/><rect x="160" y="170" width="118" height="4" rx="2" fill="#4d6a87"/><text class="ttl" x="219.0" y="192" text-anchor="middle" font-size="10.5">B8 explain</text><text class="sub" x="219.0" y="206" text-anchor="middle">N5 + numcheck</text>
+<rect class="box" x="10" y="170" width="118" height="48" rx="6"/><rect x="10" y="170" width="118" height="4" rx="2" fill="#1a7f47"/><text class="ttl" x="69.0" y="192" text-anchor="middle" font-size="10.5">B9 save</text><text class="sub" x="69.0" y="206" text-anchor="middle">rapport + audit → S3</text>
+<rect class="box" x="10" y="244" width="118" height="40" rx="6" style="stroke:#de171e"/><text class="ttl" x="69.0" y="262" text-anchor="middle" font-size="10.5" style="fill:#de171e">FlowBFailed</text><text class="sub" x="69.0" y="275" text-anchor="middle">Catch de chaque tâche</text>
+<path class="arrow" d="M128,52.0 L158,52.0" marker-end="url(#a)"/>
+<path class="arrow" d="M278,52.0 L308,52.0" marker-end="url(#a)"/><text class="lbl" x="294" y="47.0" text-anchor="middle">oui</text>
+<path class="arrow" d="M219.0,82 L219.0,118" marker-end="url(#a)"/><text class="lbl" x="225.0" y="104" text-anchor="start">non</text>
+<path class="arrow" d="M428,52.0 L458,52.0" marker-end="url(#a)"/>
+<path class="arrow" d="M578,52.0 L612,52.0" marker-end="url(#a)"/>
+<path class="arrow" d="M679.0,136 L679.0,168" marker-end="url(#a)"/>
+<path class="arrow" d="M620,194.0 L580,194.0" marker-end="url(#a)"/>
+<path class="arrow" d="M460,194.0 L280,194.0" marker-end="url(#a)"/><text class="lbl" x="369.0" y="189.0" text-anchor="middle">non</text>
+<path class="arrow" d="M519.0,224 L519.0,266 L430,266" marker-end="url(#a)"/><text class="lbl" x="525.0" y="248" text-anchor="start">oui</text>
+<path class="arrow" d="M369.0,242 L239.0,220" marker-end="url(#a)"/>
+<path class="arrow" d="M160,194.0 L130,194.0" marker-end="url(#a)"/>
+<path class="arrow" d="M69.0,218 L69.0,242" marker-end="url(#a)" stroke-dasharray="4 3"/><text class="lbl" x="75.0" y="234" text-anchor="start">erreur</text>
+</svg></div>
+  <p class="muted" style="margin-top:6px;font-size:9.6px">Chaque tâche invoque la Lambda Flow B avec le nom de l'étape. B3 rejoue la boucle de profil.
+  L'intention n'est utilisée qu'une fois confirmée. La marge (B7) est un fait calculé, jamais une suggestion.</p>
+
+  <h2 class="sec">Contexte · La boucle d'explication</h2>
+  <p class="intro">Le verdict est fixé avant tout appel à l'IA. Chaque facteur est rédigé à part, à partir de ses seuls faits, vérifié, puis
+  réessayé une fois ; sinon un gabarit prend le relais. Le titre, la marge et l'avertissement ne sont jamais rédigés par l'IA.</p>
+  <div class="card" style="padding:8px"><svg viewBox="0 0 760 200" xmlns="http://www.w3.org/2000/svg">
+<defs>
+<marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+<path d="M0,0 L10,5 L0,10 z" fill="#9aabbd"/></marker>
+<marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+<path d="M0,0 L10,5 L0,10 z" fill="#0b6bcb"/></marker>
+</defs>
+<rect class="box" x="8" y="10" width="136" height="70" rx="4"/>
+<rect x="8" y="10" width="136" height="3" rx="1" fill="#1a7f47"/>
+<text class="ttl" x="18" y="29">Verdict + sections</text>
+<text class="sub" x="18" y="43">décidés par le code,</text>
+<text class="sub" x="18" y="55">avant tout appel IA</text>
+<rect x="18" y="61" width="40" height="13" rx="6.5" fill="#e8f1fb"/><text x="23" y="70.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">Lambda</text>
+<path d="M223.0,15 L280,45.0 L223.0,75 L166,45.0 z" fill="#fff" stroke="#c9d0db"/><text class="ttl" x="223.0" y="44.0" text-anchor="middle" font-size="10.5">Section ok ?</text><text class="sub" x="223.0" y="56.0" text-anchor="middle">statut pass</text>
+<rect class="box" x="304" y="10" width="136" height="70" rx="4"/>
+<rect x="304" y="10" width="136" height="3" rx="1" fill="#4d6a87"/>
+<text class="ttl" x="314" y="29">N5 · essai 1</text>
+<text class="sub" x="314" y="43">faits de la section seuls</text>
+<text class="sub" x="314" y="55">Guardrail actif</text>
+<rect x="314" y="61" width="106" height="13" rx="6.5" fill="#e8f1fb"/><text x="319" y="70.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">Bedrock + Guardrail</text>
+<rect class="box" x="464" y="10" width="136" height="70" rx="4"/>
+<rect x="464" y="10" width="136" height="3" rx="1" fill="#de171e"/>
+<text class="ttl" x="474" y="29">Vérificateur V1–V5</text>
+<text class="sub" x="474" y="43">références, chiffres,</text>
+<text class="sub" x="474" y="55">couverture, ton, forme</text>
+<rect x="474" y="61" width="40" height="13" rx="6.5" fill="#e8f1fb"/><text x="479" y="70.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">Lambda</text>
+<rect class="box" x="616" y="10" width="136" height="70" rx="4"/>
+<rect x="616" y="10" width="136" height="3" rx="1" fill="#1a7f47"/>
+<text class="ttl" x="626" y="29">Texte retenu</text>
+<text class="sub" x="626" y="43">mode llm ou llm_retry</text>
+<text class="sub" x="626" y="55">segments fait / inférence</text>
+<rect class="box" x="464" y="112" width="136" height="70" rx="4"/>
+<rect x="464" y="112" width="136" height="3" rx="1" fill="#4d6a87"/>
+<text class="ttl" x="474" y="131">N5 · essai 2</text>
+<text class="sub" x="474" y="145">mêmes faits + liste</text>
+<text class="sub" x="474" y="157">des échecs</text>
+<rect x="474" y="163" width="106" height="13" rx="6.5" fill="#e8f1fb"/><text x="479" y="172.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">Bedrock + Guardrail</text>
+<rect class="box" x="616" y="112" width="136" height="70" rx="4"/>
+<rect x="616" y="112" width="136" height="3" rx="1" fill="#de171e"/>
+<text class="ttl" x="626" y="131">V1–V5 (bis)</text>
+<text class="sub" x="626" y="145">toutes les règles,</text>
+<text class="sub" x="626" y="157">tous les échecs listés</text>
+<rect x="626" y="163" width="40" height="13" rx="6.5" fill="#e8f1fb"/><text x="631" y="172.5" font-size="8.4" font-weight="600" style="fill:#0b6bcb">Lambda</text>
+<rect class="box" x="168" y="112" width="112" height="70" rx="4"/>
+<rect x="168" y="112" width="112" height="3" rx="1" fill="#4d6a87"/>
+<text class="ttl" x="178" y="131">Gabarit</text>
+<text class="sub" x="178" y="145">texte déterministe,</text>
+<text class="sub" x="178" y="157">passe toujours</text>
+<path class="arrow" d="M144,45.0 L166,45.0" marker-end="url(#a)"/>
+<path class="arrow" d="M280,45.0 L302,45.0" marker-end="url(#a)"/><text class="lbl" x="291" y="40.0" text-anchor="middle">non</text>
+<path class="arrow" d="M224,75 L224,110" marker-end="url(#a)"/><text class="lbl" x="230" y="96" text-anchor="start">oui</text>
+<path class="arrow" d="M440,45.0 L462,45.0" marker-end="url(#a)"/>
+<path class="arrow" d="M600,45.0 L614,45.0" marker-end="url(#a)"/><text class="lbl" x="607" y="40.0" text-anchor="middle">ok</text>
+<path class="arrow" d="M532,80 L532,110" marker-end="url(#a)" stroke-dasharray="4 3"/><text class="lbl" x="538" y="96" text-anchor="start">échec</text>
+<path class="arrow" d="M600,147.0 L614,147.0" marker-end="url(#a)"/>
+<path class="arrow" d="M684,112 L684,82" marker-end="url(#a)"/><text class="lbl" x="690" y="96" text-anchor="start">ok</text>
+<path class="arrow" d="M684,182 L684,194 L224,194 L224,184" marker-end="url(#a)" stroke-dasharray="4 3"/><text class="lbl" x="450" y="190" text-anchor="middle">échec, ou blocage du Guardrail</text>
+<text class="lbl" x="372" y="104" text-anchor="middle" font-weight="600" style="fill:#0b2a4a">× 5 facteurs en parallèle</text>
+<text class="lbl" x="372" y="117" text-anchor="middle">objectif, horizon, risque,</text>
+<text class="lbl" x="372" y="128" text-anchor="middle">contraintes, préférences</text>
+<text class="lbl" x="372" y="142" text-anchor="middle">2 appels au plus par section</text>
+</svg></div>
+  <div class="grid4 sec" style="grid-template-columns:repeat(5,1fr)">
+    <div class="card role g"><span class="tag">V1 · Références</span><p>Chaque segment cite un contrôle, un fait ou un événement réel.</p></div>
+    <div class="card role g"><span class="tag">V2 · Chiffres</span><p>Chaque nombre existe dans les faits (tolérance d'arrondi).</p></div>
+    <div class="card role g"><span class="tag">V3 · Couverture</span><p>Chaque violation et avertissement est mentionné.</p></div>
+    <div class="card role g"><span class="tag">V4 · Ton</span><p>Aucune formule de conseil, FR ou EN : « vous devriez », « envisagez »…</p></div>
+    <div class="card role g"><span class="tag">V5 · Forme</span><p>Nombre de segments, type, longueur.</p></div>
+  </div>
   <div class="pn">4 / 5</div>
 </section>
 
 <!-- 5 · services, IAM, deployment -->
 <section class="page">
   <div class="hdr-thin"></div>
-  <h2 style="margin-top:4mm">Services</h2>
+  <h2 style="margin-top:4mm">Contexte · Services</h2>
   <div class="card" style="padding:4px 8px">
   <table class="table">
     <tr><th>Service</th><th>Ressources</th><th>Rôle</th></tr>

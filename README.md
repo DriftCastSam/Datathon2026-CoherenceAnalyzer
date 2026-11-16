@@ -1,9 +1,31 @@
-# CoherenceAnalyzer
+# Compass (CoherenceAnalyzer)
 
-Checks whether a self-directed investor's portfolio, or a trade they want to make, is coherent with their own profile. Deterministic rules own every limit. Bedrock LLM nodes fill narrow, gated slots. Datathon 2026 / PolyFinances AlphaForge AI.
+Compass is an AI loop that refines an investor's profile with every move, while a safety gate keeps only what it can prove. Rules, not the AI, check the portfolio against it. Datathon 2026 / PolyFinances AlphaForge AI.
 
-- **Spec (source of truth):** [SPEC.md](SPEC.md)
-- **Working rules:** [CLAUDE.md](CLAUDE.md)
+- **Live app:** https://d36xzk6fhvfvuw.cloudfront.net/app.html
+- **One-pager:** [docs/deliverables/one-pager.pdf](docs/deliverables/one-pager.pdf)
+- **AWS architecture:** [docs/deliverables/architecture-aws.pdf](docs/deliverables/architecture-aws.pdf)
+- **Interactive run flowchart:** [docs/index.html](docs/index.html) (open in a browser)
+- **Spec (source of truth):** [SPEC.md](SPEC.md) · approved resolutions: [docs/spec-decisions.md](docs/spec-decisions.md)
+
+The package is named `coherence_analyzer` (the project's working name); Compass is the product name.
+
+## Quick start
+
+Python 3.11. Everything runs offline: `COHERENCE_ANALYZER_LLM=mock` replays recorded Bedrock responses from
+`fixtures/llm_cache/`, so no AWS account is needed.
+
+```
+git clone https://github.com/DriftCastSam/Datathon2026-CoherenceAnalyzer.git && cd Datathon2026-CoherenceAnalyzer
+python3.11 -m venv .venv && . .venv/bin/activate
+pip install -r requirements.txt
+COHERENCE_ANALYZER_LLM=mock pytest -q -n auto --dist loadfile                                            # full suite, ~1 min
+COHERENCE_ANALYZER_STORE_DIR=.cache/store COHERENCE_ANALYZER_LLM=mock python -m coherence_analyzer.cli demo   # Robert + NVDA, end to end
+COHERENCE_ANALYZER_LLM=mock python deploy/serve_local.py                                                   # the app at http://127.0.0.1:8000
+```
+
+Live Bedrock calls (`COHERENCE_ANALYZER_LLM=record`) need AWS credentials and `BEDROCK_MODEL_ID` in `.env`
+(see `.env.example`). Deploying to AWS: see [AWS deploy](#aws-deploy).
 
 ## Setup
 

@@ -12,3 +12,5 @@ portfolios/
 .claude/worktrees/
 build/
 *.zip
+.claude/loop/runs/
+.claude/settings.local.json

@@ -100,6 +100,57 @@ def aws_map() -> str:
     return "\n".join(s)
 
 
+def loop() -> str:
+    """The core: the profile refinement loop (flux A), drawn as a closed cycle with the gate's reject branch."""
+    W, H = 380, 214
+    U, R, L, G = BLUE, GREEN, LABEL, RED
+    s = [f'<svg viewBox="0 0 {W} {H}" xmlns="http://www.w3.org/2000/svg" role="img" '
+         f'aria-label="Boucle d\'affinage du profil">',
+         '<defs><marker id="lm" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">'
+         f'<path d="M0,0 L10,5 L0,10 z" fill="{BLUE}"/></marker>'
+         '<marker id="lr" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">'
+         f'<path d="M0,0 L10,5 L0,10 z" fill="{RED}"/></marker></defs>']
+    w, h, xs, y1, y2 = 108, 50, [4, 136, 268], 8, 146
+
+    def n(x, y, c, k, t, a, b=""):
+        out = (f'<rect x="{x}" y="{y}" width="{w}" height="{h}" rx="4" fill="#fff" stroke="{LINE}"/>'
+               f'<rect x="{x}" y="{y}" width="{w}" height="3" rx="1" fill="{c}"/>'
+               f'<text x="{x + 8}" y="{y + 17}" font-size="9.8" font-weight="600" style="fill:{NAVY}">{k} · {t}</text>'
+               f'<text x="{x + 8}" y="{y + 30}" font-size="8.6" style="fill:{MUTED}">{a}</text>')
+        if b:
+            out += f'<text x="{x + 8}" y="{y + 41}" font-size="8.6" style="fill:{MUTED}">{b}</text>'
+        return out
+
+    def ar(d, red=False):
+        dash = ' stroke-dasharray="4 3"' if red else ""
+        return (f'<path d="{d}" stroke="{RED if red else BLUE}" stroke-width="1.4" fill="none" '
+                f'marker-end="url(#{"lr" if red else "lm"})"{dash}/>')
+    s.append(n(xs[0], y1, U, "1", "Profil", "déclarations, notes,", "questions, transaction"))
+    s.append(n(xs[1], y1, L, "2", "L'IA propose", "comportement, valeurs,", "connaissances"))
+    s.append(n(xs[2], y1, G, "3", "Gate", "preuve réelle ou rejet ;", "IA plafonnée à warning"))
+    s.append(n(xs[2], y2, R, "4", "Limites", "recalculées par règles,", "jamais par l'IA"))
+    s.append(n(xs[1], y2, R, "5", "Portefeuille", "confronté au profil :", "violations, marge"))
+    s.append(n(xs[0], y2, U, "6", "À clarifier", "questions fixes,", "jamais générées"))
+    cy, cy2 = y1 + h / 2, y2 + h / 2
+    s.append(ar(f"M{xs[0] + w},{cy} L{xs[1] - 2},{cy}"))
+    s.append(ar(f"M{xs[1] + w},{cy} L{xs[2] - 2},{cy}"))
+    s.append(ar(f"M{xs[2] + w / 2 + 18},{y1 + h} L{xs[2] + w / 2 + 18},{y2 - 2}"))
+    s.append(ar(f"M{xs[2]},{cy2} L{xs[1] + w + 2},{cy2}"))
+    s.append(ar(f"M{xs[1]},{cy2} L{xs[0] + w + 2},{cy2}"))
+    s.append(ar(f"M{xs[0] + w / 2},{y2} L{xs[0] + w / 2},{y1 + h + 2}"))
+    s.append(f'<text x="{xs[0] + w / 2 + 6}" y="{(y1 + h + y2) / 2 - 2}" font-size="8.6" style="fill:{BLUE}">chaque réponse =</text>'
+             f'<text x="{xs[0] + w / 2 + 6}" y="{(y1 + h + y2) / 2 + 9}" font-size="8.6" style="fill:{BLUE}">un nouvel événement</text>')
+    # gate reject branch, back into the gate's own input
+    gx = xs[2] + w / 2 - 22
+    s.append(ar(f"M{gx},{y1 + h} C{gx},{y1 + h + 30} {xs[1] + w / 2},{y1 + h + 30} {xs[1] + w / 2},{y1 + h + 2}", red=True))
+    s.append(f'<text x="{(gx + xs[1] + w / 2) / 2}" y="{y1 + h + 40}" text-anchor="middle" font-size="8.6" style="fill:{RED}">'
+             f'rejet : valeur précédente gardée, audit</text>')
+    s.append(f'<text x="{W / 2 + 4}" y="{y2 - 18}" text-anchor="middle" font-size="11" font-weight="600" style="fill:{NAVY}">'
+             f'relancée à chaque événement</text>')
+    s.append("</svg>")
+    return "\n".join(s)
+
+
 ICON = {
     "lock": '<path d="M5 9V6a4 4 0 0 1 8 0v3" fill="none" stroke="currentColor" stroke-width="1.6"/><rect x="3" y="9" width="12" height="8" rx="2" fill="currentColor"/>',
     "check": '<circle cx="9" cy="9" r="8" fill="none" stroke="currentColor" stroke-width="1.6"/><path d="M5 9.2l2.6 2.6L13 6.5" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>',
@@ -125,17 +176,11 @@ PAGE = """<!doctype html>
   h1{font-size:25px;margin-bottom:5px}
   .lead{font-size:12px}
   h2{font-size:13px;margin-bottom:6px}
-  .ps{display:grid;grid-template-columns:1fr 1.2fr;gap:10px;margin-top:5mm}
-  .ps .card{padding:11px 13px}
-  .pt{display:flex;gap:9px;align-items:flex-start;margin-top:7px}
-  .pt .d{flex:none;width:18px;height:18px;border-radius:50%;color:#fff;font:600 9.5px/18px var(--f);text-align:center}
-  .pt b{display:block;font-size:10.6px;margin-bottom:1px}
-  .pt p{font-size:9.8px;color:var(--muted);line-height:1.45}
-  .prob .d{background:var(--red)} .sol .d{background:var(--blue)}
-  .flow{display:grid;grid-template-columns:repeat(6,1fr);gap:9px}
-  .flow .card{padding:8px 9px;position:relative}
-  .flow .card p{font-size:9.3px;color:var(--muted);line-height:1.35}
-  .flow .card:not(:last-child)::after{content:"›";position:absolute;right:-5px;top:50%;transform:translate(50%,-50%);color:var(--label);font-size:14px}
+  .core{display:grid;grid-template-columns:1.22fr 1fr;gap:10px;margin-top:5mm}
+  .core .card{padding:10px 12px}
+  .cap{font-size:9.6px;color:var(--muted);line-height:1.45;margin-bottom:6px}
+  .ctx p{font-size:9.4px;color:var(--muted);margin-bottom:3px}
+  .ctx li{font-size:9.4px;color:var(--muted);margin:2px 0} .ctx b{font-size:9.4px}
   .hero{display:grid;grid-template-columns:1.32fr 1fr;gap:10px}
   .ask{font:500 13.5px/1.3 var(--f);color:var(--navy);margin:2px 0 1px}
   .kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:7px}
@@ -147,8 +192,8 @@ PAGE = """<!doctype html>
   .persona h3{display:flex;justify-content:space-between;align-items:center;gap:6px;font-size:10.8px}
   .persona p{font-size:9.4px;color:var(--muted);line-height:1.4}
   .bottom{display:grid;grid-template-columns:1.32fr 1fr;gap:10px}
-  .guar{display:grid;grid-template-columns:repeat(2,1fr);gap:6px}
-  .g1{display:flex;gap:7px;align-items:center;padding:6px 9px}
+  .guar{display:grid;grid-template-columns:1fr;gap:5px}
+  .g1{display:flex;gap:8px;align-items:center;padding:5px 8px;border:1px solid var(--line);border-radius:4px;background:var(--rowTint)}
   .g1 svg{width:16px!important;height:16px!important}
   .g1 p{font-size:9.2px;color:var(--muted);line-height:1.3} .g1 b{font-size:9.8px;display:block}
   .sect{margin-top:5mm}
@@ -158,34 +203,32 @@ PAGE = """<!doctype html>
 <section class="page">
   <div class="hdr"><div class="wm"><svg viewBox="0 0 24 24" width="26" height="26"><circle cx="12" cy="12" r="10.5" fill="none" stroke="#0b2a4a" stroke-width="1.8"/><path d="M12 4.5l2.6 7.5h-5.2z" fill="#de171e"/><path d="M12 19.5l-2.6-7.5h5.2z" fill="#0b2a4a"/><circle cx="12" cy="12" r="1.4" fill="#fff"/></svg><span>Compass</span></div><span>Compass · Datathon PolyFinances 2026</span></div>
 
-  <h1>Votre transaction est-elle cohérente avec <em>votre</em> profil ?</h1>
-  <p class="lead">Compass vérifie, avant qu'il agisse, si le portefeuille ou la transaction d'un investisseur autonome
-  respecte le profil qu'il a lui-même déclaré, et lui explique pourquoi en langage clair.</p>
+  <h1>Votre portefeuille ressemble-t-il à <em>votre</em> profil ?</h1>
+  <p class="lead">Compass, c'est une boucle agentique qui affine le profil de l'investisseur à chaque action, et une couche
+  de sécurité IA entre ce profil et son portefeuille. L'IA propose, une gate ne garde que ce qu'elle peut prouver, et les
+  règles fixent les limites. Tout le reste n'est que du contexte.</p>
 
-  <div class="ps">
-    <div class="card prob">
-      <h2>Le problème</h2>
-      <div class="pt"><span class="d">1</span><div><b>Personne ne vérifie la cohérence</b><p>En courtage direct, l'ordre est exécuté tel quel. Le profil déclaré à l'ouverture du compte n'est plus jamais confronté aux décisions.</p></div></div>
-      <div class="pt"><span class="d">2</span><div><b>Le comportement dérive</b><p>Effet de mode, concentration sur un titre : l'investisseur prend plus de risque que ce qu'il a lui-même dit pouvoir supporter.</p></div></div>
-      <div class="pt"><span class="d">3</span><div><b>Un chatbot n'est pas la réponse</b><p>Une IA générale invente des chiffres et glisse vers le conseil personnalisé : inacceptable en finance réglementée.</p></div></div>
+  <div class="core">
+    <div class="card">
+      <h2>1 · La boucle d'affinage du profil</h2>
+      <p class="cap">Une question, une note ou une transaction devient un événement. L'IA propose ce qu'il révèle, la gate
+      filtre, les limites sont recalculées et le portefeuille est confronté au profil. Ce qui reste flou revient à
+      l'investisseur, et sa réponse relance la boucle.</p>
+      <div class="legend"><span class="u">utilisateur</span><span class="r">code déterministe</span><span class="l">Amazon Bedrock</span><span class="g">gate</span></div>
+      {loop}
     </div>
-    <div class="card sol">
-      <h2>Notre solution</h2>
-      <div class="pt"><span class="d">1</span><div><b>Le profil devient la référence</b><p>Ses déclarations (horizon, objectifs, tolérance et capacité au risque, connaissances, valeurs) sont traduites par des règles en limites personnelles, chacune traçable jusqu'au champ qui la fixe.</p></div></div>
-      <div class="pt"><span class="d">2</span><div><b>Chaque décision est mesurée</b><p>Un moteur de risque (5 000 trajectoires simulées, stress tests) compare le portefeuille avant et après la transaction à ces limites, et mesure la marge.</p></div></div>
-      <div class="pt"><span class="d">3</span><div><b>L'IA lit et explique, sous contrôle</b><p>Amazon Bedrock lit le comportement, les notes et l'intention ; chaque réponse est vérifiée. L'IA peut avertir, jamais bloquer, et chaque chiffre expliqué est vérifié.</p></div></div>
+    <div class="card">
+      <h2>2 · La sécurité IA entre profil et portefeuille</h2>
+      <p class="cap">Aucune réponse de l'IA ne touche le profil ni le verdict sans passer la gate.</p>
+      <div class="guar">
+        <div class="g1">{i_quote}<div><b>Preuves réelles</b><p>Un événement ou une citation exacte, sinon rejet</p></div></div>
+        <div class="g1">{i_lock}<div><b>Limites hors IA</b><p>Règles et déclarations seulement</p></div></div>
+        <div class="g1">{i_check}<div><b>IA plafonnée</b><p>Avertit, ne bloque jamais</p></div></div>
+        <div class="g1">{i_hash}<div><b>Chiffres vérifiés</b><p>Absent des faits : un nouvel essai, puis un gabarit</p></div></div>
+        <div class="g1">{i_tag}<div><b>Origine étiquetée</b><p>Fait, hypothèse ou inférence</p></div></div>
+        <div class="g1">{i_no}<div><b>Aucun conseil</b><p>Guardrail Bedrock, aucune exécution</p></div></div>
+      </div>
     </div>
-  </div>
-
-  <h2 class="sect">Comment ça marche</h2>
-  <div class="legend"><span class="u">utilisateur</span><span class="r">code déterministe</span><span class="l">Amazon Bedrock</span><span class="g">contrôle</span></div>
-  <div class="flow">
-    <div class="card role u"><span class="tag">1 · Profil</span><p>Déclarations, historique, portefeuille</p></div>
-    <div class="card role l"><span class="tag">2 · Lecture IA</span><p>Comportement, questions, notes, intention</p></div>
-    <div class="card role g"><span class="tag">3 · Gate</span><p>Preuves réelles, sinon rejet</p></div>
-    <div class="card role r"><span class="tag">4 · Limites</span><p>Calculées par règles, jamais par l'IA</p></div>
-    <div class="card role r"><span class="tag">5 · Contrôles</span><p>Avant / après, marge</p></div>
-    <div class="card role l"><span class="tag">6 · Explication</span><p>Chiffres vérifiés, Guardrail</p></div>
   </div>
 
   <h2 class="sect">Exemple</h2>
@@ -215,14 +258,16 @@ PAGE = """<!doctype html>
 
   <div class="bottom sect">
     <div>
-      <h2>Garanties</h2>
-      <div class="guar">
-        <div class="card g1">{i_lock}<div><b>Limites hors IA</b><p>Règles et déclarations seulement</p></div></div>
-        <div class="card g1">{i_check}<div><b>IA plafonnée</b><p>Avertit, ne bloque jamais</p></div></div>
-        <div class="card g1">{i_quote}<div><b>Preuves réelles</b><p>Événement ou citation exacte</p></div></div>
-        <div class="card g1">{i_hash}<div><b>Chiffres vérifiés</b><p>Absent des faits = rejeté</p></div></div>
-        <div class="card g1">{i_tag}<div><b>Origine étiquetée</b><p>Fait, hypothèse ou inférence</p></div></div>
-        <div class="card g1">{i_no}<div><b>Aucun conseil</b><p>Ni recommandation, ni exécution</p></div></div>
+      <h2>Le reste : du contexte</h2>
+      <div class="card ctx">
+        <p>Ces briques donnent à la boucle de quoi travailler et rendent l'outil agréable à utiliser.</p>
+        <ul>
+          <li><b>Moteur de risque :</b> 5 000 trajectoires simulées, stress tests, avant / après</li>
+          <li><b>Simulateur de transaction :</b> marge avant la première limite franchie</li>
+          <li><b>Explication en langage clair :</b> rédigée après le verdict, jamais avant</li>
+          <li><b>Interface :</b> tableau de bord, questionnaire, what-if</li>
+          <li><b>Données :</b> titres, FNB en transparence, frais, étiquettes sourcées</li>
+        </ul>
       </div>
     </div>
     <div>
@@ -239,7 +284,7 @@ PAGE = """<!doctype html>
 
 
 def main() -> None:
-    html = PAGE.replace("{chart}", chart()).replace("{aws}", aws_map())
+    html = PAGE.replace("{chart}", chart()).replace("{aws}", aws_map()).replace("{loop}", loop())
     for name, color in [("lock", NAVY), ("check", GREEN), ("quote", BLUE), ("hash", NAVY), ("tag", LABEL), ("no", RED)]:
         html = html.replace("{i_" + name + "}", icon(name, color))
     (HERE / "one-pager.html").write_text(html, encoding="utf-8")

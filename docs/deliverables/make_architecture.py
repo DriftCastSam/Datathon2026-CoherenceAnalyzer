@@ -225,7 +225,7 @@ def profile_loop() -> str:
     ux = xs[0] + w / 2
     s.append(arrow(f"M{ux},{y2} L{ux},{y1 + h + 2}", "chaque réponse", ux + 6, 148, hot=True, anchor="start"))
     s.append(f'<text class="lbl" x="{ux + 6}" y="159">= un nouvel événement</text>')
-    s.append('<text x="345" y="150" text-anchor="middle" font-size="12.5" font-weight="600" style="fill:#0b2a4a">Boucle de profil (flux A)</text>')
+    s.append('<text x="345" y="150" text-anchor="middle" font-size="12.5" font-weight="600" style="fill:#0b2a4a">Boucle d\'affinage du profil (flux A)</text>')
     s.append('<text class="sub" x="345" y="165" text-anchor="middle">relancée à chaque événement · IA seulement si son entrée a changé</text>')
     s.append("</svg>")
     return "\n".join(s)
@@ -322,8 +322,14 @@ PAGE = """<!doctype html>
 <section class="page">
   <div class="hdr"><div class="wm"><svg viewBox="0 0 24 24" width="26" height="26"><circle cx="12" cy="12" r="10.5" fill="none" stroke="#0b2a4a" stroke-width="1.8"/><path d="M12 4.5l2.6 7.5h-5.2z" fill="#de171e"/><path d="M12 19.5l-2.6-7.5h5.2z" fill="#0b2a4a"/><circle cx="12" cy="12" r="1.4" fill="#fff"/></svg><span>Compass</span></div><span>Compass · Architecture AWS</span></div>
   <h1>Architecture AWS</h1>
-  <p class="lead" style="margin-bottom:6mm">Serverless, décrite en CloudFormation. Un pipeline scripté, pas un agent libre : le code décide,
-  Amazon Bedrock lit et rédige dans des cases étroites, et chaque réponse de l'IA est contrôlée avant usage.</p>
+  <p class="lead" style="margin-bottom:4mm">Le cœur de Compass tient en deux pièces : une <b>boucle agentique</b> qui affine le profil
+  à chaque événement, et une <b>couche de sécurité IA</b> entre ce profil et le portefeuille. Amazon Bedrock propose, une gate
+  ne garde que ce qu'elle peut prouver, et le code fixe les limites et le verdict. Le reste de l'architecture (interface,
+  flux transaction, explication) est du contexte. Serverless, décrite en CloudFormation.</p>
+  <div class="grid2" style="margin-bottom:5mm">
+    <div class="card role l"><span class="tag">Cœur 1 · page 2</span><p class="muted">Boucle d'affinage du profil : l'IA propose, la gate filtre, les règles recalculent, et ce qui reste flou revient à l'utilisateur.</p></div>
+    <div class="card role g"><span class="tag">Cœur 2 · page 3</span><p class="muted">Sécurité IA : dix couches entre l'IA et le profil ; une réponse rejetée laisse toujours l'état précédent intact.</p></div>
+  </div>
   <div class="card" style="padding:8px">{overview}</div>
   <div class="grid3" style="margin-top:9px">
     <div class="card"><h3><span class="n">1</span>Interface</h3><p class="muted">CloudFront sert <code>app.html</code>. Le bucket du site est privé, lisible par CloudFront seul (OAC).</p></div>
@@ -336,10 +342,10 @@ PAGE = """<!doctype html>
 <!-- 2 · profile loop -->
 <section class="page">
   <div class="hdr-thin"></div>
-  <h2 style="margin-top:4mm">La boucle d'analyse du profil</h2>
-  <p class="intro">Le profil n'est jamais réécrit par l'IA. Chaque événement relance la boucle : les règles recalculent, les lecteurs IA proposent,
+  <h2 style="margin-top:4mm">Cœur 1 · La boucle d'affinage du profil</h2>
+  <p class="intro">C'est la boucle agentique de Compass. Le profil n'est jamais réécrit par l'IA. Chaque événement relance la boucle : les règles recalculent, les lecteurs IA proposent,
   la gate accepte, borne ou rejette, puis les limites sont reconstruites à partir des règles et des valeurs déclarées.
-  Ce qui reste ambigu revient à l'utilisateur sous forme de questions fixes.</p>
+  Ce qui reste ambigu revient à l'utilisateur sous forme de questions fixes ; sa réponse est un nouvel événement, et le profil s'affine à chaque tour.</p>
   <div class="legend"><span class="u">utilisateur / données</span><span class="r">code déterministe</span><span class="l">Amazon Bedrock</span><span class="g">gate</span></div>
   <div class="card" style="padding:8px">{loop}</div>
 
@@ -363,33 +369,10 @@ PAGE = """<!doctype html>
   <div class="pn">2 / 5</div>
 </section>
 
-<!-- 3 · trade flow + explanation loop -->
+<!-- 3 · AI safety (core 2) -->
 <section class="page">
   <div class="hdr-thin"></div>
-  <h2 style="margin-top:4mm">Le flux transaction (Step Functions)</h2>
-  <div class="legend"><span class="r">code déterministe</span><span class="l">Bedrock, puis contrôle</span><span class="u">attente utilisateur</span><span class="g">échec</span></div>
-  <div class="card" style="padding:8px">{flow_b}</div>
-  <p class="muted" style="margin-top:6px;font-size:9.6px">Chaque tâche invoque la Lambda Flow B avec le nom de l'étape. B3 rejoue la boucle de profil.
-  L'intention n'est utilisée qu'une fois confirmée. La marge (B7) est un fait calculé, jamais une suggestion.</p>
-
-  <h2 class="sec">La boucle d'explication</h2>
-  <p class="intro">Le verdict est fixé avant tout appel à l'IA. Chaque facteur est rédigé à part, à partir de ses seuls faits, vérifié, puis
-  réessayé une fois ; sinon un gabarit prend le relais. Le titre, la marge et l'avertissement ne sont jamais rédigés par l'IA.</p>
-  <div class="card" style="padding:8px">{lanes}</div>
-  <div class="grid4 sec" style="grid-template-columns:repeat(5,1fr)">
-    <div class="card role g"><span class="tag">V1 · Références</span><p>Chaque segment cite un contrôle, un fait ou un événement réel.</p></div>
-    <div class="card role g"><span class="tag">V2 · Chiffres</span><p>Chaque nombre existe dans les faits (tolérance d'arrondi).</p></div>
-    <div class="card role g"><span class="tag">V3 · Couverture</span><p>Chaque violation et avertissement est mentionné.</p></div>
-    <div class="card role g"><span class="tag">V4 · Ton</span><p>Aucune formule de conseil, FR ou EN : « vous devriez », « envisagez »…</p></div>
-    <div class="card role g"><span class="tag">V5 · Forme</span><p>Nombre de segments, type, longueur.</p></div>
-  </div>
-  <div class="pn">3 / 5</div>
-</section>
-
-<!-- 4 · AI safety -->
-<section class="page">
-  <div class="hdr-thin"></div>
-  <h2 style="margin-top:4mm">Sécurité de l'IA : défense en profondeur</h2>
+  <h2 style="margin-top:4mm">Cœur 2 · La sécurité IA entre profil et portefeuille</h2>
   <p class="intro">Aucune couche ne suffit seule. Chacune suppose que la précédente a échoué ; une réponse rejetée laisse toujours l'état précédent intact.</p>
   <div class="card" style="padding:8px;margin-bottom:9px">{funnel}</div>
   <div class="card" style="padding:4px 8px">
@@ -427,13 +410,36 @@ PAGE = """<!doctype html>
       sont étiquetées comme telles, dans le rapport comme dans l'interface. Ce qui ne peut pas être vérifié est listé, pas supposé.</p>
     </div>
   </div>
+  <div class="pn">3 / 5</div>
+</section>
+
+<!-- 4 · context: trade flow + explanation loop -->
+<section class="page">
+  <div class="hdr-thin"></div>
+  <h2 style="margin-top:4mm">Contexte · Le flux transaction (Step Functions)</h2>
+  <div class="legend"><span class="r">code déterministe</span><span class="l">Bedrock, puis contrôle</span><span class="u">attente utilisateur</span><span class="g">échec</span></div>
+  <div class="card" style="padding:8px">{flow_b}</div>
+  <p class="muted" style="margin-top:6px;font-size:9.6px">Chaque tâche invoque la Lambda Flow B avec le nom de l'étape. B3 rejoue la boucle de profil.
+  L'intention n'est utilisée qu'une fois confirmée. La marge (B7) est un fait calculé, jamais une suggestion.</p>
+
+  <h2 class="sec">Contexte · La boucle d'explication</h2>
+  <p class="intro">Le verdict est fixé avant tout appel à l'IA. Chaque facteur est rédigé à part, à partir de ses seuls faits, vérifié, puis
+  réessayé une fois ; sinon un gabarit prend le relais. Le titre, la marge et l'avertissement ne sont jamais rédigés par l'IA.</p>
+  <div class="card" style="padding:8px">{lanes}</div>
+  <div class="grid4 sec" style="grid-template-columns:repeat(5,1fr)">
+    <div class="card role g"><span class="tag">V1 · Références</span><p>Chaque segment cite un contrôle, un fait ou un événement réel.</p></div>
+    <div class="card role g"><span class="tag">V2 · Chiffres</span><p>Chaque nombre existe dans les faits (tolérance d'arrondi).</p></div>
+    <div class="card role g"><span class="tag">V3 · Couverture</span><p>Chaque violation et avertissement est mentionné.</p></div>
+    <div class="card role g"><span class="tag">V4 · Ton</span><p>Aucune formule de conseil, FR ou EN : « vous devriez », « envisagez »…</p></div>
+    <div class="card role g"><span class="tag">V5 · Forme</span><p>Nombre de segments, type, longueur.</p></div>
+  </div>
   <div class="pn">4 / 5</div>
 </section>
 
 <!-- 5 · services, IAM, deployment -->
 <section class="page">
   <div class="hdr-thin"></div>
-  <h2 style="margin-top:4mm">Services</h2>
+  <h2 style="margin-top:4mm">Contexte · Services</h2>
   <div class="card" style="padding:4px 8px">
   <table class="table">
     <tr><th>Service</th><th>Ressources</th><th>Rôle</th></tr>
