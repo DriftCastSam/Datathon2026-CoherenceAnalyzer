@@ -2,6 +2,49 @@
 
 Full deployment reference. Overview and diagrams: [README](../README.md#architecture).
 
+## Architecture
+
+```mermaid
+flowchart LR
+    U[User<br/>app.html / CLI]
+    subgraph AWS["AWS, one region (CloudFormation)"]
+        CF[CloudFront<br/>OAC] --> S3S[(S3 site bucket<br/>private)]
+        URL[Lambda Function URL<br/>/api, /site-api] --> API[Lambda API<br/>FastAPI + Mangum<br/>Flows A, C, what-if]
+        SF[Step Functions<br/>Flow B, B1 to B9] --> FB[Lambda Flow B<br/>1 state = 1 invocation]
+        BR[Amazon Bedrock<br/>Converse, nodes N1 to N6]
+        GR[Bedrock Guardrails<br/>no personalised advice]
+        S3D[(S3 data bucket<br/>profiles, events, reports, audit)]
+        CW[CloudWatch Logs<br/>latency, tokens, LLM cache]
+    end
+    U -->|1 interface| CF
+    U -->|2 profile + review| URL
+    U -->|3 trade| SF
+    API --> BR
+    FB --> BR
+    BR -->|explainer N5 only| GR
+    API --> S3D
+    FB --> S3D
+    API --> CW
+    FB --> CW
+```
+
+The profile-refinement loop (Flow A), rerun on every event:
+
+```mermaid
+flowchart LR
+    U[User<br/>questionnaire, notes,<br/>questions, trade] --> E[Events]
+    E --> A1[A1 rules<br/>derived rule: fields]
+    A1 --> A2[A2 AI readers<br/>N1 behaviour, N2 questions, N3 notes]
+    A2 --> A3{A3 gate<br/>real evidence?}
+    A3 -->|rejected: previous value kept, audited| A4
+    A3 -->|accepted or clamped| A4[A4 rules again<br/>knowledge score]
+    A4 --> A5[A5 limits + trace<br/>rules and declared values only]
+    A5 --> A6[A6 new profile version<br/>schema, diff, audit]
+    A6 --> C[Internal coherence<br/>C1-C5 code + N6 AI: info or warning]
+    C --> Q[Points to clarify<br/>fixed questions, never generated]
+    Q -->|each answer = a new event| U
+```
+
 ## AWS deploy
 
 The template is `deploy/aws/coherence-analyzer.cfn.json` (S3 bucket with versioning, public access block, SSE and a TLS-only policy; Bedrock Guardrail with a denied topic for personalised investment recommendations; one least-privilege managed policy). It is never deployed by the tests or the build. To deploy by hand:

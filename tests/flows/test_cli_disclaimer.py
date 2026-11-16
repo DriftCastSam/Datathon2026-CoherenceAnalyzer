@@ -22,6 +22,7 @@ from coherence_analyzer import cli, config  # noqa: E402
 ROOT = Path(__file__).resolve().parents[2]
 FIXTURES = ROOT / "fixtures"
 README = ROOT / "README.md"
+LIMITATIONS = ROOT / "docs" / "assumptions.md"     # "Known limitations" moved out of README.md
 
 # SPEC §9.4 verbatim; the tests compare against config.DISCLAIMER and against these literals.
 FR = ("Simulation éducative avec des profils fictifs. Ceci n'est pas un conseil financier personnalisé. "
@@ -140,9 +141,9 @@ def test_demo_still_prints_the_disclaimer(tmp_path, monkeypatch):
 # ------------------------------------------------------------------ README "Known limitations" (SPEC §19)
 
 def _limitations_section() -> str:
-    text = README.read_text(encoding="utf-8")
+    text = LIMITATIONS.read_text(encoding="utf-8")
     m = re.search(r"^(#{2,3})\s+Known limitations\b.*$", text, flags=re.MULTILINE | re.IGNORECASE)
-    assert m, "README.md needs a 'Known limitations' heading (SPEC §19: document them)"
+    assert m, "docs/assumptions.md needs a 'Known limitations' heading (SPEC §19: document them)"
     level = len(m.group(1))
     rest = text[m.end():]
     nxt = re.search(r"^#{1,%d}\s" % level, rest, flags=re.MULTILINE)
